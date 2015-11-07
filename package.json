@@ -1,0 +1,41 @@
+{
+  "name": "load-multiconfig",
+  "version": "0.1.0",
+  "description": "Find and load configuration from a package.json property, rc file, or CommonJS module",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "npm run lint && tape test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidtheclark/load-multiconfig.git"
+  },
+  "keywords": [
+    "load",
+    "configuration",
+    "config"
+  ],
+  "author": "David Clark",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/davidtheclark/load-multiconfig/issues"
+  },
+  "homepage": "https://github.com/davidtheclark/load-multiconfig#readme",
+  "files": [
+    "index.js"
+  ],
+  "dependencies": {
+    "graceful-fs": "^4.1.2",
+    "js-yaml": "^3.4.3",
+    "os-homedir": "^1.0.1",
+    "parse-json": "^2.2.0",
+    "pinkie-promise": "^1.0.0",
+    "require-from-string": "^1.1.0"
+  },
+  "devDependencies": {
+    "eslint": "1.9.0",
+    "sinon": "1.17.2",
+    "tape": "4.2.2"
+  }
+}
