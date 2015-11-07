@@ -1,3 +1,4 @@
+/* much inspiration from https://github.com/sindresorhus/find-up */
 'use strict';
 
 var fs = require('graceful-fs');
