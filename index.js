@@ -1,13 +1,12 @@
 /* much inspiration from https://github.com/sindresorhus/find-up */
 'use strict';
 
-var fs = require('graceful-fs');
-var parseJson = require('parse-json');
 var path = require('path');
-var yaml = require('js-yaml');
-var requireFromString = require('require-from-string');
 var oshomedir = require('os-homedir');
 var Promise = require('pinkie-promise');
+var loadPackageProp = require('./lib/loadPackageProp');
+var loadRc = require('./lib/loadRc');
+var loadJs = require('./lib/loadJs');
 
 var DONE = 'done';
 
@@ -17,7 +16,7 @@ module.exports = function(moduleName, options) {
   options.rcName = options.rcName || '.' + moduleName + 'rc';
   options.jsName = options.jsName || moduleName + '.config.js';
 
-  var homedir = oshomedir();
+  var homedir = options.homedir || oshomedir();
   var splitSearchPath = splitPath(options.cwd);
 
   return new Promise(function(resolve, reject) {
@@ -62,60 +61,6 @@ function splitPath(x) {
 
 function joinPath(x) {
   return path.join.apply(null, [path.sep].concat(x));
-}
-
-function loadPackageProp(searchPath, packageProp) {
-  var searchFilepath = path.join(searchPath, 'package.json');
-  return new Promise(function(resolve) {
-    fs.readFile(searchFilepath, 'utf8', function(err, content) {
-      if (err) {
-        resolve(null);
-        return;
-      }
-      var parsedContent = parseJson(content);
-      var packagePropValue = parsedContent[packageProp]
-      if (!packagePropValue) {
-        resolve(null);
-        return;
-      }
-      resolve({
-        config: packagePropValue,
-        filepath: searchFilepath,
-      });
-    });
-  });
-}
-
-function loadRc(searchPath, rcName) {
-  var searchFilepath = path.join(searchPath, rcName);
-  return new Promise(function(resolve) {
-    fs.readFile(searchFilepath, 'utf8', function(err, content) {
-      if (err) {
-        resolve(null);
-        return;
-      }
-      resolve({
-        config: yaml.safeLoad(content),
-        filepath: searchFilepath,
-      });
-    });
-  });
-}
-
-function loadJs(searchPath, jsName) {
-  var searchFilepath = path.join(searchPath, jsName);
-  return new Promise(function(resolve) {
-    fs.readFile(searchFilepath, 'utf8', function(err, content) {
-      if (err) {
-        resolve(null);
-        return;
-      }
-      resolve({
-        config: requireFromString(content, searchFilepath),
-        filepath: searchFilepath,
-      });
-    });
-  });
 }
 
 function moveUpOrGiveUp(searchPath, splitSearchPath, stopdir) {
