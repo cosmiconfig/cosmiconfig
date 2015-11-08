@@ -28,10 +28,12 @@
   "dependencies": {
     "graceful-fs": "^4.1.2",
     "js-yaml": "^3.4.3",
+    "lodash": "^3.10.1",
     "os-homedir": "^1.0.1",
     "parse-json": "^2.2.0",
     "pinkie-promise": "^1.0.0",
-    "require-from-string": "^1.1.0"
+    "require-from-string": "^1.1.0",
+    "resolve-from": "^1.0.1"
   },
   "devDependencies": {
     "eslint": "1.9.0",

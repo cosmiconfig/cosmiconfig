@@ -1,7 +1,7 @@
 var test = require('tape');
 var sinon = require('sinon');
 var fs = require('graceful-fs');
-var configHunter = require('..');
+var loadMulticonfig = require('..');
 
 test('find rc file in third searched dir, with a package.json lacking prop', function(t) {
   var planned = 0;
@@ -27,7 +27,7 @@ test('find rc file in third searched dir, with a package.json lacking prop', fun
     }
   });
 
-  configHunter('foo', { cwd: startDir })
+  loadMulticonfig('foo', { cwd: startDir })
     .then(function(result) {
       t.equal(readFileStub.callCount, 8);
       t.equal(readFileStub.getCall(0).args[0], '/a/b/c/d/e/f/package.json',
@@ -80,7 +80,7 @@ test('find package.json prop in second searched dir', function(t) {
     }
   });
 
-  configHunter('foo', { cwd: startDir })
+  loadMulticonfig('foo', { cwd: startDir })
     .then(function(result) {
       t.equal(readFileStub.callCount, 4);
       t.equal(readFileStub.getCall(0).args[0], '/a/b/c/d/e/f/package.json',
@@ -125,7 +125,7 @@ test('find JS file in first searched dir', function(t) {
     }
   });
 
-  configHunter('foo', { cwd: startDir })
+  loadMulticonfig('foo', { cwd: startDir })
     .then(function(result) {
       t.equal(readFileStub.callCount, 3);
       t.equal(readFileStub.getCall(0).args[0], '/a/b/c/d/e/f/package.json',
@@ -166,7 +166,7 @@ test('find package.json in second directory searched, with alternate names', fun
     }
   });
 
-  configHunter('foo', {
+  loadMulticonfig('foo', {
     cwd: startDir,
     rcName: '.wowza',
     jsName: 'wowzaConfig.js',

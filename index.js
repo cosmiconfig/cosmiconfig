@@ -7,6 +7,7 @@ var Promise = require('pinkie-promise');
 var loadPackageProp = require('./lib/loadPackageProp');
 var loadRc = require('./lib/loadRc');
 var loadJs = require('./lib/loadJs');
+var loadDefinedPath = require('./lib/loadDefinedPath');
 
 var DONE = 'done';
 
@@ -20,6 +21,9 @@ module.exports = function(moduleName, options) {
   var splitSearchPath = splitPath(options.cwd);
 
   return new Promise(function(resolve, reject) {
+    if (options.config) {
+      return resolve(loadDefinedPath(options.config, options.format));
+    }
     return find(resolve, reject);
   });
 
