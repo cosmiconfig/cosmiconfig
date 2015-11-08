@@ -5,7 +5,6 @@ var configHunter = require('..');
 
 test('do not find file, and give up', function(t) {
   var planned = 0;
-
   var startDir = '/a/b';
   var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
     switch (searchPath) {
@@ -20,6 +19,8 @@ test('do not find file, and give up', function(t) {
       case '/foo.config.js':
         callback(new Error());
         break;
+      default:
+        callback(new Error('irrelevant path ' + searchPath));
     }
   });
 
@@ -57,7 +58,6 @@ test('do not find file, and give up', function(t) {
 
 test('stop at homedir, and give up', function(t) {
   var planned = 0;
-
   var startDir = '/a/b';
   var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
     switch (searchPath) {
@@ -72,6 +72,8 @@ test('stop at homedir, and give up', function(t) {
       case '/foo.config.js':
         callback(new Error());
         break;
+      default:
+        callback(new Error('irrelevant path ' + searchPath));
     }
   });
 
@@ -97,6 +99,117 @@ test('stop at homedir, and give up', function(t) {
       console.log(err.stack);
     });
   planned += 8;
+
+  t.plan(planned);
+});
+
+
+test('find invalid YAML in rc file', function(t) {
+  var planned = 0;
+  var startDir = '/a/b';
+  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+    switch (searchPath) {
+      case '/a/b/package.json':
+        callback(new Error());
+        break;
+      case '/a/b/.foorc':
+        callback(null, 'found: true: broken');
+        break;
+      default:
+        callback(new Error('irrelevant path ' + searchPath));
+    }
+  });
+
+  configHunter('foo', { cwd: startDir, homedir: '/a' })
+    .catch(function(error) {
+      t.ok(error, 'threw error');
+      t.equal(error.name, 'YAMLException', 'threw correct error type');
+      readFileStub.restore();
+    });
+
+  planned += 2;
+
+  t.plan(planned);
+});
+
+test('find invalid JSON in rc file', function(t) {
+  var planned = 0;
+  var startDir = '/a/b';
+  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+    switch (searchPath) {
+      case '/a/b/package.json':
+        callback(new Error());
+        break;
+      case '/a/b/.foorc':
+        callback(null, '{ "found": true, }');
+        break;
+      default:
+        callback(new Error('irrelevant path ' + searchPath));
+    }
+  });
+
+  configHunter('foo', { cwd: startDir, homedir: '/a' })
+    .catch(function(error) {
+      t.ok(error, 'threw error');
+      t.equal(error.name, 'JSONError', 'threw correct error type');
+      readFileStub.restore();
+    });
+
+  planned += 2;
+
+  t.plan(planned);
+});
+
+test('find invalid package.json', function(t) {
+  var planned = 0;
+  var startDir = '/a/b';
+  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+    switch (searchPath) {
+      case '/a/b/package.json':
+        callback(null, '{ "foo": "bar", }');
+        break;
+      default:
+        callback(new Error('irrelevant path ' + searchPath));
+    }
+  });
+
+  configHunter('foo', { cwd: startDir, homedir: '/a' })
+    .catch(function(error) {
+      t.ok(error, 'threw error');
+      t.equal(error.name, 'JSONError', 'threw correct error type');
+      readFileStub.restore();
+    });
+
+  planned += 2;
+
+  t.plan(planned);
+});
+
+test('find invalid JS in .config.js file', function(t) {
+  var planned = 0;
+  var startDir = '/a/b';
+  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+    switch (searchPath) {
+      case '/a/b/package.json':
+      case '/a/b/.foorc':
+        callback(new Error());
+        break;
+      case '/a/b/foo.config.js':
+        callback(null, 'module.exports = { found: true: false,');
+        break;
+      default:
+        callback(new Error('irrelevant path ' + searchPath));
+    }
+  });
+
+  configHunter('foo', { cwd: startDir, homedir: '/a' })
+    .catch(function(error) {
+      t.ok(error, 'threw error');
+      t.equal(error.name, 'SyntaxError', 'threw correct error type');
+      readFileStub.restore();
+    });
+
+  planned += 2;
 
   t.plan(planned);
 });

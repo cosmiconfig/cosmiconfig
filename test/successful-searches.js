@@ -147,3 +147,51 @@ test('find JS file in first searched dir', function(t) {
 
   t.plan(planned);
 });
+
+test('find package.json in second directory searched, with alternate names', function(t) {
+  var planned = 0;
+  var startDir = '/a/b/c/d/e/f';
+  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+    switch (searchPath) {
+      case '/a/b/c/d/e/f/package.json':
+      case '/a/b/c/d/e/f/.wowza':
+      case '/a/b/c/d/e/f/wowzaConfig.js':
+        callback(new Error());
+        break;
+      case '/a/b/c/d/e/package.json':
+        callback(null, '{ "heeha": { "found": true } }');
+        break;
+      default:
+        callback(new Error('irrelevant path ' + searchPath));
+    }
+  });
+
+  configHunter('foo', {
+    cwd: startDir,
+    rcName: '.wowza',
+    jsName: 'wowzaConfig.js',
+    packageProp: 'heeha',
+  })
+    .then(function(result) {
+      t.equal(readFileStub.callCount, 4);
+      t.equal(readFileStub.getCall(0).args[0], '/a/b/c/d/e/f/package.json',
+        'first dir: checked /a/b/c/d/e/f/package.json');
+      t.equal(readFileStub.getCall(1).args[0], '/a/b/c/d/e/f/.wowza',
+        'first dir: checked /a/b/c/d/e/f/.wowza');
+      t.equal(readFileStub.getCall(2).args[0], '/a/b/c/d/e/f/wowzaConfig.js',
+        'first dir: checked /a/b/c/d/e/f/wowzaConfig.js');
+      t.equal(readFileStub.getCall(3).args[0], '/a/b/c/d/e/package.json',
+        'first dir: checked /a/b/c/d/e/package.json');
+      t.deepEqual(result.config, {
+        found: true,
+      });
+      t.equal(result.filepath, '/a/b/c/d/e/package.json');
+      readFileStub.restore();
+    })
+    .catch(function(err) {
+      console.log(err.stack);
+    });
+  planned += 7;
+
+  t.plan(planned);
+});

@@ -20,13 +20,13 @@ module.exports = function(moduleName, options) {
   var splitSearchPath = splitPath(options.cwd);
 
   return new Promise(function(resolve, reject) {
-    find(resolve, reject);
+    return find(resolve, reject);
   });
 
   function find(resolve, reject) {
     var currentSearchPath = joinPath(splitSearchPath);
 
-    loadPackageProp(currentSearchPath, options.packageProp)
+    return loadPackageProp(currentSearchPath, options.packageProp)
       .then(function(result) {
         if (result) finishWith(result);
         else return loadRc(currentSearchPath, options.rcName);
@@ -45,7 +45,7 @@ module.exports = function(moduleName, options) {
       })
       .catch(function(err) {
         if (err === DONE) return;
-        throw err;
+        reject(err);
       });
 
     function finishWith(result) {
