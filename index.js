@@ -3,7 +3,6 @@
 
 var path = require('path');
 var oshomedir = require('os-homedir');
-var Promise = require('pinkie-promise');
 var loadPackageProp = require('./lib/loadPackageProp');
 var loadRc = require('./lib/loadRc');
 var loadJs = require('./lib/loadJs');
@@ -22,28 +21,31 @@ module.exports = function(moduleName, options) {
   var splitSearchPath = splitPath(options.cwd);
 
   return new Promise(function(resolve, reject) {
+
     find();
+
     function find() {
       if (options.config) {
         loadDefinedPath(options.config, options.format).then(function(result) {
           finishWith(result);
         });
+        return;
       }
 
       var currentSearchPath = joinPath(splitSearchPath);
 
       return loadPackageProp(currentSearchPath, options.packageProp)
         .then(function(result) {
-          if (result) finishWith(result);
-          else return loadRc(currentSearchPath, options.rcName);
+          if (result) return finishWith(result);
+          return loadRc(currentSearchPath, options.rcName);
         })
         .then(function(result) {
-          if (result) finishWith(result);
-          else return loadJs(currentSearchPath, options.jsName);
+          if (result) return finishWith(result);
+          return loadJs(currentSearchPath, options.jsName);
         })
         .then(function(result) {
-          if (result) finishWith(result);
-          else return moveUpOrGiveUp(currentSearchPath, splitSearchPath, homedir);
+          if (result) return finishWith(result);
+          return moveUpOrGiveUp(currentSearchPath, splitSearchPath, homedir);
         })
         .then(function(result) {
           if (result === DONE) resolve(null);
@@ -56,14 +58,10 @@ module.exports = function(moduleName, options) {
 
       function finishWith(result) {
         if (options.allowExtends) {
-          mergeExtends(result.config, path.dirname(result.filepath))
+          return mergeExtends(result.config, path.dirname(result.filepath))
             .then(function(mergedConfig) {
               resolve({ config: mergedConfig, filepath: result.filepath });
               throw DONE;
-            })
-            .catch(function(err) {
-              if (err === DONE) return;
-              reject(err);
             });
         } else {
           resolve(result);
