@@ -8,6 +8,7 @@ var loadPackageProp = require('./lib/loadPackageProp');
 var loadRc = require('./lib/loadRc');
 var loadJs = require('./lib/loadJs');
 var loadDefinedPath = require('./lib/loadDefinedPath');
+var mergeExtends = require('./lib/mergeExtends');
 
 var DONE = 'done';
 
@@ -21,13 +22,16 @@ module.exports = function(moduleName, options) {
   var splitSearchPath = splitPath(options.cwd);
 
   return new Promise(function(resolve, reject) {
-    if (options.config) {
-      return resolve(loadDefinedPath(options.config, options.format));
-    }
     return find(resolve, reject);
   });
 
   function find(resolve, reject) {
+    if (options.config) {
+      loadDefinedPath(options.config, options.format).then(function(result) {
+        finishWith(result);
+      });
+    }
+
     var currentSearchPath = joinPath(splitSearchPath);
 
     return loadPackageProp(currentSearchPath, options.packageProp)
@@ -53,8 +57,20 @@ module.exports = function(moduleName, options) {
       });
 
     function finishWith(result) {
-      resolve(result);
-      throw DONE;
+      if (options.allowExtends) {
+        mergeExtends(result.config, path.dirname(result.filepath))
+          .then(function(mergedConfig) {
+            resolve({ config: mergedConfig, filepath: result.filepath });
+            throw DONE;
+          })
+          .catch(function(err) {
+            if (err === DONE) return;
+            reject(err);
+          });
+      } else {
+        resolve(result);
+        throw DONE;
+      }
     }
   }
 };

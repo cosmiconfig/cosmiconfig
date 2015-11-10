@@ -32,6 +32,7 @@
     "os-homedir": "^1.0.1",
     "parse-json": "^2.2.0",
     "pinkie-promise": "^1.0.0",
+    "queue-async": "^1.0.7",
     "require-from-string": "^1.1.0",
     "resolve-from": "^1.0.1"
   },
