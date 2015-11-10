@@ -3,6 +3,7 @@
 
 var path = require('path');
 var oshomedir = require('os-homedir');
+var Promise = require('pinkie-promise');
 var loadPackageProp = require('./lib/loadPackageProp');
 var loadRc = require('./lib/loadRc');
 var loadJs = require('./lib/loadJs');
