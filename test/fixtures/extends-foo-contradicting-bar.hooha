@@ -1,0 +1,7 @@
+{
+  "extends": [
+    "./foo.json",
+    "./bar.yaml",
+    "./.bar-one"
+  ]
+}

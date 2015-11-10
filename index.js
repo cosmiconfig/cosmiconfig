@@ -22,57 +22,56 @@ module.exports = function(moduleName, options) {
   var splitSearchPath = splitPath(options.cwd);
 
   return new Promise(function(resolve, reject) {
-    return find(resolve, reject);
-  });
+    find();
+    function find() {
+      if (options.config) {
+        loadDefinedPath(options.config, options.format).then(function(result) {
+          finishWith(result);
+        });
+      }
 
-  function find(resolve, reject) {
-    if (options.config) {
-      loadDefinedPath(options.config, options.format).then(function(result) {
-        finishWith(result);
-      });
-    }
+      var currentSearchPath = joinPath(splitSearchPath);
 
-    var currentSearchPath = joinPath(splitSearchPath);
+      return loadPackageProp(currentSearchPath, options.packageProp)
+        .then(function(result) {
+          if (result) finishWith(result);
+          else return loadRc(currentSearchPath, options.rcName);
+        })
+        .then(function(result) {
+          if (result) finishWith(result);
+          else return loadJs(currentSearchPath, options.jsName);
+        })
+        .then(function(result) {
+          if (result) finishWith(result);
+          else return moveUpOrGiveUp(currentSearchPath, splitSearchPath, homedir);
+        })
+        .then(function(result) {
+          if (result === DONE) resolve(null);
+          else find();
+        })
+        .catch(function(err) {
+          if (err === DONE) return;
+          reject(err);
+        });
 
-    return loadPackageProp(currentSearchPath, options.packageProp)
-      .then(function(result) {
-        if (result) finishWith(result);
-        else return loadRc(currentSearchPath, options.rcName);
-      })
-      .then(function(result) {
-        if (result) finishWith(result);
-        else return loadJs(currentSearchPath, options.jsName);
-      })
-      .then(function(result) {
-        if (result) finishWith(result);
-        else return moveUpOrGiveUp(currentSearchPath, splitSearchPath, homedir);
-      })
-      .then(function(result) {
-        if (result === DONE) resolve(null);
-        else find(resolve, reject);
-      })
-      .catch(function(err) {
-        if (err === DONE) return;
-        reject(err);
-      });
-
-    function finishWith(result) {
-      if (options.allowExtends) {
-        mergeExtends(result.config, path.dirname(result.filepath))
-          .then(function(mergedConfig) {
-            resolve({ config: mergedConfig, filepath: result.filepath });
-            throw DONE;
-          })
-          .catch(function(err) {
-            if (err === DONE) return;
-            reject(err);
-          });
-      } else {
-        resolve(result);
-        throw DONE;
+      function finishWith(result) {
+        if (options.allowExtends) {
+          mergeExtends(result.config, path.dirname(result.filepath))
+            .then(function(mergedConfig) {
+              resolve({ config: mergedConfig, filepath: result.filepath });
+              throw DONE;
+            })
+            .catch(function(err) {
+              if (err === DONE) return;
+              reject(err);
+            });
+        } else {
+          resolve(result);
+          throw DONE;
+        }
       }
     }
-  }
+  });
 };
 
 function splitPath(x) {
