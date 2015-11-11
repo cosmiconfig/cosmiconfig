@@ -78,9 +78,10 @@ test('defined JS file with syntax error', function(t) {
     format: 'js',
   })
     .catch(function(error) {
-      t.equal(error.name, 'ReferenceError', 'with expected format');
+      t.ok(error);
+      t.ok(!/^Failed to parse/.test(error.message));
     });
-  planned += 1;
+  planned += 2;
 
   t.plan(planned);
 });
