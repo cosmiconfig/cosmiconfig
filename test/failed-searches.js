@@ -17,7 +17,7 @@ test('do not find file, and give up', function(t) {
       case '/package.json':
       case '/.foorc':
       case '/foo.config.js':
-        callback(new Error());
+        callback({ code: 'ENOENT' });
         break;
       default:
         callback(new Error('irrelevant path ' + searchPath));
@@ -70,7 +70,7 @@ test('stop at homedir, and give up', function(t) {
       case '/package.json':
       case '/.foorc':
       case '/foo.config.js':
-        callback(new Error());
+        callback({ code: 'ENOENT' });
         break;
       default:
         callback(new Error('irrelevant path ' + searchPath));
@@ -110,7 +110,7 @@ test('find invalid YAML in rc file', function(t) {
   var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
     switch (searchPath) {
       case '/a/b/package.json':
-        callback(new Error());
+        callback({ code: 'ENOENT' });
         break;
       case '/a/b/.foorc':
         callback(null, 'found: true: broken');
@@ -138,7 +138,7 @@ test('find invalid JSON in rc file', function(t) {
   var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
     switch (searchPath) {
       case '/a/b/package.json':
-        callback(new Error());
+        callback({ code: 'ENOENT' });
         break;
       case '/a/b/.foorc':
         callback(null, '{ "found": true, }');
@@ -192,7 +192,7 @@ test('find invalid JS in .config.js file', function(t) {
     switch (searchPath) {
       case '/a/b/package.json':
       case '/a/b/.foorc':
-        callback(new Error());
+        callback({ code: 'ENOENT' });
         break;
       case '/a/b/foo.config.js':
         callback(null, 'module.exports = { found: true: false,');

@@ -14,7 +14,7 @@ test('find rc file in third searched dir, with a package.json lacking prop', fun
       case '/a/b/c/d/e/package.json':
       case '/a/b/c/d/e/.foorc':
       case '/a/b/c/d/e/foo.config.js':
-        callback(new Error());
+        callback({ code: 'ENOENT' });
         break;
       case '/a/b/c/d/package.json':
         callback(null, '{ "false": "hope" }');
@@ -70,7 +70,7 @@ test('find package.json prop in second searched dir', function(t) {
       case '/a/b/c/d/e/f/foo.config.js':
       case '/a/b/c/d/e/.foorc':
       case '/a/b/c/d/e/foo.config.js':
-        callback(new Error());
+        callback({ code: 'ENOENT' });
         break;
       case '/a/b/c/d/e/package.json':
         callback(null, '{ "author": "Todd", "foo": { "found": true } }');
@@ -115,7 +115,7 @@ test('find JS file in first searched dir', function(t) {
       case '/a/b/c/d/e/package.json':
       case '/a/b/c/d/e/.foorc':
       case '/a/b/c/d/e/foo.config.js':
-        callback(new Error());
+        callback({ code: 'ENOENT' });
         break;
       case '/a/b/c/d/e/f/foo.config.js':
         callback(null, 'module.exports = { found: true };');
@@ -156,7 +156,7 @@ test('find package.json in second directory searched, with alternate names', fun
       case '/a/b/c/d/e/f/package.json':
       case '/a/b/c/d/e/f/.wowza':
       case '/a/b/c/d/e/f/wowzaConfig.js':
-        callback(new Error());
+        callback({ code: 'ENOENT' });
         break;
       case '/a/b/c/d/e/package.json':
         callback(null, '{ "heeha": { "found": true } }');
