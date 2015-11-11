@@ -28,14 +28,18 @@ module.exports = function(moduleName, options) {
     function find() {
       if (options.config) {
         loadDefinedPath(options.config, options.format).then(function(result) {
-          finishWith(result);
-        });
+          return finishWith(result);
+        })
+          .catch(function(err) {
+            if (err === DONE) return;
+            reject(err);
+          });
         return;
       }
 
       var currentSearchPath = joinPath(splitSearchPath);
 
-      return loadPackageProp(currentSearchPath, options.packageProp)
+      loadPackageProp(currentSearchPath, options.packageProp)
         .then(function(result) {
           if (result) return finishWith(result);
           return loadRc(currentSearchPath, options.rcName);
@@ -49,8 +53,8 @@ module.exports = function(moduleName, options) {
           return moveUpOrGiveUp(currentSearchPath, splitSearchPath, homedir);
         })
         .then(function(result) {
-          if (result === DONE) resolve(null);
-          else find();
+          if (result === DONE) return resolve(null);
+          find();
         })
         .catch(function(err) {
           if (err === DONE) return;
@@ -58,6 +62,7 @@ module.exports = function(moduleName, options) {
         });
 
       function finishWith(result) {
+        // The `throw`ing in here is to break the Promise chain above
         if (options.allowExtends) {
           return mergeExtends(result.config, path.dirname(result.filepath))
             .then(function(mergedConfig) {
