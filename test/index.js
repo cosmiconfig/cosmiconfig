@@ -1,4 +1,5 @@
 require('./successful-searches');
 require('./failed-searches');
 require('./successful-extends');
-// require('./defined-path');
+require('./successful-defined-files');
+require('./failed-defined-files');

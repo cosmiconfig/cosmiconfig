@@ -1,4 +1,5 @@
-/* much inspiration from https://github.com/sindresorhus/find-up */
+// Much inspiration from https://github.com/sindresorhus/find-up
+
 'use strict';
 
 var path = require('path');
@@ -7,7 +8,7 @@ var Promise = require('pinkie-promise');
 var loadPackageProp = require('./lib/loadPackageProp');
 var loadRc = require('./lib/loadRc');
 var loadJs = require('./lib/loadJs');
-var loadDefinedPath = require('./lib/loadDefinedPath');
+var loadDefinedFile = require('./lib/loadDefinedFile');
 var mergeExtends = require('./lib/mergeExtends');
 
 var DONE = 'done';
@@ -27,13 +28,9 @@ module.exports = function(moduleName, options) {
 
     function find() {
       if (options.config) {
-        loadDefinedPath(options.config, options.format).then(function(result) {
+        loadDefinedFile(options.config, options.format).then(function(result) {
           return finishWith(result);
-        })
-          .catch(function(err) {
-            if (err === DONE) return;
-            reject(err);
-          });
+        }).catch(reject);
         return;
       }
 
@@ -42,11 +39,11 @@ module.exports = function(moduleName, options) {
       loadPackageProp(currentSearchPath, options.packageProp)
         .then(function(result) {
           if (result) return finishWith(result);
-          return loadRc(currentSearchPath, options.rcName);
+          return loadRc(path.join(currentSearchPath, options.rcName));
         })
         .then(function(result) {
           if (result) return finishWith(result);
-          return loadJs(currentSearchPath, options.jsName);
+          return loadJs(path.join(currentSearchPath, options.jsName));
         })
         .then(function(result) {
           if (result) return finishWith(result);

@@ -61,27 +61,3 @@ test('defined JS config path', function(t) {
 
   t.plan(planned);
 });
-
-// test('defined JSON config path with syntax error', function(t) {
-//   var planned = 0;
-//
-//   loadMulticonfig(null, {
-//     config: path.join(__dirname, './fixtures/foo-invalid.json'),
-//   })
-//     .catch(function(error) {
-//       t.ok(/^Failed to parse/.test(error.message), 'without format');
-//     });
-//   planned += 1;
-//
-//   loadMulticonfig(null, {
-//     config: path.join(__dirname, './fixtures/foo-invalid.json'),
-//     format: 'json',
-//   })
-//     .catch(function(error) {
-//       console.log(error.name);
-//       t.ok(/^Failed to parse/.test(error.message), 'with format');
-//     });
-//   planned += 1;
-//
-//   t.plan(planned);
-// });
