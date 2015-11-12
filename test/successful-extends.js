@@ -1,5 +1,7 @@
 var test = require('tape');
 var path = require('path');
+var Module = require('module');
+var sinon = require('sinon');
 var loadMulticonfig = require('..');
 
 test('extend single config', function(t) {
@@ -89,14 +91,43 @@ test('extend configs that themselves extend', function(t) {
 
   loadMulticonfig(null, {
     allowExtends: true,
-    jsName: 'extends-extending.js',
-    cwd: path.join(__dirname, 'fixtures/horse/cat'),
+    config: path.join(__dirname, './fixtures/extends-extending.js'),
   })
     .then(function(result) {
       t.deepEqual(result.config, {
         bar: true,
       });
       t.equal(result.filepath, path.join(__dirname, './fixtures/extends-extending.js'));
+    })
+    .catch(function(err) {
+      console.log(err.stack);
+    });
+  planned += 2;
+
+  t.plan(planned);
+});
+
+test('extend configs that themselves extend', function(t) {
+  var planned = 0;
+
+  // Probably not best practice ... but I gotta test somehow
+  var resolveFilenameStub = sinon.stub(Module, '_resolveFilename', function(lookup) {
+    if (lookup === 'foo-module') {
+      return path.join(__dirname, 'fixtures/npm-foo-module.js');
+    }
+  });
+
+  loadMulticonfig(null, {
+    allowExtends: true,
+    rcName: 'extends-module.json',
+    cwd: path.join(__dirname, 'fixtures'),
+  })
+    .then(function(result) {
+      resolveFilenameStub.restore();
+      t.deepEqual(result.config, {
+        foo: false,
+      });
+      t.equal(result.filepath, path.join(__dirname, './fixtures/extends-module.json'));
     })
     .catch(function(err) {
       console.log(err.stack);
