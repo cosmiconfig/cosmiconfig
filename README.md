@@ -1,5 +1,7 @@
 # cosmiconfig [![Build Status](https://travis-ci.org/davidtheclark/cosmiconfig.svg?branch=master)](https://travis-ci.org/davidtheclark/cosmiconfig)
 
+**STATUS: Under active development, so do not use unless you are helping develop.**
+
 Find and load a configuration object from a `package.json` property, JSON or YAML "rc file", or `.config.js` CommonJS module.
 
 For example, if your module's name is "soursocks," cosmiconfig will search out configuration in the following places:
@@ -9,7 +11,13 @@ For example, if your module's name is "soursocks," cosmiconfig will search out c
 
 cosmiconfig continues to search in these places all the way down the file tree until it finds acceptable configuration or hits the home directory. And it does all this asynchronously, so it shouldn't get in your way.
 
-Last but not least: cosmiconfig contains built-in support for `extends` functionality — so your module can provide shareable configs with no extra effort on your part (!).
+## Installation
+
+```
+npm install cosmiconfig
+```
+
+Tested in Node 0.10+.
 
 ## API
 
@@ -85,27 +93,6 @@ Default: Absolute path to your home directory
 
 Path which the search will stop.
 
-##### allowExtends
-
-Type: `Boolean`
-Default: `false`
-
-If `true`, allow configuration objects to extend other configuration objects via the `extends` property. See below.
-
-## Extends
-
-If you set `options.allowExtends = true`, configuration objects will be able to explicity extend other configuration objects. This opens the door to shareable configs, in the manner of ESLint and stylelint.
-
-Configurations can contain an `extends` value that is a single string or an array of strings. Each string must be a lookup that `require()` will understand from the context of the that file, so one of the following:
-
-- an npm module name;
-- an absolute path;
-- a relative path, relative to the configuration file that is contains the `extends`.
-
-When one config extends another, it merges its own properties into the other's. For example, if Config A extends Config B, the result that cosmiconfig returns is Config A's properties merged into Config B (so Config A's take priority).
-
-*You can extend multiple configs, and extended configs can extend other configs.* So if you load Config A, which extends Config B and Config C, and Config C extends Config D — the resultant configuration object be the merging of all, A, B, C, and D. Wowza.
-
 ## Differences from [rc](https://github.com/dominictarr/rc)
 
 [rc](https://github.com/dominictarr/rc) serves its focused purpose well. cosmiconfig differs in a few key ways — making it more useful for some projects, less useful for others:
@@ -114,5 +101,4 @@ When one config extends another, it merges its own properties into the other's. 
 - Built-in support for JSON, YAML, and CommonJS formats.
 - Stops at the first configuration found, instead of finding all that can be found down the filetree and merging them automatically.
 - Provides a few configuration options (e.g. different file name expectations).
-- Provides `extends` support.
 - Asynchronicity.

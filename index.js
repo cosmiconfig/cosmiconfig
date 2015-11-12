@@ -9,7 +9,6 @@ var loadPackageProp = require('./lib/loadPackageProp');
 var loadRc = require('./lib/loadRc');
 var loadJs = require('./lib/loadJs');
 var loadDefinedFile = require('./lib/loadDefinedFile');
-var mergeExtends = require('./lib/mergeExtends');
 
 var DONE = 'done';
 
@@ -59,17 +58,8 @@ module.exports = function(moduleName, options) {
         });
 
       function finishWith(result) {
-        // The `throw`ing in here is to break the Promise chain above
-        if (options.allowExtends) {
-          return mergeExtends(result.config, path.dirname(result.filepath))
-            .then(function(mergedConfig) {
-              resolve({ config: mergedConfig, filepath: result.filepath });
-              throw DONE;
-            });
-        } else {
-          resolve(result);
-          throw DONE;
-        }
+        resolve(result);
+        throw DONE;
       }
     }
   });
