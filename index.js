@@ -19,7 +19,7 @@ module.exports = function(moduleName, options) {
   options.rcName = options.rcName || '.' + moduleName + 'rc';
   options.jsName = options.jsName || moduleName + '.config.js';
 
-  var homedir = options.homedir || oshomedir();
+  var stopDir = options.stopDir || oshomedir();
   var splitSearchPath = splitPath(options.cwd);
 
   return new Promise(function(resolve, reject) {
@@ -47,7 +47,7 @@ module.exports = function(moduleName, options) {
         })
         .then(function(result) {
           if (result) return finishWith(result);
-          return moveUpOrGiveUp(currentSearchPath, splitSearchPath, homedir);
+          return moveUpOrGiveUp(currentSearchPath, splitSearchPath, stopDir);
         })
         .then(function(result) {
           if (result === DONE) return resolve(null);

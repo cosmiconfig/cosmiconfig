@@ -56,7 +56,7 @@ test('do not find file, and give up', function(t) {
   t.plan(planned);
 });
 
-test('stop at homedir, and give up', function(t) {
+test('stop at stopDir, and give up', function(t) {
   var planned = 0;
   var startDir = '/a/b';
   var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
@@ -77,7 +77,7 @@ test('stop at homedir, and give up', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, homedir: '/a' })
+  cosmiconfig('foo', { cwd: startDir, stopDir: '/a' })
     .then(function(result) {
       t.equal(readFileStub.callCount, 6);
       t.equal(readFileStub.getCall(0).args[0], '/a/b/package.json',
@@ -87,11 +87,11 @@ test('stop at homedir, and give up', function(t) {
       t.equal(readFileStub.getCall(2).args[0], '/a/b/foo.config.js',
         'first dir: /a/b/foo.config.js');
       t.equal(readFileStub.getCall(3).args[0], '/a/package.json',
-        'second and homedir: /a/package.json');
+        'second and stopDir: /a/package.json');
       t.equal(readFileStub.getCall(4).args[0], '/a/.foorc',
-        'second and homedir: /a/.foorc');
+        'second and stopDir: /a/.foorc');
       t.equal(readFileStub.getCall(5).args[0], '/a/foo.config.js',
-        'second and homedir: /a/foo.config.js');
+        'second and stopDir: /a/foo.config.js');
       t.equal(result, null);
       readFileStub.restore();
     })
@@ -120,7 +120,7 @@ test('find invalid YAML in rc file', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, homedir: '/a' })
+  cosmiconfig('foo', { cwd: startDir, stopDir: '/a' })
     .catch(function(error) {
       t.ok(error, 'threw error');
       t.equal(error.name, 'YAMLException', 'threw correct error type');
@@ -148,7 +148,7 @@ test('find invalid JSON in rc file', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, homedir: '/a' })
+  cosmiconfig('foo', { cwd: startDir, stopDir: '/a' })
     .catch(function(error) {
       t.ok(error, 'threw error');
       t.equal(error.name, 'JSONError', 'threw correct error type');
@@ -173,7 +173,7 @@ test('find invalid package.json', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, homedir: '/a' })
+  cosmiconfig('foo', { cwd: startDir, stopDir: '/a' })
     .catch(function(error) {
       t.ok(error, 'threw error');
       t.equal(error.name, 'JSONError', 'threw correct error type');
@@ -202,7 +202,7 @@ test('find invalid JS in .config.js file', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, homedir: '/a' })
+  cosmiconfig('foo', { cwd: startDir, stopDir: '/a' })
     .catch(function(error) {
       t.ok(error, 'threw error');
       t.equal(error.name, 'SyntaxError', 'threw correct error type');
