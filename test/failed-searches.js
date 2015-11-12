@@ -1,7 +1,7 @@
 var test = require('tape');
 var sinon = require('sinon');
 var fs = require('graceful-fs');
-var loadMulticonfig = require('..');
+var cosmiconfig = require('..');
 
 test('do not find file, and give up', function(t) {
   var planned = 0;
@@ -24,7 +24,7 @@ test('do not find file, and give up', function(t) {
     }
   });
 
-  loadMulticonfig('foo', { cwd: startDir })
+  cosmiconfig('foo', { cwd: startDir })
     .then(function(result) {
       t.equal(readFileStub.callCount, 9);
       t.equal(readFileStub.getCall(0).args[0], '/a/b/package.json',
@@ -77,7 +77,7 @@ test('stop at homedir, and give up', function(t) {
     }
   });
 
-  loadMulticonfig('foo', { cwd: startDir, homedir: '/a' })
+  cosmiconfig('foo', { cwd: startDir, homedir: '/a' })
     .then(function(result) {
       t.equal(readFileStub.callCount, 6);
       t.equal(readFileStub.getCall(0).args[0], '/a/b/package.json',
@@ -120,7 +120,7 @@ test('find invalid YAML in rc file', function(t) {
     }
   });
 
-  loadMulticonfig('foo', { cwd: startDir, homedir: '/a' })
+  cosmiconfig('foo', { cwd: startDir, homedir: '/a' })
     .catch(function(error) {
       t.ok(error, 'threw error');
       t.equal(error.name, 'YAMLException', 'threw correct error type');
@@ -148,7 +148,7 @@ test('find invalid JSON in rc file', function(t) {
     }
   });
 
-  loadMulticonfig('foo', { cwd: startDir, homedir: '/a' })
+  cosmiconfig('foo', { cwd: startDir, homedir: '/a' })
     .catch(function(error) {
       t.ok(error, 'threw error');
       t.equal(error.name, 'JSONError', 'threw correct error type');
@@ -173,7 +173,7 @@ test('find invalid package.json', function(t) {
     }
   });
 
-  loadMulticonfig('foo', { cwd: startDir, homedir: '/a' })
+  cosmiconfig('foo', { cwd: startDir, homedir: '/a' })
     .catch(function(error) {
       t.ok(error, 'threw error');
       t.equal(error.name, 'JSONError', 'threw correct error type');
@@ -202,7 +202,7 @@ test('find invalid JS in .config.js file', function(t) {
     }
   });
 
-  loadMulticonfig('foo', { cwd: startDir, homedir: '/a' })
+  cosmiconfig('foo', { cwd: startDir, homedir: '/a' })
     .catch(function(error) {
       t.ok(error, 'threw error');
       t.equal(error.name, 'SyntaxError', 'threw correct error type');

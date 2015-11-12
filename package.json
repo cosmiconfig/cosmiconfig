@@ -1,5 +1,5 @@
 {
-  "name": "load-multiconfig",
+  "name": "cosmiconfig",
   "version": "0.1.0",
   "description": "Find and load configuration from a package.json property, rc file, or CommonJS module",
   "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/davidtheclark/load-multiconfig.git"
+    "url": "git+https://github.com/davidtheclark/cosmiconfig.git"
   },
   "keywords": [
     "load",
@@ -19,9 +19,9 @@
   "author": "David Clark",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/davidtheclark/load-multiconfig/issues"
+    "url": "https://github.com/davidtheclark/cosmiconfig/issues"
   },
-  "homepage": "https://github.com/davidtheclark/load-multiconfig#readme",
+  "homepage": "https://github.com/davidtheclark/cosmiconfig#readme",
   "files": [
     "index.js"
   ],

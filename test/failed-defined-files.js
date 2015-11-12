@@ -1,11 +1,11 @@
 var test = require('tape');
 var path = require('path');
-var loadMulticonfig = require('..');
+var cosmiconfig = require('..');
 
 test('defined file that does not exist', function(t) {
   var planned = 0;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     config: '/does/not/exist',
   })
     .catch(function(error) {
@@ -19,7 +19,7 @@ test('defined file that does not exist', function(t) {
 test('defined JSON file with syntax error', function(t) {
   var planned = 0;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     config: path.join(__dirname, './fixtures/foo-invalid.json'),
   })
     .catch(function(error) {
@@ -27,7 +27,7 @@ test('defined JSON file with syntax error', function(t) {
     });
   planned += 1;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     config: path.join(__dirname, './fixtures/foo-invalid.json'),
     format: 'json',
   })
@@ -42,7 +42,7 @@ test('defined JSON file with syntax error', function(t) {
 test('defined YAML file with syntax error', function(t) {
   var planned = 0;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     config: path.join(__dirname, './fixtures/foo-invalid.yaml'),
   })
     .catch(function(error) {
@@ -50,7 +50,7 @@ test('defined YAML file with syntax error', function(t) {
     });
   planned += 1;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     config: path.join(__dirname, './fixtures/foo-invalid.yaml'),
     format: 'yaml',
   })
@@ -65,7 +65,7 @@ test('defined YAML file with syntax error', function(t) {
 test('defined JS file with syntax error', function(t) {
   var planned = 0;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     config: path.join(__dirname, './fixtures/foo-invalid.js'),
   })
     .catch(function(error) {
@@ -73,7 +73,7 @@ test('defined JS file with syntax error', function(t) {
     });
   planned += 1;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     config: path.join(__dirname, './fixtures/foo-invalid.js'),
     format: 'js',
   })

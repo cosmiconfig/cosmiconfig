@@ -1,11 +1,11 @@
 var test = require('tape');
 var path = require('path');
-var loadMulticonfig = require('..');
+var cosmiconfig = require('..');
 
 test('defined JSON config path', function(t) {
   var planned = 0;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     config: path.join(__dirname, './fixtures/foo.json'),
   })
     .then(function(result) {
@@ -25,7 +25,7 @@ test('defined JSON config path', function(t) {
 test('defined YAML config path', function(t) {
   var planned = 0;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     config: path.join(__dirname, './fixtures/foo.yaml'),
   })
     .then(function(result) {
@@ -45,7 +45,7 @@ test('defined YAML config path', function(t) {
 test('defined JS config path', function(t) {
   var planned = 0;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     config: path.join(__dirname, './fixtures/foo.js'),
   })
     .then(function(result) {

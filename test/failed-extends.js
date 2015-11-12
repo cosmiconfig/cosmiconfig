@@ -1,11 +1,11 @@
 var test = require('tape');
 var path = require('path');
-var loadMulticonfig = require('..');
+var cosmiconfig = require('..');
 
 test('extend nonexistent file', function(t) {
   var planned = 0;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     allowExtends: true,
     config: path.join(__dirname, './fixtures/extends-nonexistent.json'),
   })
@@ -20,7 +20,7 @@ test('extend nonexistent file', function(t) {
 test('extend invalid file', function(t) {
   var planned = 0;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     allowExtends: true,
     config: path.join(__dirname, './fixtures/extends-invalid.yaml'),
   })
@@ -35,7 +35,7 @@ test('extend invalid file', function(t) {
 test('extends another that extends nonexistent file', function(t) {
   var planned = 0;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     allowExtends: true,
     config: path.join(__dirname, './fixtures/extends-extending-nonexistent.js'),
   })

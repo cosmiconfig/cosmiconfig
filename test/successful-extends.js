@@ -2,12 +2,12 @@ var test = require('tape');
 var path = require('path');
 var Module = require('module');
 var sinon = require('sinon');
-var loadMulticonfig = require('..');
+var cosmiconfig = require('..');
 
 test('extend single config', function(t) {
   var planned = 0;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     allowExtends: true,
     config: path.join(__dirname, './fixtures/extends-foo-js.json'),
   })
@@ -19,7 +19,7 @@ test('extend single config', function(t) {
     });
   planned += 1;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     allowExtends: true,
     config: path.join(__dirname, './fixtures/extends-foo-yaml.js'),
   })
@@ -32,7 +32,7 @@ test('extend single config', function(t) {
   planned += 1;
 
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     allowExtends: true,
     rcName: 'extends-foo-json',
     cwd: path.join(__dirname, 'fixtures/horse/cat'),
@@ -51,7 +51,7 @@ test('extend single config', function(t) {
 test('extend multiple configs', function(t) {
   var planned = 0;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     allowExtends: true,
     config: path.join(__dirname, './fixtures/extends-foo-bar'),
   })
@@ -67,7 +67,7 @@ test('extend multiple configs', function(t) {
     });
   planned += 2;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     allowExtends: true,
     config: path.join(__dirname, './fixtures/extends-foo-contradicting-bar.hooha'),
   })
@@ -89,7 +89,7 @@ test('extend multiple configs', function(t) {
 test('extend configs that themselves extend', function(t) {
   var planned = 0;
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     allowExtends: true,
     config: path.join(__dirname, './fixtures/extends-extending.js'),
   })
@@ -117,7 +117,7 @@ test('extend configs that themselves extend', function(t) {
     }
   });
 
-  loadMulticonfig(null, {
+  cosmiconfig(null, {
     allowExtends: true,
     rcName: 'extends-module.json',
     cwd: path.join(__dirname, 'fixtures'),
