@@ -32,7 +32,7 @@
     "os-homedir": "^1.0.1",
     "parse-json": "^2.2.0",
     "pinkie-promise": "^1.0.0",
-    "require-from-string": "^1.1.0",
+    "require-from-string": "^1.1.0"
   },
   "devDependencies": {
     "eslint": "1.9.0",
