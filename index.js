@@ -5,18 +5,24 @@
 var path = require('path');
 var oshomedir = require('os-homedir');
 var Promise = require('pinkie-promise');
+var minimist = require('minimist');
 var loadPackageProp = require('./lib/loadPackageProp');
 var loadRc = require('./lib/loadRc');
 var loadJs = require('./lib/loadJs');
 var loadDefinedFile = require('./lib/loadDefinedFile');
 
 var DONE = 'done';
+var parsedCliArgs = minimist(process.argv);
 
 module.exports = function(moduleName, options) {
   options = options || {};
   options.packageProp = options.packageProp || moduleName;
   options.rcName = options.rcName || '.' + moduleName + 'rc';
   options.jsName = options.jsName || moduleName + '.config.js';
+
+  if (parsedCliArgs.config) {
+    options.configPath = path.resolve(parsedCliArgs.config);
+  }
 
   var stopDir = options.stopDir || oshomedir();
   var splitSearchPath = splitPath(options.cwd);

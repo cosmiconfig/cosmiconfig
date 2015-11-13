@@ -2,7 +2,11 @@
 
 **STATUS: Under active development, so do not use unless you are helping develop.**
 
-Find and load a configuration object from a `package.json` property, JSON or YAML "rc file", or `.config.js` CommonJS module.
+Find and load a configuration object from
+- a CLI `--config` argument,
+- a `package.json` property (anywhere down file tree),
+- a JSON or YAML "rc file" (anywhere down file tree), or
+- a `.config.js` CommonJS module (anywhere down file tree).
 
 For example, if your module's name is "soursocks," cosmiconfig will search out configuration in the following places:
 - a `soursocks` property in `package.json`;
@@ -10,6 +14,8 @@ For example, if your module's name is "soursocks," cosmiconfig will search out c
 - a `soursocks.config.js` file exporting a JS object.
 
 cosmiconfig continues to search in these places all the way down the file tree until it finds acceptable configuration or hits the home directory. And it does all this asynchronously, so it shouldn't get in your way.
+
+If cosmiconfig finds a `--config` CLI argument, it will load that file, trying to parse it as either JSON, YAML, or JS.
 
 ## Installation
 
@@ -49,6 +55,9 @@ So let's say `yourModuleName = 'goldengrahams'` — here's how cosmiconfig will 
 - If at any point a parseable configuration is found, the `cosmiconfig()` Promise resolves with its result object.
 - If no configuration object is found, the `cosmiconfig()` Promise resolves with `null`.
 - If a configuration object is found *but is malformed* (causing a parsing error), the `cosmiconfig()` Promise rejects and shares that error (so you should `.catch()` it).
+
+All this can be overridden by passing a `configPath` option or a `--config` CLI argument to specify a file.
+cosmiconfig will read that file and try parsing it as JSON, YAML, or JS.
 
 ### cosmiconfig(moduleName[, options])
 
@@ -98,6 +107,8 @@ Path which the search will stop.
 Type: `string`
 
 Path to a configuration file. cosmiconfig will read it and try to parse it as JSON, YAML, or JS.
+
+This option can be set via the command line with `--config`.
 
 ## Differences from [rc](https://github.com/dominictarr/rc)
 
