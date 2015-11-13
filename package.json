@@ -22,9 +22,6 @@
     "url": "https://github.com/davidtheclark/cosmiconfig/issues"
   },
   "homepage": "https://github.com/davidtheclark/cosmiconfig#readme",
-  "files": [
-    "index.js"
-  ],
   "dependencies": {
     "graceful-fs": "^4.1.2",
     "js-yaml": "^3.4.3",
