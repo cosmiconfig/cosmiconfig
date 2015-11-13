@@ -6,7 +6,7 @@ test('defined JSON config path', function(t) {
   var planned = 0;
 
   cosmiconfig(null, {
-    config: path.join(__dirname, './fixtures/foo.json'),
+    configPath: path.join(__dirname, './fixtures/foo.json'),
   })
     .then(function(result) {
       t.deepEqual(result.config, {
@@ -26,7 +26,7 @@ test('defined YAML config path', function(t) {
   var planned = 0;
 
   cosmiconfig(null, {
-    config: path.join(__dirname, './fixtures/foo.yaml'),
+    configPath: path.join(__dirname, './fixtures/foo.yaml'),
   })
     .then(function(result) {
       t.deepEqual(result.config, {
@@ -46,7 +46,7 @@ test('defined JS config path', function(t) {
   var planned = 0;
 
   cosmiconfig(null, {
-    config: path.join(__dirname, './fixtures/foo.js'),
+    configPath: path.join(__dirname, './fixtures/foo.js'),
   })
     .then(function(result) {
       t.deepEqual(result.config, {

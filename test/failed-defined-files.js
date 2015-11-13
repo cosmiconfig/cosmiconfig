@@ -6,7 +6,7 @@ test('defined file that does not exist', function(t) {
   var planned = 0;
 
   cosmiconfig(null, {
-    config: '/does/not/exist',
+    configPath: '/does/not/exist',
   })
     .catch(function(error) {
       t.equal(error.code, 'ENOENT', 'with expected format');
@@ -20,7 +20,7 @@ test('defined JSON file with syntax error', function(t) {
   var planned = 0;
 
   cosmiconfig(null, {
-    config: path.join(__dirname, './fixtures/foo-invalid.json'),
+    configPath: path.join(__dirname, './fixtures/foo-invalid.json'),
   })
     .catch(function(error) {
       t.ok(/^Failed to parse/.test(error.message), 'without expected format');
@@ -28,7 +28,7 @@ test('defined JSON file with syntax error', function(t) {
   planned += 1;
 
   cosmiconfig(null, {
-    config: path.join(__dirname, './fixtures/foo-invalid.json'),
+    configPath: path.join(__dirname, './fixtures/foo-invalid.json'),
     format: 'json',
   })
     .catch(function(error) {
@@ -43,7 +43,7 @@ test('defined YAML file with syntax error', function(t) {
   var planned = 0;
 
   cosmiconfig(null, {
-    config: path.join(__dirname, './fixtures/foo-invalid.yaml'),
+    configPath: path.join(__dirname, './fixtures/foo-invalid.yaml'),
   })
     .catch(function(error) {
       t.ok(/^Failed to parse/.test(error.message), 'without expected format');
@@ -51,7 +51,7 @@ test('defined YAML file with syntax error', function(t) {
   planned += 1;
 
   cosmiconfig(null, {
-    config: path.join(__dirname, './fixtures/foo-invalid.yaml'),
+    configPath: path.join(__dirname, './fixtures/foo-invalid.yaml'),
     format: 'yaml',
   })
     .catch(function(error) {
@@ -66,7 +66,7 @@ test('defined JS file with syntax error', function(t) {
   var planned = 0;
 
   cosmiconfig(null, {
-    config: path.join(__dirname, './fixtures/foo-invalid.js'),
+    configPath: path.join(__dirname, './fixtures/foo-invalid.js'),
   })
     .catch(function(error) {
       t.ok(/^Failed to parse/.test(error.message), 'without expected format');
@@ -74,7 +74,7 @@ test('defined JS file with syntax error', function(t) {
   planned += 1;
 
   cosmiconfig(null, {
-    config: path.join(__dirname, './fixtures/foo-invalid.js'),
+    configPath: path.join(__dirname, './fixtures/foo-invalid.js'),
     format: 'js',
   })
     .catch(function(error) {

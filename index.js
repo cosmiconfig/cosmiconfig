@@ -26,8 +26,8 @@ module.exports = function(moduleName, options) {
     find();
 
     function find() {
-      if (options.config) {
-        loadDefinedFile(options.config, options.format).then(function(result) {
+      if (options.configPath) {
+        loadDefinedFile(options.configPath, options.format).then(function(result) {
           return finishWith(result);
         }).catch(reject);
         return;

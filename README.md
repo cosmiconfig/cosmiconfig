@@ -93,6 +93,12 @@ Default: Absolute path to your home directory
 
 Path which the search will stop.
 
+##### configPath
+
+Type: `string`
+
+Path to a configuration file. cosmiconfig will read it and try to parse it as JSON, YAML, or JS.
+
 ## Differences from [rc](https://github.com/dominictarr/rc)
 
 [rc](https://github.com/dominictarr/rc) serves its focused purpose well. cosmiconfig differs in a few key ways — making it more useful for some projects, less useful for others:
