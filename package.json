@@ -27,10 +27,10 @@
   },
   "homepage": "https://github.com/davidtheclark/cosmiconfig#readme",
   "dependencies": {
-    "defaults": "^1.0.3",
     "graceful-fs": "^4.1.2",
     "js-yaml": "^3.4.3",
     "minimist": "^1.2.0",
+    "object-assign": "^4.0.1",
     "os-homedir": "^1.0.1",
     "parse-json": "^2.2.0",
     "pinkie-promise": "^2.0.0",
