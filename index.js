@@ -4,7 +4,7 @@ var path = require('path');
 var oshomedir = require('os-homedir');
 var Promise = require('pinkie-promise');
 var minimist = require('minimist');
-var defaults = require('defaults');
+var assign = require('object-assign');
 var loadPackageProp = require('./lib/loadPackageProp');
 var loadRc = require('./lib/loadRc');
 var loadJs = require('./lib/loadJs');
@@ -13,14 +13,14 @@ var loadDefinedFile = require('./lib/loadDefinedFile');
 var parsedCliArgs = minimist(process.argv);
 
 module.exports = function(moduleName, options) {
-  options = defaults(options, {
+  options = assign({
     packageProp: moduleName,
     rc: '.' + moduleName + 'rc',
     js: moduleName + '.config.js',
     argv: 'config',
     rcStrictJson: false,
     stopDir: oshomedir(),
-  });
+  }, options);
 
   if (options.argv && parsedCliArgs[options.argv]) {
     options.configPath = path.resolve(parsedCliArgs[options.argv]);
