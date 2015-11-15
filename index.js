@@ -19,13 +19,13 @@ module.exports = function(moduleName, options) {
     js: moduleName + '.config.js',
     argv: 'config',
     rcStrictJson: false,
+    stopDir: oshomedir(),
   });
 
   if (options.argv && parsedCliArgs[options.argv]) {
     options.configPath = path.resolve(parsedCliArgs[options.argv]);
   }
 
-  var stopDir = options.stopDir || oshomedir();
   var splitSearchPath = splitPath(options.cwd);
 
   if (options.configPath) {
@@ -49,7 +49,7 @@ module.exports = function(moduleName, options) {
     }).then(function(result) {
       if (result) return result;
       // Notice the mutation of splitSearchPath
-      if (currentSearchPath === stopDir || !splitSearchPath.pop()) {
+      if (currentSearchPath === options.stopDir || !splitSearchPath.pop()) {
         return null;
       }
       return find();
