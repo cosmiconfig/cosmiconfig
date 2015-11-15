@@ -18,6 +18,8 @@ cosmiconfig continues to search in these places all the way down the file tree u
 
 If cosmiconfig finds a `--config` CLI argument, it will load that file, trying to parse it as either JSON, YAML, or JS.
 
+Additionally, all of these search locations are configurable: you can customize filenames or turn off any location.
+
 ## Installation
 
 ```
@@ -49,8 +51,8 @@ So let's say `yourModuleName = 'goldengrahams'` — here's how cosmiconfig will 
 
 - Starting from `process.cwd()` (or some other directory defined by `options.cwd`), it looks for configuration objects in three places, in this order:
   1. A `goldengrahams` property in a `package.json` file (or some other property defined by `options.packageProp`);
-  2. A `.goldengrahamsrc` file with JSON or YAML syntax (or some other filename defined by `options.rcName`);
-  3. A `goldengrahams.config.js` JS file exporting the object (or some other filename defined by `options.jsName`).
+  2. A `.goldengrahamsrc` file with JSON or YAML syntax (or some other filename defined by `options.rc`);
+  3. A `goldengrahams.config.js` JS file exporting the object (or some other filename defined by `options.js`).
 - If none of those searches reveal a configuration object, it moves down one directory and tries again. So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking those three locations in each directory.
 - It continues searching until it arrives at your user directory (or some other directory defined by `options.stopDir`).
 - If at any point a parseable configuration is found, the `cosmiconfig()` Promise resolves with its result object.
@@ -75,33 +77,41 @@ You module name. This is used to create the filenames that cosmiconfig will look
 
 #### Options
 
-##### cwd
+##### packageProp
 
-Type: `string`
-Default: `process.cwd()`
+Type: `string` or `boolean`
+Default: `'[moduleName]'`
 
-Directory to start the search from.
+Name of the property in `package.json` to look for.
 
-##### rcName
+If `false`, cosmiconfig will not look in `package.json` files.
 
-Type: `string`
+##### rc
+
+Type: `string` or `boolean`
 Default: `'.[moduleName]rc'`
 
 Name of the "rc file" to look for, which can be formatted as JSON or YAML.
 
-##### jsName
+If `false`, cosmiconfig will not look for an rc file.
 
-Type: `string`
+##### js
+
+Type: `string` or `boolean`
 Default: `'[moduleName].config.js'`
 
 Name of a JS file to look for, which must export the configuration object.
 
-##### stopDir
+If `false`, cosmiconfig will not look for a JS file.
 
-Type: `string`
-Default: Absolute path to your home directory
+##### argv
 
-Path which the search will stop.
+Type: `string` or `boolean`
+Default: `'config'`
+
+Name of a `process.argv` argument to look for. The default causes cosmiconfig to look for `--config`.
+
+If `false`, cosmiconfig will not look for any `process.argv` arguments.
 
 ##### configPath
 
@@ -110,6 +120,30 @@ Type: `string`
 Path to a configuration file. cosmiconfig will read it and try to parse it as JSON, YAML, or JS.
 
 This option can be set via the command line with `--config`.
+
+##### rcStrictJson
+
+Type: `boolean`
+Default: `false`
+
+If `true`, cosmiconfig will expect rc files to be strict JSON. No YAML permitted, and no sloppy JSON.
+
+By default, rc files are parsed with [js-yaml](https://github.com/nodeca/js-yaml), which is
+more permissive with punctuation than standard strict JSON.
+
+##### cwd
+
+Type: `string`
+Default: `process.cwd()`
+
+Directory to start the search from.
+
+##### stopDir
+
+Type: `string`
+Default: Absolute path to your home directory
+
+Path which the search will stop.
 
 ## Differences from [rc](https://github.com/dominictarr/rc)
 

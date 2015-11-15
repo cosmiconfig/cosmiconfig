@@ -4,6 +4,7 @@ var path = require('path');
 var oshomedir = require('os-homedir');
 var Promise = require('pinkie-promise');
 var minimist = require('minimist');
+var defaults = require('defaults');
 var loadPackageProp = require('./lib/loadPackageProp');
 var loadRc = require('./lib/loadRc');
 var loadJs = require('./lib/loadJs');
@@ -13,13 +14,16 @@ var DONE = 'done';
 var parsedCliArgs = minimist(process.argv);
 
 module.exports = function(moduleName, options) {
-  options = options || {};
-  options.packageProp = options.packageProp || moduleName;
-  options.rcName = options.rcName || '.' + moduleName + 'rc';
-  options.jsName = options.jsName || moduleName + '.config.js';
+  options = defaults(options, {
+    packageProp: moduleName,
+    rc: '.' + moduleName + 'rc',
+    js: moduleName + '.config.js',
+    argv: 'config',
+    rcStrictJson: false,
+  });
 
-  if (parsedCliArgs.config) {
-    options.configPath = path.resolve(parsedCliArgs.config);
+  if (options.argv && parsedCliArgs[options.argv]) {
+    options.configPath = path.resolve(parsedCliArgs[options.argv]);
   }
 
   var stopDir = options.stopDir || oshomedir();
@@ -39,19 +43,35 @@ module.exports = function(moduleName, options) {
 
       var currentSearchPath = joinPath(splitSearchPath);
 
-      loadPackageProp(currentSearchPath, options.packageProp)
-        .then(function(result) {
+      var search = Promise.resolve(null);
+
+      if (options.packageProp) {
+        search = search.then(function(result) {
           if (result) return finishWith(result);
-          return loadRc(path.join(currentSearchPath, options.rcName));
-        })
-        .then(function(result) {
+          return loadPackageProp(currentSearchPath, options.packageProp);
+        });
+      }
+
+      if (options.rc) {
+        search = search.then(function(result) {
           if (result) return finishWith(result);
-          return loadJs(path.join(currentSearchPath, options.jsName));
-        })
-        .then(function(result) {
+          return loadRc(path.join(currentSearchPath, options.rc), {
+            strictJson: options.rcStrictJson,
+          });
+        });
+      }
+
+      if (options.js) {
+        search = search.then(function(result) {
           if (result) return finishWith(result);
-          return moveUpOrGiveUp(currentSearchPath, splitSearchPath, stopDir);
-        })
+          return loadJs(path.join(currentSearchPath, options.js));
+        });
+      }
+
+      search.then(function(result) {
+        if (result) return finishWith(result);
+        return moveUpOrGiveUp(currentSearchPath);
+      })
         .then(function(result) {
           if (result === DONE) return resolve(null);
           find();
@@ -60,6 +80,17 @@ module.exports = function(moduleName, options) {
           if (err === DONE) return;
           reject(err);
         });
+
+      function moveUpOrGiveUp(searchPath) {
+        return new Promise(function(resolve) {
+          // Notice the mutation of splitSearchPath
+          if (searchPath === stopDir || !splitSearchPath.pop()) {
+            resolve(DONE);
+          } else {
+            resolve(null);
+          }
+        });
+      }
 
       function finishWith(result) {
         resolve(result);
@@ -75,15 +106,4 @@ function splitPath(x) {
 
 function joinPath(parts) {
   return parts.join(path.sep);
-}
-
-function moveUpOrGiveUp(searchPath, splitSearchPath, stopdir) {
-  return new Promise(function(resolve) {
-    // Notice the mutation of splitSearchPath
-    if (searchPath === stopdir || !splitSearchPath.pop()) {
-      resolve(DONE);
-    } else {
-      resolve(null);
-    }
-  });
 }

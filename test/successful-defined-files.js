@@ -6,7 +6,7 @@ function absolutePath(str) {
   return path.join(__dirname, str);
 }
 
-test('defined JSON config path', function(t) {
+test('defined JSON config path with rcStrictJson', function(t) {
   var planned = 0;
 
   cosmiconfig(null, {

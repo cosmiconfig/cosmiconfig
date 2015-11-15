@@ -125,7 +125,7 @@ test('find invalid YAML in rc file', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, stopDir: 'a' })
+  cosmiconfig('foo', { cwd: startDir, stopDir: absolutePath('a') })
     .catch(function(error) {
       t.ok(error, 'threw error');
       t.equal(error.name, 'YAMLException', 'threw correct error type');
@@ -137,7 +137,7 @@ test('find invalid YAML in rc file', function(t) {
   t.plan(planned);
 });
 
-test('find invalid JSON in rc file', function(t) {
+test('find invalid JSON in rc file with rcStrictJson', function(t) {
   var planned = 0;
   var startDir = absolutePath('a/b');
   var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
@@ -153,7 +153,11 @@ test('find invalid JSON in rc file', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, stopDir: 'a' })
+  cosmiconfig('foo', {
+    cwd: startDir,
+    stopDir: absolutePath('a'),
+    rcStrictJson: true,
+  })
     .catch(function(error) {
       t.ok(error, 'threw error');
       t.equal(error.name, 'JSONError', 'threw correct error type');
@@ -178,7 +182,7 @@ test('find invalid package.json', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, stopDir: 'a' })
+  cosmiconfig('foo', { cwd: startDir, stopDir: absolutePath('a') })
     .catch(function(error) {
       t.ok(error, 'threw error');
       t.equal(error.name, 'JSONError', 'threw correct error type');
@@ -207,7 +211,7 @@ test('find invalid JS in .config.js file', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, stopDir: 'a' })
+  cosmiconfig('foo', { cwd: startDir, stopDir: absolutePath('a') })
     .catch(function(error) {
       t.ok(error, 'threw error');
       t.equal(error.name, 'SyntaxError', 'threw correct error type');
