@@ -79,7 +79,7 @@ You module name. This is used to create the filenames that cosmiconfig will look
 
 ##### packageProp
 
-Type: `string` or `boolean`
+Type: `string` or `false`
 Default: `'[moduleName]'`
 
 Name of the property in `package.json` to look for.
@@ -88,7 +88,7 @@ If `false`, cosmiconfig will not look in `package.json` files.
 
 ##### rc
 
-Type: `string` or `boolean`
+Type: `string` or `false`
 Default: `'.[moduleName]rc'`
 
 Name of the "rc file" to look for, which can be formatted as JSON or YAML.
@@ -97,7 +97,7 @@ If `false`, cosmiconfig will not look for an rc file.
 
 ##### js
 
-Type: `string` or `boolean`
+Type: `string` or `false`
 Default: `'[moduleName].config.js'`
 
 Name of a JS file to look for, which must export the configuration object.
@@ -106,7 +106,7 @@ If `false`, cosmiconfig will not look for a JS file.
 
 ##### argv
 
-Type: `string` or `boolean`
+Type: `string` or `false`
 Default: `'config'`
 
 Name of a `process.argv` argument to look for. The default causes cosmiconfig to look for `--config`.
