@@ -1,4 +1,4 @@
-# cosmiconfig 
+# cosmiconfig
 
 [![Build Status](https://img.shields.io/travis/davidtheclark/cosmiconfig/master.svg?label=unix%20build)](https://travis-ci.org/davidtheclark/cosmiconfig) [![Build status](https://img.shields.io/appveyor/ci/davidtheclark/cosmiconfig/master.svg?label=windows%20build)](https://ci.appveyor.com/project/davidtheclark/cosmiconfig/branch/master)
 
@@ -109,7 +109,7 @@ If `false`, cosmiconfig will not look for a JS file.
 Type: `string` or `false`
 Default: `'config'`
 
-Name of a `process.argv` argument to look for, whose value should be the path to a configuration file. 
+Name of a `process.argv` argument to look for, whose value should be the path to a configuration file.
 cosmiconfig will read it and try to parse it as JSON, YAML, or JS.
 By default, cosmiconfig looks for `--config`.
 
@@ -156,3 +156,9 @@ Directory where the search will stop.
 - Stops at the first configuration found, instead of finding all that can be found down the filetree and merging them automatically.
 - Provides a few configuration options (e.g. different file name expectations).
 - Asynchronicity.
+
+## Contributing & Development
+
+Please note that this project is released with a Contributor Code of Conduct. By participating in this project you agree to abide by its terms.
+
+And please do participate!
