@@ -2,17 +2,21 @@ var test = require('tape');
 var path = require('path');
 var cosmiconfig = require('..');
 
+function absolutePath(str) {
+  return path.join(__dirname, str);
+}
+
 test('defined JSON config path', function(t) {
   var planned = 0;
 
   cosmiconfig(null, {
-    configPath: path.join(__dirname, './fixtures/foo.json'),
+    configPath: absolutePath('fixtures/foo.json'),
   })
     .then(function(result) {
       t.deepEqual(result.config, {
         foo: true,
       });
-      t.equal(result.filepath, path.join(__dirname, './fixtures/foo.json'));
+      t.equal(result.filepath, absolutePath('fixtures/foo.json'));
     })
     .catch(function(err) {
       console.log(err.stack);
@@ -26,13 +30,13 @@ test('defined YAML config path', function(t) {
   var planned = 0;
 
   cosmiconfig(null, {
-    configPath: path.join(__dirname, './fixtures/foo.yaml'),
+    configPath: absolutePath('fixtures/foo.yaml'),
   })
     .then(function(result) {
       t.deepEqual(result.config, {
         foo: true,
       });
-      t.equal(result.filepath, path.join(__dirname, './fixtures/foo.yaml'));
+      t.equal(result.filepath, absolutePath('fixtures/foo.yaml'));
     })
     .catch(function(err) {
       console.log(err.stack);
@@ -46,13 +50,13 @@ test('defined JS config path', function(t) {
   var planned = 0;
 
   cosmiconfig(null, {
-    configPath: path.join(__dirname, './fixtures/foo.js'),
+    configPath: absolutePath('fixtures/foo.js'),
   })
     .then(function(result) {
       t.deepEqual(result.config, {
         foo: true,
       });
-      t.equal(result.filepath, path.join(__dirname, './fixtures/foo.js'));
+      t.equal(result.filepath, absolutePath('fixtures/foo.js'));
     })
     .catch(function(err) {
       console.log(err.stack);

@@ -1,5 +1,3 @@
-// Much inspiration from https://github.com/sindresorhus/find-up
-
 'use strict';
 
 var path = require('path');
