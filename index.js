@@ -73,8 +73,8 @@ function splitPath(x) {
   return path.resolve(x || '').split(path.sep);
 }
 
-function joinPath(x) {
-  return path.join.apply(null, [path.sep].concat(x));
+function joinPath(parts) {
+  return parts.join(path.sep);
 }
 
 function moveUpOrGiveUp(searchPath, splitSearchPath, stopdir) {
