@@ -5,19 +5,18 @@
 **STATUS: Under active development, so do not use unless you are helping develop.**
 
 Find and load a configuration object from
-- a `package.json` property (anywhere down file tree),
-- a JSON or YAML "rc file" (anywhere down file tree), or
-- a `.config.js` CommonJS module (anywhere down file tree).
-- a CLI `--config` argument,
+- a `package.json` property (anywhere down the file tree)
+- a JSON or YAML "rc file" (anywhere down the file tree)
+- a `.config.js` CommonJS module (anywhere down the file tree)
+- a CLI `--config` argument
 
 For example, if your module's name is "soursocks," cosmiconfig will search out configuration in the following places:
-- a `soursocks` property in `package.json`;
-- a `.soursocksrc` file in JSON or YAML format;
-- a `soursocks.config.js` file exporting a JS object.
+- a `soursocks` property in `package.json`
+- a `.soursocksrc` file in JSON or YAML format
+- a `soursocks.config.js` file exporting a JS object
+- a `--config` CLI argument
 
-cosmiconfig continues to search in these places all the way down the file tree until it finds acceptable configuration or hits the home directory. And it does all this asynchronously, so it shouldn't get in your way.
-
-If cosmiconfig finds a `--config` CLI argument, it will load that file, trying to parse it as either JSON, YAML, or JS.
+cosmiconfig continues to search in these places all the way down the file tree until it finds acceptable configuration (or hits the home directory). And it does all this asynchronously, so it shouldn't get in your way.
 
 Additionally, all of these search locations are configurable: you can customize filenames or turn off any location.
 
@@ -48,19 +47,19 @@ cosmiconfig(yourModuleName[, options])
 The function `cosmiconfig()` searches for configuration objects and returns a Promise;
 and that Promise resolves with an object containing the information you're looking for.
 
-So let's say `yourModuleName = 'goldengrahams'` — here's how cosmiconfig will work:
+So let's say `var yourModuleName = 'goldengrahams'` — here's how cosmiconfig will work:
 
 - Starting from `process.cwd()` (or some other directory defined by `options.cwd`), it looks for configuration objects in three places, in this order:
   1. A `goldengrahams` property in a `package.json` file (or some other property defined by `options.packageProp`);
   2. A `.goldengrahamsrc` file with JSON or YAML syntax (or some other filename defined by `options.rc`);
   3. A `goldengrahams.config.js` JS file exporting the object (or some other filename defined by `options.js`).
 - If none of those searches reveal a configuration object, it moves down one directory and tries again. So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking those three locations in each directory.
-- It continues searching until it arrives at your user directory (or some other directory defined by `options.stopDir`).
+- It continues searching until it arrives at your home directory (or some other directory defined by `options.stopDir`).
 - If at any point a parseable configuration is found, the `cosmiconfig()` Promise resolves with its result object.
 - If no configuration object is found, the `cosmiconfig()` Promise resolves with `null`.
 - If a configuration object is found *but is malformed* (causing a parsing error), the `cosmiconfig()` Promise rejects and shares that error (so you should `.catch()` it).
 
-All this can be overridden by passing a `configPath` option or a `--config` CLI argument to specify a file.
+All this searching can be short-circuited by passing `options.configPath` or a `--config` CLI argument to specify a file.
 cosmiconfig will read that file and try parsing it as JSON, YAML, or JS.
 
 ### cosmiconfig(moduleName[, options])
@@ -110,7 +109,9 @@ If `false`, cosmiconfig will not look for a JS file.
 Type: `string` or `false`
 Default: `'config'`
 
-Name of a `process.argv` argument to look for. The default causes cosmiconfig to look for `--config`.
+Name of a `process.argv` argument to look for, whose value should be the path to a configuration file. 
+cosmiconfig will read it and try to parse it as JSON, YAML, or JS.
+By default, cosmiconfig looks for `--config`.
 
 If `false`, cosmiconfig will not look for any `process.argv` arguments.
 
@@ -144,7 +145,7 @@ Directory to start the search from.
 Type: `string`
 Default: Absolute path to your home directory
 
-Path which the search will stop.
+Directory where the search will stop.
 
 ## Differences from [rc](https://github.com/dominictarr/rc)
 
