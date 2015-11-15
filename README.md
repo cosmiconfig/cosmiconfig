@@ -5,10 +5,10 @@
 **STATUS: Under active development, so do not use unless you are helping develop.**
 
 Find and load a configuration object from
-- a CLI `--config` argument,
 - a `package.json` property (anywhere down file tree),
 - a JSON or YAML "rc file" (anywhere down file tree), or
 - a `.config.js` CommonJS module (anywhere down file tree).
+- a CLI `--config` argument,
 
 For example, if your module's name is "soursocks," cosmiconfig will search out configuration in the following places:
 - a `soursocks` property in `package.json`;
