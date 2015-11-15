@@ -20,5 +20,4 @@ install:
 test_script:
   - node --version
   - npm --version
-  - ps: "npm test # PowerShell"
   - cmd: "npm test"
