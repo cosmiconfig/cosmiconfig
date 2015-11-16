@@ -35,7 +35,7 @@ module.exports = function(moduleName, options) {
   function find() {
     var currentSearchPath = joinPath(splitSearchPath);
 
-    return Promise.resolve(null).then(function() {
+    return Promise.resolve().then(function() {
       if (!options.packageProp) return;
       return loadPackageProp(currentSearchPath, options.packageProp);
     }).then(function(result) {
