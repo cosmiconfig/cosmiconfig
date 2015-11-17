@@ -52,8 +52,7 @@ test('do not find file, and give up', function(t) {
         'third and last dir: /foo.config.js');
       t.equal(result, null);
       readFileStub.restore();
-    })
-    .catch(function(err) {
+    }).catch(function(err) {
       console.log(err.stack);
     });
   planned += 11;
@@ -99,8 +98,7 @@ test('stop at stopDir, and give up', function(t) {
         'second and stopDir: a/foo.config.js');
       t.equal(result, null);
       readFileStub.restore();
-    })
-    .catch(function(err) {
+    }).catch(function(err) {
       console.log(err.stack);
     });
   planned += 8;

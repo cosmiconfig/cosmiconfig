@@ -11,16 +11,14 @@ test('defined JSON config path with rcStrictJson', function(t) {
 
   cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo.json'),
-  })
-    .then(function(result) {
-      t.deepEqual(result.config, {
-        foo: true,
-      });
-      t.equal(result.filepath, absolutePath('fixtures/foo.json'));
-    })
-    .catch(function(err) {
-      console.log(err.stack);
+  }).then(function(result) {
+    t.deepEqual(result.config, {
+      foo: true,
     });
+    t.equal(result.filepath, absolutePath('fixtures/foo.json'));
+  }).catch(function(err) {
+    console.log(err.stack);
+  });
   planned += 2;
 
   t.plan(planned);
@@ -31,16 +29,14 @@ test('defined YAML config path', function(t) {
 
   cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo.yaml'),
-  })
-    .then(function(result) {
-      t.deepEqual(result.config, {
-        foo: true,
-      });
-      t.equal(result.filepath, absolutePath('fixtures/foo.yaml'));
-    })
-    .catch(function(err) {
-      console.log(err.stack);
+  }).then(function(result) {
+    t.deepEqual(result.config, {
+      foo: true,
     });
+    t.equal(result.filepath, absolutePath('fixtures/foo.yaml'));
+  }).catch(function(err) {
+    console.log(err.stack);
+  });
   planned += 2;
 
   t.plan(planned);
@@ -51,16 +47,14 @@ test('defined JS config path', function(t) {
 
   cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo.js'),
-  })
-    .then(function(result) {
-      t.deepEqual(result.config, {
-        foo: true,
-      });
-      t.equal(result.filepath, absolutePath('fixtures/foo.js'));
-    })
-    .catch(function(err) {
-      console.log(err.stack);
+  }).then(function(result) {
+    t.deepEqual(result.config, {
+      foo: true,
     });
+    t.equal(result.filepath, absolutePath('fixtures/foo.js'));
+  }).catch(function(err) {
+    console.log(err.stack);
+  });
   planned += 2;
 
   t.plan(planned);

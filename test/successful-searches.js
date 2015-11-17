@@ -56,8 +56,7 @@ test('find rc file in third searched dir, with a package.json lacking prop', fun
       });
       t.equal(result.filepath, absolutePath('a/b/c/d/.foorc'));
       readFileStub.restore();
-    })
-    .catch(function(err) {
+    }).catch(function(err) {
       console.log(err.stack);
     });
   planned += 11;
@@ -101,8 +100,7 @@ test('find package.json prop in second searched dir', function(t) {
       });
       t.equal(result.filepath, absolutePath('a/b/c/d/e/package.json'));
       readFileStub.restore();
-    })
-    .catch(function(err) {
+    }).catch(function(err) {
       console.log(err.stack);
     });
   planned += 7;
@@ -144,8 +142,7 @@ test('find JS file in first searched dir', function(t) {
       });
       t.equal(result.filepath, absolutePath('a/b/c/d/e/f/foo.config.js'));
       readFileStub.restore();
-    })
-    .catch(function(err) {
+    }).catch(function(err) {
       console.log(err.stack);
     });
   planned += 6;
@@ -193,8 +190,7 @@ test('find package.json in second directory searched, with alternate names', fun
       });
       t.equal(result.filepath, absolutePath('a/b/c/d/e/package.json'));
       readFileStub.restore();
-    })
-    .catch(function(err) {
+    }).catch(function(err) {
       console.log(err.stack);
     });
   planned += 7;
@@ -247,8 +243,7 @@ test('find rc file in third searched dir, skipping packageProp, with rcStrictJso
       });
       t.equal(result.filepath, absolutePath('a/b/c/d/.foorc'));
       readFileStub.restore();
-    })
-    .catch(function(err) {
+    }).catch(function(err) {
       console.log(err.stack);
     });
   planned += 8;
@@ -293,8 +288,7 @@ test('find package.json prop in second searched dir, skipping js and rc', functi
       });
       t.equal(result.filepath, absolutePath('a/b/c/d/e/package.json'));
       readFileStub.restore();
-    })
-    .catch(function(err) {
+    }).catch(function(err) {
       console.log(err.stack);
     });
   planned += 5;
