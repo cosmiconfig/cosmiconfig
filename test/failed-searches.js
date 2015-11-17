@@ -1,4 +1,4 @@
-var test = require('tape');
+var test = require('ava');
 var sinon = require('sinon');
 var path = require('path');
 var fs = require('graceful-fs');
@@ -8,8 +8,7 @@ function absolutePath(str) {
   return path.join(__dirname, str);
 }
 
-test('do not find file, and give up', function(t) {
-  var planned = 0;
+test.serial('do not find file, and give up', function(t) {
   var startDir = absolutePath('a/b');
   var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
     switch (searchPath) {
@@ -29,39 +28,35 @@ test('do not find file, and give up', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, stopDir: absolutePath('.') })
-    .then(function(result) {
-      t.equal(readFileStub.callCount, 9);
-      t.equal(readFileStub.getCall(0).args[0], absolutePath('a/b/package.json'),
-        'first dir: a/b/package.json');
-      t.equal(readFileStub.getCall(1).args[0], absolutePath('a/b/.foorc'),
-        'first dir: a/b/.foorc');
-      t.equal(readFileStub.getCall(2).args[0], absolutePath('a/b/foo.config.js'),
-        'first dir: a/b/foo.config.js');
-      t.equal(readFileStub.getCall(3).args[0], absolutePath('a/package.json'),
-        'second dir: a/package.json');
-      t.equal(readFileStub.getCall(4).args[0], absolutePath('a/.foorc'),
-        'second dir: a/.foorc');
-      t.equal(readFileStub.getCall(5).args[0], absolutePath('a/foo.config.js'),
-        'second dir: a/foo.config.js');
-      t.equal(readFileStub.getCall(6).args[0], absolutePath('/package.json'),
-        'third and last dir: /package.json');
-      t.equal(readFileStub.getCall(7).args[0], absolutePath('/.foorc'),
-        'third and last dir: /.foorc');
-      t.equal(readFileStub.getCall(8).args[0], absolutePath('/foo.config.js'),
-        'third and last dir: /foo.config.js');
-      t.equal(result, null);
-      readFileStub.restore();
-    }).catch(function(err) {
-      console.log(err.stack);
-    });
-  planned += 11;
-
-  t.plan(planned);
+  return cosmiconfig('foo', {
+    cwd: startDir,
+    stopDir: absolutePath('.'),
+  }).then(function(result) {
+    t.is(readFileStub.callCount, 9);
+    t.is(readFileStub.getCall(0).args[0], absolutePath('a/b/package.json'),
+      'first dir: a/b/package.json');
+    t.is(readFileStub.getCall(1).args[0], absolutePath('a/b/.foorc'),
+      'first dir: a/b/.foorc');
+    t.is(readFileStub.getCall(2).args[0], absolutePath('a/b/foo.config.js'),
+      'first dir: a/b/foo.config.js');
+    t.is(readFileStub.getCall(3).args[0], absolutePath('a/package.json'),
+      'second dir: a/package.json');
+    t.is(readFileStub.getCall(4).args[0], absolutePath('a/.foorc'),
+      'second dir: a/.foorc');
+    t.is(readFileStub.getCall(5).args[0], absolutePath('a/foo.config.js'),
+      'second dir: a/foo.config.js');
+    t.is(readFileStub.getCall(6).args[0], absolutePath('/package.json'),
+      'third and last dir: /package.json');
+    t.is(readFileStub.getCall(7).args[0], absolutePath('/.foorc'),
+      'third and last dir: /.foorc');
+    t.is(readFileStub.getCall(8).args[0], absolutePath('/foo.config.js'),
+      'third and last dir: /foo.config.js');
+    t.is(result, null);
+    readFileStub.restore();
+  });
 });
 
-test('stop at stopDir, and give up', function(t) {
-  var planned = 0;
+test.serial('stop at stopDir, and give up', function(t) {
   var startDir = absolutePath('a/b');
   var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
     switch (searchPath) {
@@ -81,34 +76,30 @@ test('stop at stopDir, and give up', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, stopDir: absolutePath('a') })
-    .then(function(result) {
-      t.equal(readFileStub.callCount, 6);
-      t.equal(readFileStub.getCall(0).args[0], absolutePath('a/b/package.json'),
-        'first dir: a/b/package.json');
-      t.equal(readFileStub.getCall(1).args[0], absolutePath('a/b/.foorc'),
-        'first dir: a/b/.foorc');
-      t.equal(readFileStub.getCall(2).args[0], absolutePath('a/b/foo.config.js'),
-        'first dir: a/b/foo.config.js');
-      t.equal(readFileStub.getCall(3).args[0], absolutePath('a/package.json'),
-        'second and stopDir: a/package.json');
-      t.equal(readFileStub.getCall(4).args[0], absolutePath('a/.foorc'),
-        'second and stopDir: a/.foorc');
-      t.equal(readFileStub.getCall(5).args[0], absolutePath('a/foo.config.js'),
-        'second and stopDir: a/foo.config.js');
-      t.equal(result, null);
-      readFileStub.restore();
-    }).catch(function(err) {
-      console.log(err.stack);
-    });
-  planned += 8;
-
-  t.plan(planned);
+  return cosmiconfig('foo', {
+    cwd: startDir,
+    stopDir: absolutePath('a'),
+  }).then(function(result) {
+    t.is(readFileStub.callCount, 6);
+    t.is(readFileStub.getCall(0).args[0], absolutePath('a/b/package.json'),
+      'first dir: a/b/package.json');
+    t.is(readFileStub.getCall(1).args[0], absolutePath('a/b/.foorc'),
+      'first dir: a/b/.foorc');
+    t.is(readFileStub.getCall(2).args[0], absolutePath('a/b/foo.config.js'),
+      'first dir: a/b/foo.config.js');
+    t.is(readFileStub.getCall(3).args[0], absolutePath('a/package.json'),
+      'second and stopDir: a/package.json');
+    t.is(readFileStub.getCall(4).args[0], absolutePath('a/.foorc'),
+      'second and stopDir: a/.foorc');
+    t.is(readFileStub.getCall(5).args[0], absolutePath('a/foo.config.js'),
+      'second and stopDir: a/foo.config.js');
+    t.is(result, null);
+    readFileStub.restore();
+  });
 });
 
 
-test('find invalid YAML in rc file', function(t) {
-  var planned = 0;
+test.serial('find invalid YAML in rc file', function(t) {
   var startDir = absolutePath('a/b');
   var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
     switch (searchPath) {
@@ -123,20 +114,17 @@ test('find invalid YAML in rc file', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, stopDir: absolutePath('a') })
-    .catch(function(error) {
-      t.ok(error, 'threw error');
-      t.equal(error.name, 'YAMLException', 'threw correct error type');
-      readFileStub.restore();
-    });
-
-  planned += 2;
-
-  t.plan(planned);
+  return cosmiconfig('foo', {
+    cwd: startDir,
+    stopDir: absolutePath('a'),
+  }).catch(function(error) {
+    t.ok(error, 'threw error');
+    t.is(error.name, 'YAMLException', 'threw correct error type');
+    readFileStub.restore();
+  });
 });
 
-test('find invalid JSON in rc file with rcStrictJson', function(t) {
-  var planned = 0;
+test.serial('find invalid JSON in rc file with rcStrictJson', function(t) {
   var startDir = absolutePath('a/b');
   var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
     switch (searchPath) {
@@ -151,24 +139,18 @@ test('find invalid JSON in rc file with rcStrictJson', function(t) {
     }
   });
 
-  cosmiconfig('foo', {
+  return cosmiconfig('foo', {
     cwd: startDir,
     stopDir: absolutePath('a'),
     rcStrictJson: true,
-  })
-    .catch(function(error) {
-      t.ok(error, 'threw error');
-      t.equal(error.name, 'JSONError', 'threw correct error type');
-      readFileStub.restore();
-    });
-
-  planned += 2;
-
-  t.plan(planned);
+  }).catch(function(error) {
+    t.ok(error, 'threw error');
+    t.is(error.name, 'JSONError', 'threw correct error type');
+    readFileStub.restore();
+  });
 });
 
-test('find invalid package.json', function(t) {
-  var planned = 0;
+test.serial('find invalid package.json', function(t) {
   var startDir = absolutePath('a/b');
   var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
     switch (searchPath) {
@@ -180,20 +162,17 @@ test('find invalid package.json', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, stopDir: absolutePath('a') })
-    .catch(function(error) {
-      t.ok(error, 'threw error');
-      t.equal(error.name, 'JSONError', 'threw correct error type');
-      readFileStub.restore();
-    });
-
-  planned += 2;
-
-  t.plan(planned);
+  return cosmiconfig('foo', {
+    cwd: startDir,
+    stopDir: absolutePath('a'),
+  }).catch(function(error) {
+    t.ok(error, 'threw error');
+    t.is(error.name, 'JSONError', 'threw correct error type');
+    readFileStub.restore();
+  });
 });
 
-test('find invalid JS in .config.js file', function(t) {
-  var planned = 0;
+test.serial('find invalid JS in .config.js file', function(t) {
   var startDir = absolutePath('a/b');
   var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
     switch (searchPath) {
@@ -209,14 +188,12 @@ test('find invalid JS in .config.js file', function(t) {
     }
   });
 
-  cosmiconfig('foo', { cwd: startDir, stopDir: absolutePath('a') })
-    .catch(function(error) {
-      t.ok(error, 'threw error');
-      t.equal(error.name, 'SyntaxError', 'threw correct error type');
-      readFileStub.restore();
-    });
-
-  planned += 2;
-
-  t.plan(planned);
+  return cosmiconfig('foo', {
+    cwd: startDir,
+    stopDir: absolutePath('a'),
+  }).catch(function(error) {
+    t.ok(error, 'threw error');
+    t.is(error.name, 'SyntaxError', 'threw correct error type');
+    readFileStub.restore();
+  });
 });

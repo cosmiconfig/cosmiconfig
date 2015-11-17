@@ -9,7 +9,9 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "test": "npm run lint && tape test"
+    "pretest": "npm run lint",
+    "test": "ava",
+    "prepublish": "npm test"
   },
   "repository": {
     "type": "git",
@@ -21,24 +23,27 @@
     "config"
   ],
   "author": "David Clark",
+  "contributors": [
+    "Bogdan Chadkin <trysound@yandex.ru>"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/davidtheclark/cosmiconfig/issues"
   },
   "homepage": "https://github.com/davidtheclark/cosmiconfig#readme",
   "dependencies": {
+    "bluebird": "^3.0.5",
     "graceful-fs": "^4.1.2",
     "js-yaml": "^3.4.3",
     "minimist": "^1.2.0",
     "object-assign": "^4.0.1",
     "os-homedir": "^1.0.1",
     "parse-json": "^2.2.0",
-    "pinkie-promise": "^2.0.0",
     "require-from-string": "^1.1.0"
   },
   "devDependencies": {
+    "ava": "^0.5.0",
     "eslint": "1.9.0",
-    "sinon": "1.17.2",
-    "tape": "4.2.2"
+    "sinon": "1.17.2"
   }
 }

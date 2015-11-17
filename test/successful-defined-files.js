@@ -1,4 +1,4 @@
-var test = require('tape');
+var test = require('ava');
 var path = require('path');
 var cosmiconfig = require('..');
 
@@ -7,55 +7,34 @@ function absolutePath(str) {
 }
 
 test('defined JSON config path with rcStrictJson', function(t) {
-  var planned = 0;
-
-  cosmiconfig(null, {
+  return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo.json'),
   }).then(function(result) {
-    t.deepEqual(result.config, {
+    t.same(result.config, {
       foo: true,
     });
-    t.equal(result.filepath, absolutePath('fixtures/foo.json'));
-  }).catch(function(err) {
-    console.log(err.stack);
+    t.is(result.filepath, absolutePath('fixtures/foo.json'));
   });
-  planned += 2;
-
-  t.plan(planned);
 });
 
 test('defined YAML config path', function(t) {
-  var planned = 0;
-
-  cosmiconfig(null, {
+  return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo.yaml'),
   }).then(function(result) {
-    t.deepEqual(result.config, {
+    t.same(result.config, {
       foo: true,
     });
-    t.equal(result.filepath, absolutePath('fixtures/foo.yaml'));
-  }).catch(function(err) {
-    console.log(err.stack);
+    t.is(result.filepath, absolutePath('fixtures/foo.yaml'));
   });
-  planned += 2;
-
-  t.plan(planned);
 });
 
 test('defined JS config path', function(t) {
-  var planned = 0;
-
-  cosmiconfig(null, {
+  return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo.js'),
   }).then(function(result) {
-    t.deepEqual(result.config, {
+    t.same(result.config, {
       foo: true,
     });
-    t.equal(result.filepath, absolutePath('fixtures/foo.js'));
-  }).catch(function(err) {
-    console.log(err.stack);
+    t.is(result.filepath, absolutePath('fixtures/foo.js'));
   });
-  planned += 2;
-
-  t.plan(planned);
 });
