@@ -2,7 +2,7 @@
 
 var path = require('path');
 var oshomedir = require('os-homedir');
-var Promise = require('pinkie-promise');
+var Promise = require('bluebird');
 var minimist = require('minimist');
 var assign = require('object-assign');
 var loadPackageProp = require('./lib/loadPackageProp');
