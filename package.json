@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "test": "npm run lint && tape test"
+    "ava": "ava test",
+    "test": "npm run lint && npm run ava"
   },
   "repository": {
     "type": "git",
@@ -37,8 +38,8 @@
     "require-from-string": "^1.1.0"
   },
   "devDependencies": {
+    "ava": "^0.5.0",
     "eslint": "1.9.0",
-    "sinon": "1.17.2",
-    "tape": "4.2.2"
+    "sinon": "1.17.2"
   }
 }

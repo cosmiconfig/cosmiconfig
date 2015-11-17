@@ -1,4 +1,4 @@
-var test = require('tape');
+var test = require('ava');
 var path = require('path');
 var cosmiconfig = require('..');
 
@@ -7,77 +7,60 @@ function absolutePath(str) {
 }
 
 test('defined file that does not exist', function(t) {
-  var planned = 0;
-
-  cosmiconfig(null, {
+  return cosmiconfig(null, {
     configPath: absolutePath('does/not/exist'),
   }).catch(function(error) {
-    t.equal(error.code, 'ENOENT', 'with expected format');
+    t.is(error.code, 'ENOENT', 'with expected format');
   });
-  planned += 1;
-
-  t.plan(planned);
 });
 
-test('defined JSON file with syntax error', function(t) {
-  var planned = 0;
-
-  cosmiconfig(null, {
+test('defined JSON file with syntax error, without expected format', function(t) {
+  return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo-invalid.json'),
   }).catch(function(error) {
-    t.ok(/^Failed to parse/.test(error.message), 'without expected format');
+    t.ok(/^Failed to parse/.test(error.message));
   });
-  planned += 1;
+});
 
-  cosmiconfig(null, {
+test('defined JSON file with syntax error, with expected format', function(t) {
+  return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo-invalid.json'),
     format: 'json',
   }).catch(function(error) {
-    t.equal(error.name, 'JSONError', 'with expected format');
+    t.is(error.name, 'JSONError');
   });
-  planned += 1;
-
-  t.plan(planned);
 });
 
-test('defined YAML file with syntax error', function(t) {
-  var planned = 0;
-
-  cosmiconfig(null, {
+test('defined YAML file with syntax error, without expected format', function(t) {
+  return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo-invalid.yaml'),
   }).catch(function(error) {
-    t.ok(/^Failed to parse/.test(error.message), 'without expected format');
+    t.ok(/^Failed to parse/.test(error.message));
   });
-  planned += 1;
+});
 
-  cosmiconfig(null, {
+test('defined YAML file with syntax error, with expected format', function(t) {
+  return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo-invalid.yaml'),
     format: 'yaml',
   }).catch(function(error) {
-    t.equal(error.name, 'YAMLException', 'with expected format');
+    t.is(error.name, 'YAMLException');
   });
-  planned += 1;
-
-  t.plan(planned);
 });
 
-test('defined JS file with syntax error', function(t) {
-  var planned = 0;
-
-  cosmiconfig(null, {
+test('defined JS file with syntax error, without expected format', function(t) {
+  return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo-invalid.js'),
   }).catch(function(error) {
-    t.ok(/^Failed to parse/.test(error.message), 'without expected format');
+    t.ok(/^Failed to parse/.test(error.message));
   });
-  planned += 1;
+});
 
-  cosmiconfig(null, {
+test('defined JS file with syntax error, with expected format', function(t) {
+  return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo-invalid.js'),
     format: 'js',
   }).catch(function(error) {
-    t.ok(!/^Failed to parse/.test(error.message), 'with expected format');
+    t.ok(!/^Failed to parse/.test(error.message));
   });
-  planned += 1;
-
-  t.plan(planned);
 });
