@@ -9,8 +9,9 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "ava": "ava test",
-    "test": "npm run lint && npm run ava"
+    "pretest": "npm run lint",
+    "test": "ava",
+    "prepublish": "npm test"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,9 @@
     "config"
   ],
   "author": "David Clark",
+  "contributors": [
+    "Bogdan Chadkin <trysound@yandex.ru>"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/davidtheclark/cosmiconfig/issues"
