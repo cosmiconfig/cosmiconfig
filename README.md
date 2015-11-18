@@ -2,8 +2,6 @@
 
 [![Build Status](https://img.shields.io/travis/davidtheclark/cosmiconfig/master.svg?label=unix%20build)](https://travis-ci.org/davidtheclark/cosmiconfig) [![Build status](https://img.shields.io/appveyor/ci/davidtheclark/cosmiconfig/master.svg?label=windows%20build)](https://ci.appveyor.com/project/davidtheclark/cosmiconfig/branch/master)
 
-**STATUS: Under active development, so do not use unless you are helping develop.**
-
 Find and load a configuration object from
 - a `package.json` property (anywhere down the file tree)
 - a JSON or YAML "rc file" (anywhere down the file tree)
@@ -11,10 +9,10 @@ Find and load a configuration object from
 - a CLI `--config` argument
 
 For example, if your module's name is "soursocks," cosmiconfig will search out configuration in the following places:
-- a `soursocks` property in `package.json`
-- a `.soursocksrc` file in JSON or YAML format
-- a `soursocks.config.js` file exporting a JS object
-- a `--config` CLI argument
+- a `soursocks` property in `package.json` (anywhere down the file tree)
+- a `.soursocksrc` file in JSON or YAML format (anywhere down the file tree)
+- a `soursocks.config.js` file exporting a JS object (anywhere down the file tree)
+- a CLI `--config` argument
 
 cosmiconfig continues to search in these places all the way down the file tree until it finds acceptable configuration (or hits the home directory). And it does all this asynchronously, so it shouldn't get in your way.
 
@@ -28,8 +26,7 @@ npm install cosmiconfig
 
 Tested in Node 0.10+.
 
-## API
-
+## Usage
 
 ```js
 var cosmiconfig = require('cosmiconfig');
@@ -44,8 +41,8 @@ cosmiconfig(yourModuleName[, options])
   });
 ```
 
-The function `cosmiconfig()` searches for configuration objects and returns a Promise;
-and that Promise resolves with an object containing the information you're looking for.
+The function `cosmiconfig()` searches for a configuration object and returns a Promise,
+which resolves with an object containing the information you're looking for.
 
 So let's say `var yourModuleName = 'goldengrahams'` — here's how cosmiconfig will work:
 
@@ -62,6 +59,8 @@ So let's say `var yourModuleName = 'goldengrahams'` — here's how cosmiconfig w
 All this searching can be short-circuited by passing `options.configPath` or a `--config` CLI argument to specify a file.
 cosmiconfig will read that file and try parsing it as JSON, YAML, or JS.
 
+## API
+
 ### cosmiconfig(moduleName[, options])
 
 Returns a promise that resolves with `null` (if no configuration was found) or an object with the following properties:
@@ -73,7 +72,7 @@ Returns a promise that resolves with `null` (if no configuration was found) or a
 
 Type: `string`
 
-You module name. This is used to create the filenames that cosmiconfig will look for.
+You module name. This is used to create the default filenames that cosmiconfig will look for.
 
 #### Options
 
@@ -110,7 +109,7 @@ Type: `string` or `false`
 Default: `'config'`
 
 Name of a `process.argv` argument to look for, whose value should be the path to a configuration file.
-cosmiconfig will read it and try to parse it as JSON, YAML, or JS.
+cosmiconfig will read the file and try to parse it as JSON, YAML, or JS.
 By default, cosmiconfig looks for `--config`.
 
 If `false`, cosmiconfig will not look for any `process.argv` arguments.
@@ -154,7 +153,7 @@ Directory where the search will stop.
 - Looks for configuration in some different places: in a `package.json` property, an rc file, and a `.config.js` file.
 - Built-in support for JSON, YAML, and CommonJS formats.
 - Stops at the first configuration found, instead of finding all that can be found down the filetree and merging them automatically.
-- Provides a few configuration options (e.g. different file name expectations).
+- Options.
 - Asynchronicity.
 
 ## Contributing & Development
