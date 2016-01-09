@@ -6,7 +6,7 @@ function absolutePath(str) {
   return path.join(__dirname, str);
 }
 
-test('defined JSON config path with rcStrictJson', function(t) {
+test('defined JSON config path', function(t) {
   return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo.json'),
   }).then(function(result) {
@@ -36,5 +36,16 @@ test('defined JS config path', function(t) {
       foo: true,
     });
     t.is(result.filepath, absolutePath('fixtures/foo.js'));
+  });
+});
+
+test('defined modulized JS config path', function(t) {
+  return cosmiconfig(null, {
+    configPath: absolutePath('fixtures/foo-module.js'),
+  }).then(function(result) {
+    t.same(result.config, {
+      foo: true,
+    });
+    t.is(result.filepath, absolutePath('fixtures/foo-module.js'));
   });
 });
