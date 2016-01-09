@@ -1,5 +1,9 @@
 # Changelog
 
+## Head
+
+- Fix handling of `require()`'s within JS module configs.
+
 ## 1.0.1
 
 - Switch Promise implementation to pinkie-promise.
