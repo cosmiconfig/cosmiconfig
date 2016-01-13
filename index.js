@@ -42,6 +42,7 @@ module.exports = function(moduleName, options) {
       if (result || !options.rc) return result;
       return loadRc(path.join(currentSearchPath, options.rc), {
         strictJson: options.rcStrictJson,
+        extensions: options.rcExtensions,
       });
     }).then(function(result) {
       if (result || !options.js) return result;

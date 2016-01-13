@@ -44,6 +44,7 @@
   "devDependencies": {
     "ava": "0.9.1",
     "eslint": "1.10.3",
+    "lodash": "3.10.1",
     "sinon": "1.17.2"
   }
 }

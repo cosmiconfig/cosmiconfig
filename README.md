@@ -18,6 +18,9 @@ cosmiconfig continues to search in these places all the way down the file tree u
 
 Additionally, all of these search locations are configurable: you can customize filenames or turn off any location.
 
+You can also look for rc files with extensions, e.g. `.soursocksrc.json` or `.soursocksrc.yaml`.
+You may like extensions on your rc files because you'll get syntax highlighting and linting in text editors.
+
 ## Installation
 
 ```
@@ -94,6 +97,10 @@ Name of the "rc file" to look for, which can be formatted as JSON or YAML.
 
 If `false`, cosmiconfig will not look for an rc file.
 
+If `rcExtensions: true`, the rc file can also have extensions that specify the syntax, e.g. `.[moduleName]rc.json`.
+You may like extensions on your rc files because you'll get syntax highlighting and linting in text editors.
+Also, with `rcExtensions: true`, you can use JS modules as rc files, e.g. `.[moduleName]rc.js`.
+
 ##### js
 
 Type: `string` or `false`
@@ -132,6 +139,21 @@ If `true`, cosmiconfig will expect rc files to be strict JSON. No YAML permitted
 By default, rc files are parsed with [js-yaml](https://github.com/nodeca/js-yaml), which is
 more permissive with punctuation than standard strict JSON.
 
+##### rcExtensions
+
+Type: `boolean`
+Default: `false`
+
+If `true`, cosmiconfig will look for rc files with extensions, in addition to rc files without.
+
+This adds a few steps to the search process.
+Instead of *just* looking for `.goldengrahamsrc` (no extension), it will also look for the following, in this order:
+
+- `.goldengrahamsrc.json`
+- `.goldengrahamsrc.yaml`
+- `.goldengrahamsrc.yml`
+- `.goldengrahamsrc.js`
+
 ##### cwd
 
 Type: `string`
@@ -150,7 +172,7 @@ Directory where the search will stop.
 
 [rc](https://github.com/dominictarr/rc) serves its focused purpose well. cosmiconfig differs in a few key ways — making it more useful for some projects, less useful for others:
 
-- Looks for configuration in some different places: in a `package.json` property, an rc file, and a `.config.js` file.
+- Looks for configuration in some different places: in a `package.json` property, an rc file, a `.config.js` file, and rc files with extensions.
 - Built-in support for JSON, YAML, and CommonJS formats.
 - Stops at the first configuration found, instead of finding all that can be found down the filetree and merging them automatically.
 - Options.

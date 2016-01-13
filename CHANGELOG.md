@@ -1,5 +1,9 @@
 # Changelog
 
+## Head
+
+- Add `rcExtensions` option.
+
 ## 1.0.2
 
 - Fix handling of `require()`'s within JS module configs.
