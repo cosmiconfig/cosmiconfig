@@ -1,17 +1,19 @@
-var test = require('ava');
-var sinon = require('sinon');
-var path = require('path');
-var fs = require('graceful-fs');
-var _ = require('lodash');
-var cosmiconfig = require('..');
+'use strict';
+
+const test = require('ava');
+const sinon = require('sinon');
+const path = require('path');
+const fs = require('graceful-fs');
+const _ = require('lodash');
+const cosmiconfig = require('..');
 
 function absolutePath(str) {
   return path.join(__dirname, str);
 }
 
-test.serial('find rc file in third searched dir, with a package.json lacking prop', function(t) {
-  var startDir = absolutePath('a/b/c/d/e/f');
-  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+test.serial('find rc file in third searched dir, with a package.json lacking prop', (t) => {
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -34,8 +36,8 @@ test.serial('find rc file in third searched dir, with a package.json lacking pro
 
   return cosmiconfig('foo', {
     cwd: startDir,
-    stopDir: absolutePath('.') ,
-  }).then(function(result) {
+    stopDir: absolutePath('.'),
+  }).then((result) => {
     t.is(readFileStub.callCount, 8);
     t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked /a/b/c/d/e/f/package.json');
@@ -61,9 +63,9 @@ test.serial('find rc file in third searched dir, with a package.json lacking pro
   });
 });
 
-test.serial('find package.json prop in second searched dir', function(t) {
-  var startDir = absolutePath('a/b/c/d/e/f');
-  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+test.serial('find package.json prop in second searched dir', (t) => {
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -82,8 +84,8 @@ test.serial('find package.json prop in second searched dir', function(t) {
 
   return cosmiconfig('foo', {
     cwd: startDir,
-    stopDir: absolutePath('.') ,
-  }).then(function(result) {
+    stopDir: absolutePath('.'),
+  }).then((result) => {
     t.is(readFileStub.callCount, 4);
     t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked /a/b/c/d/e/f/package.json');
@@ -101,9 +103,9 @@ test.serial('find package.json prop in second searched dir', function(t) {
   });
 });
 
-test.serial('find JS file in first searched dir', function(t) {
-  var startDir = absolutePath('a/b/c/d/e/f');
-  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+test.serial('find JS file in first searched dir', (t) => {
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -123,7 +125,7 @@ test.serial('find JS file in first searched dir', function(t) {
   return cosmiconfig('foo', {
     cwd: startDir,
     stopDir: absolutePath('.'),
-  }).then(function(result) {
+  }).then((result) => {
     t.is(readFileStub.callCount, 3);
     t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked /a/b/c/d/e/f/package.json');
@@ -139,9 +141,9 @@ test.serial('find JS file in first searched dir', function(t) {
   });
 });
 
-test.serial('find package.json in second directory searched, with alternate names', function(t) {
-  var startDir = absolutePath('a/b/c/d/e/f');
-  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+test.serial('find package.json in second directory searched, with alternate names', (t) => {
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.wowza'):
@@ -162,7 +164,7 @@ test.serial('find package.json in second directory searched, with alternate name
     js: 'wowzaConfig.js',
     packageProp: 'heeha',
     stopDir: absolutePath('.'),
-  }).then(function(result) {
+  }).then((result) => {
     t.is(readFileStub.callCount, 4);
     t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked /a/b/c/d/e/f/package.json');
@@ -180,9 +182,9 @@ test.serial('find package.json in second directory searched, with alternate name
   });
 });
 
-test.serial('find rc file in third searched dir, skipping packageProp, with rcStrictJson', function(t) {
-  var startDir = absolutePath('a/b/c/d/e/f');
-  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+test.serial('find rc file in third searched dir, skipping packageProp, with rcStrictJson', (t) => {
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -206,7 +208,7 @@ test.serial('find rc file in third searched dir, skipping packageProp, with rcSt
     stopDir: absolutePath('.'),
     packageProp: false,
     rcStrictJson: true,
-  }).then(function(result) {
+  }).then((result) => {
     t.is(readFileStub.callCount, 5);
     t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
       'first dir: checked /a/b/c/d/e/f/.foorc');
@@ -226,9 +228,9 @@ test.serial('find rc file in third searched dir, skipping packageProp, with rcSt
   });
 });
 
-test.serial('find package.json prop in second searched dir, skipping js and rc', function(t) {
-  var startDir = absolutePath('a/b/c/d/e/f');
-  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+test.serial('find package.json prop in second searched dir, skipping js and rc', (t) => {
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -250,7 +252,7 @@ test.serial('find package.json prop in second searched dir, skipping js and rc',
     stopDir: absolutePath('.'),
     js: false,
     rc: false,
-  }).then(function(result) {
+  }).then((result) => {
     t.is(readFileStub.callCount, 2);
     t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked /a/b/c/d/e/f/package.json');
@@ -266,9 +268,9 @@ test.serial('find package.json prop in second searched dir, skipping js and rc',
 
 // RC file with specified extension
 
-test.serial('with rcExtensions, find .foorc.json in second searched dir', function(t) {
-  var startDir = absolutePath('a/b/c/d/e/f');
-  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+test.serial('with rcExtensions, find .foorc.json in second searched dir', (t) => {
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -293,7 +295,7 @@ test.serial('with rcExtensions, find .foorc.json in second searched dir', functi
     cwd: startDir,
     stopDir: absolutePath('.'),
     rcExtensions: true,
-  }).then(function(result) {
+  }).then((result) => {
     t.is(readFileStub.callCount, 10);
 
     t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
@@ -324,9 +326,9 @@ test.serial('with rcExtensions, find .foorc.json in second searched dir', functi
   });
 });
 
-test.serial('with rcExtensions, find .foorc.yaml in first searched dir', function(t) {
-  var startDir = absolutePath('a/b/c/d/e/f');
-  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+test.serial('with rcExtensions, find .foorc.yaml in first searched dir', (t) => {
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -345,7 +347,7 @@ test.serial('with rcExtensions, find .foorc.yaml in first searched dir', functio
     cwd: startDir,
     stopDir: absolutePath('.'),
     rcExtensions: true,
-  }).then(function(result) {
+  }).then((result) => {
     t.is(readFileStub.callCount, 4);
 
     t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
@@ -364,9 +366,9 @@ test.serial('with rcExtensions, find .foorc.yaml in first searched dir', functio
   });
 });
 
-test.serial('with rcExtensions, find .foorc.yml in first searched dir', function(t) {
-  var startDir = absolutePath('a/b/c/d/e/f');
-  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+test.serial('with rcExtensions, find .foorc.yml in first searched dir', (t) => {
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -386,7 +388,7 @@ test.serial('with rcExtensions, find .foorc.yml in first searched dir', function
     cwd: startDir,
     stopDir: absolutePath('.'),
     rcExtensions: true,
-  }).then(function(result) {
+  }).then((result) => {
     t.is(readFileStub.callCount, 5);
 
     t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
@@ -407,9 +409,9 @@ test.serial('with rcExtensions, find .foorc.yml in first searched dir', function
   });
 });
 
-test.serial('with rcExtensions, find .foorc.js in first searched dir', function(t) {
-  var startDir = absolutePath('a/b/c/d/e/f');
-  var readFileStub = sinon.stub(fs, 'readFile', function(searchPath, encoding, callback) {
+test.serial('with rcExtensions, find .foorc.js in first searched dir', (t) => {
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -430,7 +432,7 @@ test.serial('with rcExtensions, find .foorc.js in first searched dir', function(
     cwd: startDir,
     stopDir: absolutePath('.'),
     rcExtensions: true,
-  }).then(function(result) {
+  }).then((result) => {
     t.is(readFileStub.callCount, 6);
 
     t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),

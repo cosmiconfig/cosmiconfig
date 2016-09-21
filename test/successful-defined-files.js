@@ -1,15 +1,17 @@
-var test = require('ava');
-var path = require('path');
-var cosmiconfig = require('..');
+'use strict';
+
+const test = require('ava');
+const path = require('path');
+const cosmiconfig = require('..');
 
 function absolutePath(str) {
   return path.join(__dirname, str);
 }
 
-test('defined JSON config path', function(t) {
+test('defined JSON config path', (t) => {
   return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo.json'),
-  }).then(function(result) {
+  }).then((result) => {
     t.deepEqual(result.config, {
       foo: true,
     });
@@ -17,10 +19,10 @@ test('defined JSON config path', function(t) {
   });
 });
 
-test('defined YAML config path', function(t) {
+test('defined YAML config path', (t) => {
   return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo.yaml'),
-  }).then(function(result) {
+  }).then((result) => {
     t.deepEqual(result.config, {
       foo: true,
     });
@@ -28,10 +30,10 @@ test('defined YAML config path', function(t) {
   });
 });
 
-test('defined JS config path', function(t) {
+test('defined JS config path', (t) => {
   return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo.js'),
-  }).then(function(result) {
+  }).then((result) => {
     t.deepEqual(result.config, {
       foo: true,
     });
@@ -39,10 +41,10 @@ test('defined JS config path', function(t) {
   });
 });
 
-test('defined modulized JS config path', function(t) {
+test('defined modulized JS config path', (t) => {
   return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo-module.js'),
-  }).then(function(result) {
+  }).then((result) => {
     t.deepEqual(result.config, {
       foo: true,
     });
