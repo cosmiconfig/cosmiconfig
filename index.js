@@ -3,7 +3,6 @@
 const path = require('path');
 const oshomedir = require('os-homedir');
 const minimist = require('minimist');
-const assign = require('object-assign');
 const loadPackageProp = require('./lib/loadPackageProp');
 const loadRc = require('./lib/loadRc');
 const loadJs = require('./lib/loadJs');
@@ -12,7 +11,7 @@ const loadDefinedFile = require('./lib/loadDefinedFile');
 const parsedCliArgs = minimist(process.argv);
 
 module.exports = function (moduleName, options) {
-  options = assign({
+  options = Object.assign({
     packageProp: moduleName,
     rc: '.' + moduleName + 'rc',
     js: moduleName + '.config.js',
