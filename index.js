@@ -2,7 +2,6 @@
 
 const path = require('path');
 const oshomedir = require('os-homedir');
-
 const minimist = require('minimist');
 const assign = require('object-assign');
 const loadPackageProp = require('./lib/loadPackageProp');
