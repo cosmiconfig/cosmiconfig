@@ -9,8 +9,8 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "pretest": "npm run lint",
-    "test": "ava",
+    "ava": "ava",
+    "test": "npm run ava && npm run lint",
     "prepublish": "npm test"
   },
   "repository": {
