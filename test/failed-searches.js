@@ -27,7 +27,7 @@ test.serial('do not find file, and give up', (t) => {
         callback({ code: 'ENOENT' });
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -75,7 +75,7 @@ test.serial('stop at stopDir, and give up', (t) => {
         callback({ code: 'ENOENT' });
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -113,7 +113,7 @@ test.serial('find invalid YAML in rc file', (t) => {
         callback(null, 'found: true: broken');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -138,7 +138,7 @@ test.serial('find invalid JSON in rc file with rcStrictJson', (t) => {
         callback(null, '{ "found": true, }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -161,7 +161,7 @@ test.serial('find invalid package.json', (t) => {
         callback(null, '{ "foo": "bar", }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -187,7 +187,7 @@ test.serial('find invalid JS in .config.js file', (t) => {
         callback(null, 'module.exports = { found: true: false,');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -215,7 +215,7 @@ test.serial('with rcExtensions, find invalid JSON in .foorc.json', (t) => {
         callback(null, '{ "found": true,, }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -243,7 +243,7 @@ test.serial('with rcExtensions, find invalid YAML in .foorc.yaml', (t) => {
         callback(null, 'found: thing: true');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -272,7 +272,7 @@ test.serial('with rcExtensions, find invalid YAML in .foorc.yml', (t) => {
         callback(null, 'found: thing: true');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -302,7 +302,7 @@ test.serial('with rcExtensions, find invalid JS in .foorc.js', (t) => {
         callback(null, 'module.exports ==! { found: true };');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 

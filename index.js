@@ -13,8 +13,8 @@ const parsedCliArgs = minimist(process.argv);
 module.exports = function (moduleName, options) {
   options = Object.assign({
     packageProp: moduleName,
-    rc: '.' + moduleName + 'rc',
-    js: moduleName + '.config.js',
+    rc: `.${moduleName}rc`,
+    js: `${moduleName}.config.js`,
     argv: 'config',
     rcStrictJson: false,
     stopDir: oshomedir(),

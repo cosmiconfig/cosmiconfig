@@ -30,7 +30,7 @@ test.serial('find rc file in third searched dir, with a package.json lacking pro
         callback(null, '{ "found": true }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -78,7 +78,7 @@ test.serial('find package.json prop in second searched dir', (t) => {
         callback(null, '{ "author": "Todd", "foo": { "found": true } }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -118,7 +118,7 @@ test.serial('find JS file in first searched dir', (t) => {
         callback(null, 'module.exports = { found: true };');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -154,7 +154,7 @@ test.serial('find package.json in second directory searched, with alternate name
         callback(null, '{ "heeha": { "found": true } }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -199,7 +199,7 @@ test.serial('find rc file in third searched dir, skipping packageProp, with rcSt
         callback(null, '{ "found": true }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -243,7 +243,7 @@ test.serial('find package.json prop in second searched dir, skipping js and rc',
         callback(null, '{ "author": "Todd", "foo": { "found": true } }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -287,7 +287,7 @@ test.serial('with rcExtensions, find .foorc.json in second searched dir', (t) =>
         callback(null, '{ "found": true }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -339,7 +339,7 @@ test.serial('with rcExtensions, find .foorc.yaml in first searched dir', (t) => 
         callback(null, 'found: true');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -380,7 +380,7 @@ test.serial('with rcExtensions, find .foorc.yml in first searched dir', (t) => {
         callback(null, 'found: true');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
@@ -424,7 +424,7 @@ test.serial('with rcExtensions, find .foorc.js in first searched dir', (t) => {
         callback(null, 'module.exports = { found: true };');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   });
 
