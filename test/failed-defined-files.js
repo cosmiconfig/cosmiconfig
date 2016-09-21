@@ -18,7 +18,7 @@ test('defined JSON file with syntax error, without expected format', function(t)
   return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo-invalid.json'),
   }).catch(function(error) {
-    t.ok(/^Failed to parse/.test(error.message));
+    t.truthy(/^Failed to parse/.test(error.message));
   });
 });
 
@@ -35,7 +35,7 @@ test('defined YAML file with syntax error, without expected format', function(t)
   return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo-invalid.yaml'),
   }).catch(function(error) {
-    t.ok(/^Failed to parse/.test(error.message));
+    t.truthy(/^Failed to parse/.test(error.message));
   });
 });
 
@@ -52,7 +52,7 @@ test('defined JS file with syntax error, without expected format', function(t) {
   return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo-invalid.js'),
   }).catch(function(error) {
-    t.ok(/^Failed to parse/.test(error.message));
+    t.truthy(/^Failed to parse/.test(error.message));
   });
 });
 
@@ -61,6 +61,6 @@ test('defined JS file with syntax error, with expected format', function(t) {
     configPath: absolutePath('fixtures/foo-invalid.js'),
     format: 'js',
   }).catch(function(error) {
-    t.ok(!/^Failed to parse/.test(error.message));
+    t.truthy(!/^Failed to parse/.test(error.message));
   });
 });

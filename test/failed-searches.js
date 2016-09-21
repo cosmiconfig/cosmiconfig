@@ -119,7 +119,7 @@ test.serial('find invalid YAML in rc file', function(t) {
     cwd: startDir,
     stopDir: absolutePath('a'),
   }).catch(function(error) {
-    t.ok(error, 'threw error');
+    t.truthy(error, 'threw error');
     t.is(error.name, 'YAMLException', 'threw correct error type');
     readFileStub.restore();
   });
@@ -145,7 +145,7 @@ test.serial('find invalid JSON in rc file with rcStrictJson', function(t) {
     stopDir: absolutePath('a'),
     rcStrictJson: true,
   }).catch(function(error) {
-    t.ok(error, 'threw error');
+    t.truthy(error, 'threw error');
     t.is(error.name, 'JSONError', 'threw correct error type');
     readFileStub.restore();
   });
@@ -167,7 +167,7 @@ test.serial('find invalid package.json', function(t) {
     cwd: startDir,
     stopDir: absolutePath('a'),
   }).catch(function(error) {
-    t.ok(error, 'threw error');
+    t.truthy(error, 'threw error');
     t.is(error.name, 'JSONError', 'threw correct error type');
     readFileStub.restore();
   });
@@ -193,7 +193,7 @@ test.serial('find invalid JS in .config.js file', function(t) {
     cwd: startDir,
     stopDir: absolutePath('a'),
   }).catch(function(error) {
-    t.ok(error, 'threw error');
+    t.truthy(error, 'threw error');
     t.is(error.name, 'SyntaxError', 'threw correct error type');
     readFileStub.restore();
   });
@@ -222,7 +222,7 @@ test.serial('with rcExtensions, find invalid JSON in .foorc.json', function(t) {
     stopDir: absolutePath('.'),
     rcExtensions: true,
   }).catch(function(error) {
-    t.ok(error, 'threw error');
+    t.truthy(error, 'threw error');
     t.is(error.name, 'JSONError', 'threw correct error type');
     readFileStub.restore();
   });
@@ -250,7 +250,7 @@ test.serial('with rcExtensions, find invalid YAML in .foorc.yaml', function(t) {
     stopDir: absolutePath('.'),
     rcExtensions: true,
   }).catch(function(error) {
-    t.ok(error, 'threw error');
+    t.truthy(error, 'threw error');
     t.is(error.name, 'YAMLException', 'threw correct error type');
     readFileStub.restore();
   });
@@ -279,7 +279,7 @@ test.serial('with rcExtensions, find invalid YAML in .foorc.yml', function(t) {
     stopDir: absolutePath('.'),
     rcExtensions: true,
   }).catch(function(error) {
-    t.ok(error, 'threw error');
+    t.truthy(error, 'threw error');
     t.is(error.name, 'YAMLException', 'threw correct error type');
     readFileStub.restore();
   });
@@ -309,7 +309,7 @@ test.serial('with rcExtensions, find invalid JS in .foorc.js', function(t) {
     stopDir: absolutePath('.'),
     rcExtensions: true,
   }).catch(function(error) {
-    t.ok(error, 'threw error');
+    t.truthy(error, 'threw error');
     t.is(error.name, 'SyntaxError', 'threw correct error type');
     readFileStub.restore();
   });

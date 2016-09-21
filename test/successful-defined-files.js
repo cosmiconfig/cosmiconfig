@@ -10,7 +10,7 @@ test('defined JSON config path', function(t) {
   return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo.json'),
   }).then(function(result) {
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       foo: true,
     });
     t.is(result.filepath, absolutePath('fixtures/foo.json'));
@@ -21,7 +21,7 @@ test('defined YAML config path', function(t) {
   return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo.yaml'),
   }).then(function(result) {
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       foo: true,
     });
     t.is(result.filepath, absolutePath('fixtures/foo.yaml'));
@@ -32,7 +32,7 @@ test('defined JS config path', function(t) {
   return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo.js'),
   }).then(function(result) {
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       foo: true,
     });
     t.is(result.filepath, absolutePath('fixtures/foo.js'));
@@ -43,7 +43,7 @@ test('defined modulized JS config path', function(t) {
   return cosmiconfig(null, {
     configPath: absolutePath('fixtures/foo-module.js'),
   }).then(function(result) {
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       foo: true,
     });
     t.is(result.filepath, absolutePath('fixtures/foo-module.js'));

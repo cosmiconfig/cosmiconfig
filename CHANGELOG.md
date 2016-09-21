@@ -1,5 +1,9 @@
 # Changelog
 
+## Head
+
+- Remove support for Node versions <4.
+
 ## 1.1.0
 
 - Add `rcExtensions` option.

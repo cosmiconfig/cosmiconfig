@@ -53,7 +53,7 @@ test.serial('find rc file in third searched dir, with a package.json lacking pro
       'third dir: checked /a/b/c/d/package.json');
     t.is(_.get(readFileStub.getCall(7), 'args[0]'), absolutePath('a/b/c/d/.foorc'),
       'third dir: checked /a/b/c/d/.foorc');
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       found: true,
     });
     t.is(result.filepath, absolutePath('a/b/c/d/.foorc'));
@@ -93,7 +93,7 @@ test.serial('find package.json prop in second searched dir', function(t) {
       'first dir: checked /a/b/c/d/e/f/foo.config.js');
     t.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/package.json'),
       'second dir: checked /a/b/c/d/e/package.json');
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       found: true,
     });
     t.is(result.filepath, absolutePath('a/b/c/d/e/package.json'));
@@ -131,7 +131,7 @@ test.serial('find JS file in first searched dir', function(t) {
       'first dir: checked /a/b/c/d/e/f/.foorc');
     t.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/foo.config.js'),
       'first dir: checked /a/b/c/d/e/f/foo.config.js');
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       found: true,
     });
     t.is(result.filepath, absolutePath('a/b/c/d/e/f/foo.config.js'));
@@ -172,7 +172,7 @@ test.serial('find package.json in second directory searched, with alternate name
       'first dir: checked /a/b/c/d/e/f/wowzaConfig.js');
     t.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/package.json'),
       'first dir: checked /a/b/c/d/e/package.json');
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       found: true,
     });
     t.is(result.filepath, absolutePath('a/b/c/d/e/package.json'));
@@ -218,7 +218,7 @@ test.serial('find rc file in third searched dir, skipping packageProp, with rcSt
       'second dir: checked /a/b/c/d/e/foo.config.js');
     t.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/b/c/d/.foorc'),
       'third dir: checked /a/b/c/d/.foorc');
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       found: true,
     });
     t.is(result.filepath, absolutePath('a/b/c/d/.foorc'));
@@ -256,7 +256,7 @@ test.serial('find package.json prop in second searched dir, skipping js and rc',
       'first dir: checked /a/b/c/d/e/f/package.json');
     t.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/package.json'),
       'second dir: checked /a/b/c/d/e/package.json');
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       found: true,
     });
     t.is(result.filepath, absolutePath('a/b/c/d/e/package.json'));
@@ -316,7 +316,7 @@ test.serial('with rcExtensions, find .foorc.json in second searched dir', functi
       'first dir: checked a/b/c/d/e/.foorc');
     t.is(_.get(readFileStub.getCall(9), 'args[0]'), absolutePath('a/b/c/d/e/.foorc.json'),
       'first dir: checked a/b/c/d/e/.foorc.json');
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       found: true,
     });
     t.is(result.filepath, absolutePath('a/b/c/d/e/.foorc.json'));
@@ -356,7 +356,7 @@ test.serial('with rcExtensions, find .foorc.yaml in first searched dir', functio
       'first dir: checked a/b/c/d/e/f/.foorc.json');
     t.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yaml'),
       'first dir: checked a/b/c/d/e/f/.foorc.yaml');
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       found: true,
     });
     t.is(result.filepath, absolutePath('a/b/c/d/e/f/.foorc.yaml'));
@@ -399,7 +399,7 @@ test.serial('with rcExtensions, find .foorc.yml in first searched dir', function
       'first dir: checked a/b/c/d/e/f/.foorc.yaml');
     t.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yml'),
       'first dir: checked a/b/c/d/e/f/.foorc.yml');
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       found: true,
     });
     t.is(result.filepath, absolutePath('a/b/c/d/e/f/.foorc.yml'));
@@ -445,7 +445,7 @@ test.serial('with rcExtensions, find .foorc.js in first searched dir', function(
       'first dir: checked a/b/c/d/e/f/.foorc.yml');
     t.is(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.js'),
       'first dir: checked a/b/c/d/e/f/.foorc.js');
-    t.same(result.config, {
+    t.deepEqual(result.config, {
       found: true,
     });
     t.is(result.filepath, absolutePath('a/b/c/d/e/f/.foorc.js'));
