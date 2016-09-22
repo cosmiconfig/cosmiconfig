@@ -252,7 +252,7 @@ test.serial('but cache on old instance still works', (assert) => {
   });
 });
 
-test.serial('no caching happens if you say no', (assert) => {
+test.serial('does not cache if you say no', (assert) => {
   const searchPath = absolutePath('a/b/c/d');
   statStub = sinon.stub(fs, 'stat').yieldsAsync(null, {
     isDirectory: () => true,
@@ -269,22 +269,42 @@ test.serial('no caching happens if you say no', (assert) => {
     cache: false,
   }).load;
 
-  function assertSearch() {
-    return loadConfig(searchPath).then((result) => {
-      assert.is(readFileStub.callCount, 2);
-
-      assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/package.json'),
-        'first dir: checked a/b/c/d/package.json');
-      assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/.foorc'),
-        'first dir: checked a/b/c/d/.foorc');
-
-      assert.deepEqual(result, expectedResult);
-    });
-  }
-
   // Same call three times hits the file system every time
   return Promise.resolve()
-    .then(assertSearch)
-    .then(assertSearch)
-    .then(assertSearch);
+    .then(() => {
+      return loadConfig(searchPath).then((result) => {
+        assert.is(readFileStub.callCount, 2);
+
+        assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/package.json'),
+          'first dir: checked a/b/c/d/package.json');
+        assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/.foorc'),
+          'first dir: checked a/b/c/d/.foorc');
+
+        assert.deepEqual(result, expectedResult);
+      });
+    })
+    .then(() => {
+      return loadConfig(searchPath).then((result) => {
+        assert.is(readFileStub.callCount, 4);
+
+        assert.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/package.json'),
+          'first dir: checked a/b/c/d/package.json');
+        assert.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/.foorc'),
+          'first dir: checked a/b/c/d/.foorc');
+
+        assert.deepEqual(result, expectedResult);
+      });
+    })
+    .then(() => {
+      return loadConfig(searchPath).then((result) => {
+        assert.is(readFileStub.callCount, 6);
+
+        assert.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/b/c/d/package.json'),
+          'first dir: checked a/b/c/d/package.json');
+        assert.is(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/b/c/d/.foorc'),
+          'first dir: checked a/b/c/d/.foorc');
+
+        assert.deepEqual(result, expectedResult);
+      });
+    });
 });

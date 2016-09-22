@@ -34,7 +34,9 @@ Tested in Node 4+.
 ```js
 var cosmiconfig = require('cosmiconfig');
 
-cosmiconfig(yourModuleName[, options])
+var loadConfig = cosmiconfig(yourModuleName[, options]).load;
+
+loadConfig(yourSearchPath)
   .then(function(result) {
     // result.config is the parsed configuration object
     // result.filepath is the path to the config file that was found
@@ -49,7 +51,7 @@ which resolves with an object containing the information you're looking for.
 
 So let's say `var yourModuleName = 'goldengrahams'` — here's how cosmiconfig will work:
 
-- Starting from `process.cwd()` (or some other directory defined by `options.cwd`), it looks for configuration objects in three places, in this order:
+- Starting from `process.cwd()` (or some other directory defined by the `searchPath` argument to `load()`), it looks for configuration objects in three places, in this order:
   1. A `goldengrahams` property in a `package.json` file (or some other property defined by `options.packageProp`);
   2. A `.goldengrahamsrc` file with JSON or YAML syntax (or some other filename defined by `options.rc`);
   3. A `goldengrahams.config.js` JS file exporting the object (or some other filename defined by `options.js`).
@@ -64,12 +66,9 @@ cosmiconfig will read that file and try parsing it as JSON, YAML, or JS.
 
 ## API
 
-### cosmiconfig(moduleName[, options])
+### `const cosmiconfigInstance = cosmiconfig(moduleName[, options])`
 
-Returns a promise that resolves with `null` (if no configuration was found) or an object with the following properties:
-
-- **config**: The parsed configuration object that was found.
-- **filepath**: The path to the file that housed that configuration object.
+Creates a cosmiconfig instance configured according to the arguments, and initializes its caches.
 
 #### moduleName
 
@@ -154,19 +153,37 @@ Instead of *just* looking for `.goldengrahamsrc` (no extension), it will also lo
 - `.goldengrahamsrc.yml`
 - `.goldengrahamsrc.js`
 
-##### cwd
-
-Type: `string`
-Default: `process.cwd()`
-
-Directory to start the search from.
-
 ##### stopDir
 
 Type: `string`
 Default: Absolute path to your home directory
 
 Directory where the search will stop.
+
+##### cache
+
+Type: `boolean`
+Default: `true`
+
+If `false`, no caches will be used.
+
+### Instance methods (on `cosmiconfigInstance`)
+
+#### `load(searchPath)`
+
+Find and load a configuration file, starting at `searchPath`.
+
+If `searchPath` points to a directory, cosmiconfig will start its search in the `searchPath` directory and continue to search up the file tree, as documented above.
+
+If `searchPath` points to a file (i.e. you already know where the configuration is that you want to load), cosmiconfig will just try to read and parse that file.
+
+## Caching
+
+As of v2, cosmiconfig uses a few caches to reduce the need for repetitious reading of the filesystem. Every new cosmiconfig instance (created with `cosmiconfig()`) has its own caches.
+
+To avoid or work around caching, you can
+- create separate instances of cosmiconfig, or
+- set `cache: false` in your options.
 
 ## Differences from [rc](https://github.com/dominictarr/rc)
 
