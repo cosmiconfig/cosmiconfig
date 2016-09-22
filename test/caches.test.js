@@ -251,3 +251,40 @@ test.serial('but cache on old instance still works', (assert) => {
     assert.deepEqual(result, expectedResult);
   });
 });
+
+test.serial('no caching happens if you say no', (assert) => {
+  const searchPath = absolutePath('a/b/c/d');
+  statStub = sinon.stub(fs, 'stat').yieldsAsync(null, {
+    isDirectory: () => true,
+  });
+
+  const expectedResult = {
+    filepath: absolutePath('a/b/c/d/.foorc'),
+    config: {
+      foundInD: true,
+    },
+  };
+
+  const loadConfig = cosmiconfig('foo', {
+    cache: false,
+  }).load;
+
+  function assertSearch() {
+    return loadConfig(searchPath).then((result) => {
+      assert.is(readFileStub.callCount, 2);
+
+      assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/package.json'),
+        'first dir: checked a/b/c/d/package.json');
+      assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/.foorc'),
+        'first dir: checked a/b/c/d/.foorc');
+
+      assert.deepEqual(result, expectedResult);
+    });
+  }
+
+  // Same call three times hits the file system every time
+  return Promise.resolve()
+    .then(assertSearch)
+    .then(assertSearch)
+    .then(assertSearch);
+});

@@ -15,6 +15,7 @@ module.exports = function (moduleName, options) {
     argv: 'config',
     rcStrictJson: false,
     stopDir: oshomedir(),
+    cache: true,
   }, options);
 
   if (options.argv && parsedCliArgs[options.argv]) {
