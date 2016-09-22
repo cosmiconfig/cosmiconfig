@@ -11,9 +11,23 @@ function absolutePath(str) {
   return path.join(__dirname, str);
 }
 
-test.serial('find rc file in third searched dir, with a package.json lacking prop', (t) => {
+let statStub;
+let readFileStub;
+
+test.beforeEach(() => {
+  statStub = sinon.stub(fs, 'stat').yieldsAsync(null, {
+    isDirectory: () => true,
+  });
+});
+
+test.afterEach(() => {
+  if (readFileStub.restore) readFileStub.restore();
+  if (statStub.restore) statStub.restore();
+});
+
+test.serial('find rc file in third searched dir, with a package.json lacking prop', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -34,38 +48,38 @@ test.serial('find rc file in third searched dir, with a package.json lacking pro
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
-  }).then((result) => {
-    t.is(readFileStub.callCount, 8);
-    t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
+  }).load;
+
+  return loadConfig(startDir).then((result) => {
+    assert.is(readFileStub.callCount, 8);
+    assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked /a/b/c/d/e/f/package.json');
-    t.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
+    assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
       'first dir: checked /a/b/c/d/e/f/.foorc');
-    t.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/foo.config.js'),
+    assert.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/foo.config.js'),
       'first dir: checked /a/b/c/d/e/f/foo.config.js');
-    t.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/package.json'),
+    assert.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/package.json'),
       'second dir: checked /a/b/c/d/e/package.json');
-    t.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/b/c/d/e/.foorc'),
+    assert.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/b/c/d/e/.foorc'),
       'second dir: checked /a/b/c/d/e/.foorc');
-    t.is(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/b/c/d/e/foo.config.js'),
+    assert.is(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/b/c/d/e/foo.config.js'),
       'second dir: checked /a/b/c/d/e/foo.config.js');
-    t.is(_.get(readFileStub.getCall(6), 'args[0]'), absolutePath('a/b/c/d/package.json'),
+    assert.is(_.get(readFileStub.getCall(6), 'args[0]'), absolutePath('a/b/c/d/package.json'),
       'third dir: checked /a/b/c/d/package.json');
-    t.is(_.get(readFileStub.getCall(7), 'args[0]'), absolutePath('a/b/c/d/.foorc'),
+    assert.is(_.get(readFileStub.getCall(7), 'args[0]'), absolutePath('a/b/c/d/.foorc'),
       'third dir: checked /a/b/c/d/.foorc');
-    t.deepEqual(result.config, {
+    assert.deepEqual(result.config, {
       found: true,
     });
-    t.is(result.filepath, absolutePath('a/b/c/d/.foorc'));
-    readFileStub.restore();
+    assert.is(result.filepath, absolutePath('a/b/c/d/.foorc'));
   });
 });
 
-test.serial('find package.json prop in second searched dir', (t) => {
+test.serial('find package.json prop in second searched dir', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -82,30 +96,30 @@ test.serial('find package.json prop in second searched dir', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
-  }).then((result) => {
-    t.is(readFileStub.callCount, 4);
-    t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
+  }).load;
+
+  return loadConfig(startDir).then((result) => {
+    assert.is(readFileStub.callCount, 4);
+    assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked /a/b/c/d/e/f/package.json');
-    t.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
+    assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
       'first dir: checked /a/b/c/d/e/f/.foorc');
-    t.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/foo.config.js'),
+    assert.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/foo.config.js'),
       'first dir: checked /a/b/c/d/e/f/foo.config.js');
-    t.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/package.json'),
+    assert.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/package.json'),
       'second dir: checked /a/b/c/d/e/package.json');
-    t.deepEqual(result.config, {
+    assert.deepEqual(result.config, {
       found: true,
     });
-    t.is(result.filepath, absolutePath('a/b/c/d/e/package.json'));
-    readFileStub.restore();
+    assert.is(result.filepath, absolutePath('a/b/c/d/e/package.json'));
   });
 });
 
-test.serial('find JS file in first searched dir', (t) => {
+test.serial('find JS file in first searched dir', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -122,28 +136,28 @@ test.serial('find JS file in first searched dir', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
-  }).then((result) => {
-    t.is(readFileStub.callCount, 3);
-    t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
+  }).load;
+
+  return loadConfig(startDir).then((result) => {
+    assert.is(readFileStub.callCount, 3);
+    assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked /a/b/c/d/e/f/package.json');
-    t.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
+    assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
       'first dir: checked /a/b/c/d/e/f/.foorc');
-    t.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/foo.config.js'),
+    assert.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/foo.config.js'),
       'first dir: checked /a/b/c/d/e/f/foo.config.js');
-    t.deepEqual(result.config, {
+    assert.deepEqual(result.config, {
       found: true,
     });
-    t.is(result.filepath, absolutePath('a/b/c/d/e/f/foo.config.js'));
-    readFileStub.restore();
+    assert.is(result.filepath, absolutePath('a/b/c/d/e/f/foo.config.js'));
   });
 });
 
-test.serial('find package.json in second directory searched, with alternate names', (t) => {
+test.serial('find package.json in second directory searched, with alternate names', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.wowza'):
@@ -158,33 +172,33 @@ test.serial('find package.json in second directory searched, with alternate name
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     rc: '.wowza',
     js: 'wowzaConfig.js',
     packageProp: 'heeha',
     stopDir: absolutePath('.'),
-  }).then((result) => {
-    t.is(readFileStub.callCount, 4);
-    t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
+  }).load;
+
+  return loadConfig(startDir).then((result) => {
+    assert.is(readFileStub.callCount, 4);
+    assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked /a/b/c/d/e/f/package.json');
-    t.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.wowza'),
+    assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.wowza'),
       'first dir: checked /a/b/c/d/e/f/.wowza');
-    t.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/wowzaConfig.js'),
+    assert.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/wowzaConfig.js'),
       'first dir: checked /a/b/c/d/e/f/wowzaConfig.js');
-    t.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/package.json'),
+    assert.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/package.json'),
       'first dir: checked /a/b/c/d/e/package.json');
-    t.deepEqual(result.config, {
+    assert.deepEqual(result.config, {
       found: true,
     });
-    t.is(result.filepath, absolutePath('a/b/c/d/e/package.json'));
-    readFileStub.restore();
+    assert.is(result.filepath, absolutePath('a/b/c/d/e/package.json'));
   });
 });
 
-test.serial('find rc file in third searched dir, skipping packageProp, with rcStrictJson', (t) => {
+test.serial('find rc file in third searched dir, skipping packageProp, with rcStrictJson', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -203,34 +217,34 @@ test.serial('find rc file in third searched dir, skipping packageProp, with rcSt
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     packageProp: false,
     rcStrictJson: true,
-  }).then((result) => {
-    t.is(readFileStub.callCount, 5);
-    t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
+  }).load;
+
+  return loadConfig(startDir).then((result) => {
+    assert.is(readFileStub.callCount, 5);
+    assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
       'first dir: checked /a/b/c/d/e/f/.foorc');
-    t.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/foo.config.js'),
+    assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/foo.config.js'),
       'first dir: checked /a/b/c/d/e/f/foo.config.js');
-    t.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/.foorc'),
+    assert.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/.foorc'),
       'second dir: checked /a/b/c/d/e/.foorc');
-    t.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/foo.config.js'),
+    assert.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/foo.config.js'),
       'second dir: checked /a/b/c/d/e/foo.config.js');
-    t.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/b/c/d/.foorc'),
+    assert.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/b/c/d/.foorc'),
       'third dir: checked /a/b/c/d/.foorc');
-    t.deepEqual(result.config, {
+    assert.deepEqual(result.config, {
       found: true,
     });
-    t.is(result.filepath, absolutePath('a/b/c/d/.foorc'));
-    readFileStub.restore();
+    assert.is(result.filepath, absolutePath('a/b/c/d/.foorc'));
   });
 });
 
-test.serial('find package.json prop in second searched dir, skipping js and rc', (t) => {
+test.serial('find package.json prop in second searched dir, skipping js and rc', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -247,30 +261,30 @@ test.serial('find package.json prop in second searched dir, skipping js and rc',
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     js: false,
     rc: false,
-  }).then((result) => {
-    t.is(readFileStub.callCount, 2);
-    t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
+  }).load;
+
+  return loadConfig(startDir).then((result) => {
+    assert.is(readFileStub.callCount, 2);
+    assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked /a/b/c/d/e/f/package.json');
-    t.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/package.json'),
+    assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/package.json'),
       'second dir: checked /a/b/c/d/e/package.json');
-    t.deepEqual(result.config, {
+    assert.deepEqual(result.config, {
       found: true,
     });
-    t.is(result.filepath, absolutePath('a/b/c/d/e/package.json'));
-    readFileStub.restore();
+    assert.is(result.filepath, absolutePath('a/b/c/d/e/package.json'));
   });
 });
 
 // RC file with specified extension
 
-test.serial('with rcExtensions, find .foorc.json in second searched dir', (t) => {
+test.serial('with rcExtensions, find .foorc.json in second searched dir', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -291,44 +305,44 @@ test.serial('with rcExtensions, find .foorc.json in second searched dir', (t) =>
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
-  }).then((result) => {
-    t.is(readFileStub.callCount, 10);
+  }).load;
 
-    t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
+  return loadConfig(startDir).then((result) => {
+    assert.is(readFileStub.callCount, 10);
+
+    assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked a/b/c/d/e/f/package.json');
-    t.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
+    assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
       'first dir: checked a/b/c/d/e/f/.foorc');
-    t.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.json'),
+    assert.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.json'),
       'first dir: checked a/b/c/d/e/f/.foorc.json');
-    t.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yaml'),
+    assert.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yaml'),
       'first dir: checked a/b/c/d/e/f/.foorc.yaml');
-    t.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yml'),
+    assert.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yml'),
       'first dir: checked a/b/c/d/e/f/.foorc.yml');
-    t.is(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.js'),
+    assert.is(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.js'),
       'first dir: checked a/b/c/d/e/f/.foorc.js');
-    t.is(_.get(readFileStub.getCall(6), 'args[0]'), absolutePath('a/b/c/d/e/f/foo.config.js'),
+    assert.is(_.get(readFileStub.getCall(6), 'args[0]'), absolutePath('a/b/c/d/e/f/foo.config.js'),
       'first dir: checked a/b/c/d/e/f/foo.config.js');
-    t.is(_.get(readFileStub.getCall(7), 'args[0]'), absolutePath('a/b/c/d/e/package.json'),
+    assert.is(_.get(readFileStub.getCall(7), 'args[0]'), absolutePath('a/b/c/d/e/package.json'),
       'first dir: checked a/b/c/d/e/package.json');
-    t.is(_.get(readFileStub.getCall(8), 'args[0]'), absolutePath('a/b/c/d/e/.foorc'),
+    assert.is(_.get(readFileStub.getCall(8), 'args[0]'), absolutePath('a/b/c/d/e/.foorc'),
       'first dir: checked a/b/c/d/e/.foorc');
-    t.is(_.get(readFileStub.getCall(9), 'args[0]'), absolutePath('a/b/c/d/e/.foorc.json'),
+    assert.is(_.get(readFileStub.getCall(9), 'args[0]'), absolutePath('a/b/c/d/e/.foorc.json'),
       'first dir: checked a/b/c/d/e/.foorc.json');
-    t.deepEqual(result.config, {
+    assert.deepEqual(result.config, {
       found: true,
     });
-    t.is(result.filepath, absolutePath('a/b/c/d/e/.foorc.json'));
-    readFileStub.restore();
+    assert.is(result.filepath, absolutePath('a/b/c/d/e/.foorc.json'));
   });
 });
 
-test.serial('with rcExtensions, find .foorc.yaml in first searched dir', (t) => {
+test.serial('with rcExtensions, find .foorc.yaml in first searched dir', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -343,32 +357,32 @@ test.serial('with rcExtensions, find .foorc.yaml in first searched dir', (t) => 
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
-  }).then((result) => {
-    t.is(readFileStub.callCount, 4);
+  }).load;
 
-    t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
+  return loadConfig(startDir).then((result) => {
+    assert.is(readFileStub.callCount, 4);
+
+    assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked a/b/c/d/e/f/package.json');
-    t.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
+    assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
       'first dir: checked a/b/c/d/e/f/.foorc');
-    t.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.json'),
+    assert.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.json'),
       'first dir: checked a/b/c/d/e/f/.foorc.json');
-    t.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yaml'),
+    assert.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yaml'),
       'first dir: checked a/b/c/d/e/f/.foorc.yaml');
-    t.deepEqual(result.config, {
+    assert.deepEqual(result.config, {
       found: true,
     });
-    t.is(result.filepath, absolutePath('a/b/c/d/e/f/.foorc.yaml'));
-    readFileStub.restore();
+    assert.is(result.filepath, absolutePath('a/b/c/d/e/f/.foorc.yaml'));
   });
 });
 
-test.serial('with rcExtensions, find .foorc.yml in first searched dir', (t) => {
+test.serial('with rcExtensions, find .foorc.yml in first searched dir', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -384,34 +398,34 @@ test.serial('with rcExtensions, find .foorc.yml in first searched dir', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
-  }).then((result) => {
-    t.is(readFileStub.callCount, 5);
+  }).load;
 
-    t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
+  return loadConfig(startDir).then((result) => {
+    assert.is(readFileStub.callCount, 5);
+
+    assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked a/b/c/d/e/f/package.json');
-    t.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
+    assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
       'first dir: checked a/b/c/d/e/f/.foorc');
-    t.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.json'),
+    assert.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.json'),
       'first dir: checked a/b/c/d/e/f/.foorc.json');
-    t.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yaml'),
+    assert.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yaml'),
       'first dir: checked a/b/c/d/e/f/.foorc.yaml');
-    t.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yml'),
+    assert.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yml'),
       'first dir: checked a/b/c/d/e/f/.foorc.yml');
-    t.deepEqual(result.config, {
+    assert.deepEqual(result.config, {
       found: true,
     });
-    t.is(result.filepath, absolutePath('a/b/c/d/e/f/.foorc.yml'));
-    readFileStub.restore();
+    assert.is(result.filepath, absolutePath('a/b/c/d/e/f/.foorc.yml'));
   });
 });
 
-test.serial('with rcExtensions, find .foorc.js in first searched dir', (t) => {
+test.serial('with rcExtensions, find .foorc.js in first searched dir', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -428,29 +442,29 @@ test.serial('with rcExtensions, find .foorc.js in first searched dir', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
-  }).then((result) => {
-    t.is(readFileStub.callCount, 6);
+  }).load;
 
-    t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
+  return loadConfig(startDir).then((result) => {
+    assert.is(readFileStub.callCount, 6);
+
+    assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/c/d/e/f/package.json'),
       'first dir: checked a/b/c/d/e/f/package.json');
-    t.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
+    assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc'),
       'first dir: checked a/b/c/d/e/f/.foorc');
-    t.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.json'),
+    assert.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.json'),
       'first dir: checked a/b/c/d/e/f/.foorc.json');
-    t.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yaml'),
+    assert.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yaml'),
       'first dir: checked a/b/c/d/e/f/.foorc.yaml');
-    t.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yml'),
+    assert.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.yml'),
       'first dir: checked a/b/c/d/e/f/.foorc.yml');
-    t.is(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.js'),
+    assert.is(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/b/c/d/e/f/.foorc.js'),
       'first dir: checked a/b/c/d/e/f/.foorc.js');
-    t.deepEqual(result.config, {
+    assert.deepEqual(result.config, {
       found: true,
     });
-    t.is(result.filepath, absolutePath('a/b/c/d/e/f/.foorc.js'));
-    readFileStub.restore();
+    assert.is(result.filepath, absolutePath('a/b/c/d/e/f/.foorc.js'));
   });
 });

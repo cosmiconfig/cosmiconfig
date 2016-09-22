@@ -11,9 +11,23 @@ function absolutePath(str) {
   return path.join(__dirname, str);
 }
 
-test.serial('do not find file, and give up', (t) => {
+let statStub;
+let readFileStub;
+
+test.beforeEach(() => {
+  statStub = sinon.stub(fs, 'stat').yieldsAsync(null, {
+    isDirectory: () => true,
+  });
+});
+
+test.afterEach(() => {
+  if (readFileStub.restore) readFileStub.restore();
+  if (statStub.restore) statStub.restore();
+});
+
+test.serial('do not find file, and give up', (assert) => {
   const startDir = absolutePath('a/b');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/package.json'):
       case absolutePath('a/b/.foorc'):
@@ -31,37 +45,40 @@ test.serial('do not find file, and give up', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
-  }).then((result) => {
-    t.is(readFileStub.callCount, 9);
-    t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/package.json'),
+  }).load;
+
+  return loadConfig(startDir).then((result) => {
+    assert.is(statStub.callCount, 1);
+    assert.is(_.get(statStub.getCall(0), 'args[0]'), absolutePath('a/b'));
+
+    assert.is(readFileStub.callCount, 9);
+    assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/package.json'),
       'first dir: a/b/package.json');
-    t.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/.foorc'),
+    assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/.foorc'),
       'first dir: a/b/.foorc');
-    t.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/foo.config.js'),
+    assert.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/foo.config.js'),
       'first dir: a/b/foo.config.js');
-    t.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/package.json'),
+    assert.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/package.json'),
       'second dir: a/package.json');
-    t.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/.foorc'),
+    assert.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/.foorc'),
       'second dir: a/.foorc');
-    t.is(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/foo.config.js'),
+    assert.is(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/foo.config.js'),
       'second dir: a/foo.config.js');
-    t.is(_.get(readFileStub.getCall(6), 'args[0]'), absolutePath('/package.json'),
+    assert.is(_.get(readFileStub.getCall(6), 'args[0]'), absolutePath('./package.json'),
       'third and last dir: /package.json');
-    t.is(_.get(readFileStub.getCall(7), 'args[0]'), absolutePath('/.foorc'),
+    assert.is(_.get(readFileStub.getCall(7), 'args[0]'), absolutePath('./.foorc'),
       'third and last dir: /.foorc');
-    t.is(_.get(readFileStub.getCall(8), 'args[0]'), absolutePath('/foo.config.js'),
+    assert.is(_.get(readFileStub.getCall(8), 'args[0]'), absolutePath('./foo.config.js'),
       'third and last dir: /foo.config.js');
-    t.is(result, null);
-    readFileStub.restore();
+    assert.is(result, null);
   });
 });
 
-test.serial('stop at stopDir, and give up', (t) => {
+test.serial('stop at stopDir, and give up', (assert) => {
   const startDir = absolutePath('a/b');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/package.json'):
       case absolutePath('a/b/.foorc'):
@@ -79,32 +96,31 @@ test.serial('stop at stopDir, and give up', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('a'),
-  }).then((result) => {
-    t.is(readFileStub.callCount, 6);
-    t.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/package.json'),
+  }).load;
+
+  return loadConfig(startDir).then((result) => {
+    assert.is(readFileStub.callCount, 6);
+    assert.is(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/package.json'),
       'first dir: a/b/package.json');
-    t.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/.foorc'),
+    assert.is(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/.foorc'),
       'first dir: a/b/.foorc');
-    t.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/foo.config.js'),
+    assert.is(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/foo.config.js'),
       'first dir: a/b/foo.config.js');
-    t.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/package.json'),
+    assert.is(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/package.json'),
       'second and stopDir: a/package.json');
-    t.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/.foorc'),
+    assert.is(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/.foorc'),
       'second and stopDir: a/.foorc');
-    t.is(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/foo.config.js'),
+    assert.is(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/foo.config.js'),
       'second and stopDir: a/foo.config.js');
-    t.is(result, null);
-    readFileStub.restore();
+    assert.is(result, null);
   });
 });
 
-
-test.serial('find invalid YAML in rc file', (t) => {
+test.serial('find invalid YAML in rc file', (assert) => {
   const startDir = absolutePath('a/b');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/package.json'):
         callback({ code: 'ENOENT' });
@@ -117,19 +133,19 @@ test.serial('find invalid YAML in rc file', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('a'),
-  }).catch((error) => {
-    t.truthy(error, 'threw error');
-    t.is(error.name, 'YAMLException', 'threw correct error type');
-    readFileStub.restore();
+  }).load;
+
+  return loadConfig(startDir).catch((error) => {
+    assert.truthy(error, 'threw error');
+    assert.is(error.name, 'YAMLException', 'threw correct error type');
   });
 });
 
-test.serial('find invalid JSON in rc file with rcStrictJson', (t) => {
+test.serial('find invalid JSON in rc file with rcStrictJson', (assert) => {
   const startDir = absolutePath('a/b');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/package.json'):
         callback({ code: 'ENOENT' });
@@ -142,20 +158,20 @@ test.serial('find invalid JSON in rc file with rcStrictJson', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('a'),
     rcStrictJson: true,
-  }).catch((error) => {
-    t.truthy(error, 'threw error');
-    t.is(error.name, 'JSONError', 'threw correct error type');
-    readFileStub.restore();
+  }).load;
+
+  return loadConfig(startDir).catch((error) => {
+    assert.truthy(error, 'threw error');
+    assert.is(error.name, 'JSONError', 'threw correct error type');
   });
 });
 
-test.serial('find invalid package.json', (t) => {
+test.serial('find invalid package.json', (assert) => {
   const startDir = absolutePath('a/b');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/package.json'):
         callback(null, '{ "foo": "bar", }');
@@ -165,19 +181,19 @@ test.serial('find invalid package.json', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('a'),
-  }).catch((error) => {
-    t.truthy(error, 'threw error');
-    t.is(error.name, 'JSONError', 'threw correct error type');
-    readFileStub.restore();
+  }).load;
+
+  return loadConfig(startDir).catch((error) => {
+    assert.truthy(error, 'threw error');
+    assert.is(error.name, 'JSONError', 'threw correct error type');
   });
 });
 
-test.serial('find invalid JS in .config.js file', (t) => {
+test.serial('find invalid JS in .config.js file', (assert) => {
   const startDir = absolutePath('a/b');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/package.json'):
       case absolutePath('a/b/.foorc'):
@@ -191,21 +207,19 @@ test.serial('find invalid JS in .config.js file', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('a'),
-  }).catch((error) => {
-    t.truthy(error, 'threw error');
-    t.is(error.name, 'SyntaxError', 'threw correct error type');
-    readFileStub.restore();
+  }).load;
+
+  return loadConfig(startDir).catch((error) => {
+    assert.truthy(error, 'threw error');
+    assert.is(error.name, 'SyntaxError', 'threw correct error type');
   });
 });
 
-// RC file with specified extension
-
-test.serial('with rcExtensions, find invalid JSON in .foorc.json', (t) => {
+test.serial('with rcExtensions, find invalid JSON in .foorc.json', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -219,20 +233,20 @@ test.serial('with rcExtensions, find invalid JSON in .foorc.json', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
-  }).catch((error) => {
-    t.truthy(error, 'threw error');
-    t.is(error.name, 'JSONError', 'threw correct error type');
-    readFileStub.restore();
+  }).load;
+
+  return loadConfig(startDir).catch((error) => {
+    assert.truthy(error, 'threw error');
+    assert.is(error.name, 'JSONError', 'threw correct error type');
   });
 });
 
-test.serial('with rcExtensions, find invalid YAML in .foorc.yaml', (t) => {
+test.serial('with rcExtensions, find invalid YAML in .foorc.yaml', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -247,20 +261,20 @@ test.serial('with rcExtensions, find invalid YAML in .foorc.yaml', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
-  }).catch((error) => {
-    t.truthy(error, 'threw error');
-    t.is(error.name, 'YAMLException', 'threw correct error type');
-    readFileStub.restore();
+  }).load;
+
+  return loadConfig(startDir).catch((error) => {
+    assert.truthy(error, 'threw error');
+    assert.is(error.name, 'YAMLException', 'threw correct error type');
   });
 });
 
-test.serial('with rcExtensions, find invalid YAML in .foorc.yml', (t) => {
+test.serial('with rcExtensions, find invalid YAML in .foorc.yml', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -276,20 +290,20 @@ test.serial('with rcExtensions, find invalid YAML in .foorc.yml', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
-  }).catch((error) => {
-    t.truthy(error, 'threw error');
-    t.is(error.name, 'YAMLException', 'threw correct error type');
-    readFileStub.restore();
+  }).load;
+
+  return loadConfig(startDir).catch((error) => {
+    assert.truthy(error, 'threw error');
+    assert.is(error.name, 'YAMLException', 'threw correct error type');
   });
 });
 
-test.serial('with rcExtensions, find invalid JS in .foorc.js', (t) => {
+test.serial('with rcExtensions, find invalid JS in .foorc.js', (assert) => {
   const startDir = absolutePath('a/b/c/d/e/f');
-  const readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
+  readFileStub = sinon.stub(fs, 'readFile', (searchPath, encoding, callback) => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -306,13 +320,13 @@ test.serial('with rcExtensions, find invalid JS in .foorc.js', (t) => {
     }
   });
 
-  return cosmiconfig('foo', {
-    cwd: startDir,
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
-  }).catch((error) => {
-    t.truthy(error, 'threw error');
-    t.is(error.name, 'SyntaxError', 'threw correct error type');
-    readFileStub.restore();
+  }).load;
+
+  return loadConfig(startDir).catch((error) => {
+    assert.truthy(error, 'threw error');
+    assert.is(error.name, 'SyntaxError', 'threw correct error type');
   });
 });
