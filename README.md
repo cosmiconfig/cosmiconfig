@@ -32,11 +32,11 @@ Tested in Node 4+.
 ## Usage
 
 ```js
-var cosmiconfig = require('cosmiconfig');
+const cosmiconfig = require('cosmiconfig');
 
-var loadConfig = cosmiconfig(yourModuleName[, options]).load;
+const explorer = cosmiconfig(yourModuleName[, options]);
 
-loadConfig(yourSearchPath)
+explorer.load(yourSearchPath)
   .then(function(result) {
     // result.config is the parsed configuration object
     // result.filepath is the path to the config file that was found
@@ -66,9 +66,9 @@ cosmiconfig will read that file and try parsing it as JSON, YAML, or JS.
 
 ## API
 
-### `const cosmiconfigInstance = cosmiconfig(moduleName[, options])`
+### `const explorer = cosmiconfig(moduleName[, options])`
 
-Creates a cosmiconfig instance configured according to the arguments, and initializes its caches.
+Creates a cosmiconfig instance (i.e. explorer) configured according to the arguments, and initializes its caches.
 
 #### moduleName
 
@@ -167,7 +167,7 @@ Default: `true`
 
 If `false`, no caches will be used.
 
-### Instance methods (on `cosmiconfigInstance`)
+### Instance methods (on `explorer`)
 
 #### `load(searchPath)`
 

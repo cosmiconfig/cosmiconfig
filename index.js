@@ -3,7 +3,7 @@
 const path = require('path');
 const oshomedir = require('os-homedir');
 const minimist = require('minimist');
-const createCachedLoad = require('./lib/createCachedLoad');
+const createExplorer = require('./lib/createExplorer');
 
 const parsedCliArgs = minimist(process.argv);
 
@@ -22,7 +22,7 @@ module.exports = function (moduleName, options) {
     options.configPath = path.resolve(parsedCliArgs[options.argv]);
   }
 
-  const load = createCachedLoad(options);
+  const load = createExplorer(options);
   return {
     load,
   };
