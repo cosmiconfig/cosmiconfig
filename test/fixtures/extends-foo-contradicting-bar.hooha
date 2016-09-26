@@ -1,7 +1,0 @@
-{
-  "extends": [
-    "./foo.json",
-    "./bar.yaml",
-    "./nesting/.bar-one"
-  ]
-}

@@ -10,7 +10,7 @@ function absolutePath(str) {
 
 test('defined JSON config path', (assert) => {
   const loadConfig = cosmiconfig().load;
-  return loadConfig(absolutePath('fixtures/foo.json')).then((result) => {
+  return loadConfig(null, absolutePath('fixtures/foo.json')).then((result) => {
     assert.deepEqual(result.config, {
       foo: true,
     });
@@ -20,7 +20,7 @@ test('defined JSON config path', (assert) => {
 
 test('defined YAML config path', (assert) => {
   const loadConfig = cosmiconfig().load;
-  return loadConfig(absolutePath('fixtures/foo.yaml')).then((result) => {
+  return loadConfig(null, absolutePath('fixtures/foo.yaml')).then((result) => {
     assert.deepEqual(result.config, {
       foo: true,
     });
@@ -30,7 +30,7 @@ test('defined YAML config path', (assert) => {
 
 test('defined JS config path', (assert) => {
   const loadConfig = cosmiconfig().load;
-  return loadConfig(absolutePath('fixtures/foo.js')).then((result) => {
+  return loadConfig(null, absolutePath('fixtures/foo.js')).then((result) => {
     assert.deepEqual(result.config, {
       foo: true,
     });
@@ -40,7 +40,7 @@ test('defined JS config path', (assert) => {
 
 test('defined modulized JS config path', (assert) => {
   const loadConfig = cosmiconfig().load;
-  return loadConfig(absolutePath('fixtures/foo-module.js')).then((result) => {
+  return loadConfig(null, absolutePath('fixtures/foo-module.js')).then((result) => {
     assert.deepEqual(result.config, {
       foo: true,
     });

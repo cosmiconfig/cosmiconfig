@@ -22,8 +22,5 @@ module.exports = function (moduleName, options) {
     options.configPath = path.resolve(parsedCliArgs[options.argv]);
   }
 
-  const load = createExplorer(options);
-  return {
-    load,
-  };
+  return createExplorer(options);
 };

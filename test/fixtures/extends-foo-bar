@@ -1,3 +1,0 @@
-extends:
-  - "./foo.js"
-  - "./bar.yaml"
