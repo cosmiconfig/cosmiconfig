@@ -4,7 +4,6 @@ const test = require('ava');
 const sinon = require('sinon');
 const path = require('path');
 const fs = require('graceful-fs');
-const _ = require('lodash');
 const cosmiconfig = require('..');
 const assertSearchSequence = require('./assertSearchSequence');
 

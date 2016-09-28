@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "ava": "ava",
+    "ava": "ava test/*.test.js",
     "test": "npm run ava && npm run lint",
     "prepublish": "npm test"
   },
