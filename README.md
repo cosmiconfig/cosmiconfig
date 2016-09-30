@@ -37,11 +37,11 @@ const cosmiconfig = require('cosmiconfig');
 const explorer = cosmiconfig(yourModuleName[, options]);
 
 explorer.load(yourSearchPath)
-  .then(function(result) {
+  .then((result) => {
     // result.config is the parsed configuration object
     // result.filepath is the path to the config file that was found
   })
-  .catch(function(parsingError) {
+  .catch((parsingError) => {
     // do something constructive
   });
 ```
@@ -49,7 +49,7 @@ explorer.load(yourSearchPath)
 The function `cosmiconfig()` searches for a configuration object and returns a Promise,
 which resolves with an object containing the information you're looking for.
 
-So let's say `var yourModuleName = 'goldengrahams'` — here's how cosmiconfig will work:
+So let's say `const yourModuleName = 'goldengrahams'` — here's how cosmiconfig will work:
 
 - Starting from `process.cwd()` (or some other directory defined by the `searchPath` argument to `load()`), it looks for configuration objects in three places, in this order:
   1. A `goldengrahams` property in a `package.json` file (or some other property defined by `options.packageProp`);
@@ -63,6 +63,15 @@ So let's say `var yourModuleName = 'goldengrahams'` — here's how cosmiconfig w
 
 All this searching can be short-circuited by passing `options.configPath` or a `--config` CLI argument to specify a file.
 cosmiconfig will read that file and try parsing it as JSON, YAML, or JS.
+
+## Caching
+
+As of v2, cosmiconfig uses a few caches to reduce the need for repetitious reading of the filesystem. Every new cosmiconfig instance (created with `cosmiconfig()`) has its own caches.
+
+To avoid or work around caching, you can
+- create separate instances of cosmiconfig, or
+- set `cache: false` in your options.
+- use the cache clearing methods documented below.
 
 ## API
 
@@ -120,14 +129,6 @@ By default, cosmiconfig looks for `--config`.
 
 If `false`, cosmiconfig will not look for any `process.argv` arguments.
 
-##### configPath
-
-Type: `string`
-
-Path to a configuration file. cosmiconfig will read it and try to parse it as JSON, YAML, or JS.
-
-This option can be set via the command line with `--config`.
-
 ##### rcStrictJson
 
 Type: `boolean`
@@ -169,21 +170,36 @@ If `false`, no caches will be used.
 
 ### Instance methods (on `explorer`)
 
-#### `load(searchPath)`
+#### `load([searchPath, configPath])`
 
-Find and load a configuration file, starting at `searchPath`.
+Find and load a configuration file. Returns `null` if nothing is found, or an object with two properties:
+- `config`: The loaded and parsed configuration.
+- `filepath`: The filepath where this configuration was found.
 
-If `searchPath` points to a directory, cosmiconfig will start its search in the `searchPath` directory and continue to search up the file tree, as documented above.
+You should provide *either* `searchPath` *or* `configPath`. Use `configPath` if you know the path of the configuration file you want to load. Otherwise, use `searchPath`.
 
-If `searchPath` points to a file (i.e. you already know where the configuration is that you want to load), cosmiconfig will just try to read and parse that file.
+```js
+explorer.load('start/search/here');
+explorer.load('start/search/at/this/file.css');
 
-## Caching
+explorer.load(null, 'load/this/file.json');
+```
 
-As of v2, cosmiconfig uses a few caches to reduce the need for repetitious reading of the filesystem. Every new cosmiconfig instance (created with `cosmiconfig()`) has its own caches.
+If you provide `searchPath`, cosmiconfig will start its search at `searchPath` and continue to search up the file tree, as documented above.
 
-To avoid or work around caching, you can
-- create separate instances of cosmiconfig, or
-- set `cache: false` in your options.
+If you provide `configPath` (i.e. you already know where the configuration is that you want to load), cosmiconfig will try to read and parse that file.
+
+#### `clearFileCache()`
+
+Clears the cache used when you provide a `configPath` argument to `load`.
+
+#### `clearDirectoryCache()`
+
+Clears the cache used when you provide a `searchPath` argument to `load`.
+
+#### `clearCaches()`
+
+Performs both `clearFileCache()` and `clearDirectoryCache()`.
 
 ## Differences from [rc](https://github.com/dominictarr/rc)
 
