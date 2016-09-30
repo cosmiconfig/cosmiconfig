@@ -1,1 +1,3 @@
 test/fixtures
+coverage
+.nyc_output

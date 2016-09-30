@@ -70,9 +70,7 @@ test.serial('does not use cache at first', (assert) => {
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
-    config: {
-      foundInD: true,
-    },
+    config: { foundInD: true },
   };
 
   return cachedLoadConfig(searchPath).then((result) => {
@@ -94,9 +92,7 @@ test.serial('uses cache for already-visited directories', (assert) => {
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
-    config: {
-      foundInD: true,
-    },
+    config: { foundInD: true },
   };
 
   return cachedLoadConfig(searchPath).then((result) => {
@@ -112,9 +108,7 @@ test.serial('uses cache for file in already-visited directories', (assert) => {
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
-    config: {
-      foundInD: true,
-    },
+    config: { foundInD: true },
   };
 
   return cachedLoadConfig(searchPath).then((result) => {
@@ -130,9 +124,7 @@ test.serial('uses cache when some directories in search were already visted', (a
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
-    config: {
-      foundInD: true,
-    },
+    config: { foundInD: true },
   };
 
   return cachedLoadConfig(searchPath).then((result) => {
@@ -169,9 +161,7 @@ test.serial('does not use cache with a new cosmiconfig instance', (assert) => {
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
-    config: {
-      foundInD: true,
-    },
+    config: { foundInD: true },
   };
 
   const loadConfig = cosmiconfig('foo').load;
@@ -194,9 +184,7 @@ test.serial('but cache on old instance still works', (assert) => {
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
-    config: {
-      foundInD: true,
-    },
+    config: { foundInD: true },
   };
 
   return cachedLoadConfig(searchPath).then((result) => {
@@ -211,9 +199,7 @@ test.serial('does not cache if you say no', (assert) => {
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
-    config: {
-      foundInD: true,
-    },
+    config: { foundInD: true },
   };
 
   const loadConfig = cosmiconfig('foo', {
@@ -246,6 +232,102 @@ test.serial('does not cache if you say no', (assert) => {
           'a/b/c/d/package.json',
           'a/b/c/d/.foorc',
         ], 4);
+        assert.deepEqual(result, expectedResult);
+      });
+    });
+});
+
+test.serial('clearFileCache', (assert) => {
+  const searchPath = absolutePath('a/b/c/d/.foorc');
+  statStubIsDirectory(false);
+  const expectedResult = {
+    filepath: absolutePath('a/b/c/d/.foorc'),
+    config: { foundInD: true },
+  };
+  const explorer = cosmiconfig('foo');
+
+  return Promise.resolve()
+    .then(() => {
+      return explorer.load(null, searchPath).then((result) => {
+        assertSearchSequence(assert, readFileStub, [
+          'a/b/c/d/.foorc',
+        ], 0);
+        assert.deepEqual(result, expectedResult);
+      });
+    })
+    .then(() => {
+      return explorer.load(null, searchPath).then((result) => {
+        assertSearchSequence(assert, readFileStub, [
+          'a/b/c/d/.foorc',
+        ], 0);
+        assert.deepEqual(result, expectedResult);
+      });
+    })
+    .then(() => {
+      explorer.clearFileCache();
+    })
+    .then(() => {
+      return explorer.load(null, searchPath).then((result) => {
+        assertSearchSequence(assert, readFileStub, [
+          'a/b/c/d/.foorc',
+          'a/b/c/d/.foorc',
+        ], 0);
+        assert.deepEqual(result, expectedResult);
+      });
+    });
+});
+
+test.serial('clearDirectoryCache', (assert) => {
+  const searchPath = absolutePath('a/b/c/d/e');
+  statStubIsDirectory(true);
+  const expectedResult = {
+    filepath: absolutePath('a/b/c/d/.foorc'),
+    config: { foundInD: true },
+  };
+  const explorer = cosmiconfig('foo');
+
+  return Promise.resolve()
+    .then(() => {
+      return explorer.load(searchPath).then((result) => {
+        assertSearchSequence(assert, readFileStub, [
+          'a/b/c/d/e/package.json',
+          'a/b/c/d/e/.foorc',
+          'a/b/c/d/e/foo.config.js',
+          'a/b/c/d/package.json',
+          'a/b/c/d/.foorc',
+        ], 0);
+        assert.deepEqual(result, expectedResult);
+      });
+    })
+    .then(() => {
+      return explorer.load(searchPath).then((result) => {
+        assertSearchSequence(assert, readFileStub, [
+          'a/b/c/d/e/package.json',
+          'a/b/c/d/e/.foorc',
+          'a/b/c/d/e/foo.config.js',
+          'a/b/c/d/package.json',
+          'a/b/c/d/.foorc',
+        ], 0);
+        assert.deepEqual(result, expectedResult);
+      });
+    })
+    .then(() => {
+      explorer.clearDirectoryCache();
+    })
+    .then(() => {
+      return explorer.load(searchPath).then((result) => {
+        assertSearchSequence(assert, readFileStub, [
+          'a/b/c/d/e/package.json',
+          'a/b/c/d/e/.foorc',
+          'a/b/c/d/e/foo.config.js',
+          'a/b/c/d/package.json',
+          'a/b/c/d/.foorc',
+          'a/b/c/d/e/package.json',
+          'a/b/c/d/e/.foorc',
+          'a/b/c/d/e/foo.config.js',
+          'a/b/c/d/package.json',
+          'a/b/c/d/.foorc',
+        ], 0);
         assert.deepEqual(result, expectedResult);
       });
     });
