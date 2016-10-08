@@ -1,6 +1,6 @@
 # Changelog
 
-## Head
+## 2.0.0
 
 - Changed: module now creates cosmiconfig instances with `load` methods (see README).
 - Added: caching (enabled by the change above).

@@ -168,6 +168,14 @@ Default: `true`
 
 If `false`, no caches will be used.
 
+##### transform
+
+Type: `Function` returning a Promise
+
+A function that transforms the parsed configuration. Receives the result object with `config` and `filepath` properties, and must return a Promise that resolves with the transformed result.
+
+The reason you might use this option instead of simply applying your transform function some other way is that *the transformed result will be cached*. If your transformation involves additional filesystem I/O or other potentially slow processing, you can use this option to avoid repeating those steps every time a given configuration is loaded.
+
 ### Instance methods (on `explorer`)
 
 #### `load([searchPath, configPath])`
