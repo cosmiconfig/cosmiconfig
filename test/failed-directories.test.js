@@ -331,7 +331,7 @@ test.serial('with rcExtensions, find invalid JS in .foorc.js', (assert) => {
   });
 });
 
-test.serial('Not exist configuration file', (assert) => {
+test.serial('Configuration file not exist', (assert) => {
 
   const loadConfig = cosmiconfig('noop').load;
 
