@@ -333,7 +333,7 @@ test.serial('with rcExtensions, find invalid JS in .foorc.js', (assert) => {
 
 test.serial('Configuration file not exist', (assert) => {
 
-  const loadConfig = cosmiconfig('noop').load;
+  const loadConfig = cosmiconfig('not_exist_rc_name').load;
 
   return loadConfig('.').then((result) => {
     assert.deepEqual(result, null);
