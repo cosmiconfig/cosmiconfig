@@ -330,3 +330,12 @@ test.serial('with rcExtensions, find invalid JS in .foorc.js', (assert) => {
     assert.is(error.name, 'SyntaxError', 'threw correct error type');
   });
 });
+
+test.serial('Not exist configuration file', (assert) => {
+
+  const loadConfig = cosmiconfig('noop').load;
+
+  return loadConfig('.').then((result) => {
+    assert.deepEqual(result, null);
+  });
+});
