@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.2
+
+- Fixed: Node version specified in `package.json`.
+
 ## 2.0.1
 
 - Fixed: no more infinite loop in Windows.
