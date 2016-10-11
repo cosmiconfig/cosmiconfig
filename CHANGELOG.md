@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1
+
+- Fixed: no more infinite loop in Windows.
+
 ## 2.0.0
 
 - Changed: module now creates cosmiconfig instances with `load` methods (see README).
