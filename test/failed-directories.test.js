@@ -330,3 +330,10 @@ test.serial('with rcExtensions, find invalid JS in .foorc.js', (assert) => {
     assert.is(error.name, 'SyntaxError', 'threw correct error type');
   });
 });
+
+test.serial('Configuration file not exist', (assert) => {
+  const loadConfig = cosmiconfig('not_exist_rc_name').load;
+  return loadConfig('.').then((result) => {
+    assert.is(result, null);
+  });
+});
