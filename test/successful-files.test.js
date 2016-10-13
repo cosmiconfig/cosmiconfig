@@ -1,16 +1,16 @@
 'use strict';
 
-const test = require('ava');
-const path = require('path');
-const cosmiconfig = require('..');
+var test = require('ava');
+var path = require('path');
+var cosmiconfig = require('..');
 
 function absolutePath(str) {
   return path.join(__dirname, str);
 }
 
-test('defined JSON config path', (assert) => {
-  const loadConfig = cosmiconfig().load;
-  return loadConfig(null, absolutePath('fixtures/foo.json')).then((result) => {
+test('defined JSON config path', function (assert) {
+  var loadConfig = cosmiconfig().load;
+  return loadConfig(null, absolutePath('fixtures/foo.json')).then(function (result) {
     assert.deepEqual(result.config, {
       foo: true,
     });
@@ -18,9 +18,9 @@ test('defined JSON config path', (assert) => {
   });
 });
 
-test('defined YAML config path', (assert) => {
-  const loadConfig = cosmiconfig().load;
-  return loadConfig(null, absolutePath('fixtures/foo.yaml')).then((result) => {
+test('defined YAML config path', function (assert) {
+  var loadConfig = cosmiconfig().load;
+  return loadConfig(null, absolutePath('fixtures/foo.yaml')).then(function (result) {
     assert.deepEqual(result.config, {
       foo: true,
     });
@@ -28,9 +28,9 @@ test('defined YAML config path', (assert) => {
   });
 });
 
-test('defined JS config path', (assert) => {
-  const loadConfig = cosmiconfig().load;
-  return loadConfig(null, absolutePath('fixtures/foo.js')).then((result) => {
+test('defined JS config path', function (assert) {
+  var loadConfig = cosmiconfig().load;
+  return loadConfig(null, absolutePath('fixtures/foo.js')).then(function (result) {
     assert.deepEqual(result.config, {
       foo: true,
     });
@@ -38,9 +38,9 @@ test('defined JS config path', (assert) => {
   });
 });
 
-test('defined modulized JS config path', (assert) => {
-  const loadConfig = cosmiconfig().load;
-  return loadConfig(null, absolutePath('fixtures/foo-module.js')).then((result) => {
+test('defined modulized JS config path', function (assert) {
+  var loadConfig = cosmiconfig().load;
+  return loadConfig(null, absolutePath('fixtures/foo-module.js')).then(function (result) {
     assert.deepEqual(result.config, {
       foo: true,
     });

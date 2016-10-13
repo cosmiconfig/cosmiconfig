@@ -1,5 +1,9 @@
 # Changelog
 
+## Head
+
+- Added: Node 0.12 support.
+
 ## 2.0.2
 
 - Fixed: Node version specified in `package.json`.

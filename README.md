@@ -32,9 +32,9 @@ Tested in Node 4+.
 ## Usage
 
 ```js
-const cosmiconfig = require('cosmiconfig');
+var cosmiconfig = require('cosmiconfig');
 
-const explorer = cosmiconfig(yourModuleName[, options]);
+var explorer = cosmiconfig(yourModuleName[, options]);
 
 explorer.load(yourSearchPath)
   .then((result) => {
@@ -49,7 +49,7 @@ explorer.load(yourSearchPath)
 The function `cosmiconfig()` searches for a configuration object and returns a Promise,
 which resolves with an object containing the information you're looking for.
 
-So let's say `const yourModuleName = 'goldengrahams'` — here's how cosmiconfig will work:
+So let's say `var yourModuleName = 'goldengrahams'` — here's how cosmiconfig will work:
 
 - Starting from `process.cwd()` (or some other directory defined by the `searchPath` argument to `load()`), it looks for configuration objects in three places, in this order:
   1. A `goldengrahams` property in a `package.json` file (or some other property defined by `options.packageProp`);
@@ -75,7 +75,7 @@ To avoid or work around caching, you can
 
 ## API
 
-### `const explorer = cosmiconfig(moduleName[, options])`
+### `var explorer = cosmiconfig(moduleName[, options])`
 
 Creates a cosmiconfig instance (i.e. explorer) configured according to the arguments, and initializes its caches.
 
