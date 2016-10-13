@@ -337,3 +337,13 @@ test.serial('Configuration file not exist', (assert) => {
     assert.is(result, null);
   });
 });
+
+test.serial('searchPath file not exist', (assert) => {
+  // To fail isDirectory() function.
+  if (statStub.restore) statStub.restore();
+
+  const loadConfig = cosmiconfig('not_exist_search_path').load;
+  return loadConfig('foo/bar/foo/bar').then((result) => {
+    assert.is(result, null);
+  });
+});
