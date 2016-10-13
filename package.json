@@ -8,7 +8,7 @@
     "lib"
   ],
   "scripts": {
-    "lint": "node-version-gte-4 && eslint .",
+    "lint": "node-version-gte-4 && eslint . || echo \"ESLint not supported\"",
     "ava": "ava test/*.test.js",
     "coverage": "nyc npm run ava && nyc report --reporter=html && open coverage/index.html",
     "test": "npm run ava && npm run lint",
