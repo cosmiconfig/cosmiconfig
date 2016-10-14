@@ -1,6 +1,6 @@
 # Changelog
 
-## Head
+## 2.1.0
 
 - Added: Node 0.12 support.
 
