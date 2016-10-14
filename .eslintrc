@@ -1,5 +1,11 @@
 {
   "extends": [
     "eslint-config-davidtheclark-node"
-  ]
+  ],
+  "rules": {
+    "no-var": "off",
+    "prefer-const": "off",
+    "prefer-arrow-callback": "off",
+    "node/no-unsupported-features": ["error", {"version": 0.12}],
+  }
 }

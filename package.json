@@ -8,7 +8,7 @@
     "lib"
   ],
   "scripts": {
-    "lint": "eslint .",
+    "lint": "node-version-gte-4 && eslint . || echo \"ESLint not supported\"",
     "ava": "ava test/*.test.js",
     "coverage": "nyc npm run ava && nyc report --reporter=html && open coverage/index.html",
     "test": "npm run ava && npm run lint",
@@ -36,6 +36,7 @@
     "graceful-fs": "^4.1.2",
     "js-yaml": "^3.4.3",
     "minimist": "^1.2.0",
+    "object-assign": "^4.1.0",
     "os-homedir": "^1.0.1",
     "parse-json": "^2.2.0",
     "require-from-string": "^1.1.0"
@@ -47,10 +48,11 @@
     "eslint-plugin-node": "^2.0.0",
     "expect": "^1.20.2",
     "lodash": "4.16.1",
+    "node-version-check": "^2.1.1",
     "nyc": "^8.3.0",
     "sinon": "1.17.6"
   },
   "engines": {
-    "node": ">=4"
+    "node": ">=0.12"
   }
 }
