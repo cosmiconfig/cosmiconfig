@@ -3,13 +3,15 @@
 var path = require('path');
 var oshomedir = require('os-homedir');
 var minimist = require('minimist');
-var assign = require('object-assign');
+var deepAssign = require('deep-assign');
 var createExplorer = require('./lib/createExplorer');
 
 var parsedCliArgs = minimist(process.argv);
 
 module.exports = function (moduleName, options) {
-  options = assign({
+  options = deepAssign({
+    extend: ['extends'],
+    pathResolve: ['plugins'],
     packageProp: moduleName,
     rc: '.' + moduleName + 'rc',
     js: moduleName + '.config.js',
