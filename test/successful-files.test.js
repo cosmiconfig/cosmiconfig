@@ -47,3 +47,10 @@ test('defined modulized JS config path', function (assert) {
     assert.is(result.filepath, absolutePath('fixtures/foo-module.js'));
   });
 });
+
+test('file Non-existent', function (assert) {
+  var loadConfig = cosmiconfig('eslint').load;
+  return loadConfig(absolutePath('../Non-existent.js')).then(function (result) {
+    assert.is(result.filepath, absolutePath('../.eslintrc'));
+  });
+});
