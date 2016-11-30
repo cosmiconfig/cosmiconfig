@@ -33,25 +33,25 @@
   },
   "homepage": "https://github.com/davidtheclark/cosmiconfig#readme",
   "dependencies": {
-    "global-modules": "^0.2.3",
-    "graceful-fs": "^4.1.2",
-    "js-yaml": "^3.4.3",
+    "global-paths": "^0.1.2",
+    "graceful-fs": "^4.1.11",
+    "js-yaml": "^3.7.0",
     "minimist": "^1.2.0",
     "object-assign": "^4.1.0",
-    "os-homedir": "^1.0.1",
+    "os-homedir": "^1.0.2",
     "parse-json": "^2.2.0",
-    "require-from-string": "^1.1.0"
+    "require-from-string": "^1.2.1"
   },
   "devDependencies": {
-    "ava": "0.16.0",
-    "eslint": "3.5.0",
+    "ava": "^0.17.0",
+    "eslint": "^3.11.1",
     "eslint-config-davidtheclark-node": "^0.2.0",
-    "eslint-plugin-node": "^2.0.0",
+    "eslint-plugin-node": "^3.0.4",
     "expect": "^1.20.2",
-    "lodash": "4.16.1",
+    "lodash": "^4.17.2",
     "node-version-check": "^2.1.1",
-    "nyc": "^8.3.0",
-    "sinon": "1.17.6"
+    "nyc": "^10.0.0",
+    "sinon": "^1.17.6"
   },
   "engines": {
     "node": ">=0.12"
