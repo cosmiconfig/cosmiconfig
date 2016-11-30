@@ -33,6 +33,7 @@
   },
   "homepage": "https://github.com/davidtheclark/cosmiconfig#readme",
   "dependencies": {
+    "global-modules": "^0.2.3",
     "graceful-fs": "^4.1.2",
     "js-yaml": "^3.4.3",
     "minimist": "^1.2.0",

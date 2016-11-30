@@ -1,3 +1,4 @@
 {
-  "extends": ["./foo.js"]
+  "parser": "./foo.js",
+  "plugins": ["./foo.js"]
 }

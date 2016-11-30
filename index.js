@@ -11,7 +11,7 @@ var parsedCliArgs = minimist(process.argv);
 module.exports = function (moduleName, options) {
   options = assign({
     'prefix.extends': moduleName + '-config-',
-    modules: ['extends', 'plugins'],
+    modules: ['extends', 'plugins', 'presets', 'parser'],
     packageProp: moduleName,
     moduleName: moduleName,
     rc: '.' + moduleName + 'rc',

@@ -3,7 +3,6 @@
 var test = require('ava');
 var path = require('path');
 var fs = require('fs');
-var assign = require('object-assign');
 var cosmiconfig = require('..');
 
 function absolutePath(str) {
@@ -13,12 +12,9 @@ function absolutePath(str) {
 test('defined JSON config path', function (assert) {
   var loadConfig = cosmiconfig().load;
   return loadConfig(null, absolutePath('fixtures/foo.json')).then(function (result) {
-    assert.deepEqual(result.config, {
-      extends: [
-        {
-          foo: true,
-        },
-      ],
+    assert.deepEqual(result.config,  {
+      parser: absolutePath('fixtures/foo.js'),
+      plugins: [absolutePath('fixtures/foo.js')],
     });
     assert.is(result.filepath, absolutePath('fixtures/foo.json'));
   });
@@ -63,9 +59,24 @@ test('eslint config file', function (assert) {
   return loadConfig(require.resolve('../')).then(function (result) {
     var config = eval.call(null, '(' + fs.readFileSync(rcFile).toString() + ')');
 
-    config.extends = [assign({}, require('eslint-config-davidtheclark-node'), {
-      plugins:[require('eslint-plugin-node')],
-    })];
+    config.extends = config.extends.map(function (moduleId){
+      return require.resolve(moduleId.replace(/^(?:eslint-config-)?/, 'eslint-config-'));
+    });
+
+    assert.deepEqual(result.config, config);
+    assert.is(result.filepath, rcFile);
+  });
+});
+
+test('eslint config file', function (assert) {
+  var loadConfig = cosmiconfig('eslint', {
+  }).load;
+  var rcFile = require.resolve('eslint-config-davidtheclark-node');
+  return loadConfig(null, rcFile).then(function (result) {
+    var config = require(rcFile);
+    config.plugins = config.plugins.map(function (moduleId){
+      return require.resolve(moduleId.replace(/^(?:eslint-plugin-)?/, 'eslint-plugin-'));
+    });
 
     assert.deepEqual(result.config, config);
     // console.log(result.config.extends[0].plugins[0]);
