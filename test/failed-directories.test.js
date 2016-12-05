@@ -3,7 +3,7 @@
 var test = require('ava');
 var sinon = require('sinon');
 var path = require('path');
-var fs = require('graceful-fs');
+var fs = require('fs');
 var _ = require('lodash');
 var cosmiconfig = require('..');
 

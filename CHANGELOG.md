@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.1
+
+- Fixed: swapped `graceful-fs` for regular `fs`, fixing a garbage collection problem.
+
 ## 2.1.0
 
 - Added: Node 0.12 support.
