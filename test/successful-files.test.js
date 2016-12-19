@@ -12,9 +12,8 @@ function absolutePath(str) {
 test('defined JSON config path', function (assert) {
   var loadConfig = cosmiconfig().load;
   return loadConfig(null, absolutePath('fixtures/foo.json')).then(function (result) {
-    assert.deepEqual(result.config,  {
-      parser: absolutePath('fixtures/foo.js'),
-      plugins: [absolutePath('fixtures/foo.js')],
+    assert.deepEqual(result.config, {
+      foo: true,
     });
     assert.is(result.filepath, absolutePath('fixtures/foo.json'));
   });
@@ -41,9 +40,7 @@ test('defined JS config path', function (assert) {
 });
 
 test('defined modulized JS config path', function (assert) {
-  var loadConfig = cosmiconfig('stylelint', {
-    extends: ['extends'],
-  }).load;
+  var loadConfig = cosmiconfig().load;
   return loadConfig(null, absolutePath('fixtures/foo-module.js')).then(function (result) {
     assert.deepEqual(result.config, {
       foo: true,

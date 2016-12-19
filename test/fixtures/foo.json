@@ -1,4 +1,3 @@
 {
-  "parser": "./foo.js",
-  "plugins": ["./foo.js"]
+  "foo": true
 }
