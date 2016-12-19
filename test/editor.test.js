@@ -1,6 +1,7 @@
 'use strict';
 var test = require('ava');
 var path = require('path');
+var fs = require('path');
 var cp = require('child_process');
 
 function absolutePath(str) {
@@ -25,8 +26,8 @@ function testCase(moduleName, options) {
 
 test.before(function () {
   try {
-    fs.linkSync(absolutePath('..'), absolutePath('fixtures/editor/editor-plugin/node_modules/cosmiconfig'))
-  } catch(ex) {
+    fs.linkSync(absolutePath('..'), absolutePath('fixtures/editor/editor-plugin/node_modules/cosmiconfig'));
+  } catch (ex) {
     cp.execSync('npm i ' + absolutePath('..'), {
       cwd: absolutePath('fixtures/editor/editor-plugin/'),
       stdio: 'inherit',
