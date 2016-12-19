@@ -24,10 +24,14 @@ function testCase(moduleName, options) {
 }
 
 test.before(function () {
-  cp.execSync('npm i ' + absolutePath('..'), {
-    cwd: absolutePath('fixtures/editor/editor-plugin/'),
-    stdio: 'inherit',
-  });
+  try {
+    fs.linkSync(absolutePath('..'), absolutePath('fixtures/editor/editor-plugin/node_modules/cosmiconfig'))
+  } catch(ex) {
+    cp.execSync('npm i ' + absolutePath('..'), {
+      cwd: absolutePath('fixtures/editor/editor-plugin/'),
+      stdio: 'inherit',
+    });
+  }
 });
 
 test('plugin path lookup', function (assert) {
