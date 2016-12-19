@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/davidtheclark/cosmiconfig#readme",
   "dependencies": {
-    "global-paths": "^0.1.2",
+    "global-paths": "^1.0.0",
     "js-yaml": "^3.7.0",
     "minimist": "^1.2.0",
     "object-assign": "^4.1.0",
@@ -42,8 +42,8 @@
   },
   "devDependencies": {
     "ava": "^0.17.0",
-    "eslint": "^3.11.1",
-    "eslint-config-davidtheclark-node": "^0.2.0",
+    "eslint": "^3.12.2",
+    "eslint-config-davidtheclark-node": "^0.2.1",
     "eslint-plugin-node": "^2.0.0",
     "expect": "^1.20.2",
     "lodash": "^4.17.2",

@@ -1,0 +1,5 @@
+{
+	
+	"plugins": ["./index.css", "./not-exist", "module-proj", "module-editor-plugin"],
+	"test": 1
+}
