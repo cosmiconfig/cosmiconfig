@@ -49,7 +49,7 @@ test('defined modulized JS config path', function (assert) {
   });
 });
 
-test('eslint config file', function (assert) {
+test('.eslintrc', function (assert) {
   var loadConfig = cosmiconfig('eslint', {
   }).load;
   var rcFile = absolutePath('../.eslintrc');
@@ -65,7 +65,7 @@ test('eslint config file', function (assert) {
   });
 });
 
-test('eslint config file', function (assert) {
+test('eslint-config-davidtheclark-node', function (assert) {
   var loadConfig = cosmiconfig('eslint', {
   }).load;
   var rcFile = require.resolve('eslint-config-davidtheclark-node');
