@@ -37,7 +37,7 @@
     "minimist": "^1.2.0",
     "object-assign": "^4.1.0",
     "os-homedir": "^1.0.1",
-    "require-from-string": "^1.1.0"
+    "parse-json": "^2.2.0"
   },
   "devDependencies": {
     "eslint": "^3.13.0",
@@ -45,6 +45,7 @@
     "eslint-plugin-node": "^3.0.5",
     "expect": "^1.20.2",
     "lodash": "^4.17.4",
+    "mock-require": "^2.0.0",
     "node-version-check": "^2.1.1",
     "nyc": "^10.0.0",
     "sinon": "^1.17.7",
