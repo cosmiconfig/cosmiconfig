@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('ava');
+var test = require('tape');
 var path = require('path');
 var cosmiconfig = require('..');
 
@@ -10,19 +10,27 @@ function absolutePath(str) {
 
 test('defined file that does not exist', function (assert) {
   var loadConfig = cosmiconfig().load;
-  return loadConfig(null, absolutePath('does/not/exist'))
-    .then(assert.fail)
+  loadConfig(null, absolutePath('does/not/exist'))
+    .then(function () {
+      assert.fail('should have errored');
+      assert.end();
+    })
     .catch(function (error) {
-      assert.is(error.code, 'ENOENT', 'with expected format');
+      assert.equal(error.code, 'ENOENT', 'with expected format');
+      assert.end();
     });
 });
 
 test('defined JSON file with syntax error, without expected format', function (assert) {
   var loadConfig = cosmiconfig().load;
   return loadConfig(null, absolutePath('fixtures/foo-invalid.json'))
-    .then(assert.fail)
+    .then(function () {
+      assert.fail('should have errored');
+      assert.end();
+    })
     .catch(function (error) {
-      assert.truthy(/^Failed to parse/.test(error.message));
+      assert.ok(/^Failed to parse/.test(error.message));
+      assert.end();
     });
 });
 
@@ -31,18 +39,26 @@ test('defined JSON file with syntax error, with expected format', function (asse
     format: 'json',
   }).load;
   return loadConfig(null, absolutePath('fixtures/foo-invalid.json'))
-    .then(assert.fail)
+    .then(function () {
+      assert.fail('should have errored');
+      assert.end();
+    })
     .catch(function (error) {
-      assert.is(error.name, 'JSONError');
+      assert.equal(error.name, 'JSONError');
+      assert.end();
     });
 });
 
 test('defined YAML file with syntax error, without expected format', function (assert) {
   var loadConfig = cosmiconfig().load;
   return loadConfig(null, absolutePath('fixtures/foo-invalid.yaml'))
-    .then(assert.fail)
+    .then(function () {
+      assert.fail('should have errored');
+      assert.end();
+    })
     .catch(function (error) {
-      assert.truthy(/^Failed to parse/.test(error.message));
+      assert.ok(/^Failed to parse/.test(error.message));
+      assert.end();
     });
 });
 
@@ -51,18 +67,26 @@ test('defined YAML file with syntax error, with expected format', function (asse
     format: 'yaml',
   }).load;
   return loadConfig(null, absolutePath('fixtures/foo-invalid.yaml'))
-    .then(assert.fail)
+    .then(function () {
+      assert.fail('should have errored');
+      assert.end();
+    })
     .catch(function (error) {
-      assert.is(error.name, 'YAMLException');
+      assert.equal(error.name, 'YAMLException');
+      assert.end();
     });
 });
 
 test('defined JS file with syntax error, without expected format', function (assert) {
   var loadConfig = cosmiconfig().load;
   return loadConfig(null, absolutePath('fixtures/foo-invalid.js'))
-    .then(assert.fail)
+    .then(function () {
+      assert.fail('should have errored');
+      assert.end();
+    })
     .catch(function (error) {
-      assert.truthy(/^Failed to parse/.test(error.message));
+      assert.ok(/^Failed to parse/.test(error.message));
+      assert.end();
     });
 });
 
@@ -71,8 +95,12 @@ test('defined JS file with syntax error, with expected format', function (assert
     format: 'js',
   }).load;
   return loadConfig(null, absolutePath('fixtures/foo-invalid.js'))
-    .then(assert.fail)
+    .then(function () {
+      assert.fail('should have errored');
+      assert.end();
+    })
     .catch(function (error) {
-      assert.truthy(!/^Failed to parse/.test(error.message));
+      assert.ok(!/^Failed to parse/.test(error.message));
+      assert.end();
     });
 });
