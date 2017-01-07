@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "lint": "node-version-gte-4 && eslint . || echo \"ESLint not supported\"",
-    "tape": "tape test/*.test.js",
+    "tape": "tape test/*.test.js | tap-spec",
     "coverage": "nyc npm run tape && nyc report --reporter=html && open coverage/index.html",
     "test": "npm run tape && npm run lint"
   },
@@ -33,10 +33,10 @@
   "homepage": "https://github.com/davidtheclark/cosmiconfig#readme",
   "dependencies": {
     "js-yaml": "^3.4.3",
+    "json-parse-helpfulerror": "^1.0.3",
     "minimist": "^1.2.0",
     "object-assign": "^4.1.0",
     "os-homedir": "^1.0.1",
-    "parse-json": "^2.2.0",
     "require-from-string": "^1.1.0"
   },
   "devDependencies": {
@@ -48,6 +48,7 @@
     "node-version-check": "^2.1.1",
     "nyc": "^10.0.0",
     "sinon": "^1.17.7",
+    "tap-spec": "^4.1.1",
     "tape": "^4.6.3"
   },
   "engines": {

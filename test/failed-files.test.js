@@ -44,7 +44,7 @@ test('defined JSON file with syntax error, with expected format', function (asse
       assert.end();
     })
     .catch(function (error) {
-      assert.equal(error.name, 'JSONError');
+      assert.ok(/JSON Error/.test(error.message), 'threw correct error type');
       assert.end();
     });
 });

@@ -1,5 +1,9 @@
 # Changelog
 
+## Head
+
+- Fixed: JSON parsing errors in Node v7.
+
 ## 2.1.1
 
 - Fixed: swapped `graceful-fs` for regular `fs`, fixing a garbage collection problem.

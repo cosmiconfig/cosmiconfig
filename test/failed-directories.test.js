@@ -181,7 +181,7 @@ test('find invalid JSON in rc file with rcStrictJson', function (assert) {
 
   loadConfig(startDir).catch(function (error) {
     assert.ok(error, 'threw error');
-    assert.equal(error.name, 'JSONError', 'threw correct error type');
+    assert.ok(/JSON Error/.test(error.message), 'threw correct error type');
     teardown(assert);
   }).catch(function (err) {
     teardown(assert, err);
@@ -207,7 +207,7 @@ test('find invalid package.json', function (assert) {
 
   loadConfig(startDir).catch(function (error) {
     assert.ok(error, 'threw error');
-    assert.equal(error.name, 'JSONError', 'threw correct error type');
+    assert.ok(/JSON Error/.test(error.message), 'threw correct error type');
     teardown(assert);
   }).catch(function (err) {
     teardown(assert, err);
@@ -268,7 +268,7 @@ test('with rcExtensions, find invalid JSON in .foorc.json', function (assert) {
 
   loadConfig(startDir).catch(function (error) {
     assert.ok(error, 'threw error');
-    assert.equal(error.name, 'JSONError', 'threw correct error type');
+    assert.ok(/JSON Error/.test(error.message), 'threw correct error type');
     teardown(assert);
   }).catch(function (err) {
     teardown(assert, err);
