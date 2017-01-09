@@ -62,33 +62,54 @@ test('defined modulized JS config path', function (assert) {
 });
 
 test('.eslintrc', function (assert) {
-  var loadConfig = cosmiconfig('eslint', {
-  }).load;
+  var explorer = cosmiconfig('eslint');
+  var loadConfig = explorer.load;
   var rcFile = absolutePath('../.eslintrc');
   return loadConfig(require.resolve('../')).then(function (result) {
     var config = eval.call(null, '(' + fs.readFileSync(rcFile).toString() + ')');
 
-    config.extends = config.extends.map(function (moduleId){
-      return require.resolve(moduleId.replace(/^(?:eslint-config-)?/, 'eslint-config-'));
+    assert.deepEqual(result.config, config);
+    assert.equal(result.filepath, rcFile);
+
+    config.extends.forEach(function (moduleName) {
+      var modulePath = require.resolve(moduleName.replace(/^(?:eslint-config-)?/, 'eslint-config-'));
+      assert.equal(modulePath, explorer.resolveModule({
+        moduleName: moduleName,
+        configPath: rcFile,
+      }));
+      assert.equal(modulePath, result.resolveModule({
+        moduleName: moduleName,
+      }));
     });
 
-    assert.deepEqual(result.config, config);
-    assert.is(result.filepath, rcFile);
+    assert.end();
   });
 });
 
 test('eslint-config-davidtheclark-node', function (assert) {
-  var loadConfig = cosmiconfig('eslint', {
-  }).load;
+  var explorer = cosmiconfig('eslint');
+  var loadConfig = explorer.load;
   var rcFile = require.resolve('eslint-config-davidtheclark-node');
   return loadConfig(null, rcFile).then(function (result) {
     var config = require(rcFile);
-    config.plugins = config.plugins.map(function (moduleId){
-      return require.resolve(moduleId.replace(/^(?:eslint-plugin-)?/, 'eslint-plugin-'));
-    });
 
     assert.deepEqual(result.config, config);
-    // console.log(result.config.extends[0].plugins[0]);
-    assert.is(result.filepath, rcFile);
+    assert.equal(result.filepath, rcFile);
+
+    config.plugins.forEach(function (moduleName) {
+      var modulePath = require.resolve(moduleName.replace(/^(?:eslint-plugin-)?/, 'eslint-plugin-'));
+      assert.equal(modulePath, explorer.resolveModule({
+        moduleName: moduleName,
+        modulePrefix: 'eslint-plugin-',
+        configPath: rcFile,
+      }));
+
+      assert.equal(modulePath, result.resolveModule({
+        moduleName: moduleName,
+        modulePrefix: 'eslint-plugin-',
+      }));
+    });
+
+    assert.end();
   });
 });
