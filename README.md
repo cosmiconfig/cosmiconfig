@@ -201,8 +201,8 @@ explorer.load('start/search/at/this/file.css');
 explorer.load(null, 'load/this/file.json').then(result => {
   console.log(result.filepath);
   console.log(result.config);
-  result.config.plugins.forEach(extend => {
-    console.log(result.resolveModule({moduleName: extend, modulePrefix: 'goldengrahams-plugin'}));
+  result.config.plugins.forEach(plugin => {
+    console.log(result.resolveModule({moduleName: plugin, modulePrefix: 'goldengrahams-plugin-'}));
   });
 });
 ```
