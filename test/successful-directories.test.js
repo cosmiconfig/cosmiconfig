@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('ava');
+var test = require('tape');
 var sinon = require('sinon');
 var path = require('path');
 var fs = require('fs');
@@ -14,20 +14,22 @@ function absolutePath(str) {
 var statStub;
 var readFileStub;
 
-test.beforeEach(function () {
+function setup() {
   statStub = sinon.stub(fs, 'stat').yieldsAsync(null, {
     isDirectory: function () {
       return true;
     },
   });
-});
+}
 
-test.afterEach(function () {
+function teardown(assert, err) {
   if (readFileStub.restore) readFileStub.restore();
   if (statStub.restore) statStub.restore();
-});
+  assert.end(err);
+}
 
-test.serial('find rc file in third searched dir, with a package.json lacking prop', function (assert) {
+test('find rc file in third searched dir, with a package.json lacking prop', function (assert) {
+  setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
@@ -54,7 +56,7 @@ test.serial('find rc file in third searched dir, with a package.json lacking pro
     stopDir: absolutePath('.'),
   }).load;
 
-  return loadConfig(startDir).then(function (result) {
+  loadConfig(startDir).then(function (result) {
     assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
@@ -69,10 +71,14 @@ test.serial('find rc file in third searched dir, with a package.json lacking pro
       config: { found: true },
       filepath: absolutePath('a/b/c/d/.foorc'),
     });
+    teardown(assert);
+  }).catch(function (err) {
+    teardown(assert, err);
   });
 });
 
-test.serial('find package.json prop in second searched dir', function (assert) {
+test('find package.json prop in second searched dir', function (assert) {
+  setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
@@ -95,7 +101,7 @@ test.serial('find package.json prop in second searched dir', function (assert) {
     stopDir: absolutePath('.'),
   }).load;
 
-  return loadConfig(startDir).then(function (result) {
+  loadConfig(startDir).then(function (result) {
     assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
@@ -106,10 +112,14 @@ test.serial('find package.json prop in second searched dir', function (assert) {
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/package.json'),
     });
+    teardown(assert);
+  }).catch(function (err) {
+    teardown(assert, err);
   });
 });
 
-test.serial('find JS file in first searched dir', function (assert) {
+test('find JS file in first searched dir', function (assert) {
+  setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
@@ -132,7 +142,7 @@ test.serial('find JS file in first searched dir', function (assert) {
     stopDir: absolutePath('.'),
   }).load;
 
-  return loadConfig(startDir).then(function (result) {
+  loadConfig(startDir).then(function (result) {
     assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
@@ -142,10 +152,14 @@ test.serial('find JS file in first searched dir', function (assert) {
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/f/foo.config.js'),
     });
+    teardown(assert);
+  }).catch(function (err) {
+    teardown(assert, err);
   });
 });
 
-test.serial('find package.json in second directory searched, with alternate names', function (assert) {
+test('find package.json in second directory searched, with alternate names', function (assert) {
+  setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
@@ -169,7 +183,7 @@ test.serial('find package.json in second directory searched, with alternate name
     stopDir: absolutePath('.'),
   }).load;
 
-  return loadConfig(startDir).then(function (result) {
+  loadConfig(startDir).then(function (result) {
     assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.wowza',
@@ -180,10 +194,14 @@ test.serial('find package.json in second directory searched, with alternate name
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/package.json'),
     });
+    teardown(assert);
+  }).catch(function (err) {
+    teardown(assert, err);
   });
 });
 
-test.serial('find rc file in third searched dir, skipping packageProp, with rcStrictJson', function (assert) {
+test('find rc file in third searched dir, skipping packageProp, with rcStrictJson', function (assert) {
+  setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
@@ -210,7 +228,7 @@ test.serial('find rc file in third searched dir, skipping packageProp, with rcSt
     rcStrictJson: true,
   }).load;
 
-  return loadConfig(startDir).then(function (result) {
+  loadConfig(startDir).then(function (result) {
     assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/foo.config.js',
@@ -222,10 +240,14 @@ test.serial('find rc file in third searched dir, skipping packageProp, with rcSt
       config: { found: true },
       filepath: absolutePath('a/b/c/d/.foorc'),
     });
+    teardown(assert);
+  }).catch(function (err) {
+    teardown(assert, err);
   });
 });
 
-test.serial('find package.json prop in second searched dir, skipping js and rc', function (assert) {
+test('find package.json prop in second searched dir, skipping js and rc', function (assert) {
+  setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
@@ -250,7 +272,7 @@ test.serial('find package.json prop in second searched dir, skipping js and rc',
     rc: false,
   }).load;
 
-  return loadConfig(startDir).then(function (result) {
+  loadConfig(startDir).then(function (result) {
     assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/package.json',
@@ -259,12 +281,16 @@ test.serial('find package.json prop in second searched dir, skipping js and rc',
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/package.json'),
     });
+    teardown(assert);
+  }).catch(function (err) {
+    teardown(assert, err);
   });
 });
 
 // RC file with specified extension
 
-test.serial('with rcExtensions, find .foorc.json in second searched dir', function (assert) {
+test('with rcExtensions, find .foorc.json in second searched dir', function (assert) {
+  setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
@@ -292,7 +318,7 @@ test.serial('with rcExtensions, find .foorc.json in second searched dir', functi
     rcExtensions: true,
   }).load;
 
-  return loadConfig(startDir).then(function (result) {
+  loadConfig(startDir).then(function (result) {
     assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
@@ -309,10 +335,14 @@ test.serial('with rcExtensions, find .foorc.json in second searched dir', functi
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/.foorc.json'),
     });
+    teardown(assert);
+  }).catch(function (err) {
+    teardown(assert, err);
   });
 });
 
-test.serial('with rcExtensions, find .foorc.yaml in first searched dir', function (assert) {
+test('with rcExtensions, find .foorc.yaml in first searched dir', function (assert) {
+  setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
@@ -334,7 +364,7 @@ test.serial('with rcExtensions, find .foorc.yaml in first searched dir', functio
     rcExtensions: true,
   }).load;
 
-  return loadConfig(startDir).then(function (result) {
+  loadConfig(startDir).then(function (result) {
     assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
@@ -345,10 +375,14 @@ test.serial('with rcExtensions, find .foorc.yaml in first searched dir', functio
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/f/.foorc.yaml'),
     });
+    teardown(assert);
+  }).catch(function (err) {
+    teardown(assert, err);
   });
 });
 
-test.serial('with rcExtensions, find .foorc.yml in first searched dir', function (assert) {
+test('with rcExtensions, find .foorc.yml in first searched dir', function (assert) {
+  setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
@@ -371,7 +405,7 @@ test.serial('with rcExtensions, find .foorc.yml in first searched dir', function
     rcExtensions: true,
   }).load;
 
-  return loadConfig(startDir).then(function (result) {
+  loadConfig(startDir).then(function (result) {
     assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
@@ -383,10 +417,14 @@ test.serial('with rcExtensions, find .foorc.yml in first searched dir', function
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/f/.foorc.yml'),
     });
+    teardown(assert);
+  }).catch(function (err) {
+    teardown(assert, err);
   });
 });
 
-test.serial('with rcExtensions, find .foorc.js in first searched dir', function (assert) {
+test('with rcExtensions, find .foorc.js in first searched dir', function (assert) {
+  setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
@@ -410,7 +448,7 @@ test.serial('with rcExtensions, find .foorc.js in first searched dir', function 
     rcExtensions: true,
   }).load;
 
-  return loadConfig(startDir).then(function (result) {
+  loadConfig(startDir).then(function (result) {
     assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
@@ -423,5 +461,8 @@ test.serial('with rcExtensions, find .foorc.js in first searched dir', function 
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/f/.foorc.js'),
     });
+    teardown(assert);
+  }).catch(function (err) {
+    teardown(assert, err);
   });
 });
