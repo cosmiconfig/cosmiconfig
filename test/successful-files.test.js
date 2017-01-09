@@ -4,6 +4,10 @@ var test = require('tape');
 var path = require('path');
 var cosmiconfig = require('..');
 
+require('babel-register')({
+  only: /\.babel\.js$/,
+});
+
 function absolutePath(str) {
   return path.join(__dirname, str);
 }
@@ -41,6 +45,19 @@ test('defined JS config path', function (assert) {
       foo: true,
     });
     assert.equal(result.filepath, absolutePath('fixtures/foo.js'));
+    assert.end();
+  }).catch(function (err) {
+    assert.end(err);
+  });
+});
+
+test('defined ES6 config path', function (assert) {
+  var loadConfig = cosmiconfig().load;
+  loadConfig(null, absolutePath('fixtures/foo.babel.js')).then(function (result) {
+    assert.deepEqual(result.config, {
+      foo: true,
+    });
+    assert.equal(result.filepath, absolutePath('fixtures/foo.babel.js'));
     assert.end();
   }).catch(function (err) {
     assert.end(err);
