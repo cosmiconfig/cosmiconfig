@@ -226,7 +226,7 @@ test('find invalid JS in .config.js file', function (assert) {
         callback({ code: 'ENOENT' });
         break;
       case absolutePath('a/b/foo.config.js'):
-        callback(null, '/* woot */');
+        callback(null, 'module.exports = { found: true: false,');
         break;
       default:
         callback(new Error('irrelevant path ' + searchPath));
