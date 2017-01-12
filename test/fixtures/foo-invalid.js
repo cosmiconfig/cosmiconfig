@@ -1,1 +1,1 @@
-module.exports = { foo: true: false }
+module.exports = { foo }
