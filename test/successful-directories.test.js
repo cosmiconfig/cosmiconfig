@@ -2,6 +2,7 @@
 
 var test = require('tape');
 var sinon = require('sinon');
+var mock = require('mock-require');
 var path = require('path');
 var fs = require('fs');
 var cosmiconfig = require('..');
@@ -121,6 +122,7 @@ test('find package.json prop in second searched dir', function (assert) {
 test('find JS file in first searched dir', function (assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
+  mock('./a/b/c/d/e/f/foo.config.js', { found: true });
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -131,7 +133,7 @@ test('find JS file in first searched dir', function (assert) {
         callback({ code: 'ENOENT' });
         break;
       case absolutePath('a/b/c/d/e/f/foo.config.js'):
-        callback(null, 'module.exports = { found: true };');
+        callback(null, '/* woot */');
         break;
       default:
         callback(new Error('irrelevant path ' + searchPath));
@@ -426,6 +428,7 @@ test('with rcExtensions, find .foorc.yml in first searched dir', function (asser
 test('with rcExtensions, find .foorc.js in first searched dir', function (assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
+  mock('./a/b/c/d/e/f/.foorc', { found: true });
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -436,7 +439,7 @@ test('with rcExtensions, find .foorc.js in first searched dir', function (assert
         callback({ code: 'ENOENT' });
         break;
       case absolutePath('a/b/c/d/e/f/.foorc.js'):
-        callback(null, 'module.exports = { found: true };');
+        callback(null, '/* woot */');
         break;
       default:
         callback(new Error('irrelevant path ' + searchPath));

@@ -2,6 +2,7 @@
 
 var test = require('tape');
 var sinon = require('sinon');
+var mock = require('mock-require');
 var path = require('path');
 var fs = require('fs');
 var _ = require('lodash');
@@ -217,6 +218,7 @@ test('find invalid package.json', function (assert) {
 test('find invalid JS in .config.js file', function (assert) {
   setup();
   var startDir = absolutePath('a/b');
+  mock('./a/b/foo.config.js', './fixtures/foo-invalid.js');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/package.json'):
@@ -343,6 +345,7 @@ test('with rcExtensions, find invalid YAML in .foorc.yml', function (assert) {
 test('with rcExtensions, find invalid JS in .foorc.js', function (assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
+  mock('./a/b/c/d/e/f/.foorc', './fixtures/foo-invalid');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
