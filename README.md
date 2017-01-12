@@ -14,12 +14,14 @@ For example, if your module's name is "soursocks," cosmiconfig will search out c
 - a `soursocks.config.js` file exporting a JS object (anywhere down the file tree)
 - a CLI `--config` argument
 
-cosmiconfig continues to search in these places all the way down the file tree until it finds acceptable configuration (or hits the home directory). And it does all this asynchronously, so it shouldn't get in your way.
+cosmiconfig continues to search in these places all the way down the file tree until it finds acceptable configuration (or hits the home directory). And it does all this asynchronously, so it shouldn't get in your way. (Note that although the search is asynchronous, loading JavaScript is not due to how `require` works).
 
 Additionally, all of these search locations are configurable: you can customize filenames or turn off any location.
 
 You can also look for rc files with extensions, e.g. `.soursocksrc.json` or `.soursocksrc.yaml`.
 You may like extensions on your rc files because you'll get syntax highlighting and linting in text editors.
+
+cosmiconfig supports ES6 modules indirectly - for example, if you use babel to transpile your code or you use the babel require hook your configuration JavaScript can just `export default ...` and things will behave as expected.
 
 ## Installation
 
