@@ -6,9 +6,14 @@ var path = require('path');
 var fs = require('fs');
 var _ = require('lodash');
 var cosmiconfig = require('..');
+var oshomedir = require('os-homedir');
 
 function absolutePath(str) {
   return path.join(__dirname, str);
+}
+
+function atHomeDir(str) {
+  return oshomedir() + '/' + str;
 }
 
 var statStub;
@@ -28,7 +33,7 @@ function teardown(assert, err) {
   assert.end(err);
 }
 
-test('do not find file, and give up', function (assert) {
+test('do not find file, with ensureUserHome disabled, and give up', function (assert) {
   setup();
   var startDir = absolutePath('a/b');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
@@ -51,6 +56,7 @@ test('do not find file, and give up', function (assert) {
 
   var loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
+    ensureUserHome: false,
   }).load;
 
   loadConfig(startDir).then(function (result) {
@@ -83,7 +89,71 @@ test('do not find file, and give up', function (assert) {
   });
 });
 
-test('stop at stopDir, and give up', function (assert) {
+test('do not find file, tries at user\'s home, and give up', function (assert) {
+  setup();
+  var startDir = absolutePath('a/b');
+  readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
+    switch (searchPath) {
+      case absolutePath('a/b/package.json'):
+      case absolutePath('a/b/.foorc'):
+      case absolutePath('a/b/foo.config.js'):
+      case absolutePath('a/package.json'):
+      case absolutePath('a/.foorc'):
+      case absolutePath('a/foo.config.js'):
+      case absolutePath('package.json'):
+      case absolutePath('.foorc'):
+      case absolutePath('foo.config.js'):
+      case atHomeDir('package.json'):
+      case atHomeDir('.foorc'):
+      case atHomeDir('foo.config.js'):
+        callback({ code: 'ENOENT' });
+        break;
+      default:
+        callback(new Error('irrelevant path ' + searchPath));
+    }
+  });
+
+  var loadConfig = cosmiconfig('foo', {
+    stopDir: absolutePath('.'),
+  }).load;
+
+  loadConfig(startDir).then(function (result) {
+    assert.equal(statStub.callCount, 1);
+    assert.equal(_.get(statStub.getCall(0), 'args[0]'), absolutePath('a/b'));
+
+    assert.equal(readFileStub.callCount, 12);
+    assert.equal(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/package.json'),
+      'first dir: a/b/package.json');
+    assert.equal(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/.foorc'),
+      'first dir: a/b/.foorc');
+    assert.equal(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/foo.config.js'),
+      'first dir: a/b/foo.config.js');
+    assert.equal(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/package.json'),
+      'second dir: a/package.json');
+    assert.equal(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/.foorc'),
+      'second dir: a/.foorc');
+    assert.equal(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/foo.config.js'),
+      'second dir: a/foo.config.js');
+    assert.equal(_.get(readFileStub.getCall(6), 'args[0]'), absolutePath('./package.json'),
+      'third: /package.json');
+    assert.equal(_.get(readFileStub.getCall(7), 'args[0]'), absolutePath('./.foorc'),
+      'third: /.foorc');
+    assert.equal(_.get(readFileStub.getCall(8), 'args[0]'), absolutePath('./foo.config.js'),
+      'third: /foo.config.js');
+    assert.equal(_.get(readFileStub.getCall(9), 'args[0]'), atHomeDir('package.json'),
+      'User\'s home and last dir: /package.json');
+    assert.equal(_.get(readFileStub.getCall(10), 'args[0]'), atHomeDir('.foorc'),
+      'User\'s home and last dir: /.foorc');
+    assert.equal(_.get(readFileStub.getCall(11), 'args[0]'), atHomeDir('foo.config.js'),
+      'User\'s home and last dir: /foo.config.js');
+    assert.equal(result, null);
+    teardown(assert);
+  }).catch(function (err) {
+    teardown(assert, err);
+  });
+});
+
+test('stop at stopDir, ensureUserHome disabled, and give up', function (assert) {
   setup();
   var startDir = absolutePath('a/b');
   readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
@@ -106,6 +176,7 @@ test('stop at stopDir, and give up', function (assert) {
 
   var loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('a'),
+    ensureUserHome: false,
   }).load;
 
   loadConfig(startDir).then(function (result) {
@@ -122,6 +193,61 @@ test('stop at stopDir, and give up', function (assert) {
       'second and stopDir: a/.foorc');
     assert.equal(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/foo.config.js'),
       'second and stopDir: a/foo.config.js');
+    assert.equal(result, null);
+    teardown(assert);
+  }).catch(function (err) {
+    teardown(assert, err);
+  });
+});
+
+test('stop at stopDir, try at user\'s home and then give up ', function (assert) {
+  setup();
+  var startDir = absolutePath('a/b');
+  readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
+    switch (searchPath) {
+      case absolutePath('a/b/package.json'):
+      case absolutePath('a/b/.foorc'):
+      case absolutePath('a/b/foo.config.js'):
+      case absolutePath('a/package.json'):
+      case absolutePath('a/.foorc'):
+      case absolutePath('a/foo.config.js'):
+      case absolutePath('/package.json'):
+      case absolutePath('/.foorc'):
+      case absolutePath('/foo.config.js'):
+      case atHomeDir('package.json'):
+      case atHomeDir('.foorc'):
+      case atHomeDir('foo.config.js'):
+        callback({ code: 'ENOENT' });
+        break;
+      default:
+        callback(new Error('irrelevant path ' + searchPath));
+    }
+  });
+
+  var loadConfig = cosmiconfig('foo', {
+    stopDir: absolutePath('a'),
+  }).load;
+
+  loadConfig(startDir).then(function (result) {
+    assert.equal(readFileStub.callCount, 9);
+    assert.equal(_.get(readFileStub.getCall(0), 'args[0]'), absolutePath('a/b/package.json'),
+      'first dir: a/b/package.json');
+    assert.equal(_.get(readFileStub.getCall(1), 'args[0]'), absolutePath('a/b/.foorc'),
+      'first dir: a/b/.foorc');
+    assert.equal(_.get(readFileStub.getCall(2), 'args[0]'), absolutePath('a/b/foo.config.js'),
+      'first dir: a/b/foo.config.js');
+    assert.equal(_.get(readFileStub.getCall(3), 'args[0]'), absolutePath('a/package.json'),
+      'second: a/package.json');
+    assert.equal(_.get(readFileStub.getCall(4), 'args[0]'), absolutePath('a/.foorc'),
+      'second: a/.foorc');
+    assert.equal(_.get(readFileStub.getCall(5), 'args[0]'), absolutePath('a/foo.config.js'),
+      'second: a/foo.config.js');
+    assert.equal(_.get(readFileStub.getCall(6), 'args[0]'), atHomeDir('package.json'),
+      'User\'s home and stopDir: package.json');
+    assert.equal(_.get(readFileStub.getCall(7), 'args[0]'), atHomeDir('.foorc'),
+      'User\'s home and stopDir: .foorc');
+    assert.equal(_.get(readFileStub.getCall(8), 'args[0]'), atHomeDir('foo.config.js'),
+      'User\'s home and stopDir: foo.config.js');
     assert.equal(result, null);
     teardown(assert);
   }).catch(function (err) {
