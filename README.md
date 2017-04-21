@@ -187,7 +187,7 @@ The reason you might use this option instead of simply applying your transform f
 
 #### `load([searchPath, configPath])`
 
-Find and load a configuration file. Returns `null` if nothing is found, or an object with 3 properties:
+Find and load a configuration file. Returns a Promise that resolves with `null`, if nothing is found, or an object with 3 properties:
 - `config`: The loaded and parsed configuration.
 - `filepath`: The filepath where this configuration was found.
 - `resolveModule()`: look up the location of a module.
