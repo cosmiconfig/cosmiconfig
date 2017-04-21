@@ -10,6 +10,7 @@ var parsedCliArgs = minimist(process.argv);
 
 module.exports = function (moduleName, options) {
   options = assign({
+    modulePrefix: moduleName + '-config-',
     packageProp: moduleName,
     rc: '.' + moduleName + 'rc',
     js: moduleName + '.config.js',

@@ -161,6 +161,13 @@ Default: Absolute path to your home directory
 
 Directory where the search will stop.
 
+##### modulePrefix
+
+Type: `string`
+Default: `'[moduleName]-config-'`
+
+Default prefix of node package name.
+
 ##### cache
 
 Type: `boolean`
@@ -180,9 +187,10 @@ The reason you might use this option instead of simply applying your transform f
 
 #### `load([searchPath, configPath])`
 
-Find and load a configuration file. Returns a Promise that resolves with `null`, if nothing is found, or an object with two properties:
+Find and load a configuration file. Returns a Promise that resolves with `null`, if nothing is found, or an object with 3 properties:
 - `config`: The loaded and parsed configuration.
 - `filepath`: The filepath where this configuration was found.
+- `resolveModule()`: look up the location of a module.
 
 You should provide *either* `searchPath` *or* `configPath`. Use `configPath` if you know the path of the configuration file you want to load. Otherwise, use `searchPath`.
 
@@ -190,13 +198,28 @@ You should provide *either* `searchPath` *or* `configPath`. Use `configPath` if 
 explorer.load('start/search/here');
 explorer.load('start/search/at/this/file.css');
 
-explorer.load(null, 'load/this/file.json');
+explorer.load(null, 'load/this/file.json').then(result => {
+  console.log(result.filepath);
+  console.log(result.config);
+  result.config.plugins.forEach(plugin => {
+    console.log(result.resolveModule({moduleName: plugin, modulePrefix: 'goldengrahams-plugin-'}));
+  });
+});
 ```
 
 If you provide `searchPath`, cosmiconfig will start its search at `searchPath` and continue to search up the file tree, as documented above.
 
 If you provide `configPath` (i.e. you already know where the configuration is that you want to load), cosmiconfig will try to read and parse that file.
 
+#### `resolveModule()`
+Look up the path of a module.
+
+```js
+explorer.resolveModule({
+  moduleName: /* string */, 
+  configPath: /* string */,
+})
+```
 #### `clearFileCache()`
 
 Clears the cache used when you provide a `configPath` argument to `load`.

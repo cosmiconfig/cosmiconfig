@@ -32,11 +32,12 @@
   },
   "homepage": "https://github.com/davidtheclark/cosmiconfig#readme",
   "dependencies": {
+    "global-paths": "^1.0.0",
     "js-yaml": "^3.4.3",
     "json-parse-helpfulerror": "^1.0.3",
     "minimist": "^1.2.0",
     "object-assign": "^4.1.0",
-    "os-homedir": "^1.0.1",
+    "os-homedir": "^1.0.2",
     "require-from-string": "^1.1.0"
   },
   "devDependencies": {
