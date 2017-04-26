@@ -1,7 +1,8 @@
 # Changelog
 
-## Head
+## 2.1.2
 
+- Fixed: bug where an `ENOENT` error would be thrown is `searchPath` referenced a non-existent file.
 - Fixed: JSON parsing errors in Node v7.
 
 ## 2.1.1
