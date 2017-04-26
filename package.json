@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/davidtheclark/cosmiconfig#readme",
   "dependencies": {
+    "is-directory": "^0.3.1",
     "js-yaml": "^3.4.3",
     "json-parse-helpfulerror": "^1.0.3",
     "minimist": "^1.2.0",
