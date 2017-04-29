@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.3
+
+- Licensing improvement: switched from `json-parse-helpfulerror` to `parse-json`.
+
 ## 2.1.2
 
 - Fixed: bug where an `ENOENT` error would be thrown is `searchPath` referenced a non-existent file.
