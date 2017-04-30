@@ -10,7 +10,7 @@ function absolutePath(str) {
 
 test('defined file that does not exist', function (assert) {
   var loadConfig = cosmiconfig().load;
-  loadConfig(null, absolutePath('does/not/exist'))
+  return loadConfig(null, absolutePath('does/not/exist'))
     .then(function () {
       assert.fail('should have errored');
       assert.end();
@@ -44,7 +44,22 @@ test('defined JSON file with syntax error, with expected format', function (asse
       assert.end();
     })
     .catch(function (error) {
-      assert.ok(/JSON Error/.test(error.message), 'threw correct error type');
+      assert.ok(/JSON Error/.test(error.message), 'threw incorrect error type');
+      assert.end();
+    });
+});
+
+test('defined JSON file with duplicate keys', function (assert) {
+  var loadConfig = cosmiconfig(null, {
+    format: 'json',
+  }).load;
+  return loadConfig(null, absolutePath('fixtures/duplicate-keys.json'))
+    .then(function () {
+      assert.fail('should have errored');
+      assert.end();
+    })
+    .catch(function (error) {
+      assert.ok(/Duplicate key foo/.test(error.message), 'threw unhelpful error message');
       assert.end();
     });
 });
