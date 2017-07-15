@@ -179,11 +179,12 @@ If `true`, config will be loaded synchronously.
 
 ##### transform
 
-Type: `Function` returning a Promise(`sync` is false)
+Type: `Function`
 
-A function that transforms the parsed configuration. Receives the result object with `config` and `filepath` properties, and must return a Promise that resolves with the transformed result.
+A function that transforms the parsed configuration. Receives the result object with `config` and `filepath` properties.
 
-If the `sync` option is passed as `true`, transform need not be a function which returns a promise.
+If the option `sync` is `false`(default), the function must return a Promise that resolves with the transformed result.
+Otherwise, `transform` should be a synchronous function which returns the transformed result.
 
 The reason you might use this option instead of simply applying your transform function some other way is that *the transformed result will be cached*. If your transformation involves additional filesystem I/O or other potentially slow processing, you can use this option to avoid repeating those steps every time a given configuration is loaded.
 
