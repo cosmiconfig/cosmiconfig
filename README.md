@@ -14,7 +14,7 @@ For example, if your module's name is "soursocks," cosmiconfig will search out c
 - a `soursocks.config.js` file exporting a JS object (anywhere down the file tree)
 - a CLI `--config` argument
 
-cosmiconfig continues to search in these places all the way down the file tree until it finds acceptable configuration (or hits the home directory). And it does all this asynchronously, so it shouldn't get in your way.
+cosmiconfig continues to search in these places all the way down the file tree until it finds acceptable configuration (or hits the home directory). And it does all this asynchronously by default, so it shouldn't get in your way.
 
 Additionally, all of these search locations are configurable: you can customize filenames or turn off any location.
 
@@ -48,6 +48,8 @@ explorer.load(yourSearchPath)
 
 The function `cosmiconfig()` searches for a configuration object and returns a Promise,
 which resolves with an object containing the information you're looking for.
+
+You can also pass option `sync: true` to load the config synchronously.
 
 So let's say `var yourModuleName = 'goldengrahams'` — here's how cosmiconfig will work:
 
@@ -168,11 +170,20 @@ Default: `true`
 
 If `false`, no caches will be used.
 
+##### sync
+
+Type: `boolean`
+Default: `false`
+
+If `true`, config will be loaded synchronously.
+
 ##### transform
 
-Type: `Function` returning a Promise
+Type: `Function` returning a Promise(`sync` is false)
 
 A function that transforms the parsed configuration. Receives the result object with `config` and `filepath` properties, and must return a Promise that resolves with the transformed result.
+
+If the `sync` option is passed as `true`, transform need not be a function which returns a promise.
 
 The reason you might use this option instead of simply applying your transform function some other way is that *the transformed result will be cached*. If your transformation involves additional filesystem I/O or other potentially slow processing, you can use this option to avoid repeating those steps every time a given configuration is loaded.
 
@@ -217,7 +228,7 @@ Performs both `clearFileCache()` and `clearDirectoryCache()`.
 - Built-in support for JSON, YAML, and CommonJS formats.
 - Stops at the first configuration found, instead of finding all that can be found down the filetree and merging them automatically.
 - Options.
-- Asynchronicity.
+- Asynchronous by default, can be forced to use synchronous mode.
 
 ## Contributing & Development
 

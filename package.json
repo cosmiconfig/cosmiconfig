@@ -24,7 +24,8 @@
   ],
   "author": "David Clark <david.dave.clark@gmail.com>",
   "contributors": [
-    "Bogdan Chadkin <trysound@yandex.ru>"
+    "Bogdan Chadkin <trysound@yandex.ru>",
+    "Suhas Karanth <sudo.suhas@gmail.com>"
   ],
   "license": "MIT",
   "bugs": {
