@@ -24,7 +24,8 @@
   ],
   "author": "David Clark <david.dave.clark@gmail.com>",
   "contributors": [
-    "Bogdan Chadkin <trysound@yandex.ru>"
+    "Bogdan Chadkin <trysound@yandex.ru>",
+    "Suhas Karanth <sudo.suhas@gmail.com>"
   ],
   "license": "MIT",
   "bugs": {
@@ -33,6 +34,7 @@
   "homepage": "https://github.com/davidtheclark/cosmiconfig#readme",
   "dependencies": {
     "is-directory": "^0.3.1",
+    "is-promise": "^2.1.0",
     "js-yaml": "^3.4.3",
     "minimist": "^1.2.0",
     "object-assign": "^4.1.0",
