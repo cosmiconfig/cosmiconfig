@@ -1,5 +1,9 @@
 # Changelog
 
+## Head
+
+- Added: `sync` option.
+
 ## 2.1.3
 
 - Licensing improvement: switched from `json-parse-helpfulerror` to `parse-json`.
