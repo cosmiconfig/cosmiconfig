@@ -1,10 +1,5 @@
 # Changelog
 
-## 2.2.0
-
-- Added: `sync` option.
-- Fixed: `options.configPath` and `--config` flag are respected.
-
 ## 2.1.3
 
 - Licensing improvement: switched from `json-parse-helpfulerror` to `parse-json`.

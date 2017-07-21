@@ -6,16 +6,13 @@ var path = require('path');
 var fs = require('fs');
 var cosmiconfig = require('..');
 var assertSearchSequence = require('./assertSearchSequence');
-var makeReadFileSyncStub = require('./makeReadFileSyncStub');
 
 function absolutePath(str) {
   return path.join(__dirname, str);
 }
 
 var statStub;
-var statSyncStub;
 var readFileStub;
-var readFileSyncStub;
 
 function setup() {
   statStub = sinon.stub(fs, 'stat').yieldsAsync(null, {
@@ -23,28 +20,18 @@ function setup() {
       return true;
     },
   });
-
-  statSyncStub = sinon.stub(fs, 'statSync').callsFake(function () {
-    return {
-      isDirectory: function () {
-        return true;
-      },
-    };
-  });
 }
 
 function teardown(assert, err) {
   if (readFileStub.restore) readFileStub.restore();
-  if (readFileSyncStub.restore) readFileSyncStub.restore();
   if (statStub.restore) statStub.restore();
-  if (statSyncStub.restore) statSyncStub.restore();
   assert.end(err);
 }
 
 test('find rc file in third searched dir, with a package.json lacking prop', function (assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
+  readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -63,12 +50,14 @@ test('find rc file in third searched dir, with a package.json lacking prop', fun
       default:
         callback(new Error('irrelevant path ' + searchPath));
     }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  });
 
-  function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+  var loadConfig = cosmiconfig('foo', {
+    stopDir: absolutePath('.'),
+  }).load;
+
+  loadConfig(startDir).then(function (result) {
+    assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/foo.config.js',
@@ -82,35 +71,16 @@ test('find rc file in third searched dir, with a package.json lacking prop', fun
       config: { found: true },
       filepath: absolutePath('a/b/c/d/.foorc'),
     });
-  }
-
-  var loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-  }).load;
-  var loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    sync: true,
-  }).load;
-
-  try {
-    var result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub);
-
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
-  } catch (err) {
+    teardown(assert);
+  }).catch(function (err) {
     teardown(assert, err);
-  }
+  });
 });
 
 test('find package.json prop in second searched dir', function (assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
+  readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -125,12 +95,14 @@ test('find package.json prop in second searched dir', function (assert) {
       default:
         callback(new Error('irrelevant path ' + searchPath));
     }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  });
 
-  function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+  var loadConfig = cosmiconfig('foo', {
+    stopDir: absolutePath('.'),
+  }).load;
+
+  loadConfig(startDir).then(function (result) {
+    assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/foo.config.js',
@@ -140,35 +112,16 @@ test('find package.json prop in second searched dir', function (assert) {
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/package.json'),
     });
-  }
-
-  var loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-  }).load;
-  var loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    sync: true,
-  }).load;
-
-  try {
-    var result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub);
-
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
-  } catch (err) {
+    teardown(assert);
+  }).catch(function (err) {
     teardown(assert, err);
-  }
+  });
 });
 
 test('find JS file in first searched dir', function (assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
+  readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -183,12 +136,14 @@ test('find JS file in first searched dir', function (assert) {
       default:
         callback(new Error('irrelevant path ' + searchPath));
     }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  });
 
-  function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+  var loadConfig = cosmiconfig('foo', {
+    stopDir: absolutePath('.'),
+  }).load;
+
+  loadConfig(startDir).then(function (result) {
+    assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/foo.config.js',
@@ -197,35 +152,16 @@ test('find JS file in first searched dir', function (assert) {
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/f/foo.config.js'),
     });
-  }
-
-  var loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-  }).load;
-  var loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    sync: true,
-  }).load;
-
-  try {
-    var result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub);
-
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
-  } catch (err) {
+    teardown(assert);
+  }).catch(function (err) {
     teardown(assert, err);
-  }
+  });
 });
 
 test('find package.json in second directory searched, with alternate names', function (assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
+  readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.wowza'):
@@ -238,12 +174,17 @@ test('find package.json in second directory searched, with alternate names', fun
       default:
         callback(new Error('irrelevant path ' + searchPath));
     }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  });
 
-  function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+  var loadConfig = cosmiconfig('foo', {
+    rc: '.wowza',
+    js: 'wowzaConfig.js',
+    packageProp: 'heeha',
+    stopDir: absolutePath('.'),
+  }).load;
+
+  loadConfig(startDir).then(function (result) {
+    assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.wowza',
       'a/b/c/d/e/f/wowzaConfig.js',
@@ -253,41 +194,16 @@ test('find package.json in second directory searched, with alternate names', fun
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/package.json'),
     });
-  }
-
-  var loadConfig = cosmiconfig('foo', {
-    rc: '.wowza',
-    js: 'wowzaConfig.js',
-    packageProp: 'heeha',
-    stopDir: absolutePath('.'),
-  }).load;
-  var loadConfigSync = cosmiconfig('foo', {
-    rc: '.wowza',
-    js: 'wowzaConfig.js',
-    packageProp: 'heeha',
-    stopDir: absolutePath('.'),
-    sync: true,
-  }).load;
-
-  try {
-    var result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub);
-
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
-  } catch (err) {
+    teardown(assert);
+  }).catch(function (err) {
     teardown(assert, err);
-  }
+  });
 });
 
 test('find rc file in third searched dir, skipping packageProp, with rcStrictJson', function (assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
+  readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -304,12 +220,16 @@ test('find rc file in third searched dir, skipping packageProp, with rcStrictJso
       default:
         callback(new Error('irrelevant path ' + searchPath));
     }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  });
 
-  function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+  var loadConfig = cosmiconfig('foo', {
+    stopDir: absolutePath('.'),
+    packageProp: false,
+    rcStrictJson: true,
+  }).load;
+
+  loadConfig(startDir).then(function (result) {
+    assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/.foorc',
@@ -320,39 +240,16 @@ test('find rc file in third searched dir, skipping packageProp, with rcStrictJso
       config: { found: true },
       filepath: absolutePath('a/b/c/d/.foorc'),
     });
-  }
-
-  var loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    packageProp: false,
-    rcStrictJson: true,
-  }).load;
-  var loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    packageProp: false,
-    rcStrictJson: true,
-    sync: true,
-  }).load;
-
-  try {
-    var result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub);
-
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
-  } catch (err) {
+    teardown(assert);
+  }).catch(function (err) {
     teardown(assert, err);
-  }
+  });
 });
 
 test('find package.json prop in second searched dir, skipping js and rc', function (assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
+  readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -367,12 +264,16 @@ test('find package.json prop in second searched dir, skipping js and rc', functi
       default:
         callback(new Error('irrelevant path ' + searchPath));
     }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  });
 
-  function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+  var loadConfig = cosmiconfig('foo', {
+    stopDir: absolutePath('.'),
+    js: false,
+    rc: false,
+  }).load;
+
+  loadConfig(startDir).then(function (result) {
+    assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/package.json',
     ]);
@@ -380,33 +281,10 @@ test('find package.json prop in second searched dir, skipping js and rc', functi
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/package.json'),
     });
-  }
-
-  var loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    js: false,
-    rc: false,
-  }).load;
-  var loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    js: false,
-    rc: false,
-    sync: true,
-  }).load;
-
-  try {
-    var result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub);
-
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
-  } catch (err) {
+    teardown(assert);
+  }).catch(function (err) {
     teardown(assert, err);
-  }
+  });
 });
 
 // RC file with specified extension
@@ -414,7 +292,7 @@ test('find package.json prop in second searched dir, skipping js and rc', functi
 test('with rcExtensions, find .foorc.json in second searched dir', function (assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
+  readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -433,12 +311,15 @@ test('with rcExtensions, find .foorc.json in second searched dir', function (ass
       default:
         callback(new Error('irrelevant path ' + searchPath));
     }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  });
 
-  function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+  var loadConfig = cosmiconfig('foo', {
+    stopDir: absolutePath('.'),
+    rcExtensions: true,
+  }).load;
+
+  loadConfig(startDir).then(function (result) {
+    assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/.foorc.json',
@@ -454,37 +335,16 @@ test('with rcExtensions, find .foorc.json in second searched dir', function (ass
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/.foorc.json'),
     });
-  }
-
-  var loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-  }).load;
-  var loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-    sync: true,
-  }).load;
-
-  try {
-    var result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub);
-
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
-  } catch (err) {
+    teardown(assert);
+  }).catch(function (err) {
     teardown(assert, err);
-  }
+  });
 });
 
 test('with rcExtensions, find .foorc.yaml in first searched dir', function (assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
+  readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -497,12 +357,15 @@ test('with rcExtensions, find .foorc.yaml in first searched dir', function (asse
       default:
         callback(new Error('irrelevant path ' + searchPath));
     }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  });
 
-  function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+  var loadConfig = cosmiconfig('foo', {
+    stopDir: absolutePath('.'),
+    rcExtensions: true,
+  }).load;
+
+  loadConfig(startDir).then(function (result) {
+    assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/.foorc.json',
@@ -512,37 +375,16 @@ test('with rcExtensions, find .foorc.yaml in first searched dir', function (asse
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/f/.foorc.yaml'),
     });
-  }
-
-  var loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-  }).load;
-  var loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-    sync: true,
-  }).load;
-
-  try {
-    var result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub);
-
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
-  } catch (err) {
+    teardown(assert);
+  }).catch(function (err) {
     teardown(assert, err);
-  }
+  });
 });
 
 test('with rcExtensions, find .foorc.yml in first searched dir', function (assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
+  readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -556,12 +398,15 @@ test('with rcExtensions, find .foorc.yml in first searched dir', function (asser
       default:
         callback(new Error('irrelevant path ' + searchPath));
     }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  });
 
-  function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+  var loadConfig = cosmiconfig('foo', {
+    stopDir: absolutePath('.'),
+    rcExtensions: true,
+  }).load;
+
+  loadConfig(startDir).then(function (result) {
+    assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/.foorc.json',
@@ -572,37 +417,16 @@ test('with rcExtensions, find .foorc.yml in first searched dir', function (asser
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/f/.foorc.yml'),
     });
-  }
-
-  var loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-  }).load;
-  var loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-    sync: true,
-  }).load;
-
-  try {
-    var result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub);
-
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
-  } catch (err) {
+    teardown(assert);
+  }).catch(function (err) {
     teardown(assert, err);
-  }
+  });
 });
 
 test('with rcExtensions, find .foorc.js in first searched dir', function (assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
+  readFileStub = sinon.stub(fs, 'readFile', function (searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
       case absolutePath('a/b/c/d/e/f/.foorc'):
@@ -617,12 +441,15 @@ test('with rcExtensions, find .foorc.js in first searched dir', function (assert
       default:
         callback(new Error('irrelevant path ' + searchPath));
     }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  });
 
-  function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+  var loadConfig = cosmiconfig('foo', {
+    stopDir: absolutePath('.'),
+    rcExtensions: true,
+  }).load;
+
+  loadConfig(startDir).then(function (result) {
+    assertSearchSequence(assert, readFileStub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/.foorc.json',
@@ -634,43 +461,8 @@ test('with rcExtensions, find .foorc.js in first searched dir', function (assert
       config: { found: true },
       filepath: absolutePath('a/b/c/d/e/f/.foorc.js'),
     });
-  }
-
-  var loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-  }).load;
-  var loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-    sync: true,
-  }).load;
-
-  try {
-    var result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub);
-
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
-  } catch (err) {
-    teardown(assert, err);
-  }
-});
-
-test('options.configPath is respected', function (assert) {
-  var configPath = absolutePath('fixtures/foo.json');
-  var explorer = cosmiconfig('foo', { configPath: configPath });
-  explorer.load('./path/does/not/exist').then(function (result) {
-    assert.deepEqual(result.config, {
-      foo: true,
-    });
-    assert.equal(result.filepath, configPath);
-    assert.end();
+    teardown(assert);
   }).catch(function (err) {
-    assert.end(err);
+    teardown(assert, err);
   });
 });

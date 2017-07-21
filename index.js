@@ -17,7 +17,6 @@ module.exports = function (moduleName, options) {
     rcStrictJson: false,
     stopDir: oshomedir(),
     cache: true,
-    sync: false,
   }, options);
 
   if (options.argv && parsedCliArgs[options.argv]) {
