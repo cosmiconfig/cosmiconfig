@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.0-1
+
+- 2.2.0 included a number of improvements but somehow broke stylelint. The changes were reverted in 2.2.1, to be restored later.
+
 ## 2.1.3
 
 - Licensing improvement: switched from `json-parse-helpfulerror` to `parse-json`.
