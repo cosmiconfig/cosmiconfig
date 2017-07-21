@@ -24,7 +24,7 @@ function setup() {
     },
   });
 
-  statSyncStub = sinon.stub(fs, 'statSync', function () {
+  statSyncStub = sinon.stub(fs, 'statSync').callsFake(function () {
     return {
       isDirectory: function () {
         return true;
@@ -61,7 +61,7 @@ test('do not find file, and give up', function (assert) {
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(result, readFileStub, statStub) { // intentional shadowing
@@ -132,7 +132,7 @@ test('stop at stopDir, and give up', function (assert) {
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
@@ -189,7 +189,7 @@ test('find invalid YAML in rc file', function (assert) {
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
@@ -234,7 +234,7 @@ test('find invalid JSON in rc file with rcStrictJson', function (assert) {
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
@@ -278,7 +278,7 @@ test('find invalid package.json', function (assert) {
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
@@ -324,7 +324,7 @@ test('find invalid JS in .config.js file', function (assert) {
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
@@ -370,7 +370,7 @@ test('with rcExtensions, find invalid JSON in .foorc.json', function (assert) {
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
@@ -419,7 +419,7 @@ test('with rcExtensions, find invalid YAML in .foorc.yaml', function (assert) {
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
@@ -468,7 +468,7 @@ test('with rcExtensions, find invalid YAML in .foorc.yml', function (assert) {
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
@@ -519,7 +519,7 @@ test('with rcExtensions, find invalid JS in .foorc.js', function (assert) {
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {

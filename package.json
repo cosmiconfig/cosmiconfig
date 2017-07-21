@@ -35,24 +35,24 @@
   "dependencies": {
     "is-directory": "^0.3.1",
     "is-promise": "^2.1.0",
-    "js-yaml": "^3.4.3",
+    "js-yaml": "^3.9.0",
     "minimist": "^1.2.0",
-    "object-assign": "^4.1.0",
+    "object-assign": "^4.1.1",
     "os-homedir": "^1.0.1",
     "parse-json": "^2.2.0",
     "require-from-string": "^1.1.0"
   },
   "devDependencies": {
-    "eslint": "^3.13.0",
+    "eslint": "^4.2.0",
     "eslint-config-davidtheclark-node": "^0.2.0",
     "eslint-plugin-node": "^3.0.5",
     "expect": "^1.20.2",
     "lodash": "^4.17.4",
-    "node-version-check": "^2.1.1",
-    "nyc": "^10.0.0",
-    "sinon": "^1.17.7",
+    "node-version-check": "^2.2.0",
+    "nyc": "^11.0.3",
+    "sinon": "^2.3.8",
     "tap-spec": "^4.1.1",
-    "tape": "^4.6.3"
+    "tape": "^4.7.0"
   },
   "engines": {
     "node": ">=0.12"

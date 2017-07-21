@@ -24,7 +24,7 @@ function setup() {
     },
   });
 
-  statSyncStub = sinon.stub(fs, 'statSync', function () {
+  statSyncStub = sinon.stub(fs, 'statSync').callsFake(function () {
     return {
       isDirectory: function () {
         return true;
@@ -64,7 +64,7 @@ test('find rc file in third searched dir, with a package.json lacking prop', fun
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
@@ -126,7 +126,7 @@ test('find package.json prop in second searched dir', function (assert) {
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
@@ -184,7 +184,7 @@ test('find JS file in first searched dir', function (assert) {
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
@@ -239,7 +239,7 @@ test('find package.json in second directory searched, with alternate names', fun
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
@@ -305,7 +305,7 @@ test('find rc file in third searched dir, skipping packageProp, with rcStrictJso
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
@@ -368,7 +368,7 @@ test('find package.json prop in second searched dir, skipping js and rc', functi
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
@@ -434,7 +434,7 @@ test('with rcExtensions, find .foorc.json in second searched dir', function (ass
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
@@ -498,7 +498,7 @@ test('with rcExtensions, find .foorc.yaml in first searched dir', function (asse
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
@@ -557,7 +557,7 @@ test('with rcExtensions, find .foorc.yml in first searched dir', function (asser
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
@@ -618,7 +618,7 @@ test('with rcExtensions, find .foorc.js in first searched dir', function (assert
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile', readFile);
+  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
   readFileSyncStub = makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
