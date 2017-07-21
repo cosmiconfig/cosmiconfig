@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.2.0
+## Head
 
 - Added: `sync` option.
 - Fixed: `options.configPath` and `--config` flag are respected.
