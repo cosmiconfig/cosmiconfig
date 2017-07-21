@@ -5,7 +5,9 @@ var fs = require('fs');
 var sinon = require('sinon');
 
 module.exports = function makeReadFileSyncStub(readFile) {
-  return sinon.stub(fs, 'readFileSync').callsFake(
+  return sinon.stub(
+    fs,
+    'readFileSync',
     function readFileSync(search, encoding) {
       var errSync, contentsSync;
 

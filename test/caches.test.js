@@ -26,7 +26,7 @@ function statStubIsDirectory(result) {
     },
   });
 
-  statSyncStub = sinon.stub(fs, 'statSync').callsFake(function () {
+  statSyncStub = sinon.stub(fs, 'statSync', function () {
     return {
       isDirectory: function () {
         return result;
@@ -70,7 +70,7 @@ function setup() {
         callback(new Error('irrelevant path ' + searchPath));
     }
   }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
+  readFileStub = sinon.stub(fs, 'readFile', readFile);
 
   readFileSyncStub = makeReadFileSyncStub(readFile);
 }
