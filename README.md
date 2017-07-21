@@ -188,12 +188,6 @@ If the option `sync` is `true`, though, `transform` should be a synchronous func
 
 The reason you might use this option instead of simply applying your transform function some other way is that *the transformed result will be cached*. If your transformation involves additional filesystem I/O or other potentially slow processing, you can use this option to avoid repeating those steps every time a given configuration is loaded.
 
-##### configPath
-
-Type: `string`
-
-If provided, cosmiconfig will load and parse a config from this path, and will not perform its usual search.
-
 ### Instance methods (on `explorer`)
 
 #### `load([searchPath, configPath])`

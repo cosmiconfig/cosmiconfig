@@ -3,7 +3,6 @@
 ## Head
 
 - Added: `sync` option.
-- Fixed: `options.configPath` and `--config` flag are respected.
 
 ## 2.1.3
 

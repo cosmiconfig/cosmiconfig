@@ -660,17 +660,3 @@ test('with rcExtensions, find .foorc.js in first searched dir', function (assert
     teardown(assert, err);
   }
 });
-
-test('options.configPath is respected', function (assert) {
-  var configPath = absolutePath('fixtures/foo.json');
-  var explorer = cosmiconfig('foo', { configPath: configPath });
-  explorer.load('./path/does/not/exist').then(function (result) {
-    assert.deepEqual(result.config, {
-      foo: true,
-    });
-    assert.equal(result.filepath, configPath);
-    assert.end();
-  }).catch(function (err) {
-    assert.end(err);
-  });
-});
