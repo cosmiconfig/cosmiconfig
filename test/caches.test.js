@@ -2,15 +2,13 @@
 
 var test = require('tape');
 var sinon = require('sinon');
-var path = require('path');
 var fs = require('fs');
 var cosmiconfig = require('..');
 var assertSearchSequence = require('./assertSearchSequence');
 var makeReadFileSyncStub = require('./makeReadFileSyncStub');
+var util = require('./util');
 
-function absolutePath(str) {
-  return path.join(__dirname, str);
-}
+var absolutePath = util.absolutePath;
 
 var cachedLoadConfig;
 var cachedLoadConfigSync;

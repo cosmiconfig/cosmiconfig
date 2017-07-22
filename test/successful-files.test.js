@@ -1,12 +1,11 @@
 'use strict';
 
 var test = require('tape');
-var path = require('path');
 var cosmiconfig = require('..');
+var util = require('./util');
 
-function absolutePath(str) {
-  return path.join(__dirname, str);
-}
+var absolutePath = util.absolutePath;
+var failAssert = util.failAssert;
 
 function doAsserts(assert, result, filePath) {
   assert.deepEqual(result.config, {
@@ -24,7 +23,7 @@ function makeFileTest(file) {
     try {
       var result = loadConfigSync(null, filePath);
       doAsserts(assert, result, filePath);
-      loadConfig(null, absolutePath(file)).then(function (result) {
+      loadConfig(null, filePath).then(function (result) {
         doAsserts(assert, result, filePath);
         assert.end();
       }).catch(function (err) {
@@ -36,6 +35,15 @@ function makeFileTest(file) {
   };
 }
 
+function transform(result) {
+  result.config.foo = [result.config.foo];
+  return result;
+}
+
+function transformWithError(result) { // eslint-disable-line no-unused-vars
+  throw new Error('These pretzels are making me thirsty!');
+}
+
 test('defined JSON config path', makeFileTest('fixtures/foo.json'));
 
 test('defined YAML config path', makeFileTest('fixtures/foo.yaml'));
@@ -43,3 +51,76 @@ test('defined YAML config path', makeFileTest('fixtures/foo.yaml'));
 test('defined JS config path', makeFileTest('fixtures/foo.js'));
 
 test('defined modulized JS config path', makeFileTest('fixtures/foo-module.js'));
+
+test('transform sync', function (assert) {
+  // for testing transform, it should be enough to check for any 1 file type
+  var filePath = absolutePath('fixtures/foo.json');
+  var loadConfigSync = cosmiconfig(null, {
+    sync: true,
+    transform: transform,
+  }).load;
+
+  try {
+    var result = loadConfigSync(null, filePath);
+
+    assert.deepEqual(
+      result.config,
+      { foo: [true] },
+      'Result config should be transformed'
+    );
+
+    assert.end();
+  } catch (err) {
+    assert.end(err);
+  }
+});
+
+
+test('transform async', function (assert) {
+  // for testing transform, it should be enough to check for any 1 file type
+  var filePath = absolutePath('fixtures/foo.json');
+  var loadConfig = cosmiconfig(null, {
+    transform: transform,
+  }).load;
+
+  loadConfig(null, filePath).then(function (result) {
+    assert.deepEqual(
+      result.config,
+      { foo: [true] },
+      'Result config should be transformed'
+    );
+
+    assert.end();
+  }).catch(function (err) {
+    assert.end(err);
+  });
+});
+
+test('transform errors not swallowed in sync', function (assert) {
+  var filePath = absolutePath('fixtures/foo.json');
+  var loadConfigSync = cosmiconfig(null, {
+    sync: true,
+    transform: transformWithError,
+  }).load;
+
+  try {
+    loadConfigSync(null, filePath);
+
+    failAssert(assert);
+  } catch (err) {
+    assert.equal('These pretzels are making me thirsty!', err.message);
+    assert.end();
+  }
+});
+
+test('transform errors not swallowed in async', function (assert) {
+  var filePath = absolutePath('fixtures/foo.json');
+  var loadConfig = cosmiconfig(null, { transform: transformWithError }).load;
+
+  loadConfig(null, filePath).then(function (result) { // eslint-disable-line no-unused-vars
+    failAssert(assert);
+  }).catch(function (err) {
+    assert.equal('These pretzels are making me thirsty!', err.message);
+    assert.end();
+  });
+});
