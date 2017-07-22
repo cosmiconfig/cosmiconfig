@@ -8,54 +8,38 @@ function absolutePath(str) {
   return path.join(__dirname, str);
 }
 
-test('defined JSON config path', function (assert) {
-  var loadConfig = cosmiconfig().load;
-  loadConfig(null, absolutePath('fixtures/foo.json')).then(function (result) {
-    assert.deepEqual(result.config, {
-      foo: true,
-    });
-    assert.equal(result.filepath, absolutePath('fixtures/foo.json'));
-    assert.end();
-  }).catch(function (err) {
-    assert.end(err);
+function doAsserts(assert, result, filePath) {
+  assert.deepEqual(result.config, {
+    foo: true,
   });
-});
+  assert.equal(result.filepath, filePath);
+}
 
-test('defined YAML config path', function (assert) {
-  var loadConfig = cosmiconfig().load;
-  loadConfig(null, absolutePath('fixtures/foo.yaml')).then(function (result) {
-    assert.deepEqual(result.config, {
-      foo: true,
-    });
-    assert.equal(result.filepath, absolutePath('fixtures/foo.yaml'));
-    assert.end();
-  }).catch(function (err) {
-    assert.end(err);
-  });
-});
+function makeFileTest(file) {
+  var filePath = absolutePath(file);
+  return function fileTest(assert) {
+    var loadConfig = cosmiconfig().load;
+    var loadConfigSync = cosmiconfig(null, { sync: true }).load;
 
-test('defined JS config path', function (assert) {
-  var loadConfig = cosmiconfig().load;
-  loadConfig(null, absolutePath('fixtures/foo.js')).then(function (result) {
-    assert.deepEqual(result.config, {
-      foo: true,
-    });
-    assert.equal(result.filepath, absolutePath('fixtures/foo.js'));
-    assert.end();
-  }).catch(function (err) {
-    assert.end(err);
-  });
-});
+    try {
+      var result = loadConfigSync(null, filePath);
+      doAsserts(assert, result, filePath);
+      loadConfig(null, absolutePath(file)).then(function (result) {
+        doAsserts(assert, result, filePath);
+        assert.end();
+      }).catch(function (err) {
+        assert.end(err);
+      });
+    } catch (err) {
+      assert.end(err);
+    }
+  };
+}
 
-test('defined modulized JS config path', function (assert) {
-  var loadConfig = cosmiconfig().load;
-  loadConfig(null, absolutePath('fixtures/foo-module.js')).then(function (result) {
-    assert.deepEqual(result.config, {
-      foo: true,
-    });
-    assert.equal(result.filepath, absolutePath('fixtures/foo-module.js'));
-    assert.end();
-  }).catch(function (err) {
-    assert.end(err);
-  });
-});
+test('defined JSON config path', makeFileTest('fixtures/foo.json'));
+
+test('defined YAML config path', makeFileTest('fixtures/foo.yaml'));
+
+test('defined JS config path', makeFileTest('fixtures/foo.js'));
+
+test('defined modulized JS config path', makeFileTest('fixtures/foo-module.js'));
