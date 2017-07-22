@@ -1,12 +1,10 @@
 'use strict';
 
 var test = require('tape');
-var path = require('path');
 var cosmiconfig = require('..');
+var util = require('./util');
 
-function absolutePath(str) {
-  return path.join(__dirname, str);
-}
+var absolutePath = util.absolutePath;
 
 function failAssert(assert) {
   assert.fail('should have errored');
