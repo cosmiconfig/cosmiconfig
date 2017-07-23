@@ -1,6 +1,6 @@
 # Changelog
 
-## Head
+## 2.2.2
 
 - Fixed: `options.configPath` and `--config` flag are respected.
 
