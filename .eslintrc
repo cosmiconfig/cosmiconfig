@@ -1,11 +1,23 @@
 {
   "extends": [
-    "eslint-config-davidtheclark-node"
+    "eslint-config-davidtheclark-node",
+    "prettier"
   ],
+  "plugins": ["prettier"],
   "rules": {
     "no-var": "off",
     "prefer-const": "off",
     "prefer-arrow-callback": "off",
     "node/no-unsupported-features": ["error", {"version": 0.12}],
+    // Prettier rules
+    "prettier/prettier": [
+      "error",
+      {
+        "trailingComma": "es5",
+        "singleQuote": true,
+        "printWidth": 80,
+        "tabWidth": 2
+      }
+    ]
   }
 }

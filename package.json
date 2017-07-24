@@ -8,10 +8,14 @@
     "lib"
   ],
   "scripts": {
+    "precommit": "lint-staged && npm run tape",
     "lint": "node-version-gte-4 && eslint . || echo \"ESLint not supported\"",
     "tape": "tape test/*.test.js | tap-spec",
     "coverage": "nyc npm run tape && nyc report --reporter=html && open coverage/index.html",
     "test": "npm run tape && npm run lint"
+  },
+  "lint-staged": {
+    "*.js": ["eslint --fix", "git add"]
   },
   "repository": {
     "type": "git",
@@ -45,11 +49,16 @@
   "devDependencies": {
     "eslint": "^4.2.0",
     "eslint-config-davidtheclark-node": "^0.2.0",
+    "eslint-config-prettier": "^2.3.0",
     "eslint-plugin-node": "^3.0.5",
+    "eslint-plugin-prettier": "^2.1.2",
     "expect": "^1.20.2",
+    "husky": "^0.14.3",
+    "lint-staged": "^4.0.2",
     "lodash": "^4.17.4",
     "node-version-check": "^2.2.0",
     "nyc": "^11.0.3",
+    "prettier": "^1.5.3",
     "sinon": "^2.3.8",
     "tap-spec": "^4.1.1",
     "tape": "^4.7.0"

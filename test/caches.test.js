@@ -19,14 +19,14 @@ var readFileSyncStub;
 
 function statStubIsDirectory(result) {
   statStub = sinon.stub(fs, 'stat').yieldsAsync(null, {
-    isDirectory: function () {
+    isDirectory: function() {
       return result;
     },
   });
 
-  statSyncStub = sinon.stub(fs, 'statSync').callsFake(function () {
+  statSyncStub = sinon.stub(fs, 'statSync').callsFake(function() {
     return {
-      isDirectory: function () {
+      isDirectory: function() {
         return result;
       },
     };
@@ -81,7 +81,7 @@ function teardown(assert, err) {
   assert.end(err);
 }
 
-test('does not use cache at first', function (assert) {
+test('does not use cache at first', function(assert) {
   setup();
   var searchPath = absolutePath('a/b/c/d/e');
   statStubIsDirectory(true);
@@ -106,18 +106,20 @@ test('does not use cache at first', function (assert) {
     var result = cachedLoadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub);
 
-    cachedLoadConfig(searchPath).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    cachedLoadConfig(searchPath)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('uses cache for already-visited directories', function (assert) {
+test('uses cache for already-visited directories', function(assert) {
   setup();
   // E and D visited above
   var searchPath = absolutePath('a/b/c/d/e');
@@ -137,18 +139,20 @@ test('uses cache for already-visited directories', function (assert) {
     var result = cachedLoadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub);
 
-    cachedLoadConfig(searchPath).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    cachedLoadConfig(searchPath)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('uses cache for file in already-visited directories', function (assert) {
+test('uses cache for file in already-visited directories', function(assert) {
   setup();
   // E and D visited above
   var searchPath = absolutePath('a/b/c/d/e/foo.js');
@@ -168,18 +172,22 @@ test('uses cache for file in already-visited directories', function (assert) {
     var result = cachedLoadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub);
 
-    cachedLoadConfig(searchPath).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    cachedLoadConfig(searchPath)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('uses cache when some directories in search were already visted', function (assert) {
+test('uses cache when some directories in search were already visted', function(
+  assert
+) {
   setup();
   // E and D visited above, not F
   var searchPath = absolutePath('a/b/c/d/e/f');
@@ -203,21 +211,23 @@ test('uses cache when some directories in search were already visted', function 
     var result = cachedLoadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub);
 
-    cachedLoadConfig(searchPath).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    cachedLoadConfig(searchPath)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('does not use cache for unvisited config file', function (assert) {
+test('does not use cache for unvisited config file', function(assert) {
   setup();
   // B not yet visited
-  var configFile = absolutePath( 'a/b/package.json');
+  var configFile = absolutePath('a/b/package.json');
   statStubIsDirectory(false);
 
   var expectedResult = {
@@ -236,18 +246,20 @@ test('does not use cache for unvisited config file', function (assert) {
     var result = cachedLoadConfigSync(null, configFile);
     doAsserts(result, readFileSyncStub);
 
-    cachedLoadConfig(null, configFile).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    cachedLoadConfig(null, configFile)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('does not use cache with a new cosmiconfig instance', function (assert) {
+test('does not use cache with a new cosmiconfig instance', function(assert) {
   setup();
   var searchPath = absolutePath('a/b/c/d/e');
   statStubIsDirectory(true);
@@ -275,18 +287,20 @@ test('does not use cache with a new cosmiconfig instance', function (assert) {
     var result = loadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub);
 
-    loadConfig(searchPath).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    loadConfig(searchPath)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('but cache on old instance still works', function (assert) {
+test('but cache on old instance still works', function(assert) {
   setup();
   var searchPath = absolutePath('a/b/c/d/e');
   statStubIsDirectory(true);
@@ -305,18 +319,20 @@ test('but cache on old instance still works', function (assert) {
     var result = cachedLoadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub);
 
-    cachedLoadConfig(searchPath).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    cachedLoadConfig(searchPath)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('does not cache if you say no', function (assert) {
+test('does not cache if you say no', function(assert) {
   setup();
   var searchPath = absolutePath('a/b/c/d');
   statStubIsDirectory(true);
@@ -327,10 +343,12 @@ test('does not cache if you say no', function (assert) {
   };
 
   function doAsserts(result, stub, cnt) {
-    assertSearchSequence(assert, stub, [
-      'a/b/c/d/package.json',
-      'a/b/c/d/.foorc',
-    ], cnt);
+    assertSearchSequence(
+      assert,
+      stub,
+      ['a/b/c/d/package.json', 'a/b/c/d/.foorc'],
+      cnt
+    );
     assert.deepEqual(result, expectedResult);
   }
 
@@ -347,22 +365,23 @@ test('does not cache if you say no', function (assert) {
 
     // Same call three times hits the file system every time
     Promise.resolve()
-      .then(function () {
-        return loadConfig(searchPath).then(function (result) {
+      .then(function() {
+        return loadConfig(searchPath).then(function(result) {
           doAsserts(result, readFileStub, 0);
         });
       })
-      .then(function () {
-        return loadConfig(searchPath).then(function (result) {
+      .then(function() {
+        return loadConfig(searchPath).then(function(result) {
           doAsserts(result, readFileStub, 2);
         });
       })
-      .then(function () {
-        return loadConfig(searchPath).then(function (result) {
+      .then(function() {
+        return loadConfig(searchPath).then(function(result) {
           doAsserts(result, readFileStub, 4);
           teardown(assert);
         });
-      }).catch(function (err) {
+      })
+      .catch(function(err) {
         teardown(assert, err);
       });
   } catch (err) {
@@ -370,7 +389,7 @@ test('does not cache if you say no', function (assert) {
   }
 });
 
-test('clearFileCache', function (assert) {
+test('clearFileCache', function(assert) {
   setup();
   var searchPath = absolutePath('a/b/c/d/.foorc');
   statStubIsDirectory(false);
@@ -380,17 +399,12 @@ test('clearFileCache', function (assert) {
   };
 
   function doAssert(result, stub) {
-    assertSearchSequence(assert, stub, [
-      'a/b/c/d/.foorc',
-    ], 0);
+    assertSearchSequence(assert, stub, ['a/b/c/d/.foorc'], 0);
     assert.deepEqual(result, expectedResult);
   }
 
   function doAssertFinal(result, stub) {
-    assertSearchSequence(assert, stub, [
-      'a/b/c/d/.foorc',
-      'a/b/c/d/.foorc',
-    ], 0);
+    assertSearchSequence(assert, stub, ['a/b/c/d/.foorc', 'a/b/c/d/.foorc'], 0);
     assert.deepEqual(result, expectedResult);
   }
 
@@ -407,25 +421,26 @@ test('clearFileCache', function (assert) {
     doAssertFinal(result, readFileSyncStub);
 
     Promise.resolve()
-      .then(function () {
-        return explorer.load(null, searchPath).then(function (result) {
+      .then(function() {
+        return explorer.load(null, searchPath).then(function(result) {
           doAssert(result, readFileStub);
         });
       })
-      .then(function () {
-        return explorer.load(null, searchPath).then(function (result) {
+      .then(function() {
+        return explorer.load(null, searchPath).then(function(result) {
           doAssert(result, readFileStub);
         });
       })
-      .then(function () {
+      .then(function() {
         explorer.clearFileCache();
       })
-      .then(function () {
-        return explorer.load(null, searchPath).then(function (result) {
+      .then(function() {
+        return explorer.load(null, searchPath).then(function(result) {
           doAssertFinal(result, readFileStub);
           teardown(assert);
         });
-      }).catch(function (err) {
+      })
+      .catch(function(err) {
         teardown(assert, err);
       });
   } catch (err) {
@@ -433,7 +448,7 @@ test('clearFileCache', function (assert) {
   }
 });
 
-test('clearDirectoryCache', function (assert) {
+test('clearDirectoryCache', function(assert) {
   setup();
   var searchPath = absolutePath('a/b/c/d/e');
   statStubIsDirectory(true);
@@ -443,29 +458,39 @@ test('clearDirectoryCache', function (assert) {
   };
 
   function doAssert(result, stub) {
-    assertSearchSequence(assert, stub, [
-      'a/b/c/d/e/package.json',
-      'a/b/c/d/e/.foorc',
-      'a/b/c/d/e/foo.config.js',
-      'a/b/c/d/package.json',
-      'a/b/c/d/.foorc',
-    ], 0);
+    assertSearchSequence(
+      assert,
+      stub,
+      [
+        'a/b/c/d/e/package.json',
+        'a/b/c/d/e/.foorc',
+        'a/b/c/d/e/foo.config.js',
+        'a/b/c/d/package.json',
+        'a/b/c/d/.foorc',
+      ],
+      0
+    );
     assert.deepEqual(result, expectedResult);
   }
 
   function doAssertFinal(result, stub) {
-    assertSearchSequence(assert, stub, [
-      'a/b/c/d/e/package.json',
-      'a/b/c/d/e/.foorc',
-      'a/b/c/d/e/foo.config.js',
-      'a/b/c/d/package.json',
-      'a/b/c/d/.foorc',
-      'a/b/c/d/e/package.json',
-      'a/b/c/d/e/.foorc',
-      'a/b/c/d/e/foo.config.js',
-      'a/b/c/d/package.json',
-      'a/b/c/d/.foorc',
-    ], 0);
+    assertSearchSequence(
+      assert,
+      stub,
+      [
+        'a/b/c/d/e/package.json',
+        'a/b/c/d/e/.foorc',
+        'a/b/c/d/e/foo.config.js',
+        'a/b/c/d/package.json',
+        'a/b/c/d/.foorc',
+        'a/b/c/d/e/package.json',
+        'a/b/c/d/e/.foorc',
+        'a/b/c/d/e/foo.config.js',
+        'a/b/c/d/package.json',
+        'a/b/c/d/.foorc',
+      ],
+      0
+    );
     assert.deepEqual(result, expectedResult);
   }
 
@@ -482,25 +507,26 @@ test('clearDirectoryCache', function (assert) {
     doAssertFinal(result, readFileSyncStub);
 
     Promise.resolve()
-      .then(function () {
-        return explorer.load(searchPath).then(function (result) {
+      .then(function() {
+        return explorer.load(searchPath).then(function(result) {
           doAssert(result, readFileStub);
         });
       })
-      .then(function () {
-        return explorer.load(searchPath).then(function (result) {
+      .then(function() {
+        return explorer.load(searchPath).then(function(result) {
           doAssert(result, readFileStub);
         });
       })
-      .then(function () {
+      .then(function() {
         explorer.clearDirectoryCache();
       })
-      .then(function () {
-        return explorer.load(searchPath).then(function (result) {
+      .then(function() {
+        return explorer.load(searchPath).then(function(result) {
           doAssertFinal(result, readFileStub);
           teardown(assert);
         });
-      }).catch(function (err) {
+      })
+      .catch(function(err) {
         teardown(assert, err);
       });
   } catch (err) {

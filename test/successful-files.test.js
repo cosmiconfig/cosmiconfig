@@ -23,12 +23,14 @@ function makeFileTest(file) {
     try {
       var result = loadConfigSync(null, filePath);
       doAsserts(assert, result, filePath);
-      loadConfig(null, filePath).then(function (result) {
-        doAsserts(assert, result, filePath);
-        assert.end();
-      }).catch(function (err) {
-        assert.end(err);
-      });
+      loadConfig(null, filePath)
+        .then(function(result) {
+          doAsserts(assert, result, filePath);
+          assert.end();
+        })
+        .catch(function(err) {
+          assert.end(err);
+        });
     } catch (err) {
       assert.end(err);
     }
@@ -40,7 +42,8 @@ function transform(result) {
   return result;
 }
 
-function transformWithError(result) { // eslint-disable-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
+function transformWithError(result) {
   throw new Error('These pretzels are making me thirsty!');
 }
 
@@ -50,9 +53,12 @@ test('defined YAML config path', makeFileTest('fixtures/foo.yaml'));
 
 test('defined JS config path', makeFileTest('fixtures/foo.js'));
 
-test('defined modulized JS config path', makeFileTest('fixtures/foo-module.js'));
+test(
+  'defined modulized JS config path',
+  makeFileTest('fixtures/foo-module.js')
+);
 
-test('transform sync', function (assert) {
+test('transform sync', function(assert) {
   // for testing transform, it should be enough to check for any 1 file type
   var filePath = absolutePath('fixtures/foo.json');
   var loadConfigSync = cosmiconfig(null, {
@@ -75,28 +81,29 @@ test('transform sync', function (assert) {
   }
 });
 
-
-test('transform async', function (assert) {
+test('transform async', function(assert) {
   // for testing transform, it should be enough to check for any 1 file type
   var filePath = absolutePath('fixtures/foo.json');
   var loadConfig = cosmiconfig(null, {
     transform: transform,
   }).load;
 
-  loadConfig(null, filePath).then(function (result) {
-    assert.deepEqual(
-      result.config,
-      { foo: [true] },
-      'Result config should be transformed'
-    );
+  loadConfig(null, filePath)
+    .then(function(result) {
+      assert.deepEqual(
+        result.config,
+        { foo: [true] },
+        'Result config should be transformed'
+      );
 
-    assert.end();
-  }).catch(function (err) {
-    assert.end(err);
-  });
+      assert.end();
+    })
+    .catch(function(err) {
+      assert.end(err);
+    });
 });
 
-test('transform errors not swallowed in sync', function (assert) {
+test('transform errors not swallowed in sync', function(assert) {
   var filePath = absolutePath('fixtures/foo.json');
   var loadConfigSync = cosmiconfig(null, {
     sync: true,
@@ -113,14 +120,17 @@ test('transform errors not swallowed in sync', function (assert) {
   }
 });
 
-test('transform errors not swallowed in async', function (assert) {
+test('transform errors not swallowed in async', function(assert) {
   var filePath = absolutePath('fixtures/foo.json');
   var loadConfig = cosmiconfig(null, { transform: transformWithError }).load;
 
-  loadConfig(null, filePath).then(function (result) { // eslint-disable-line no-unused-vars
-    failAssert(assert);
-  }).catch(function (err) {
-    assert.equal('These pretzels are making me thirsty!', err.message);
-    assert.end();
-  });
+  loadConfig(null, filePath)
+    // eslint-disable-next-line no-unused-vars
+    .then(function(result) {
+      failAssert(assert);
+    })
+    .catch(function(err) {
+      assert.equal('These pretzels are making me thirsty!', err.message);
+      assert.end();
+    });
 });
