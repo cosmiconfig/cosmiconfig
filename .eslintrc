@@ -1,11 +1,12 @@
 {
   "extends": [
-    "eslint-config-davidtheclark-node"
+    "eslint-config-davidtheclark-node",
+    "prettier"
   ],
   "rules": {
     "no-var": "off",
     "prefer-const": "off",
     "prefer-arrow-callback": "off",
-    "node/no-unsupported-features": ["error", {"version": 0.12}],
+    "node/no-unsupported-features": ["error", {"version": 0.12}]
   }
 }

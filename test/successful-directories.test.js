@@ -17,14 +17,14 @@ var readFileSyncStub;
 
 function setup() {
   statStub = sinon.stub(fs, 'stat').yieldsAsync(null, {
-    isDirectory: function () {
+    isDirectory: function() {
       return true;
     },
   });
 
-  statSyncStub = sinon.stub(fs, 'statSync').callsFake(function () {
+  statSyncStub = sinon.stub(fs, 'statSync').callsFake(function() {
     return {
-      isDirectory: function () {
+      isDirectory: function() {
         return true;
       },
     };
@@ -39,7 +39,9 @@ function teardown(assert, err) {
   assert.end(err);
 }
 
-test('find rc file in third searched dir, with a package.json lacking prop', function (assert) {
+test('find rc file in third searched dir, with a package.json lacking prop', function(
+  assert
+) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
@@ -94,18 +96,20 @@ test('find rc file in third searched dir, with a package.json lacking prop', fun
     var result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    loadConfig(startDir)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('find package.json prop in second searched dir', function (assert) {
+test('find package.json prop in second searched dir', function(assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
@@ -152,18 +156,20 @@ test('find package.json prop in second searched dir', function (assert) {
     var result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    loadConfig(startDir)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('find JS file in first searched dir', function (assert) {
+test('find JS file in first searched dir', function(assert) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
@@ -209,18 +215,22 @@ test('find JS file in first searched dir', function (assert) {
     var result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    loadConfig(startDir)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('find package.json in second directory searched, with alternate names', function (assert) {
+test('find package.json in second directory searched, with alternate names', function(
+  assert
+) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
@@ -271,18 +281,22 @@ test('find package.json in second directory searched, with alternate names', fun
     var result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    loadConfig(startDir)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('find rc file in third searched dir, skipping packageProp, with rcStrictJson', function (assert) {
+test('find rc file in third searched dir, skipping packageProp, with rcStrictJson', function(
+  assert
+) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
@@ -336,18 +350,22 @@ test('find rc file in third searched dir, skipping packageProp, with rcStrictJso
     var result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    loadConfig(startDir)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('find package.json prop in second searched dir, skipping js and rc', function (assert) {
+test('find package.json prop in second searched dir, skipping js and rc', function(
+  assert
+) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
@@ -396,12 +414,14 @@ test('find package.json prop in second searched dir, skipping js and rc', functi
     var result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    loadConfig(startDir)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
@@ -409,7 +429,9 @@ test('find package.json prop in second searched dir, skipping js and rc', functi
 
 // RC file with specified extension
 
-test('with rcExtensions, find .foorc.json in second searched dir', function (assert) {
+test('with rcExtensions, find .foorc.json in second searched dir', function(
+  assert
+) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
@@ -468,18 +490,22 @@ test('with rcExtensions, find .foorc.json in second searched dir', function (ass
     var result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    loadConfig(startDir)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('with rcExtensions, find .foorc.yaml in first searched dir', function (assert) {
+test('with rcExtensions, find .foorc.yaml in first searched dir', function(
+  assert
+) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
@@ -526,18 +552,22 @@ test('with rcExtensions, find .foorc.yaml in first searched dir', function (asse
     var result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    loadConfig(startDir)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('with rcExtensions, find .foorc.yml in first searched dir', function (assert) {
+test('with rcExtensions, find .foorc.yml in first searched dir', function(
+  assert
+) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
@@ -586,18 +616,22 @@ test('with rcExtensions, find .foorc.yml in first searched dir', function (asser
     var result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    loadConfig(startDir)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('with rcExtensions, find .foorc.js in first searched dir', function (assert) {
+test('with rcExtensions, find .foorc.js in first searched dir', function(
+  assert
+) {
   setup();
   var startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
@@ -648,41 +682,49 @@ test('with rcExtensions, find .foorc.js in first searched dir', function (assert
     var result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
-    loadConfig(startDir).then(function (result) {
-      doAsserts(result, readFileStub);
-      teardown(assert);
-    }).catch(function (err) {
-      teardown(assert, err);
-    });
+    loadConfig(startDir)
+      .then(function(result) {
+        doAsserts(result, readFileStub);
+        teardown(assert);
+      })
+      .catch(function(err) {
+        teardown(assert, err);
+      });
   } catch (err) {
     teardown(assert, err);
   }
 });
 
-test('options.configPath is respected', function (assert) {
+test('options.configPath is respected', function(assert) {
   var configPath = absolutePath('fixtures/foo.json');
   var explorer = cosmiconfig('foo', { configPath: configPath });
-  explorer.load('./path/does/not/exist').then(function (result) {
-    assert.deepEqual(result.config, {
-      foo: true,
+  explorer
+    .load('./path/does/not/exist')
+    .then(function(result) {
+      assert.deepEqual(result.config, {
+        foo: true,
+      });
+      assert.equal(result.filepath, configPath);
+      assert.end();
+    })
+    .catch(function(err) {
+      assert.end(err);
     });
-    assert.equal(result.filepath, configPath);
-    assert.end();
-  }).catch(function (err) {
-    assert.end(err);
-  });
 });
 
-test('options.configPath is respected', function (assert) {
+test('options.configPath is respected', function(assert) {
   var configPath = absolutePath('fixtures/foo.json');
   var explorer = cosmiconfig('foo', { configPath: configPath });
-  explorer.load('./path/does/not/exist').then(function (result) {
-    assert.deepEqual(result.config, {
-      foo: true,
+  explorer
+    .load('./path/does/not/exist')
+    .then(function(result) {
+      assert.deepEqual(result.config, {
+        foo: true,
+      });
+      assert.equal(result.filepath, configPath);
+      assert.end();
+    })
+    .catch(function(err) {
+      assert.end(err);
     });
-    assert.equal(result.filepath, configPath);
-    assert.end();
-  }).catch(function (err) {
-    assert.end(err);
-  });
 });
