@@ -8,17 +8,20 @@ var createExplorer = require('./lib/createExplorer');
 
 var parsedCliArgs = minimist(process.argv);
 
-module.exports = function (moduleName, options) {
-  options = assign({
-    packageProp: moduleName,
-    rc: '.' + moduleName + 'rc',
-    js: moduleName + '.config.js',
-    argv: 'config',
-    rcStrictJson: false,
-    stopDir: oshomedir(),
-    cache: true,
-    sync: false,
-  }, options);
+module.exports = function(moduleName, options) {
+  options = assign(
+    {
+      packageProp: moduleName,
+      rc: '.' + moduleName + 'rc',
+      js: moduleName + '.config.js',
+      argv: 'config',
+      rcStrictJson: false,
+      stopDir: oshomedir(),
+      cache: true,
+      sync: false,
+    },
+    options
+  );
 
   if (options.argv && parsedCliArgs[options.argv]) {
     options.configPath = path.resolve(parsedCliArgs[options.argv]);
