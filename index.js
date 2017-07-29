@@ -1,4 +1,5 @@
 'use strict';
+require('please-upgrade-node')(require('./package.json'));
 
 var path = require('path');
 var oshomedir = require('os-homedir');

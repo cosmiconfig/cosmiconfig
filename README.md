@@ -27,7 +27,7 @@ You may like extensions on your rc files because you'll get syntax highlighting 
 npm install cosmiconfig
 ```
 
-Tested in Node 0.12+.
+Tested in Node 4+.
 
 ## Usage
 
