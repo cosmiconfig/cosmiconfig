@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "precommit": "lint-staged && npm run tape",
-    "lint": "node-version-gte-4 && eslint . || echo \"ESLint not supported\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "tape": "tape test/*.test.js | tap-spec",
     "coverage": "nyc npm run tape && nyc report --reporter=html && open coverage/index.html",
     "test": "npm run tape && npm run lint"
@@ -54,6 +55,7 @@
     "object-assign": "^4.1.1",
     "os-homedir": "^1.0.1",
     "parse-json": "^2.2.0",
+    "please-upgrade-node": "^3.0.1",
     "require-from-string": "^1.1.0"
   },
   "devDependencies": {
@@ -65,7 +67,6 @@
     "husky": "^0.14.3",
     "lint-staged": "^4.0.4",
     "lodash": "^4.17.4",
-    "node-version-check": "^2.2.0",
     "nyc": "^11.0.3",
     "prettier": "^1.6.1",
     "sinon": "^2.3.8",
@@ -73,6 +74,6 @@
     "tape": "^4.7.0"
   },
   "engines": {
-    "node": ">=0.12"
+    "node": ">=4"
   }
 }
