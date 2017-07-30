@@ -7,6 +7,13 @@
     "no-var": "off",
     "prefer-const": "off",
     "prefer-arrow-callback": "off",
-    "node/no-unsupported-features": ["error", {"version": 4}]
+    "node/no-unsupported-features": ["error", {"version": 4}],
+    "func-names": ["error", "always"],
+    "prefer-template": "error",
+    "object-shorthand": [
+        "error",
+        "always",
+        { "avoidExplicitReturnArrows": true }
+    ]
   }
 }

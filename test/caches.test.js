@@ -1,40 +1,32 @@
 'use strict';
 
-var test = require('tape');
-var sinon = require('sinon');
-var fs = require('fs');
-var cosmiconfig = require('..');
-var assertSearchSequence = require('./assertSearchSequence');
-var makeReadFileSyncStub = require('./makeReadFileSyncStub');
-var util = require('./util');
+const test = require('tape');
+const sinon = require('sinon');
+const fs = require('fs');
+const cosmiconfig = require('..');
+const assertSearchSequence = require('./assertSearchSequence');
+const makeReadFileSyncStub = require('./makeReadFileSyncStub');
+const util = require('./util');
 
-var absolutePath = util.absolutePath;
+const absolutePath = util.absolutePath;
 
-var cachedLoadConfig;
-var cachedLoadConfigSync;
-var statStub;
-var statSyncStub;
-var readFileStub;
-var readFileSyncStub;
+let statStub;
+let statSyncStub;
+let readFileStub;
+let readFileSyncStub;
 
 function statStubIsDirectory(result) {
   statStub = sinon.stub(fs, 'stat').yieldsAsync(null, {
-    isDirectory: function() {
-      return result;
-    },
+    isDirectory: () => result,
   });
 
-  statSyncStub = sinon.stub(fs, 'statSync').callsFake(function() {
-    return {
-      isDirectory: function() {
-        return result;
-      },
-    };
-  });
+  statSyncStub = sinon.stub(fs, 'statSync').callsFake(() => ({
+    isDirectory: () => result,
+  }));
 }
 
-cachedLoadConfig = cosmiconfig('foo').load;
-cachedLoadConfigSync = cosmiconfig('foo', { sync: true }).load;
+const cachedLoadConfig = cosmiconfig('foo').load;
+const cachedLoadConfigSync = cosmiconfig('foo', { sync: true }).load;
 
 // The tests below rely both on this directory structure and on the
 // order in which they run!
@@ -65,7 +57,7 @@ function setup() {
         callback(null, '{ "foundInB": true }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
@@ -81,12 +73,12 @@ function teardown(assert, err) {
   assert.end(err);
 }
 
-test('does not use cache at first', function(assert) {
+test('does not use cache at first', assert => {
   setup();
-  var searchPath = absolutePath('a/b/c/d/e');
+  const searchPath = absolutePath('a/b/c/d/e');
   statStubIsDirectory(true);
 
-  var expectedResult = {
+  const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
     config: { foundInD: true },
   };
@@ -103,15 +95,15 @@ test('does not use cache at first', function(assert) {
   }
 
   try {
-    var result = cachedLoadConfigSync(searchPath);
+    const result = cachedLoadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub);
 
     cachedLoadConfig(searchPath)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -119,13 +111,13 @@ test('does not use cache at first', function(assert) {
   }
 });
 
-test('uses cache for already-visited directories', function(assert) {
+test('uses cache for already-visited directories', assert => {
   setup();
   // E and D visited above
-  var searchPath = absolutePath('a/b/c/d/e');
+  const searchPath = absolutePath('a/b/c/d/e');
   statStubIsDirectory(true);
 
-  var expectedResult = {
+  const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
     config: { foundInD: true },
   };
@@ -136,15 +128,15 @@ test('uses cache for already-visited directories', function(assert) {
   }
 
   try {
-    var result = cachedLoadConfigSync(searchPath);
+    const result = cachedLoadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub);
 
     cachedLoadConfig(searchPath)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -152,13 +144,13 @@ test('uses cache for already-visited directories', function(assert) {
   }
 });
 
-test('uses cache for file in already-visited directories', function(assert) {
+test('uses cache for file in already-visited directories', assert => {
   setup();
   // E and D visited above
-  var searchPath = absolutePath('a/b/c/d/e/foo.js');
+  const searchPath = absolutePath('a/b/c/d/e/foo.js');
   statStubIsDirectory(false);
 
-  var expectedResult = {
+  const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
     config: { foundInD: true },
   };
@@ -169,15 +161,15 @@ test('uses cache for file in already-visited directories', function(assert) {
   }
 
   try {
-    var result = cachedLoadConfigSync(searchPath);
+    const result = cachedLoadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub);
 
     cachedLoadConfig(searchPath)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -185,15 +177,13 @@ test('uses cache for file in already-visited directories', function(assert) {
   }
 });
 
-test('uses cache when some directories in search were already visted', function(
-  assert
-) {
+test('uses cache when some directories in search were already visted', assert => {
   setup();
   // E and D visited above, not F
-  var searchPath = absolutePath('a/b/c/d/e/f');
+  const searchPath = absolutePath('a/b/c/d/e/f');
   statStubIsDirectory(true);
 
-  var expectedResult = {
+  const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
     config: { foundInD: true },
   };
@@ -208,15 +198,15 @@ test('uses cache when some directories in search were already visted', function(
   }
 
   try {
-    var result = cachedLoadConfigSync(searchPath);
+    const result = cachedLoadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub);
 
     cachedLoadConfig(searchPath)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -224,13 +214,13 @@ test('uses cache when some directories in search were already visted', function(
   }
 });
 
-test('does not use cache for unvisited config file', function(assert) {
+test('does not use cache for unvisited config file', assert => {
   setup();
   // B not yet visited
-  var configFile = absolutePath('a/b/package.json');
+  const configFile = absolutePath('a/b/package.json');
   statStubIsDirectory(false);
 
-  var expectedResult = {
+  const expectedResult = {
     filepath: absolutePath('a/b/package.json'),
     config: {
       foundInB: true,
@@ -243,15 +233,15 @@ test('does not use cache for unvisited config file', function(assert) {
   }
 
   try {
-    var result = cachedLoadConfigSync(null, configFile);
+    const result = cachedLoadConfigSync(null, configFile);
     doAsserts(result, readFileSyncStub);
 
     cachedLoadConfig(null, configFile)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -259,12 +249,12 @@ test('does not use cache for unvisited config file', function(assert) {
   }
 });
 
-test('does not use cache with a new cosmiconfig instance', function(assert) {
+test('does not use cache with a new cosmiconfig instance', assert => {
   setup();
-  var searchPath = absolutePath('a/b/c/d/e');
+  const searchPath = absolutePath('a/b/c/d/e');
   statStubIsDirectory(true);
 
-  var expectedResult = {
+  const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
     config: { foundInD: true },
   };
@@ -280,19 +270,19 @@ test('does not use cache with a new cosmiconfig instance', function(assert) {
     assert.deepEqual(result, expectedResult);
   }
 
-  var loadConfig = cosmiconfig('foo').load;
-  var loadConfigSync = cosmiconfig('foo', { sync: true }).load;
+  const loadConfig = cosmiconfig('foo').load;
+  const loadConfigSync = cosmiconfig('foo', { sync: true }).load;
 
   try {
-    var result = loadConfigSync(searchPath);
+    const result = loadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub);
 
     loadConfig(searchPath)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -300,12 +290,12 @@ test('does not use cache with a new cosmiconfig instance', function(assert) {
   }
 });
 
-test('but cache on old instance still works', function(assert) {
+test('but cache on old instance still works', assert => {
   setup();
-  var searchPath = absolutePath('a/b/c/d/e');
+  const searchPath = absolutePath('a/b/c/d/e');
   statStubIsDirectory(true);
 
-  var expectedResult = {
+  const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
     config: { foundInD: true },
   };
@@ -316,15 +306,15 @@ test('but cache on old instance still works', function(assert) {
   }
 
   try {
-    var result = cachedLoadConfigSync(searchPath);
+    const result = cachedLoadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub);
 
     cachedLoadConfig(searchPath)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -332,12 +322,12 @@ test('but cache on old instance still works', function(assert) {
   }
 });
 
-test('does not cache if you say no', function(assert) {
+test('does not cache if you say no', assert => {
   setup();
-  var searchPath = absolutePath('a/b/c/d');
+  const searchPath = absolutePath('a/b/c/d');
   statStubIsDirectory(true);
 
-  var expectedResult = {
+  const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
     config: { foundInD: true },
   };
@@ -352,11 +342,11 @@ test('does not cache if you say no', function(assert) {
     assert.deepEqual(result, expectedResult);
   }
 
-  var loadConfig = cosmiconfig('foo', { cache: false }).load;
-  var loadConfigSync = cosmiconfig('foo', { cache: false, sync: true }).load;
+  const loadConfig = cosmiconfig('foo', { cache: false }).load;
+  const loadConfigSync = cosmiconfig('foo', { cache: false, sync: true }).load;
 
   try {
-    var result = loadConfigSync(searchPath);
+    let result = loadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub, 0);
     result = loadConfigSync(searchPath);
     doAsserts(result, readFileSyncStub, 2);
@@ -365,23 +355,23 @@ test('does not cache if you say no', function(assert) {
 
     // Same call three times hits the file system every time
     Promise.resolve()
-      .then(function() {
-        return loadConfig(searchPath).then(function(result) {
+      .then(() => {
+        return loadConfig(searchPath).then(result => {
           doAsserts(result, readFileStub, 0);
         });
       })
-      .then(function() {
-        return loadConfig(searchPath).then(function(result) {
+      .then(() => {
+        return loadConfig(searchPath).then(result => {
           doAsserts(result, readFileStub, 2);
         });
       })
-      .then(function() {
-        return loadConfig(searchPath).then(function(result) {
+      .then(() => {
+        return loadConfig(searchPath).then(result => {
           doAsserts(result, readFileStub, 4);
           teardown(assert);
         });
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -389,11 +379,11 @@ test('does not cache if you say no', function(assert) {
   }
 });
 
-test('clearFileCache', function(assert) {
+test('clearFileCache', assert => {
   setup();
-  var searchPath = absolutePath('a/b/c/d/.foorc');
+  const searchPath = absolutePath('a/b/c/d/.foorc');
   statStubIsDirectory(false);
-  var expectedResult = {
+  const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
     config: { foundInD: true },
   };
@@ -408,11 +398,11 @@ test('clearFileCache', function(assert) {
     assert.deepEqual(result, expectedResult);
   }
 
-  var explorer = cosmiconfig('foo');
-  var explorerSync = cosmiconfig('foo', { sync: true });
+  const explorer = cosmiconfig('foo');
+  const explorerSync = cosmiconfig('foo', { sync: true });
 
   try {
-    var result = explorerSync.load(null, searchPath);
+    let result = explorerSync.load(null, searchPath);
     doAssert(result, readFileSyncStub);
     result = explorerSync.load(null, searchPath);
     doAssert(result, readFileSyncStub);
@@ -421,26 +411,26 @@ test('clearFileCache', function(assert) {
     doAssertFinal(result, readFileSyncStub);
 
     Promise.resolve()
-      .then(function() {
-        return explorer.load(null, searchPath).then(function(result) {
+      .then(() => {
+        return explorer.load(null, searchPath).then(result => {
           doAssert(result, readFileStub);
         });
       })
-      .then(function() {
-        return explorer.load(null, searchPath).then(function(result) {
+      .then(() => {
+        return explorer.load(null, searchPath).then(result => {
           doAssert(result, readFileStub);
         });
       })
-      .then(function() {
+      .then(() => {
         explorer.clearFileCache();
       })
-      .then(function() {
-        return explorer.load(null, searchPath).then(function(result) {
+      .then(() => {
+        return explorer.load(null, searchPath).then(result => {
           doAssertFinal(result, readFileStub);
           teardown(assert);
         });
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -448,11 +438,11 @@ test('clearFileCache', function(assert) {
   }
 });
 
-test('clearDirectoryCache', function(assert) {
+test('clearDirectoryCache', assert => {
   setup();
-  var searchPath = absolutePath('a/b/c/d/e');
+  const searchPath = absolutePath('a/b/c/d/e');
   statStubIsDirectory(true);
-  var expectedResult = {
+  const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
     config: { foundInD: true },
   };
@@ -494,11 +484,11 @@ test('clearDirectoryCache', function(assert) {
     assert.deepEqual(result, expectedResult);
   }
 
-  var explorer = cosmiconfig('foo');
-  var explorerSync = cosmiconfig('foo', { sync: true });
+  const explorer = cosmiconfig('foo');
+  const explorerSync = cosmiconfig('foo', { sync: true });
 
   try {
-    var result = explorerSync.load(searchPath);
+    let result = explorerSync.load(searchPath);
     doAssert(result, readFileSyncStub);
     result = explorerSync.load(searchPath);
     doAssert(result, readFileSyncStub);
@@ -507,26 +497,26 @@ test('clearDirectoryCache', function(assert) {
     doAssertFinal(result, readFileSyncStub);
 
     Promise.resolve()
-      .then(function() {
-        return explorer.load(searchPath).then(function(result) {
+      .then(() => {
+        return explorer.load(searchPath).then(result => {
           doAssert(result, readFileStub);
         });
       })
-      .then(function() {
-        return explorer.load(searchPath).then(function(result) {
+      .then(() => {
+        return explorer.load(searchPath).then(result => {
           doAssert(result, readFileStub);
         });
       })
-      .then(function() {
+      .then(() => {
         explorer.clearDirectoryCache();
       })
-      .then(function() {
-        return explorer.load(searchPath).then(function(result) {
+      .then(() => {
+        return explorer.load(searchPath).then(result => {
           doAssertFinal(result, readFileStub);
           teardown(assert);
         });
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {

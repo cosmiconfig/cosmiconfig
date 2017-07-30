@@ -1,6 +1,6 @@
 'use strict';
 
-var path = require('path');
+const path = require('path');
 
 exports.absolutePath = function absolutePath(str) {
   return path.join(__dirname, str);
