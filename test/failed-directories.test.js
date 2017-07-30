@@ -5,31 +5,22 @@ const sinon = require('sinon');
 const fs = require('fs');
 const _ = require('lodash');
 const cosmiconfig = require('..');
-const makeReadFileSyncStub = require('./makeReadFileSyncStub');
 const util = require('./util');
 
 const absolutePath = util.absolutePath;
 
-let statStub;
-let statSyncStub;
 let readFileStub;
 let readFileSyncStub;
 
 function setup() {
-  statStub = sinon.stub(fs, 'stat').yieldsAsync(null, {
-    isDirectory: () => true,
-  });
-
-  statSyncStub = sinon.stub(fs, 'statSync').callsFake(() => ({
-    isDirectory: () => true,
-  }));
+  util.statStubIsDirectory(true);
 }
 
 function teardown(assert, err) {
   if (readFileStub.restore) readFileStub.restore();
   if (readFileSyncStub.restore) readFileSyncStub.restore();
-  if (statStub.restore) statStub.restore();
-  if (statSyncStub.restore) statSyncStub.restore();
+  if (fs.stat.restore) fs.stat.restore();
+  if (fs.statSync.restore) fs.statSync.restore();
   assert.end(err);
 }
 
@@ -54,7 +45,7 @@ test('do not find file, and give up', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(result, readFileStub, statStub) {
     // intentional shadowing
@@ -120,10 +111,10 @@ test('do not find file, and give up', assert => {
 
   try {
     const result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub, statSyncStub);
+    doAsserts(result, readFileSyncStub, fs.statSync);
     loadConfig(startDir)
       .then(result => {
-        doAsserts(result, readFileStub, statStub);
+        doAsserts(result, readFileStub, fs.stat);
         teardown(assert);
       })
       .catch(err => {
@@ -155,7 +146,7 @@ test('stop at stopDir, and give up', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
     assert.equal(stub.callCount, 6);
@@ -202,10 +193,10 @@ test('stop at stopDir, and give up', assert => {
 
   try {
     const result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub, statSyncStub);
+    doAsserts(result, readFileSyncStub, fs.statSync);
     loadConfig(startDir)
       .then(result => {
-        doAsserts(result, readFileStub, statStub);
+        doAsserts(result, readFileStub, fs.stat);
         teardown(assert);
       })
       .catch(err => {
@@ -232,7 +223,7 @@ test('find invalid YAML in rc file', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
     assert.ok(error, 'threw error');
@@ -279,7 +270,7 @@ test('find invalid JSON in rc file with rcStrictJson', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
     assert.ok(error, 'threw error');
@@ -325,7 +316,7 @@ test('find invalid package.json', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
     assert.ok(error, 'threw error');
@@ -373,7 +364,7 @@ test('find invalid JS in .config.js file', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
     assert.ok(error, 'threw error');
@@ -421,7 +412,7 @@ test('with rcExtensions, find invalid JSON in .foorc.json', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
     assert.ok(error, 'threw error');
@@ -472,7 +463,7 @@ test('with rcExtensions, find invalid YAML in .foorc.yaml', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
     assert.ok(error, 'threw error');
@@ -523,7 +514,7 @@ test('with rcExtensions, find invalid YAML in .foorc.yml', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
     assert.ok(error, 'threw error');
@@ -576,7 +567,7 @@ test('with rcExtensions, find invalid JS in .foorc.js', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(error) {
     assert.ok(error, 'threw error');

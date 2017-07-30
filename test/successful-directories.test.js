@@ -4,32 +4,22 @@ const test = require('tape');
 const sinon = require('sinon');
 const fs = require('fs');
 const cosmiconfig = require('..');
-const assertSearchSequence = require('./assertSearchSequence');
-const makeReadFileSyncStub = require('./makeReadFileSyncStub');
 const util = require('./util');
 
 const absolutePath = util.absolutePath;
 
-let statStub;
-let statSyncStub;
 let readFileStub;
 let readFileSyncStub;
 
 function setup() {
-  statStub = sinon.stub(fs, 'stat').yieldsAsync(null, {
-    isDirectory: () => true,
-  });
-
-  statSyncStub = sinon.stub(fs, 'statSync').callsFake(() => ({
-    isDirectory: () => true,
-  }));
+  util.statStubIsDirectory(true);
 }
 
 function teardown(assert, err) {
   if (readFileStub.restore) readFileStub.restore();
   if (readFileSyncStub.restore) readFileSyncStub.restore();
-  if (statStub.restore) statStub.restore();
-  if (statSyncStub.restore) statSyncStub.restore();
+  if (fs.stat.restore) fs.stat.restore();
+  if (fs.statSync.restore) fs.statSync.restore();
   assert.end(err);
 }
 
@@ -57,10 +47,10 @@ test('find rc file in third searched dir, with a package.json lacking prop', ass
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+    util.assertSearchSequence(assert, stub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/foo.config.js',
@@ -121,10 +111,10 @@ test('find package.json prop in second searched dir', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+    util.assertSearchSequence(assert, stub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/foo.config.js',
@@ -181,10 +171,10 @@ test('find JS file in first searched dir', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+    util.assertSearchSequence(assert, stub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/foo.config.js',
@@ -238,10 +228,10 @@ test('find package.json in second directory searched, with alternate names', ass
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+    util.assertSearchSequence(assert, stub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.wowza',
       'a/b/c/d/e/f/wowzaConfig.js',
@@ -306,10 +296,10 @@ test('find rc file in third searched dir, skipping packageProp, with rcStrictJso
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+    util.assertSearchSequence(assert, stub, [
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/.foorc',
@@ -371,10 +361,10 @@ test('find package.json prop in second searched dir, skipping js and rc', assert
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+    util.assertSearchSequence(assert, stub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/package.json',
     ]);
@@ -439,10 +429,10 @@ test('with rcExtensions, find .foorc.json in second searched dir', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+    util.assertSearchSequence(assert, stub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/.foorc.json',
@@ -505,10 +495,10 @@ test('with rcExtensions, find .foorc.yaml in first searched dir', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+    util.assertSearchSequence(assert, stub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/.foorc.json',
@@ -566,10 +556,10 @@ test('with rcExtensions, find .foorc.yml in first searched dir', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+    util.assertSearchSequence(assert, stub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/.foorc.json',
@@ -629,10 +619,10 @@ test('with rcExtensions, find .foorc.js in first searched dir', assert => {
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 
   function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+    util.assertSearchSequence(assert, stub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/.foorc.json',
