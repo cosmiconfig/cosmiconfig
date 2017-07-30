@@ -4,26 +4,12 @@ const test = require('tape');
 const sinon = require('sinon');
 const fs = require('fs');
 const cosmiconfig = require('..');
-const assertSearchSequence = require('./assertSearchSequence');
-const makeReadFileSyncStub = require('./makeReadFileSyncStub');
 const util = require('./util');
 
 const absolutePath = util.absolutePath;
 
-let statStub;
-let statSyncStub;
 let readFileStub;
 let readFileSyncStub;
-
-function statStubIsDirectory(result) {
-  statStub = sinon.stub(fs, 'stat').yieldsAsync(null, {
-    isDirectory: () => result,
-  });
-
-  statSyncStub = sinon.stub(fs, 'statSync').callsFake(() => ({
-    isDirectory: () => result,
-  }));
-}
 
 const cachedLoadConfig = cosmiconfig('foo').load;
 const cachedLoadConfigSync = cosmiconfig('foo', { sync: true }).load;
@@ -62,21 +48,21 @@ function setup() {
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
 
-  readFileSyncStub = makeReadFileSyncStub(readFile);
+  readFileSyncStub = util.makeReadFileSyncStub(readFile);
 }
 
 function teardown(assert, err) {
   if (readFileStub.restore) readFileStub.restore();
   if (readFileSyncStub.restore) readFileSyncStub.restore();
-  if (statStub.restore) statStub.restore();
-  if (statSyncStub.restore) statSyncStub.restore();
+  if (fs.stat.restore) fs.stat.restore();
+  if (fs.statSync.restore) fs.statSync.restore();
   assert.end(err);
 }
 
 test('does not use cache at first', assert => {
   setup();
   const searchPath = absolutePath('a/b/c/d/e');
-  statStubIsDirectory(true);
+  util.statStubIsDirectory(true);
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
@@ -84,7 +70,7 @@ test('does not use cache at first', assert => {
   };
 
   function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+    util.assertSearchSequence(assert, stub, [
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
       'a/b/c/d/e/foo.config.js',
@@ -115,7 +101,7 @@ test('uses cache for already-visited directories', assert => {
   setup();
   // E and D visited above
   const searchPath = absolutePath('a/b/c/d/e');
-  statStubIsDirectory(true);
+  util.statStubIsDirectory(true);
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
@@ -148,7 +134,7 @@ test('uses cache for file in already-visited directories', assert => {
   setup();
   // E and D visited above
   const searchPath = absolutePath('a/b/c/d/e/foo.js');
-  statStubIsDirectory(false);
+  util.statStubIsDirectory(false);
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
@@ -181,7 +167,7 @@ test('uses cache when some directories in search were already visted', assert =>
   setup();
   // E and D visited above, not F
   const searchPath = absolutePath('a/b/c/d/e/f');
-  statStubIsDirectory(true);
+  util.statStubIsDirectory(true);
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
@@ -189,7 +175,7 @@ test('uses cache when some directories in search were already visted', assert =>
   };
 
   function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+    util.assertSearchSequence(assert, stub, [
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
       'a/b/c/d/e/f/foo.config.js',
@@ -218,7 +204,7 @@ test('does not use cache for unvisited config file', assert => {
   setup();
   // B not yet visited
   const configFile = absolutePath('a/b/package.json');
-  statStubIsDirectory(false);
+  util.statStubIsDirectory(false);
 
   const expectedResult = {
     filepath: absolutePath('a/b/package.json'),
@@ -252,7 +238,7 @@ test('does not use cache for unvisited config file', assert => {
 test('does not use cache with a new cosmiconfig instance', assert => {
   setup();
   const searchPath = absolutePath('a/b/c/d/e');
-  statStubIsDirectory(true);
+  util.statStubIsDirectory(true);
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
@@ -260,7 +246,7 @@ test('does not use cache with a new cosmiconfig instance', assert => {
   };
 
   function doAsserts(result, stub) {
-    assertSearchSequence(assert, stub, [
+    util.assertSearchSequence(assert, stub, [
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
       'a/b/c/d/e/foo.config.js',
@@ -293,7 +279,7 @@ test('does not use cache with a new cosmiconfig instance', assert => {
 test('but cache on old instance still works', assert => {
   setup();
   const searchPath = absolutePath('a/b/c/d/e');
-  statStubIsDirectory(true);
+  util.statStubIsDirectory(true);
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
@@ -325,7 +311,7 @@ test('but cache on old instance still works', assert => {
 test('does not cache if you say no', assert => {
   setup();
   const searchPath = absolutePath('a/b/c/d');
-  statStubIsDirectory(true);
+  util.statStubIsDirectory(true);
 
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
@@ -333,7 +319,7 @@ test('does not cache if you say no', assert => {
   };
 
   function doAsserts(result, stub, cnt) {
-    assertSearchSequence(
+    util.assertSearchSequence(
       assert,
       stub,
       ['a/b/c/d/package.json', 'a/b/c/d/.foorc'],
@@ -382,19 +368,24 @@ test('does not cache if you say no', assert => {
 test('clearFileCache', assert => {
   setup();
   const searchPath = absolutePath('a/b/c/d/.foorc');
-  statStubIsDirectory(false);
+  util.statStubIsDirectory(false);
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
     config: { foundInD: true },
   };
 
   function doAssert(result, stub) {
-    assertSearchSequence(assert, stub, ['a/b/c/d/.foorc'], 0);
+    util.assertSearchSequence(assert, stub, ['a/b/c/d/.foorc'], 0);
     assert.deepEqual(result, expectedResult);
   }
 
   function doAssertFinal(result, stub) {
-    assertSearchSequence(assert, stub, ['a/b/c/d/.foorc', 'a/b/c/d/.foorc'], 0);
+    util.assertSearchSequence(
+      assert,
+      stub,
+      ['a/b/c/d/.foorc', 'a/b/c/d/.foorc'],
+      0
+    );
     assert.deepEqual(result, expectedResult);
   }
 
@@ -441,14 +432,14 @@ test('clearFileCache', assert => {
 test('clearDirectoryCache', assert => {
   setup();
   const searchPath = absolutePath('a/b/c/d/e');
-  statStubIsDirectory(true);
+  util.statStubIsDirectory(true);
   const expectedResult = {
     filepath: absolutePath('a/b/c/d/.foorc'),
     config: { foundInD: true },
   };
 
   function doAssert(result, stub) {
-    assertSearchSequence(
+    util.assertSearchSequence(
       assert,
       stub,
       [
@@ -464,7 +455,7 @@ test('clearDirectoryCache', assert => {
   }
 
   function doAssertFinal(result, stub) {
-    assertSearchSequence(
+    util.assertSearchSequence(
       assert,
       stub,
       [
