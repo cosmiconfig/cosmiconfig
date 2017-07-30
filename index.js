@@ -1,20 +1,19 @@
 'use strict';
 require('please-upgrade-node')(require('./package.json'));
 
-var path = require('path');
-var oshomedir = require('os-homedir');
-var minimist = require('minimist');
-var assign = require('object-assign');
-var createExplorer = require('./lib/createExplorer');
+const path = require('path');
+const oshomedir = require('os-homedir');
+const minimist = require('minimist');
+const createExplorer = require('./lib/createExplorer');
 
-var parsedCliArgs = minimist(process.argv);
+const parsedCliArgs = minimist(process.argv);
 
-module.exports = function(moduleName, options) {
-  options = assign(
+module.exports = function cosmiconfig(moduleName, options) {
+  options = Object.assign(
     {
       packageProp: moduleName,
-      rc: '.' + moduleName + 'rc',
-      js: moduleName + '.config.js',
+      rc: `.${moduleName}rc`,
+      js: `${moduleName}.config.js`,
       argv: 'config',
       rcStrictJson: false,
       stopDir: oshomedir(),

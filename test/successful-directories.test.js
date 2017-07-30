@@ -1,34 +1,28 @@
 'use strict';
 
-var test = require('tape');
-var sinon = require('sinon');
-var fs = require('fs');
-var cosmiconfig = require('..');
-var assertSearchSequence = require('./assertSearchSequence');
-var makeReadFileSyncStub = require('./makeReadFileSyncStub');
-var util = require('./util');
+const test = require('tape');
+const sinon = require('sinon');
+const fs = require('fs');
+const cosmiconfig = require('..');
+const assertSearchSequence = require('./assertSearchSequence');
+const makeReadFileSyncStub = require('./makeReadFileSyncStub');
+const util = require('./util');
 
-var absolutePath = util.absolutePath;
+const absolutePath = util.absolutePath;
 
-var statStub;
-var statSyncStub;
-var readFileStub;
-var readFileSyncStub;
+let statStub;
+let statSyncStub;
+let readFileStub;
+let readFileSyncStub;
 
 function setup() {
   statStub = sinon.stub(fs, 'stat').yieldsAsync(null, {
-    isDirectory: function() {
-      return true;
-    },
+    isDirectory: () => true,
   });
 
-  statSyncStub = sinon.stub(fs, 'statSync').callsFake(function() {
-    return {
-      isDirectory: function() {
-        return true;
-      },
-    };
-  });
+  statSyncStub = sinon.stub(fs, 'statSync').callsFake(() => ({
+    isDirectory: () => true,
+  }));
 }
 
 function teardown(assert, err) {
@@ -39,11 +33,9 @@ function teardown(assert, err) {
   assert.end(err);
 }
 
-test('find rc file in third searched dir, with a package.json lacking prop', function(
-  assert
-) {
+test('find rc file in third searched dir, with a package.json lacking prop', assert => {
   setup();
-  var startDir = absolutePath('a/b/c/d/e/f');
+  const startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -61,7 +53,7 @@ test('find rc file in third searched dir, with a package.json lacking prop', fun
         callback(null, '{ "found": true }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
@@ -84,24 +76,24 @@ test('find rc file in third searched dir, with a package.json lacking prop', fun
     });
   }
 
-  var loadConfig = cosmiconfig('foo', {
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
   }).load;
-  var loadConfigSync = cosmiconfig('foo', {
+  const loadConfigSync = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     sync: true,
   }).load;
 
   try {
-    var result = loadConfigSync(startDir);
+    const result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
     loadConfig(startDir)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -109,9 +101,9 @@ test('find rc file in third searched dir, with a package.json lacking prop', fun
   }
 });
 
-test('find package.json prop in second searched dir', function(assert) {
+test('find package.json prop in second searched dir', assert => {
   setup();
-  var startDir = absolutePath('a/b/c/d/e/f');
+  const startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -125,7 +117,7 @@ test('find package.json prop in second searched dir', function(assert) {
         callback(null, '{ "author": "Todd", "foo": { "found": true } }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
@@ -144,24 +136,24 @@ test('find package.json prop in second searched dir', function(assert) {
     });
   }
 
-  var loadConfig = cosmiconfig('foo', {
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
   }).load;
-  var loadConfigSync = cosmiconfig('foo', {
+  const loadConfigSync = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     sync: true,
   }).load;
 
   try {
-    var result = loadConfigSync(startDir);
+    const result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
     loadConfig(startDir)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -169,9 +161,9 @@ test('find package.json prop in second searched dir', function(assert) {
   }
 });
 
-test('find JS file in first searched dir', function(assert) {
+test('find JS file in first searched dir', assert => {
   setup();
-  var startDir = absolutePath('a/b/c/d/e/f');
+  const startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -185,7 +177,7 @@ test('find JS file in first searched dir', function(assert) {
         callback(null, 'module.exports = { found: true };');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
@@ -203,24 +195,24 @@ test('find JS file in first searched dir', function(assert) {
     });
   }
 
-  var loadConfig = cosmiconfig('foo', {
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
   }).load;
-  var loadConfigSync = cosmiconfig('foo', {
+  const loadConfigSync = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     sync: true,
   }).load;
 
   try {
-    var result = loadConfigSync(startDir);
+    const result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
     loadConfig(startDir)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -228,11 +220,9 @@ test('find JS file in first searched dir', function(assert) {
   }
 });
 
-test('find package.json in second directory searched, with alternate names', function(
-  assert
-) {
+test('find package.json in second directory searched, with alternate names', assert => {
   setup();
-  var startDir = absolutePath('a/b/c/d/e/f');
+  const startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -244,7 +234,7 @@ test('find package.json in second directory searched, with alternate names', fun
         callback(null, '{ "heeha": { "found": true } }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
@@ -263,13 +253,13 @@ test('find package.json in second directory searched, with alternate names', fun
     });
   }
 
-  var loadConfig = cosmiconfig('foo', {
+  const loadConfig = cosmiconfig('foo', {
     rc: '.wowza',
     js: 'wowzaConfig.js',
     packageProp: 'heeha',
     stopDir: absolutePath('.'),
   }).load;
-  var loadConfigSync = cosmiconfig('foo', {
+  const loadConfigSync = cosmiconfig('foo', {
     rc: '.wowza',
     js: 'wowzaConfig.js',
     packageProp: 'heeha',
@@ -278,15 +268,15 @@ test('find package.json in second directory searched, with alternate names', fun
   }).load;
 
   try {
-    var result = loadConfigSync(startDir);
+    const result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
     loadConfig(startDir)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -294,11 +284,9 @@ test('find package.json in second directory searched, with alternate names', fun
   }
 });
 
-test('find rc file in third searched dir, skipping packageProp, with rcStrictJson', function(
-  assert
-) {
+test('find rc file in third searched dir, skipping packageProp, with rcStrictJson', assert => {
   setup();
-  var startDir = absolutePath('a/b/c/d/e/f');
+  const startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -314,7 +302,7 @@ test('find rc file in third searched dir, skipping packageProp, with rcStrictJso
         callback(null, '{ "found": true }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
@@ -334,12 +322,12 @@ test('find rc file in third searched dir, skipping packageProp, with rcStrictJso
     });
   }
 
-  var loadConfig = cosmiconfig('foo', {
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     packageProp: false,
     rcStrictJson: true,
   }).load;
-  var loadConfigSync = cosmiconfig('foo', {
+  const loadConfigSync = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     packageProp: false,
     rcStrictJson: true,
@@ -347,15 +335,15 @@ test('find rc file in third searched dir, skipping packageProp, with rcStrictJso
   }).load;
 
   try {
-    var result = loadConfigSync(startDir);
+    const result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
     loadConfig(startDir)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -363,11 +351,9 @@ test('find rc file in third searched dir, skipping packageProp, with rcStrictJso
   }
 });
 
-test('find package.json prop in second searched dir, skipping js and rc', function(
-  assert
-) {
+test('find package.json prop in second searched dir, skipping js and rc', assert => {
   setup();
-  var startDir = absolutePath('a/b/c/d/e/f');
+  const startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -381,7 +367,7 @@ test('find package.json prop in second searched dir, skipping js and rc', functi
         callback(null, '{ "author": "Todd", "foo": { "found": true } }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
@@ -398,12 +384,12 @@ test('find package.json prop in second searched dir, skipping js and rc', functi
     });
   }
 
-  var loadConfig = cosmiconfig('foo', {
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     js: false,
     rc: false,
   }).load;
-  var loadConfigSync = cosmiconfig('foo', {
+  const loadConfigSync = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     js: false,
     rc: false,
@@ -411,15 +397,15 @@ test('find package.json prop in second searched dir, skipping js and rc', functi
   }).load;
 
   try {
-    var result = loadConfigSync(startDir);
+    const result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
     loadConfig(startDir)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -429,11 +415,9 @@ test('find package.json prop in second searched dir, skipping js and rc', functi
 
 // RC file with specified extension
 
-test('with rcExtensions, find .foorc.json in second searched dir', function(
-  assert
-) {
+test('with rcExtensions, find .foorc.json in second searched dir', assert => {
   setup();
-  var startDir = absolutePath('a/b/c/d/e/f');
+  const startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -451,7 +435,7 @@ test('with rcExtensions, find .foorc.json in second searched dir', function(
         callback(null, '{ "found": true }');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
@@ -476,26 +460,26 @@ test('with rcExtensions, find .foorc.json in second searched dir', function(
     });
   }
 
-  var loadConfig = cosmiconfig('foo', {
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
   }).load;
-  var loadConfigSync = cosmiconfig('foo', {
+  const loadConfigSync = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
     sync: true,
   }).load;
 
   try {
-    var result = loadConfigSync(startDir);
+    const result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
     loadConfig(startDir)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -503,11 +487,9 @@ test('with rcExtensions, find .foorc.json in second searched dir', function(
   }
 });
 
-test('with rcExtensions, find .foorc.yaml in first searched dir', function(
-  assert
-) {
+test('with rcExtensions, find .foorc.yaml in first searched dir', assert => {
   setup();
-  var startDir = absolutePath('a/b/c/d/e/f');
+  const startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -519,7 +501,7 @@ test('with rcExtensions, find .foorc.yaml in first searched dir', function(
         callback(null, 'found: true');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
@@ -538,26 +520,26 @@ test('with rcExtensions, find .foorc.yaml in first searched dir', function(
     });
   }
 
-  var loadConfig = cosmiconfig('foo', {
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
   }).load;
-  var loadConfigSync = cosmiconfig('foo', {
+  const loadConfigSync = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
     sync: true,
   }).load;
 
   try {
-    var result = loadConfigSync(startDir);
+    const result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
     loadConfig(startDir)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -565,11 +547,9 @@ test('with rcExtensions, find .foorc.yaml in first searched dir', function(
   }
 });
 
-test('with rcExtensions, find .foorc.yml in first searched dir', function(
-  assert
-) {
+test('with rcExtensions, find .foorc.yml in first searched dir', assert => {
   setup();
-  var startDir = absolutePath('a/b/c/d/e/f');
+  const startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -582,7 +562,7 @@ test('with rcExtensions, find .foorc.yml in first searched dir', function(
         callback(null, 'found: true');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
@@ -602,26 +582,26 @@ test('with rcExtensions, find .foorc.yml in first searched dir', function(
     });
   }
 
-  var loadConfig = cosmiconfig('foo', {
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
   }).load;
-  var loadConfigSync = cosmiconfig('foo', {
+  const loadConfigSync = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
     sync: true,
   }).load;
 
   try {
-    var result = loadConfigSync(startDir);
+    const result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
     loadConfig(startDir)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -629,11 +609,9 @@ test('with rcExtensions, find .foorc.yml in first searched dir', function(
   }
 });
 
-test('with rcExtensions, find .foorc.js in first searched dir', function(
-  assert
-) {
+test('with rcExtensions, find .foorc.js in first searched dir', assert => {
   setup();
-  var startDir = absolutePath('a/b/c/d/e/f');
+  const startDir = absolutePath('a/b/c/d/e/f');
   function readFile(searchPath, encoding, callback) {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -647,7 +625,7 @@ test('with rcExtensions, find .foorc.js in first searched dir', function(
         callback(null, 'module.exports = { found: true };');
         break;
       default:
-        callback(new Error('irrelevant path ' + searchPath));
+        callback(new Error(`irrelevant path ${searchPath}`));
     }
   }
   readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
@@ -668,26 +646,26 @@ test('with rcExtensions, find .foorc.js in first searched dir', function(
     });
   }
 
-  var loadConfig = cosmiconfig('foo', {
+  const loadConfig = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
   }).load;
-  var loadConfigSync = cosmiconfig('foo', {
+  const loadConfigSync = cosmiconfig('foo', {
     stopDir: absolutePath('.'),
     rcExtensions: true,
     sync: true,
   }).load;
 
   try {
-    var result = loadConfigSync(startDir);
+    const result = loadConfigSync(startDir);
     doAsserts(result, readFileSyncStub);
 
     loadConfig(startDir)
-      .then(function(result) {
+      .then(result => {
         doAsserts(result, readFileStub);
         teardown(assert);
       })
-      .catch(function(err) {
+      .catch(err => {
         teardown(assert, err);
       });
   } catch (err) {
@@ -695,36 +673,36 @@ test('with rcExtensions, find .foorc.js in first searched dir', function(
   }
 });
 
-test('options.configPath is respected', function(assert) {
-  var configPath = absolutePath('fixtures/foo.json');
-  var explorer = cosmiconfig('foo', { configPath: configPath });
+test('options.configPath is respected', assert => {
+  const configPath = absolutePath('fixtures/foo.json');
+  const explorer = cosmiconfig('foo', { configPath });
   explorer
     .load('./path/does/not/exist')
-    .then(function(result) {
+    .then(result => {
       assert.deepEqual(result.config, {
         foo: true,
       });
       assert.equal(result.filepath, configPath);
       assert.end();
     })
-    .catch(function(err) {
+    .catch(err => {
       assert.end(err);
     });
 });
 
-test('options.configPath is respected', function(assert) {
-  var configPath = absolutePath('fixtures/foo.json');
-  var explorer = cosmiconfig('foo', { configPath: configPath });
+test('options.configPath is respected', assert => {
+  const configPath = absolutePath('fixtures/foo.json');
+  const explorer = cosmiconfig('foo', { configPath });
   explorer
     .load('./path/does/not/exist')
-    .then(function(result) {
+    .then(result => {
       assert.deepEqual(result.config, {
         foo: true,
       });
       assert.equal(result.filepath, configPath);
       assert.end();
     })
-    .catch(function(err) {
+    .catch(err => {
       assert.end(err);
     });
 });

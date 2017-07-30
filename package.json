@@ -52,7 +52,6 @@
     "is-promise": "^2.1.0",
     "js-yaml": "^3.9.0",
     "minimist": "^1.2.0",
-    "object-assign": "^4.1.1",
     "os-homedir": "^1.0.1",
     "parse-json": "^2.2.0",
     "please-upgrade-node": "^3.0.1",

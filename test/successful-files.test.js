@@ -1,11 +1,11 @@
 'use strict';
 
-var test = require('tape');
-var cosmiconfig = require('..');
-var util = require('./util');
+const test = require('tape');
+const cosmiconfig = require('..');
+const util = require('./util');
 
-var absolutePath = util.absolutePath;
-var failAssert = util.failAssert;
+const absolutePath = util.absolutePath;
+const failAssert = util.failAssert;
 
 function doAsserts(assert, result, filePath) {
   assert.deepEqual(result.config, {
@@ -15,20 +15,20 @@ function doAsserts(assert, result, filePath) {
 }
 
 function makeFileTest(file) {
-  var filePath = absolutePath(file);
+  const filePath = absolutePath(file);
   return function fileTest(assert) {
-    var loadConfig = cosmiconfig().load;
-    var loadConfigSync = cosmiconfig(null, { sync: true }).load;
+    const loadConfig = cosmiconfig().load;
+    const loadConfigSync = cosmiconfig(null, { sync: true }).load;
 
     try {
-      var result = loadConfigSync(null, filePath);
+      const result = loadConfigSync(null, filePath);
       doAsserts(assert, result, filePath);
       loadConfig(null, filePath)
-        .then(function(result) {
+        .then(result => {
           doAsserts(assert, result, filePath);
           assert.end();
         })
-        .catch(function(err) {
+        .catch(err => {
           assert.end(err);
         });
     } catch (err) {
@@ -54,20 +54,20 @@ test('defined YAML config path', makeFileTest('fixtures/foo.yaml'));
 test('defined JS config path', makeFileTest('fixtures/foo.js'));
 
 test(
-  'defined modulized JS config path',
+  'defined modularized JS config path',
   makeFileTest('fixtures/foo-module.js')
 );
 
-test('transform sync', function(assert) {
+test('transform sync', assert => {
   // for testing transform, it should be enough to check for any 1 file type
-  var filePath = absolutePath('fixtures/foo.json');
-  var loadConfigSync = cosmiconfig(null, {
+  const filePath = absolutePath('fixtures/foo.json');
+  const loadConfigSync = cosmiconfig(null, {
     sync: true,
-    transform: transform,
+    transform,
   }).load;
 
   try {
-    var result = loadConfigSync(null, filePath);
+    const result = loadConfigSync(null, filePath);
 
     assert.deepEqual(
       result.config,
@@ -81,15 +81,15 @@ test('transform sync', function(assert) {
   }
 });
 
-test('transform async', function(assert) {
+test('transform async', assert => {
   // for testing transform, it should be enough to check for any 1 file type
-  var filePath = absolutePath('fixtures/foo.json');
-  var loadConfig = cosmiconfig(null, {
-    transform: transform,
+  const filePath = absolutePath('fixtures/foo.json');
+  const loadConfig = cosmiconfig(null, {
+    transform,
   }).load;
 
   loadConfig(null, filePath)
-    .then(function(result) {
+    .then(result => {
       assert.deepEqual(
         result.config,
         { foo: [true] },
@@ -98,14 +98,14 @@ test('transform async', function(assert) {
 
       assert.end();
     })
-    .catch(function(err) {
+    .catch(err => {
       assert.end(err);
     });
 });
 
-test('transform errors not swallowed in sync', function(assert) {
-  var filePath = absolutePath('fixtures/foo.json');
-  var loadConfigSync = cosmiconfig(null, {
+test('transform errors not swallowed in sync', assert => {
+  const filePath = absolutePath('fixtures/foo.json');
+  const loadConfigSync = cosmiconfig(null, {
     sync: true,
     transform: transformWithError,
   }).load;
@@ -120,16 +120,16 @@ test('transform errors not swallowed in sync', function(assert) {
   }
 });
 
-test('transform errors not swallowed in async', function(assert) {
-  var filePath = absolutePath('fixtures/foo.json');
-  var loadConfig = cosmiconfig(null, { transform: transformWithError }).load;
+test('transform errors not swallowed in async', assert => {
+  const filePath = absolutePath('fixtures/foo.json');
+  const loadConfig = cosmiconfig(null, { transform: transformWithError }).load;
 
   loadConfig(null, filePath)
     // eslint-disable-next-line no-unused-vars
-    .then(function(result) {
+    .then(result => {
       failAssert(assert);
     })
-    .catch(function(err) {
+    .catch(err => {
       assert.equal('These pretzels are making me thirsty!', err.message);
       assert.end();
     });

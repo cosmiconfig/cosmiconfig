@@ -1,22 +1,20 @@
 'use strict';
 
-var fs = require('fs');
+const fs = require('fs');
 
-var sinon = require('sinon');
+const sinon = require('sinon');
 
 module.exports = function makeReadFileSyncStub(readFile) {
-  return sinon
-    .stub(fs, 'readFileSync')
-    .callsFake(function readFileSync(search, encoding) {
-      var errSync, contentsSync;
+  return sinon.stub(fs, 'readFileSync').callsFake((search, encoding) => {
+    let errSync, contentsSync;
 
-      readFile(search, encoding, function(err, contents) {
-        errSync = err;
-        contentsSync = contents;
-      });
-
-      if (errSync) throw errSync;
-
-      return contentsSync;
+    readFile(search, encoding, (err, contents) => {
+      errSync = err;
+      contentsSync = contents;
     });
+
+    if (errSync) throw errSync;
+
+    return contentsSync;
+  });
 };
