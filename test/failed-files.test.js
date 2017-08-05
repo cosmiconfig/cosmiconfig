@@ -129,3 +129,29 @@ test('defined JS file with syntax error, with expected format', assert => {
       assert.end();
     });
 });
+
+function makeEmptyFileTest(format) {
+  const filepath = `fixtures/foo-empty.${format}`;
+  return function emptyFileTest(assert) {
+    const loadConfig = cosmiconfig(null, { format }).load;
+    const loadConfigSync = cosmiconfig(null, { format, sync: true }).load;
+    try {
+      loadConfigSync(null, absolutePath(filepath));
+      failAssert(assert);
+    } catch (error) {
+      assert.ok(/^Config file is empty/.test(error.message));
+    }
+    return loadConfig(null, absolutePath(filepath))
+      .then(failAssert.bind(null, assert))
+      .catch(error => {
+        assert.ok(/^Config file is empty/.test(error.message));
+        assert.end();
+      });
+  };
+}
+
+test('defined JSON file empty', makeEmptyFileTest('json'));
+
+test('defined YAML file empty', makeEmptyFileTest('yaml'));
+
+test('defined JS file empty', makeEmptyFileTest('js'));
