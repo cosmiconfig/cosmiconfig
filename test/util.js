@@ -1,58 +1,84 @@
 'use strict';
 
-const fs = require('fs');
+const fsMock = require('fs');
 const path = require('path');
 
-const _ = require('lodash');
-const sinon = require('sinon');
+const cosmiconfig = require('..');
 
-exports.statStubIsDirectory = function statStubIsDirectory(result) {
-  sinon.stub(fs, 'stat').yieldsAsync(null, {
-    isDirectory: () => result,
-  });
+const absolutePath = (exports.absolutePath = str => path.join(__dirname, str));
 
-  sinon.stub(fs, 'statSync').callsFake(() => ({
-    isDirectory: () => result,
-  }));
+exports.configFileLoader = function configFileLoader(options, file) {
+  const loadConfig = cosmiconfig(null, options).load;
+  return loadConfig(null, absolutePath(file));
 };
 
-exports.absolutePath = function absolutePath(str) {
-  return path.join(__dirname, str);
+const chainFuncsSync = (result, func) => func(result);
+const chainFuncsAsync = (result, func) => result.then(func);
+
+exports.testFuncsRunner = (sync, init, funcs) =>
+  funcs.reduce(sync === true ? chainFuncsSync : chainFuncsAsync, init);
+
+/**
+ * A utility function to run a given test in both sync and async.
+ *
+ * @param {string} name
+ * @param {Function} testFn
+ */
+exports.testSyncAndAsync = function testSyncAndAsync(name, testFn) {
+  describe('sync', () => {
+    it(name, testFn(true));
+  });
+
+  describe('async', () => {
+    it(name, testFn(false));
+  });
 };
 
-exports.makeReadFileSyncStub = function makeReadFileSyncStub(readFile) {
-  return sinon.stub(fs, 'readFileSync').callsFake((search, encoding) => {
-    let errSync, contentsSync;
+exports.mockStatIsDirectory = function mockStatIsDirectory(result) {
+  const stats = {
+    isDirectory: () => result,
+  };
 
-    readFile(search, encoding, (err, contents) => {
-      errSync = err;
-      contentsSync = contents;
-    });
-
-    if (errSync) throw errSync;
-
-    return contentsSync;
+  jest.spyOn(fsMock, 'stat').mockImplementation((path, callback) => {
+    callback(null, stats);
   });
+
+  jest.spyOn(fsMock, 'statSync').mockImplementation(() => stats);
 };
 
 exports.assertSearchSequence = function assertSearchSequence(
-  assert,
-  readFileStub,
+  readFileMock,
   searchPaths,
   startCount
 ) {
   startCount = startCount || 0;
-  assert.equal(readFileStub.callCount, searchPaths.length + startCount);
-  searchPaths.forEach((searchPath, i) => {
-    assert.equal(
-      _.get(readFileStub.getCall(i + startCount), 'args[0]'),
-      path.join(__dirname, searchPath),
-      `checked ${searchPath}`
+
+  expect(readFileMock).toHaveBeenCalledTimes(searchPaths.length + startCount);
+
+  searchPaths.forEach((searchPath, idx) => {
+    expect(readFileMock.mock.calls[idx + startCount][0]).toBe(
+      path.join(__dirname, searchPath)
     );
   });
 };
 
-exports.failAssert = function failAssert(assert) {
-  assert.fail('should have errored');
-  assert.end();
+function makeReadFileMockImpl(readFile) {
+  return (searchPath, encoding, callback) => {
+    try {
+      callback(null, readFile(searchPath));
+    } catch (err) {
+      callback(err);
+    }
+  };
+}
+exports.makeReadFileMockImpl = makeReadFileMockImpl;
+
+exports.mockReadFile = function mockReadFile(sync, readFile) {
+  if (sync === true) {
+    return jest.spyOn(fsMock, 'readFileSync').mockImplementation(readFile);
+  } else {
+    return jest
+      .spyOn(fsMock, 'readFile')
+      .mockImplementation(makeReadFileMockImpl(readFile));
+  }
 };
