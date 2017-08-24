@@ -1,136 +1,104 @@
 'use strict';
 
-const test = require('tape');
-const cosmiconfig = require('..');
 const util = require('./util');
+const cosmiconfig = require('..');
 
 const absolutePath = util.absolutePath;
-const failAssert = util.failAssert;
-
-function doAsserts(assert, result, filePath) {
-  assert.deepEqual(result.config, {
-    foo: true,
-  });
-  assert.equal(result.filepath, filePath);
-}
+const configFileLoader = util.configFileLoader;
+const testFuncsRunner = util.testFuncsRunner;
+const testSyncAndAsync = util.testSyncAndAsync;
 
 function makeFileTest(file) {
-  const filePath = absolutePath(file);
-  return function fileTest(assert) {
-    const loadConfig = cosmiconfig().load;
-    const loadConfigSync = cosmiconfig(null, { sync: true }).load;
-
-    try {
-      const result = loadConfigSync(null, filePath);
-      doAsserts(assert, result, filePath);
-      loadConfig(null, filePath)
-        .then(result => {
-          doAsserts(assert, result, filePath);
-          assert.end();
-        })
-        .catch(err => {
-          assert.end(err);
+  return sync => () => {
+    expect.hasAssertions();
+    return testFuncsRunner(sync, configFileLoader({ sync }, file), [
+      result => {
+        expect(result.config).toEqual({
+          foo: true,
         });
-    } catch (err) {
-      assert.end(err);
-    }
+        expect(result.filepath).toBe(absolutePath(file));
+      },
+    ]);
   };
 }
 
-function transform(result) {
-  result.config.foo = [result.config.foo];
-  return result;
-}
-
-// eslint-disable-next-line no-unused-vars
-function transformWithError(result) {
-  throw new Error('These pretzels are making me thirsty!');
-}
-
-test('defined JSON config path', makeFileTest('fixtures/foo.json'));
-
-test('defined YAML config path', makeFileTest('fixtures/foo.yaml'));
-
-test('defined JS config path', makeFileTest('fixtures/foo.js'));
-
-test(
-  'defined modularized JS config path',
-  makeFileTest('fixtures/foo-module.js')
-);
-
-test('transform sync', assert => {
-  // for testing transform, it should be enough to check for any 1 file type
-  const filePath = absolutePath('fixtures/foo.json');
-  const loadConfigSync = cosmiconfig(null, {
-    sync: true,
-    transform,
-  }).load;
-
-  try {
-    const result = loadConfigSync(null, filePath);
-
-    assert.deepEqual(
-      result.config,
-      { foo: [true] },
-      'Result config should be transformed'
+describe('cosmiconfig', () => {
+  describe('load from file', () => {
+    testSyncAndAsync(
+      'loads defined JSON config path',
+      makeFileTest('fixtures/foo.json')
     );
 
-    assert.end();
-  } catch (err) {
-    assert.end(err);
-  }
-});
+    testSyncAndAsync(
+      'loads defined YAML config path',
+      makeFileTest('fixtures/foo.yaml')
+    );
 
-test('transform async', assert => {
-  // for testing transform, it should be enough to check for any 1 file type
-  const filePath = absolutePath('fixtures/foo.json');
-  const loadConfig = cosmiconfig(null, {
-    transform,
-  }).load;
+    testSyncAndAsync(
+      'loads defined JS config path',
+      makeFileTest('fixtures/foo.js')
+    );
 
-  loadConfig(null, filePath)
-    .then(result => {
-      assert.deepEqual(
-        result.config,
-        { foo: [true] },
-        'Result config should be transformed'
+    testSyncAndAsync(
+      'loads modularized JS config path',
+      makeFileTest('fixtures/foo-module.js')
+    );
+
+    testSyncAndAsync('respects options.configPath', sync => () => {
+      const configPath = absolutePath('fixtures/foo.json');
+      const explorer = cosmiconfig('foo', { configPath, sync });
+      return testFuncsRunner(sync, explorer.load('./path/does/not/exist'), [
+        result => {
+          expect(result.config).toEqual({
+            foo: true,
+          });
+          expect(result.filepath).toBe(configPath);
+        },
+      ]);
+    });
+
+    testSyncAndAsync('runs transform', sync => () => {
+      expect.hasAssertions();
+      return testFuncsRunner(
+        sync,
+        configFileLoader(
+          {
+            sync,
+            transform(result) {
+              result.config.foo = [result.config.foo];
+              return result;
+            },
+          },
+          'fixtures/foo.json'
+        ),
+        [
+          result => {
+            expect(result.config).toEqual({ foo: [true] });
+          },
+        ]
+      );
+    });
+
+    it('does not swallow transform errors', () => {
+      const loadConfig = sync =>
+        configFileLoader(
+          {
+            sync,
+            transform() {
+              throw new Error('These pretzels are making me thirsty!');
+            },
+          },
+          'fixtures/foo.json'
+        );
+
+      expect.assertions(2);
+      expect(() => loadConfig(true)).toThrow(
+        'These pretzels are making me thirsty!'
       );
 
-      assert.end();
-    })
-    .catch(err => {
-      assert.end(err);
+      return loadConfig(false).catch(err => {
+        expect(err.message).toBe('These pretzels are making me thirsty!');
+      });
     });
-});
-
-test('transform errors not swallowed in sync', assert => {
-  const filePath = absolutePath('fixtures/foo.json');
-  const loadConfigSync = cosmiconfig(null, {
-    sync: true,
-    transform: transformWithError,
-  }).load;
-
-  try {
-    loadConfigSync(null, filePath);
-
-    failAssert(assert);
-  } catch (err) {
-    assert.equal('These pretzels are making me thirsty!', err.message);
-    assert.end();
-  }
-});
-
-test('transform errors not swallowed in async', assert => {
-  const filePath = absolutePath('fixtures/foo.json');
-  const loadConfig = cosmiconfig(null, { transform: transformWithError }).load;
-
-  loadConfig(null, filePath)
-    // eslint-disable-next-line no-unused-vars
-    .then(result => {
-      failAssert(assert);
-    })
-    .catch(err => {
-      assert.equal('These pretzels are making me thirsty!', err.message);
-      assert.end();
-    });
+  });
 });

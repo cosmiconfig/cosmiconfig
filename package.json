@@ -8,12 +8,13 @@
     "lib"
   ],
   "scripts": {
-    "precommit": "lint-staged && npm run tape",
+    "precommit": "lint-staged && jest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "tape": "tape test/*.test.js | tap-spec",
-    "coverage": "nyc npm run tape && nyc report --reporter=html && open coverage/index.html",
-    "test": "npm run tape && npm run lint"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "coverage": "jest --coverage --coverageReporters=html --coverageReporters=text",
+    "check": "npm run test && npm run lint"
   },
   "lint-staged": {
     "*.js": [
@@ -47,6 +48,9 @@
     "printWidth": 80,
     "tabWidth": 2
   },
+  "jest": {
+    "testEnvironment": "node"
+  },
   "dependencies": {
     "is-directory": "^0.3.1",
     "is-promise": "^2.1.0",
@@ -62,15 +66,10 @@
     "eslint-config-davidtheclark-node": "^0.2.0",
     "eslint-config-prettier": "^2.3.0",
     "eslint-plugin-node": "^3.0.5",
-    "expect": "^1.20.2",
     "husky": "^0.14.3",
+    "jest": "^20.0.4",
     "lint-staged": "^4.0.4",
-    "lodash": "^4.17.4",
-    "nyc": "^11.0.3",
-    "prettier": "^1.6.1",
-    "sinon": "^2.3.8",
-    "tap-spec": "^4.1.1",
-    "tape": "^4.7.0"
+    "prettier": "^1.6.1"
   },
   "engines": {
     "node": ">=4"

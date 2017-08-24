@@ -1,625 +1,326 @@
 'use strict';
 
-const test = require('tape');
-const sinon = require('sinon');
-const fs = require('fs');
-const _ = require('lodash');
-const cosmiconfig = require('..');
+jest.mock('fs');
+
+const fsMock = require('fs');
+
 const util = require('./util');
+const cosmiconfig = require('..');
 
 const absolutePath = util.absolutePath;
+const mockReadFile = util.mockReadFile;
+const testFuncsRunner = util.testFuncsRunner;
+const testSyncAndAsync = util.testSyncAndAsync;
 
-let readFileStub;
-let readFileSyncStub;
+beforeAll(() => {
+  util.mockStatIsDirectory(true);
+});
 
-function setup() {
-  util.statStubIsDirectory(true);
-}
+afterEach(() => {
+  // Resets all information stored in the mock,
+  // including any inital implementation given.
+  fsMock.readFile.mockReset();
+  fsMock.readFileSync.mockReset();
 
-function teardown(assert, err) {
-  if (readFileStub.restore) readFileStub.restore();
-  if (readFileSyncStub.restore) readFileSyncStub.restore();
-  if (fs.stat.restore) fs.stat.restore();
-  if (fs.statSync.restore) fs.statSync.restore();
-  assert.end(err);
-}
+  // Clean up a mock's usage data between tests
+  fsMock.stat.mockClear();
+  fsMock.statSync.mockClear();
+});
 
-test('do not find file, and give up', assert => {
-  setup();
-  const startDir = absolutePath('a/b');
-  function readFile(searchPath, encoding, callback) {
-    switch (searchPath) {
-      case absolutePath('a/b/package.json'):
-      case absolutePath('a/b/.foorc'):
-      case absolutePath('a/b/foo.config.js'):
-      case absolutePath('a/package.json'):
-      case absolutePath('a/.foorc'):
-      case absolutePath('a/foo.config.js'):
-      case absolutePath('package.json'):
-      case absolutePath('.foorc'):
-      case absolutePath('foo.config.js'):
-        callback({ code: 'ENOENT' });
-        break;
-      default:
-        callback(new Error(`irrelevant path ${searchPath}`));
-    }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = util.makeReadFileSyncStub(readFile);
+afterAll(() => {
+  jest.resetAllMocks();
+});
 
-  function doAsserts(result, readFileStub, statStub) {
-    // intentional shadowing
-    assert.equal(statStub.callCount, 1);
-    assert.equal(_.get(statStub.getCall(0), 'args[0]'), absolutePath('a/b'));
+const statMockFor = sync => (sync === true ? fsMock.statSync : fsMock.stat);
 
-    assert.equal(readFileStub.callCount, 9);
-    assert.equal(
-      _.get(readFileStub.getCall(0), 'args[0]'),
-      absolutePath('a/b/package.json'),
-      'first dir: a/b/package.json'
-    );
-    assert.equal(
-      _.get(readFileStub.getCall(1), 'args[0]'),
-      absolutePath('a/b/.foorc'),
-      'first dir: a/b/.foorc'
-    );
-    assert.equal(
-      _.get(readFileStub.getCall(2), 'args[0]'),
-      absolutePath('a/b/foo.config.js'),
-      'first dir: a/b/foo.config.js'
-    );
-    assert.equal(
-      _.get(readFileStub.getCall(3), 'args[0]'),
-      absolutePath('a/package.json'),
-      'second dir: a/package.json'
-    );
-    assert.equal(
-      _.get(readFileStub.getCall(4), 'args[0]'),
-      absolutePath('a/.foorc'),
-      'second dir: a/.foorc'
-    );
-    assert.equal(
-      _.get(readFileStub.getCall(5), 'args[0]'),
-      absolutePath('a/foo.config.js'),
-      'second dir: a/foo.config.js'
-    );
-    assert.equal(
-      _.get(readFileStub.getCall(6), 'args[0]'),
-      absolutePath('./package.json'),
-      'third and last dir: /package.json'
-    );
-    assert.equal(
-      _.get(readFileStub.getCall(7), 'args[0]'),
-      absolutePath('./.foorc'),
-      'third and last dir: /.foorc'
-    );
-    assert.equal(
-      _.get(readFileStub.getCall(8), 'args[0]'),
-      absolutePath('./foo.config.js'),
-      'third and last dir: /foo.config.js'
-    );
-    assert.equal(result, null);
-  }
+describe('cosmiconfig', () => {
+  describe('load from directory', () => {
+    testSyncAndAsync('gives up if it cannot find the file', sync => () => {
+      function readFile(searchPath) {
+        switch (searchPath) {
+          case absolutePath('a/b/package.json'):
+          case absolutePath('a/b/.foorc'):
+          case absolutePath('a/b/foo.config.js'):
+          case absolutePath('a/package.json'):
+          case absolutePath('a/.foorc'):
+          case absolutePath('a/foo.config.js'):
+          case absolutePath('package.json'):
+          case absolutePath('.foorc'):
+          case absolutePath('foo.config.js'):
+            throw { code: 'ENOENT' };
+          default:
+            throw new Error(`irrelevant path ${searchPath}`);
+        }
+      }
+      const readFileMock = mockReadFile(sync, readFile);
+      const statMock = statMockFor(sync);
 
-  const loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-  }).load;
-  const loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    sync: true,
-  }).load;
+      const startDir = absolutePath('a/b');
+      const loadConfig = cosmiconfig('foo', {
+        stopDir: absolutePath('.'),
+        sync,
+      }).load;
 
-  try {
-    const result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub, fs.statSync);
-    loadConfig(startDir)
-      .then(result => {
-        doAsserts(result, readFileStub, fs.stat);
-        teardown(assert);
-      })
-      .catch(err => {
-        teardown(assert, err);
+      expect.hasAssertions();
+      return testFuncsRunner(sync, loadConfig(startDir), [
+        result => {
+          expect(statMock).toHaveBeenCalledTimes(1);
+          expect(statMock.mock.calls[0][0]).toBe(startDir);
+
+          util.assertSearchSequence(readFileMock, [
+            'a/b/package.json',
+            'a/b/.foorc',
+            'a/b/foo.config.js',
+            'a/package.json',
+            'a/.foorc',
+            'a/foo.config.js',
+            './package.json',
+            './.foorc',
+            './foo.config.js',
+          ]);
+          expect(result).toBe(null);
+        },
+      ]);
+    });
+
+    testSyncAndAsync('stops at stopDir and gives up', sync => () => {
+      function readFile(searchPath) {
+        switch (searchPath) {
+          case absolutePath('a/b/package.json'):
+          case absolutePath('a/b/.foorc'):
+          case absolutePath('a/b/foo.config.js'):
+          case absolutePath('a/package.json'):
+          case absolutePath('a/.foorc'):
+          case absolutePath('a/foo.config.js'):
+          case absolutePath('/package.json'):
+          case absolutePath('/.foorc'):
+          case absolutePath('/foo.config.js'):
+            throw { code: 'ENOENT' };
+          default:
+            throw new Error(`irrelevant path ${searchPath}`);
+        }
+      }
+      const readFileMock = mockReadFile(sync, readFile);
+
+      const startDir = absolutePath('a/b');
+      const loadConfig = cosmiconfig('foo', {
+        stopDir: absolutePath('a'),
+        sync,
+      }).load;
+
+      expect.hasAssertions();
+      return testFuncsRunner(sync, loadConfig(startDir), [
+        result => {
+          util.assertSearchSequence(readFileMock, [
+            'a/b/package.json',
+            'a/b/.foorc',
+            'a/b/foo.config.js',
+            'a/package.json',
+            'a/.foorc',
+            'a/foo.config.js',
+          ]);
+          expect(result).toBe(null);
+        },
+      ]);
+    });
+
+    it('throws error for invalid YAML in rc file', () => {
+      function readFile(searchPath) {
+        switch (searchPath) {
+          case absolutePath('a/b/package.json'):
+            throw { code: 'ENOENT' };
+          case absolutePath('a/b/.foorc'):
+            return 'found: true: broken';
+          default:
+            throw new Error(`irrelevant path ${searchPath}`);
+        }
+      }
+      mockReadFile(true, readFile);
+      mockReadFile(false, readFile);
+
+      const startDir = absolutePath('a/b');
+      const loadConfig = sync =>
+        cosmiconfig('foo', { stopDir: absolutePath('a'), sync }).load(startDir);
+
+      expect.assertions(2);
+      try {
+        loadConfig(true);
+      } catch (err) {
+        expect(err.name).toBe('YAMLException');
+      }
+      return loadConfig(false).catch(err => {
+        expect(err.name).toBe('YAMLException');
       });
-  } catch (err) {
-    teardown(assert, err);
-  }
-});
+    });
 
-test('stop at stopDir, and give up', assert => {
-  setup();
-  const startDir = absolutePath('a/b');
-  function readFile(searchPath, encoding, callback) {
-    switch (searchPath) {
-      case absolutePath('a/b/package.json'):
-      case absolutePath('a/b/.foorc'):
-      case absolutePath('a/b/foo.config.js'):
-      case absolutePath('a/package.json'):
-      case absolutePath('a/.foorc'):
-      case absolutePath('a/foo.config.js'):
-      case absolutePath('/package.json'):
-      case absolutePath('/.foorc'):
-      case absolutePath('/foo.config.js'):
-        callback({ code: 'ENOENT' });
-        break;
-      default:
-        callback(new Error(`irrelevant path ${searchPath}`));
-    }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = util.makeReadFileSyncStub(readFile);
+    it('throws error for invalid JSON in rc file with rcStrictJson', () => {
+      function readFile(searchPath) {
+        switch (searchPath) {
+          case absolutePath('a/b/package.json'):
+            throw { code: 'ENOENT' };
+          case absolutePath('a/b/.foorc'):
+            return '{ "found": true, }';
+          default:
+            throw new Error(`irrelevant path ${searchPath}`);
+        }
+      }
+      mockReadFile(true, readFile);
+      mockReadFile(false, readFile);
 
-  function doAsserts(result, stub) {
-    assert.equal(stub.callCount, 6);
-    assert.equal(
-      _.get(stub.getCall(0), 'args[0]'),
-      absolutePath('a/b/package.json'),
-      'first dir: a/b/package.json'
-    );
-    assert.equal(
-      _.get(stub.getCall(1), 'args[0]'),
-      absolutePath('a/b/.foorc'),
-      'first dir: a/b/.foorc'
-    );
-    assert.equal(
-      _.get(stub.getCall(2), 'args[0]'),
-      absolutePath('a/b/foo.config.js'),
-      'first dir: a/b/foo.config.js'
-    );
-    assert.equal(
-      _.get(stub.getCall(3), 'args[0]'),
-      absolutePath('a/package.json'),
-      'second and stopDir: a/package.json'
-    );
-    assert.equal(
-      _.get(stub.getCall(4), 'args[0]'),
-      absolutePath('a/.foorc'),
-      'second and stopDir: a/.foorc'
-    );
-    assert.equal(
-      _.get(stub.getCall(5), 'args[0]'),
-      absolutePath('a/foo.config.js'),
-      'second and stopDir: a/foo.config.js'
-    );
-    assert.equal(result, null);
-  }
+      const startDir = absolutePath('a/b');
+      const loadConfig = sync =>
+        cosmiconfig('foo', {
+          stopDir: absolutePath('a'),
+          rcStrictJson: true,
+          sync,
+        }).load(startDir);
 
-  const loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('a'),
-  }).load;
-  const loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('a'),
-    sync: true,
-  }).load;
-
-  try {
-    const result = loadConfigSync(startDir);
-    doAsserts(result, readFileSyncStub, fs.statSync);
-    loadConfig(startDir)
-      .then(result => {
-        doAsserts(result, readFileStub, fs.stat);
-        teardown(assert);
-      })
-      .catch(err => {
-        teardown(assert, err);
+      expect.assertions(2);
+      expect(() => loadConfig(true)).toThrow(/JSON Error/);
+      return loadConfig(false).catch(err => {
+        expect(err.message).toMatch(/JSON Error/);
       });
-  } catch (err) {
-    teardown(assert, err);
-  }
-});
-
-test('find invalid YAML in rc file', assert => {
-  setup();
-  const startDir = absolutePath('a/b');
-  function readFile(searchPath, encoding, callback) {
-    switch (searchPath) {
-      case absolutePath('a/b/package.json'):
-        callback({ code: 'ENOENT' });
-        break;
-      case absolutePath('a/b/.foorc'):
-        callback(null, 'found: true: broken');
-        break;
-      default:
-        callback(new Error(`irrelevant path ${searchPath}`));
-    }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = util.makeReadFileSyncStub(readFile);
-
-  function doAsserts(error) {
-    assert.ok(error, 'threw error');
-    assert.equal(error.name, 'YAMLException', 'threw correct error type');
-  }
-
-  const loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('a'),
-  }).load;
-  const loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('a'),
-    sync: true,
-  }).load;
-
-  try {
-    loadConfigSync(startDir);
-  } catch (err) {
-    doAsserts(err);
-  }
-
-  loadConfig(startDir)
-    .catch(error => {
-      doAsserts(error);
-      teardown(assert);
-    })
-    .catch(err => {
-      teardown(assert, err);
     });
-});
 
-test('find invalid JSON in rc file with rcStrictJson', assert => {
-  setup();
-  const startDir = absolutePath('a/b');
-  function readFile(searchPath, encoding, callback) {
-    switch (searchPath) {
-      case absolutePath('a/b/package.json'):
-        callback({ code: 'ENOENT' });
-        break;
-      case absolutePath('a/b/.foorc'):
-        callback(null, '{ "found": true, }');
-        break;
-      default:
-        callback(new Error(`irrelevant path ${searchPath}`));
-    }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = util.makeReadFileSyncStub(readFile);
+    it('throws error for invalid package.json', () => {
+      function readFile(searchPath) {
+        switch (searchPath) {
+          case absolutePath('a/b/package.json'):
+            return '{ "foo": "bar", }';
+          default:
+            throw new Error(`irrelevant path ${searchPath}`);
+        }
+      }
+      mockReadFile(true, readFile);
+      mockReadFile(false, readFile);
 
-  function doAsserts(error) {
-    assert.ok(error, 'threw error');
-    assert.ok(/JSON Error/.test(error.message), 'threw correct error type');
-  }
+      const startDir = absolutePath('a/b');
+      const loadConfig = sync =>
+        cosmiconfig('foo', { stopDir: absolutePath('a'), sync }).load(startDir);
 
-  const loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('a'),
-    rcStrictJson: true,
-  }).load;
-  const loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('a'),
-    rcStrictJson: true,
-    sync: true,
-  }).load;
-
-  try {
-    loadConfigSync(startDir);
-  } catch (err) {
-    doAsserts(err);
-  }
-
-  loadConfig(startDir)
-    .catch(error => {
-      doAsserts(error);
-      teardown(assert);
-    })
-    .catch(err => {
-      teardown(assert, err);
-    });
-});
-
-test('find invalid package.json', assert => {
-  setup();
-  const startDir = absolutePath('a/b');
-  function readFile(searchPath, encoding, callback) {
-    switch (searchPath) {
-      case absolutePath('a/b/package.json'):
-        callback(null, '{ "foo": "bar", }');
-        break;
-      default:
-        callback(new Error(`irrelevant path ${searchPath}`));
-    }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = util.makeReadFileSyncStub(readFile);
-
-  function doAsserts(error) {
-    assert.ok(error, 'threw error');
-    assert.ok(/JSON Error/.test(error.message), 'threw correct error type');
-  }
-
-  const loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('a'),
-  }).load;
-  const loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('a'),
-    sync: true,
-  }).load;
-
-  try {
-    loadConfigSync(startDir);
-  } catch (err) {
-    doAsserts(err);
-  }
-
-  loadConfig(startDir)
-    .catch(error => {
-      doAsserts(error);
-      teardown(assert);
-    })
-    .catch(err => {
-      teardown(assert, err);
-    });
-});
-
-test('find invalid JS in .config.js file', assert => {
-  setup();
-  const startDir = absolutePath('a/b');
-  function readFile(searchPath, encoding, callback) {
-    switch (searchPath) {
-      case absolutePath('a/b/package.json'):
-      case absolutePath('a/b/.foorc'):
-        callback({ code: 'ENOENT' });
-        break;
-      case absolutePath('a/b/foo.config.js'):
-        callback(null, 'module.exports = { found: true: false,');
-        break;
-      default:
-        callback(new Error(`irrelevant path ${searchPath}`));
-    }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = util.makeReadFileSyncStub(readFile);
-
-  function doAsserts(error) {
-    assert.ok(error, 'threw error');
-    assert.equal(error.name, 'SyntaxError', 'threw correct error type');
-  }
-
-  const loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('a'),
-  }).load;
-  const loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('a'),
-    sync: true,
-  }).load;
-
-  try {
-    loadConfigSync(startDir);
-  } catch (err) {
-    doAsserts(err);
-  }
-
-  loadConfig(startDir)
-    .catch(error => {
-      doAsserts(error);
-      teardown(assert);
-    })
-    .catch(err => {
-      teardown(assert, err);
-    });
-});
-
-test('with rcExtensions, find invalid JSON in .foorc.json', assert => {
-  setup();
-  const startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
-    switch (searchPath) {
-      case absolutePath('a/b/c/d/e/f/package.json'):
-      case absolutePath('a/b/c/d/e/f/.foorc'):
-        callback({ code: 'ENOENT' });
-        break;
-      case absolutePath('a/b/c/d/e/f/.foorc.json'):
-        callback(null, '{ "found": true,, }');
-        break;
-      default:
-        callback(new Error(`irrelevant path ${searchPath}`));
-    }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = util.makeReadFileSyncStub(readFile);
-
-  function doAsserts(error) {
-    assert.ok(error, 'threw error');
-    assert.ok(/JSON Error/.test(error.message), 'threw correct error type');
-  }
-
-  const loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-  }).load;
-  const loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-    sync: true,
-  }).load;
-
-  try {
-    loadConfigSync(startDir);
-  } catch (err) {
-    doAsserts(err);
-  }
-
-  loadConfig(startDir)
-    .catch(error => {
-      doAsserts(error);
-      teardown(assert);
-    })
-    .catch(err => {
-      teardown(assert, err);
-    });
-});
-
-test('with rcExtensions, find invalid YAML in .foorc.yaml', assert => {
-  setup();
-  const startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
-    switch (searchPath) {
-      case absolutePath('a/b/c/d/e/f/package.json'):
-      case absolutePath('a/b/c/d/e/f/.foorc'):
-      case absolutePath('a/b/c/d/e/f/.foorc.json'):
-        callback({ code: 'ENOENT' });
-        break;
-      case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
-        callback(null, 'found: thing: true');
-        break;
-      default:
-        callback(new Error(`irrelevant path ${searchPath}`));
-    }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = util.makeReadFileSyncStub(readFile);
-
-  function doAsserts(error) {
-    assert.ok(error, 'threw error');
-    assert.equal(error.name, 'YAMLException', 'threw correct error type');
-  }
-  const loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-  }).load;
-  const loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-    sync: true,
-  }).load;
-
-  try {
-    loadConfigSync(startDir);
-  } catch (err) {
-    doAsserts(err);
-  }
-
-  loadConfig(startDir)
-    .catch(error => {
-      doAsserts(error);
-      teardown(assert);
-    })
-    .catch(err => {
-      teardown(assert, err);
-    });
-});
-
-test('with rcExtensions, find invalid YAML in .foorc.yml', assert => {
-  setup();
-  const startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
-    switch (searchPath) {
-      case absolutePath('a/b/c/d/e/f/package.json'):
-      case absolutePath('a/b/c/d/e/f/.foorc'):
-      case absolutePath('a/b/c/d/e/f/.foorc.json'):
-      case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
-        callback({ code: 'ENOENT' });
-        break;
-      case absolutePath('a/b/c/d/e/f/.foorc.yml'):
-        callback(null, 'found: thing: true');
-        break;
-      default:
-        callback(new Error(`irrelevant path ${searchPath}`));
-    }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = util.makeReadFileSyncStub(readFile);
-
-  function doAsserts(error) {
-    assert.ok(error, 'threw error');
-    assert.equal(error.name, 'YAMLException', 'threw correct error type');
-  }
-
-  const loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-  }).load;
-  const loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-    sync: true,
-  }).load;
-
-  try {
-    loadConfigSync(startDir);
-  } catch (err) {
-    doAsserts(err);
-  }
-
-  loadConfig(startDir)
-    .catch(error => {
-      doAsserts(error);
-      teardown(assert);
-    })
-    .catch(err => {
-      teardown(assert, err);
-    });
-});
-
-test('with rcExtensions, find invalid JS in .foorc.js', assert => {
-  setup();
-  const startDir = absolutePath('a/b/c/d/e/f');
-  function readFile(searchPath, encoding, callback) {
-    switch (searchPath) {
-      case absolutePath('a/b/c/d/e/f/package.json'):
-      case absolutePath('a/b/c/d/e/f/.foorc'):
-      case absolutePath('a/b/c/d/e/f/.foorc.json'):
-      case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
-      case absolutePath('a/b/c/d/e/f/.foorc.yml'):
-        callback({ code: 'ENOENT' });
-        break;
-      case absolutePath('a/b/c/d/e/f/.foorc.js'):
-        callback(null, 'module.exports = found: true };');
-        break;
-      default:
-        callback(new Error(`irrelevant path ${searchPath}`));
-    }
-  }
-  readFileStub = sinon.stub(fs, 'readFile').callsFake(readFile);
-  readFileSyncStub = util.makeReadFileSyncStub(readFile);
-
-  function doAsserts(error) {
-    assert.ok(error, 'threw error');
-    assert.equal(error.name, 'SyntaxError', 'threw correct error type');
-  }
-
-  const loadConfig = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-  }).load;
-  const loadConfigSync = cosmiconfig('foo', {
-    stopDir: absolutePath('.'),
-    rcExtensions: true,
-    sync: true,
-  }).load;
-
-  try {
-    loadConfigSync(startDir);
-    assert.fail('should have errored');
-  } catch (err) {
-    doAsserts(err);
-  }
-
-  loadConfig(startDir)
-    .then(() => {
-      assert.fail('should have errored');
-      teardown(assert);
-    })
-    .catch(error => {
-      doAsserts(error);
-      teardown(assert);
-    });
-});
-
-test('Configuration file not exist', assert => {
-  setup();
-  const loadConfig = cosmiconfig('not_exist_rc_name').load;
-  const loadConfigSync = cosmiconfig('not_exist_rc_name', { sync: true }).load;
-
-  try {
-    const result = loadConfigSync('.');
-    assert.equal(result, null);
-
-    loadConfig('.')
-      .then(result => {
-        assert.equal(result, null);
-        teardown(assert);
-      })
-      .catch(err => {
-        teardown(assert, err);
+      expect.assertions(2);
+      expect(() => loadConfig(true)).toThrow(/JSON Error/);
+      return loadConfig(false).catch(err => {
+        expect(err.message).toMatch(/JSON Error/);
       });
-  } catch (err) {
-    teardown(assert, err);
-  }
+    });
+
+    it('throws error for invalid JS in .config.js file', () => {
+      function readFile(searchPath) {
+        switch (searchPath) {
+          case absolutePath('a/b/package.json'):
+          case absolutePath('a/b/.foorc'):
+            throw { code: 'ENOENT' };
+          case absolutePath('a/b/foo.config.js'):
+            return 'module.exports = { found: true: false,';
+          default:
+            throw new Error(`irrelevant path ${searchPath}`);
+        }
+      }
+      mockReadFile(true, readFile);
+      mockReadFile(false, readFile);
+
+      const startDir = absolutePath('a/b');
+      const loadConfig = sync =>
+        cosmiconfig('foo', { stopDir: absolutePath('a'), sync }).load(startDir);
+
+      expect.assertions(2);
+      try {
+        loadConfig(true);
+      } catch (err) {
+        expect(err.name).toBe('SyntaxError');
+      }
+      return loadConfig(false).catch(err => {
+        expect(err.name).toBe('SyntaxError');
+      });
+    });
+
+    describe('with rcExtensions', () => {
+      const startDir = absolutePath('a/b/c/d/e/f');
+      const loadConfig = sync =>
+        cosmiconfig('foo', {
+          stopDir: absolutePath('.'),
+          rcExtensions: true,
+          sync,
+        }).load(startDir);
+      it('throws error for invalid JSON in .foorc.json', () => {
+        function readFile(searchPath) {
+          switch (searchPath) {
+            case absolutePath('a/b/c/d/e/f/package.json'):
+            case absolutePath('a/b/c/d/e/f/.foorc'):
+              throw { code: 'ENOENT' };
+            case absolutePath('a/b/c/d/e/f/.foorc.json'):
+              return '{ "found": true,, }';
+            default:
+              throw new Error(`irrelevant path ${searchPath}`);
+          }
+        }
+        mockReadFile(true, readFile);
+        mockReadFile(false, readFile);
+
+        expect.assertions(2);
+        expect(() => loadConfig(true)).toThrow(/JSON Error/);
+        return loadConfig(false).catch(err => {
+          expect(err.message).toMatch(/JSON Error/);
+        });
+      });
+
+      it('throws error for invalid YAML in .foorc.yml', () => {
+        function readFile(searchPath) {
+          switch (searchPath) {
+            case absolutePath('a/b/c/d/e/f/package.json'):
+            case absolutePath('a/b/c/d/e/f/.foorc'):
+            case absolutePath('a/b/c/d/e/f/.foorc.json'):
+            case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
+              throw { code: 'ENOENT' };
+            case absolutePath('a/b/c/d/e/f/.foorc.yml'):
+              return 'found: thing: true';
+            default:
+              throw new Error(`irrelevant path ${searchPath}`);
+          }
+        }
+        mockReadFile(true, readFile);
+        mockReadFile(false, readFile);
+
+        expect.assertions(2);
+        try {
+          loadConfig(true);
+        } catch (err) {
+          expect(err.name).toBe('YAMLException');
+        }
+        return loadConfig(false).catch(err => {
+          expect(err.name).toBe('YAMLException');
+        });
+      });
+
+      it('throws error for invalid JS in .foorc.js', () => {
+        function readFile(searchPath) {
+          switch (searchPath) {
+            case absolutePath('a/b/c/d/e/f/package.json'):
+            case absolutePath('a/b/c/d/e/f/.foorc'):
+            case absolutePath('a/b/c/d/e/f/.foorc.json'):
+            case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
+            case absolutePath('a/b/c/d/e/f/.foorc.yml'):
+              throw { code: 'ENOENT' };
+            case absolutePath('a/b/c/d/e/f/.foorc.js'):
+              return 'module.exports = found: true };';
+            default:
+              throw new Error(`irrelevant path ${searchPath}`);
+          }
+        }
+        mockReadFile(true, readFile);
+        mockReadFile(false, readFile);
+
+        expect.assertions(2);
+        try {
+          loadConfig(true);
+        } catch (err) {
+          expect(err.name).toBe('SyntaxError');
+        }
+        return loadConfig(false).catch(err => {
+          expect(err.name).toBe('SyntaxError');
+        });
+      });
+    });
+  });
 });
