@@ -32,7 +32,7 @@ beforeAll(() => {
       case absolutePath('a/b/c/foo.config.js'):
         throw { code: 'ENOENT' };
       case absolutePath('a/b/package.json'):
-        return '{ "foundInB": true }';
+        return '{ "foo": { "foundInB": true } }';
       default:
         throw new Error(`irrelevant path ${searchPath}`);
     }
