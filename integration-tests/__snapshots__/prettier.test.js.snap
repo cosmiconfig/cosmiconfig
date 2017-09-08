@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`prettier accepts configuration from --config .prettierrc 1`] = `
+"function f() {
+  console.log('should have tab width 8');
+}
+"
+`;
+
+exports[`prettier accepts configuration from --config prettier.config.js 1`] = `
+"function f() {
+        console.log(\\"should have tab width 3\\");
+}
+"
+`;
+
+exports[`prettier resolves configuration file with --find-config-path file 1`] = `
+".prettierrc
+"
+`;
+
+exports[`prettier resolves configuration from external files 1`] = `
+"function f() {
+        console.log(\\"should have tab width 8\\");
+}
+module.exports = {
+        tabWidth: 8
+};
+function f() {
+  console.log(\\"should have no semicolons\\")
+}
+function f() {
+   console.log(\\"should have tab width 3\\");
+}
+function f() {
+  console.log.apply(null, [
+    'this file',
+    'should have trailing comma',
+    'and single quotes',
+  ]);
+}
+"
+`;
