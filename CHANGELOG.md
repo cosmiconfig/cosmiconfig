@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.3
+
+- Fixed: when a `options.configPath` or `--config` is `package.json`, return the package prop, not the entire JSON file.
+
 ## 2.2.2
 
 - Fixed: `options.configPath` and `--config` flag are respected.
