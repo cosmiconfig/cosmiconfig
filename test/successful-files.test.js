@@ -57,6 +57,25 @@ describe('cosmiconfig', () => {
       ]);
     });
 
+    testSyncAndAsync(
+      'loads package prop when --config is package.json',
+      sync => () => {
+        const configPath = absolutePath('fixtures/package.json');
+        const explorer = cosmiconfig('foo', { configPath, sync });
+        return testFuncsRunner(
+          sync,
+          explorer.load('./fixtures/foo-module.js'),
+          [
+            result => {
+              expect(result.config).toEqual({
+                bar: 'baz',
+              });
+            },
+          ]
+        );
+      }
+    );
+
     testSyncAndAsync('runs transform', sync => () => {
       expect.hasAssertions();
       return testFuncsRunner(
