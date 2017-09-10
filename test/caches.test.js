@@ -195,36 +195,6 @@ describe('cosmiconfig', () => {
       ]);
     });
 
-    testSyncAndAsync('is not used when cache option is false', sync => () => {
-      const loadConfig = cosmiconfig('foo', { sync, cache: false }).load;
-      const searchPath = absolutePath('a/b/c/d');
-      mockStatIsDirectory(true);
-
-      const expectedResult = {
-        filepath: absolutePath('a/b/c/d/.foorc'),
-        config: { foundInD: true },
-      };
-      const readFileMock = readFileMockFor(sync);
-
-      function expectation(result, cnt) {
-        util.assertSearchSequence(
-          readFileMock,
-          ['a/b/c/d/package.json', 'a/b/c/d/.foorc'],
-          cnt
-        );
-        expect(result).toEqual(expectedResult);
-      }
-
-      expect.hasAssertions();
-      return testFuncsRunner(sync, loadConfig(searchPath), [
-        result => expectation(result, 0),
-        () => loadConfig(searchPath),
-        result => expectation(result, 2),
-        () => loadConfig(searchPath),
-        result => expectation(result, 4),
-      ]);
-    });
-
     testSyncAndAsync(
       'clears file cache on calling clearFileCache',
       sync => () => {
@@ -314,5 +284,143 @@ describe('cosmiconfig', () => {
         ]);
       }
     );
+
+    testSyncAndAsync(
+      'clears both file and directory cache on calling clearCaches',
+      sync => () => {
+        const explorer = cosmiconfig('foo', { sync });
+        const searchPathFile = absolutePath('a/b/c/d/.foorc');
+        const searchPathDir = absolutePath('a/b/c/d/e');
+        mockStatIsDirectory(true);
+
+        const expectedResult = {
+          filepath: absolutePath('a/b/c/d/.foorc'),
+          config: { foundInD: true },
+        };
+        const readFileMock = readFileMockFor(sync);
+
+        function freshLoadFileExpect(result) {
+          util.assertSearchSequence(readFileMock, ['a/b/c/d/.foorc']);
+          expect(result).toEqual(expectedResult);
+          readFileMock.mockClear();
+        }
+
+        function freshLoadDirExpect(result) {
+          util.assertSearchSequence(readFileMock, [
+            'a/b/c/d/e/package.json',
+            'a/b/c/d/e/.foorc',
+            'a/b/c/d/e/foo.config.js',
+            'a/b/c/d/package.json',
+            'a/b/c/d/.foorc',
+          ]);
+          expect(result).toEqual(expectedResult);
+          readFileMock.mockClear();
+        }
+
+        function loadFromFile() {
+          mockStatIsDirectory(false);
+          return explorer.load(null, searchPathFile);
+        }
+
+        function loadFromDir() {
+          mockStatIsDirectory(true);
+          return explorer.load(searchPathDir);
+        }
+
+        expect.hasAssertions();
+        return testFuncsRunner(sync, loadFromFile(), [
+          freshLoadFileExpect,
+          loadFromFile,
+          result => {
+            // cachedLoadFileExpect
+            expect(readFileMock).not.toHaveBeenCalled();
+            expect(result).toEqual(expectedResult);
+          },
+          loadFromDir,
+          freshLoadDirExpect,
+          loadFromDir,
+          result => {
+            // cachedLoadDirExpect
+            expect(readFileMock).not.toHaveBeenCalled(); // so no need to clear
+            expect(result).toEqual(expectedResult);
+          },
+          () => {
+            explorer.clearCaches();
+          },
+          loadFromDir,
+          freshLoadDirExpect,
+          loadFromFile,
+          freshLoadFileExpect,
+        ]);
+      }
+    );
+  });
+
+  describe('cache disabled', () => {
+    const explorer = cosmiconfig('foo', { cache: false });
+
+    it('does not throw an error when clearFileCache is called', () => {
+      expect(() => explorer.clearFileCache()).not.toThrow();
+    });
+
+    it('does not throw an error when clearDirectoryCache is called', () => {
+      expect(() => explorer.clearDirectoryCache()).not.toThrow();
+    });
+    it('does not throw an error when clearCaches is called', () => {
+      expect(() => explorer.clearCaches()).not.toThrow();
+    });
+
+    testSyncAndAsync('does not cache directory results', sync => () => {
+      const loadConfig = cosmiconfig('foo', { sync, cache: false }).load;
+      const searchPath = absolutePath('a/b/c/d');
+      mockStatIsDirectory(true);
+
+      const expectedResult = {
+        filepath: absolutePath('a/b/c/d/.foorc'),
+        config: { foundInD: true },
+      };
+      const readFileMock = readFileMockFor(sync);
+
+      function expectation(result) {
+        util.assertSearchSequence(readFileMock, [
+          'a/b/c/d/package.json',
+          'a/b/c/d/.foorc',
+        ]);
+        expect(result).toEqual(expectedResult);
+        readFileMock.mockClear();
+      }
+
+      expect.hasAssertions();
+      return testFuncsRunner(sync, loadConfig(searchPath), [
+        expectation,
+        () => loadConfig(searchPath),
+        expectation,
+      ]);
+    });
+
+    testSyncAndAsync('does not cache file results', sync => () => {
+      const explorer = cosmiconfig('foo', { sync, cache: false });
+      const searchPath = absolutePath('a/b/c/d/.foorc');
+      mockStatIsDirectory(false);
+
+      const expectedResult = {
+        filepath: absolutePath('a/b/c/d/.foorc'),
+        config: { foundInD: true },
+      };
+      const readFileMock = readFileMockFor(sync);
+
+      function expectation(result) {
+        util.assertSearchSequence(readFileMock, ['a/b/c/d/.foorc']);
+        expect(result).toEqual(expectedResult);
+        readFileMock.mockClear();
+      }
+
+      expect.hasAssertions();
+      return testFuncsRunner(sync, explorer.load(null, searchPath), [
+        expectation,
+        () => explorer.load(null, searchPath),
+        expectation,
+      ]);
+    });
   });
 });

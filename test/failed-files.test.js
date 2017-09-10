@@ -62,6 +62,18 @@ function makeEmptyFileTest(fileFormat, withFormat) {
 }
 
 describe('cosmiconfig', () => {
+  util.testSyncAndAsync(
+    'returns null if neither searchPath nor configPath are specified',
+    sync => () => {
+      expect.hasAssertions();
+      return util.testFuncsRunner(sync, cosmiconfig(null, { sync }).load(), [
+        result => {
+          expect(result).toBeNull();
+        },
+      ]);
+    }
+  );
+
   describe('load from file', () => {
     it('throws error if defined file does not exist', () => {
       expect.assertions(2);

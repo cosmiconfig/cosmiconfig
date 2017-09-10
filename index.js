@@ -6,9 +6,11 @@ const oshomedir = require('os-homedir');
 const minimist = require('minimist');
 const createExplorer = require('./lib/createExplorer');
 
-const parsedCliArgs = minimist(process.argv);
-
 module.exports = function cosmiconfig(moduleName, options) {
+  // Keeping argv parsing here allows to mock `minimist` for different tests.
+  // This should not have too much of a negative impact.
+  const parsedCliArgs = minimist(process.argv);
+
   options = Object.assign(
     {
       packageProp: moduleName,
