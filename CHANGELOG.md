@@ -1,7 +1,10 @@
 # Changelog
 
-## 2.2.3
+## master
 
+- Added: `sync` option.
+- Throw error on getting empty config file.
+- Removed: support for Node versions < 4.
 - Fixed: when a `options.configPath` or `--config` is `package.json`, return the package prop, not the entire JSON file.
 
 ## 2.2.2
