@@ -49,7 +49,11 @@
     "tabWidth": 2
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "lib/*.js",
+      "index.js"
+    ]
   },
   "dependencies": {
     "is-directory": "^0.3.1",
