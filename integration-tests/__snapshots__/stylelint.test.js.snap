@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`stylelint result 1`] = `
+Object {
+  "errored": false,
+  "output": "[{\\"source\\":\\"<input css 1>\\",\\"deprecations\\":[],\\"invalidOptionWarnings\\":[],\\"parseErrors\\":[],\\"warnings\\":[]}]",
+  "results": Array [
+    Object {
+      "_postcssResult": Result {
+        "css": "a { color: pink; }",
+        "map": undefined,
+        "messages": Array [],
+        "opts": Object {
+          "from": undefined,
+          "syntax": undefined,
+        },
+        "processor": Processor {
+          "plugins": Array [],
+          "version": "6.0.10",
+        },
+        "root": Object {
+          "indexes": Object {},
+          "lastEach": 11,
+          "nodes": Array [
+            Object {
+              "indexes": Object {},
+              "lastEach": 11,
+              "nodes": Array [
+                Object {
+                  "prop": "color",
+                  "raws": Object {
+                    "before": " ",
+                    "between": ": ",
+                  },
+                  "source": Object {
+                    "end": Object {
+                      "column": 16,
+                      "line": 1,
+                    },
+                    "input": Input {
+                      "css": "a { color: pink; }",
+                      "id": "<input css 1>",
+                    },
+                    "start": Object {
+                      "column": 5,
+                      "line": 1,
+                    },
+                  },
+                  "type": "decl",
+                  "value": "pink",
+                },
+              ],
+              "raws": Object {
+                "after": " ",
+                "before": "",
+                "between": " ",
+                "semicolon": true,
+              },
+              "selector": "a",
+              "source": Object {
+                "end": Object {
+                  "column": 18,
+                  "line": 1,
+                },
+                "input": Input {
+                  "css": "a { color: pink; }",
+                  "id": "<input css 1>",
+                },
+                "start": Object {
+                  "column": 1,
+                  "line": 1,
+                },
+              },
+              "type": "rule",
+            },
+          ],
+          "raws": Object {
+            "after": "",
+            "semicolon": false,
+          },
+          "source": Object {
+            "input": Input {
+              "css": "a { color: pink; }",
+              "id": "<input css 1>",
+            },
+            "start": Object {
+              "column": 1,
+              "line": 1,
+            },
+          },
+          "type": "root",
+        },
+        "stylelint": Object {
+          "customMessages": Object {
+            "color-no-invalid-hex": undefined,
+            "comment-empty-line-before": undefined,
+            "declaration-colon-space-after": undefined,
+            "indentation": undefined,
+            "max-empty-lines": undefined,
+            "rule-empty-line-before": undefined,
+            "unit-whitelist": undefined,
+          },
+          "disabledRanges": Object {
+            "all": Array [],
+          },
+          "quiet": undefined,
+          "ruleSeverities": Object {
+            "color-no-invalid-hex": "error",
+            "comment-empty-line-before": "error",
+            "declaration-colon-space-after": "error",
+            "indentation": "error",
+            "max-empty-lines": "error",
+            "rule-empty-line-before": "error",
+            "unit-whitelist": "error",
+          },
+        },
+      },
+      "deprecations": Array [],
+      "errored": undefined,
+      "ignored": undefined,
+      "invalidOptionWarnings": Array [],
+      "parseErrors": Array [],
+      "source": "<input css 1>",
+      "warnings": Array [],
+    },
+  ],
+}
+`;

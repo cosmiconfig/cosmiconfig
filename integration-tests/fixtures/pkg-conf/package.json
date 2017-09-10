@@ -1,0 +1,15 @@
+{
+  "name": "load-pkg-config",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prettier": {
+    "tabWidth": 3
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
