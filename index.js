@@ -1,10 +1,12 @@
 'use strict';
 require('please-upgrade-node')(require('./package.json'));
 
+const os = require('os');
 const path = require('path');
-const oshomedir = require('os-homedir');
 const minimist = require('minimist');
 const createExplorer = require('./lib/createExplorer');
+
+const homedir = os.homedir();
 
 module.exports = function cosmiconfig(moduleName, options) {
   // Keeping argv parsing here allows to mock `minimist` for different tests.
@@ -18,7 +20,7 @@ module.exports = function cosmiconfig(moduleName, options) {
       js: `${moduleName}.config.js`,
       argv: 'config',
       rcStrictJson: false,
-      stopDir: oshomedir(),
+      stopDir: homedir,
       cache: true,
       sync: false,
     },

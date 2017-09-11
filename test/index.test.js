@@ -7,8 +7,8 @@ jest.mock('../lib/createExplorer');
 // test basis.
 jest.mock('minimist', () => jest.fn(() => ({})));
 
+const os = require('os');
 const path = require('path');
-const oshomedir = require('os-homedir');
 const cosmiconfig = require('../');
 
 const minimistMock = require('minimist');
@@ -16,7 +16,7 @@ const createExplorerMock = require('../lib/createExplorer');
 
 describe('cosmiconfig', () => {
   const moduleName = 'foo';
-  const stopDir = oshomedir();
+  const stopDir = os.homedir();
   const configPath = path.join(__dirname, 'fixtures/foo.json');
 
   afterEach(() => {
