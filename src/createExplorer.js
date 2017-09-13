@@ -43,6 +43,14 @@ module.exports = function createExplorer(options: {
     clearDirectoryCache();
   }
 
+  function throwError(error) {
+    if (options.sync) {
+      throw error;
+    } else {
+      return Promise.reject(error);
+    }
+  }
+
   function load(
     searchPath: string,
     configPath?: string
@@ -58,7 +66,14 @@ module.exports = function createExplorer(options: {
       }
 
       let load;
-      if (path.basename(absoluteConfigPath) === 'package.json' && packageProp) {
+      if (path.basename(absoluteConfigPath) === 'package.json') {
+        if (!packageProp) {
+          return throwError(
+            new Error(
+              'Please specify the packageProp option. The configPath argument cannot point to a package.json file if packageProp is false.'
+            )
+          );
+        }
         load = () =>
           loadPackageProp(path.dirname(absoluteConfigPath), {
             packageProp,
