@@ -12,9 +12,3 @@ declare module 'parse-json' {
     filename?: string
   ) => Object;
 }
-
-declare module 'is-promise' {
-  declare function isPromise(arg: Promise<*>): true;
-  declare function isPromise(arg: *): false;
-  declare module.exports: isPromise;
-}

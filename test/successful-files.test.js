@@ -1,7 +1,7 @@
 'use strict';
 
 const util = require('./util');
-const cosmiconfig = require('..');
+const cosmiconfig = require('../src');
 
 const absolutePath = util.absolutePath;
 const configFileLoader = util.configFileLoader;

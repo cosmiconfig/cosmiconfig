@@ -1,8 +1,6 @@
 // @flow
 'use strict';
 
-const isPromise = require('is-promise');
-
 const chainFuncsAsync = (result, func) => result.then(func);
 const chainFuncsSync = (result, func) => func(result);
 
@@ -15,7 +13,7 @@ module.exports = function funcRunner(
   init: Promise<*> | *,
   funcs: Array<Function>
 ): Promise<*> | * {
-  const isAsync = isPromise(init);
+  const isAsync = init instanceof Promise;
 
   return funcs.reduce(
     isAsync === true ? chainFuncsAsync : chainFuncsSync,

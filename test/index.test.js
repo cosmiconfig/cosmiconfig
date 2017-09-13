@@ -9,7 +9,7 @@ jest.mock('minimist', () => jest.fn(() => ({})));
 
 const os = require('os');
 const path = require('path');
-const cosmiconfig = require('../src/index');
+const cosmiconfig = require('../src');
 
 const minimistMock = require('minimist');
 const createExplorerMock = require('../src/createExplorer');

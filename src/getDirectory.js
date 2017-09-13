@@ -5,19 +5,19 @@ const path = require('path');
 const isDirectory = require('is-directory');
 
 module.exports = function getDirectory(
-  filename: string,
+  filepath: string,
   sync?: boolean
 ): Promise<string> | string {
   if (sync === true) {
-    return isDirectory.sync(filename) ? filename : path.dirname(filename);
+    return isDirectory.sync(filepath) ? filepath : path.dirname(filepath);
   }
 
   return new Promise((resolve, reject) => {
-    return isDirectory(filename, (err, filenameIsDirectory) => {
+    return isDirectory(filepath, (err, filepathIsDirectory) => {
       if (err) {
         return reject(err);
       }
-      return resolve(filenameIsDirectory ? filename : path.dirname(filename));
+      return resolve(filepathIsDirectory ? filepath : path.dirname(filepath));
     });
   });
 };
