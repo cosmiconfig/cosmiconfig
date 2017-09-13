@@ -12,7 +12,7 @@ deploy: off
 install:
   - md C:\npm-cache # http://help.appveyor.com/discussions/questions/534-npm-cache
   - npm config set cache C:\npm-cache
-  - ps: Install-Product node $env:nodejs_version
+  - ps: Install-Product node $env:nodejs_version x64
   - npm install
 
 test_script:
