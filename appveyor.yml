@@ -5,6 +5,10 @@ environment:
     - nodejs_version: 4
     - nodejs_version: 6
 
+branches:
+  only:
+    - master
+
 version: "{build}"
 build: off
 deploy: off
