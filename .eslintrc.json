@@ -1,7 +1,14 @@
 {
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "sourceType": "script"
+  },
   "extends": [
     "eslint-config-davidtheclark-node",
     "prettier"
+  ],
+  "plugins": [
+    "flowtype"
   ],
   "rules": {
     "no-var": "off",
@@ -14,6 +21,7 @@
         "error",
         "always",
         { "avoidExplicitReturnArrows": true }
-    ]
+    ],
+    "flowtype/define-flow-type": "error"
   }
 }

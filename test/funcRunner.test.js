@@ -2,7 +2,7 @@
 
 const isPromise = require('is-promise');
 
-const funcRunner = require('../lib/funcRunner');
+const funcRunner = require('../src/funcRunner');
 
 function getFuncStub() {
   return jest.fn(() => 'some-value');

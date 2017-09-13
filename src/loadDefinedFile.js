@@ -1,3 +1,4 @@
+// @flow
 'use strict';
 
 const yaml = require('js-yaml');
@@ -5,26 +6,34 @@ const requireFromString = require('require-from-string');
 const readFile = require('./readFile');
 const parseJson = require('./parseJson');
 
-module.exports = function loadDefinedFile(filepath, options) {
-  function parseContent(content) {
+module.exports = function loadDefinedFile(
+  filepath: string,
+  options: {
+    sync?: boolean,
+    format?: 'json' | 'yaml' | 'js',
+  }
+): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
+  function parseContent(content: ?string): ?cosmiconfig$Result {
     if (!content) {
       throw new Error(`Config file is empty! Filepath - "${filepath}".`);
     }
 
-    const parsedConfig = (() => {
-      switch (options.format) {
-        case 'json':
-          return parseJson(content, filepath);
-        case 'yaml':
-          return yaml.safeLoad(content, {
-            filename: filepath,
-          });
-        case 'js':
-          return requireFromString(content, filepath);
-        default:
-          return tryAllParsing(content, filepath);
-      }
-    })();
+    let parsedConfig;
+    switch (options.format) {
+      case 'json':
+        parsedConfig = parseJson(content, filepath);
+        break;
+      case 'yaml':
+        parsedConfig = yaml.safeLoad(content, {
+          filename: filepath,
+        });
+        break;
+      case 'js':
+        parsedConfig = requireFromString(content, filepath);
+        break;
+      default:
+        parsedConfig = tryAllParsing(content, filepath);
+    }
 
     if (!parsedConfig) {
       throw new Error(`Failed to parse "${filepath}" as JSON, JS, or YAML.`);
@@ -41,7 +50,7 @@ module.exports = function loadDefinedFile(filepath, options) {
     : parseContent(readFile.sync(filepath, { throwNotFound: true }));
 };
 
-function tryAllParsing(content, filepath) {
+function tryAllParsing(content: string, filepath: string): ?Object {
   return tryYaml(content, filepath, () => {
     return tryRequire(content, filepath, () => {
       return null;
@@ -49,7 +58,7 @@ function tryAllParsing(content, filepath) {
   });
 }
 
-function tryYaml(content, filepath, cb) {
+function tryYaml(content: string, filepath: string, cb: () => ?Object) {
   try {
     const result = yaml.safeLoad(content, {
       filename: filepath,
@@ -63,7 +72,7 @@ function tryYaml(content, filepath, cb) {
   }
 }
 
-function tryRequire(content, filepath, cb) {
+function tryRequire(content: string, filepath: string, cb: () => ?Object) {
   try {
     return requireFromString(content, filepath);
   } catch (e) {

@@ -1,3 +1,4 @@
+// @flow
 'use strict';
 
 const path = require('path');
@@ -6,14 +7,28 @@ const loadRc = require('./loadRc');
 const loadJs = require('./loadJs');
 const loadDefinedFile = require('./loadDefinedFile');
 const funcRunner = require('./funcRunner');
-const resolveDir = require('./resolveDir');
+const getDirectory = require('./getDirectory');
 
-module.exports = function createExplorer(options) {
+module.exports = function createExplorer(options: {
+  packageProp?: string | false,
+  rc?: string | false,
+  js?: string | false,
+  argv?: string | false,
+  format?: 'json' | 'yaml' | 'js',
+  rcStrictJson?: boolean,
+  rcExtensions?: boolean,
+  stopDir?: string,
+  cache?: boolean,
+  sync?: boolean,
+  transform?: (?Object) => ?Object,
+  configPath?: string,
+}) {
   // When `options.sync` is `false` (default),
   // these cache Promises that resolve with results, not the results themselves.
   const fileCache = options.cache ? new Map() : null;
   const directoryCache = options.cache ? new Map() : null;
   const transform = options.transform || identity;
+  const packageProp = options.packageProp;
 
   function clearFileCache() {
     if (fileCache) fileCache.clear();
@@ -28,7 +43,10 @@ module.exports = function createExplorer(options) {
     clearDirectoryCache();
   }
 
-  function load(searchPath, configPath) {
+  function load(
+    searchPath: string,
+    configPath?: string
+  ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
     if (!configPath && options.configPath) {
       configPath = options.configPath;
     }
@@ -39,12 +57,26 @@ module.exports = function createExplorer(options) {
         return fileCache.get(absoluteConfigPath);
       }
 
-      const load =
-        path.basename(absoluteConfigPath) === 'package.json'
-          ? () => loadPackageProp(path.dirname(absoluteConfigPath), options)
-          : () => loadDefinedFile(absoluteConfigPath, options);
+      let load;
+      if (path.basename(absoluteConfigPath) === 'package.json' && packageProp) {
+        load = () =>
+          loadPackageProp(path.dirname(absoluteConfigPath), {
+            packageProp,
+            sync: options.sync,
+          });
+      } else {
+        load = () =>
+          loadDefinedFile(absoluteConfigPath, {
+            sync: options.sync,
+            format: options.format,
+          });
+      }
 
-      const result = !options.sync ? load().then(transform) : transform(load());
+      const loadResult = load();
+      const result =
+        loadResult instanceof Promise
+          ? loadResult.then(transform)
+          : transform(loadResult);
       if (fileCache) fileCache.set(absoluteConfigPath, result);
       return result;
     }
@@ -52,30 +84,39 @@ module.exports = function createExplorer(options) {
     if (!searchPath) return !options.sync ? Promise.resolve(null) : null;
 
     const absoluteSearchPath = path.resolve(process.cwd(), searchPath);
-    const searchPathDir = resolveDir(absoluteSearchPath, options.sync);
+    const searchPathDir = getDirectory(absoluteSearchPath, options.sync);
 
-    return !options.sync
+    return searchPathDir instanceof Promise
       ? searchPathDir.then(searchDirectory)
       : searchDirectory(searchPathDir);
   }
 
-  function searchDirectory(directory) {
+  function searchDirectory(
+    directory: string
+  ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
     if (directoryCache && directoryCache.has(directory)) {
       return directoryCache.get(directory);
     }
 
     const result = funcRunner(!options.sync ? Promise.resolve() : undefined, [
       () => {
-        if (!options.packageProp) return;
-        return loadPackageProp(directory, options);
+        if (!packageProp) return;
+        return loadPackageProp(directory, {
+          packageProp,
+          sync: options.sync,
+        });
       },
       result => {
         if (result || !options.rc) return result;
-        return loadRc(path.join(directory, options.rc), options);
+        return loadRc(path.join(directory, options.rc), {
+          sync: options.sync,
+          rcStrictJson: options.rcStrictJson,
+          rcExtensions: options.rcExtensions,
+        });
       },
       result => {
         if (result || !options.js) return result;
-        return loadJs(path.join(directory, options.js), options);
+        return loadJs(path.join(directory, options.js), { sync: options.sync });
       },
       result => {
         if (result) return result;
