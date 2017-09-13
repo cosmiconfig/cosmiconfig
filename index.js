@@ -2,7 +2,6 @@
 require('please-upgrade-node')(require('./package.json'));
 
 const os = require('os');
-const path = require('path');
 const minimist = require('minimist');
 const createExplorer = require('./lib/createExplorer');
 
@@ -27,8 +26,9 @@ module.exports = function cosmiconfig(moduleName, options) {
     options
   );
 
-  if (options.argv && parsedCliArgs[options.argv]) {
-    options.configPath = path.resolve(parsedCliArgs[options.argv]);
+  const configPath = parsedCliArgs[options.argv];
+  if (options.argv && configPath && typeof configPath === 'string') {
+    options.configPath = configPath;
   }
 
   return createExplorer(options);
