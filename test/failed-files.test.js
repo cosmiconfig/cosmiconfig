@@ -163,18 +163,14 @@ describe('cosmiconfig', () => {
     });
 
     it('in async mode, rejects if configPath is package.json and packageProp is false', () => {
+      expect.assertions(1);
       return cosmiconfig('foo', { packageProp: false })
         .load(null, path.join(__dirname, 'fixtures/package.json'))
-        .then(
-          () => {
-            throw new Error('should have errored');
-          },
-          error => {
-            expect(error.message).toContain(
-              'Please specify the packageProp option'
-            );
-          }
-        );
+        .catch(error => {
+          expect(error.message).toContain(
+            'Please specify the packageProp option'
+          );
+        });
     });
   });
 });
