@@ -5,7 +5,7 @@ jest.mock('fs');
 const fsMock = require('fs');
 
 const util = require('./util');
-const cosmiconfig = require('..');
+const cosmiconfig = require('../src');
 
 const absolutePath = util.absolutePath;
 const mockStatIsDirectory = util.mockStatIsDirectory;

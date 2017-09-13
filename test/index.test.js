@@ -1,7 +1,7 @@
 'use strict';
 
 // Mock `createExplorer` because we want to check what it is called with.
-jest.mock('../lib/createExplorer');
+jest.mock('../src/createExplorer');
 // Mock `minimist` and also provide default implementation which returns an
 // empty object. The factory function returns a mock which we can tweak per
 // test basis.
@@ -9,10 +9,10 @@ jest.mock('minimist', () => jest.fn(() => ({})));
 
 const os = require('os');
 const path = require('path');
-const cosmiconfig = require('../');
+const cosmiconfig = require('../src');
 
 const minimistMock = require('minimist');
-const createExplorerMock = require('../lib/createExplorer');
+const createExplorerMock = require('../src/createExplorer');
 
 describe('cosmiconfig', () => {
   const moduleName = 'foo';

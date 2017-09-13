@@ -3,7 +3,7 @@
 const fsMock = require('fs');
 const path = require('path');
 
-const cosmiconfig = require('..');
+const cosmiconfig = require('../src');
 
 const absolutePath = (exports.absolutePath = str => path.join(__dirname, str));
 

@@ -2,19 +2,21 @@
   "name": "cosmiconfig",
   "version": "2.2.2",
   "description": "Find and load configuration from a package.json property, rc file, or CommonJS module",
-  "main": "index.js",
+  "main": "dist/index.js",
   "files": [
     "index.js",
-    "lib"
+    "dist"
   ],
   "scripts": {
-    "precommit": "lint-staged && jest",
+    "precommit": "lint-staged && jest && flow check",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "pretest": "npm run lint && flow check",
     "test": "jest",
     "test:watch": "jest --watch",
     "coverage": "jest --coverage --coverageReporters=html --coverageReporters=text",
-    "check": "npm run test && npm run lint"
+    "build": "flow-remove-types src --out-dir dist --quiet",
+    "prepublishOnly": "npm run build"
   },
   "lint-staged": {
     "*.js": [
@@ -51,13 +53,17 @@
   "jest": {
     "testEnvironment": "node",
     "collectCoverageFrom": [
-      "lib/*.js",
+      "src/*.js",
       "index.js"
+    ]
+  },
+  "babel": {
+    "plugins": [
+      "transform-flow-strip-types"
     ]
   },
   "dependencies": {
     "is-directory": "^0.3.1",
-    "is-promise": "^2.1.0",
     "js-yaml": "^3.9.0",
     "minimist": "^1.2.0",
     "parse-json": "^2.2.0",
@@ -65,10 +71,15 @@
     "require-from-string": "^1.1.0"
   },
   "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "eslint": "^4.5.0",
     "eslint-config-davidtheclark-node": "^0.2.0",
     "eslint-config-prettier": "^2.3.0",
+    "eslint-plugin-flowtype": "^2.35.1",
     "eslint-plugin-node": "^3.0.5",
+    "flow-bin": "^0.54.1",
+    "flow-remove-types": "^1.2.1",
     "husky": "^0.14.3",
     "jest": "^20.0.4",
     "lint-staged": "^4.0.4",

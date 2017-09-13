@@ -1,7 +1,8 @@
 'use strict';
 
+const path = require('path');
 const util = require('./util');
-const cosmiconfig = require('..');
+const cosmiconfig = require('../src');
 
 const configFileLoader = util.configFileLoader;
 
@@ -150,6 +151,26 @@ describe('cosmiconfig', () => {
       expect.assertions(2);
       expect(loadConfig(true)).toBe(null);
       return expect(loadConfig(false)).resolves.toBe(null);
+    });
+
+    it('in sync mode, throws error if configPath is package.json and packageProp is false', () => {
+      expect(() =>
+        cosmiconfig('foo', { sync: true, packageProp: false }).load(
+          null,
+          path.join(__dirname, 'fixtures/package.json')
+        )
+      ).toThrow(/Please specify the packageProp option/);
+    });
+
+    it('in async mode, rejects if configPath is package.json and packageProp is false', () => {
+      expect.assertions(1);
+      return cosmiconfig('foo', { packageProp: false })
+        .load(null, path.join(__dirname, 'fixtures/package.json'))
+        .catch(error => {
+          expect(error.message).toContain(
+            'Please specify the packageProp option'
+          );
+        });
     });
   });
 });

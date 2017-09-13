@@ -1,8 +1,6 @@
 'use strict';
 
-const isPromise = require('is-promise');
-
-const funcRunner = require('../lib/funcRunner');
+const funcRunner = require('../src/funcRunner');
 
 function getFuncStub() {
   return jest.fn(() => 'some-value');
@@ -14,7 +12,7 @@ describe('funcRunner', () => {
       const init = Promise.resolve(1);
       const res = funcRunner(init, []);
 
-      expect(isPromise(res)).toBe(true);
+      expect(res).toBeInstanceOf(Promise);
     });
 
     it('calls funcs with .then', () => {
@@ -63,7 +61,7 @@ describe('funcRunner', () => {
       const init = 1;
       const res = funcRunner(init, []);
 
-      expect(isPromise(res)).toBe(false);
+      expect(res).not.toBeInstanceOf(Promise);
     });
 
     it('calls funcs in sync', () => {

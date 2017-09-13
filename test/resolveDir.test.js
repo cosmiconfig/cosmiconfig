@@ -1,17 +1,17 @@
 'use strict';
 
 const util = require('./util');
-const resolveDir = require('../lib/resolveDir');
+const getDirectory = require('../src/getDirectory');
 
 const testFuncsRunner = util.testFuncsRunner;
 const testSyncAndAsync = util.testSyncAndAsync;
 
-describe('resolveDir', () => {
+describe('getDirectory', () => {
   testSyncAndAsync(
     'returns the searchPath if it is a directory',
     sync => () => {
       expect.hasAssertions();
-      return testFuncsRunner(sync, resolveDir(__dirname, sync), [
+      return testFuncsRunner(sync, getDirectory(__dirname, sync), [
         dir => {
           expect(dir).toBe(__dirname);
         },
@@ -23,7 +23,7 @@ describe('resolveDir', () => {
     'returns the parent directory if it is a file',
     sync => () => {
       expect.hasAssertions();
-      return testFuncsRunner(sync, resolveDir(__filename, sync), [
+      return testFuncsRunner(sync, getDirectory(__filename, sync), [
         dir => {
           expect(dir).toBe(__dirname);
         },
@@ -35,19 +35,19 @@ describe('resolveDir', () => {
     // Although we explicitly pass `false`, the result will be a promise even
     // if a value was not passed, because it would be falsy and not exactly
     // equal to `true`.
-    const res = resolveDir(__dirname, false);
+    const res = getDirectory(__dirname, false);
     expect(res).toBeInstanceOf(Promise);
   });
 
   it('propagates error thrown by is-directory in sync', () => {
-    expect(() => resolveDir(null, true)).toThrowError(
+    expect(() => getDirectory(null, true)).toThrowError(
       'expected filepath to be a string'
     );
   });
 
   it('rejects with the error thrown by is-directory in async', () => {
     expect.hasAssertions();
-    return resolveDir(null, false).catch(err => {
+    return getDirectory(null, false).catch(err => {
       expect(err.message).toBe('expected filepath to be a string');
     });
   });

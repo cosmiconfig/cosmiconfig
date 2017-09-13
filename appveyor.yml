@@ -12,14 +12,14 @@ branches:
 version: "{build}"
 build: off
 deploy: off
+cache:
+ - "%LOCALAPPDATA%\\Yarn"
 
 install:
-  - md C:\npm-cache # http://help.appveyor.com/discussions/questions/534-npm-cache
-  - npm config set cache C:\npm-cache
-  - ps: Install-Product node $env:nodejs_version
-  - npm install
+  - ps: Install-Product node $env:nodejs_version x64
+  - yarn install
 
 test_script:
   - node --version
-  - npm --version
-  - cmd: "npm test"
+  - yarn --version
+  - cmd: "yarn test"
