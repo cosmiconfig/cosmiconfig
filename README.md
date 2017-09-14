@@ -120,17 +120,6 @@ Name of a JS file to look for, which must export the configuration object.
 
 If `false`, cosmiconfig will not look for a JS file.
 
-##### argv
-
-Type: `string` or `false`
-Default: `'config'`
-
-Name of a `process.argv` argument to look for, whose value should be the path to a configuration file.
-cosmiconfig will read the file and try to parse it as JSON, YAML, or JS.
-By default, cosmiconfig looks for `--config`.
-
-If `false`, cosmiconfig will not look for any `process.argv` arguments.
-
 ##### rcStrictJson
 
 Type: `boolean`

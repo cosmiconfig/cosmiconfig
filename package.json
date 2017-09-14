@@ -53,8 +53,7 @@
   "jest": {
     "testEnvironment": "node",
     "collectCoverageFrom": [
-      "src/*.js",
-      "index.js"
+      "src/*.js"
     ]
   },
   "babel": {
@@ -65,9 +64,7 @@
   "dependencies": {
     "is-directory": "^0.3.1",
     "js-yaml": "^3.9.0",
-    "minimist": "^1.2.0",
     "parse-json": "^2.2.0",
-    "please-upgrade-node": "^3.0.1",
     "require-from-string": "^1.1.0"
   },
   "devDependencies": {
