@@ -13,7 +13,6 @@ module.exports = function createExplorer(options: {
   packageProp?: string | false,
   rc?: string | false,
   js?: string | false,
-  argv?: string | false,
   format?: 'json' | 'yaml' | 'js',
   rcStrictJson?: boolean,
   rcExtensions?: boolean,
