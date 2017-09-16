@@ -6,13 +6,11 @@ Find and load a configuration object from
 - a `package.json` property (anywhere down the file tree)
 - a JSON or YAML "rc file" (anywhere down the file tree)
 - a `.config.js` CommonJS module (anywhere down the file tree)
-- a CLI `--config` argument
 
 For example, if your module's name is "soursocks," cosmiconfig will search out configuration in the following places:
 - a `soursocks` property in `package.json` (anywhere down the file tree)
 - a `.soursocksrc` file in JSON or YAML format (anywhere down the file tree)
 - a `soursocks.config.js` file exporting a JS object (anywhere down the file tree)
-- a CLI `--config` argument
 
 cosmiconfig continues to search in these places all the way down the file tree until it finds acceptable configuration (or hits the home directory).
 
@@ -63,7 +61,7 @@ So let's say `var yourModuleName = 'goldengrahams'` — here's how cosmiconfig w
 - If no configuration object is found, the `cosmiconfig()` Promise resolves with `null`.
 - If a configuration object is found *but is malformed* (causing a parsing error), the `cosmiconfig()` Promise rejects and shares that error (so you should `.catch()` it).
 
-All this searching can be short-circuited by passing `options.configPath` or a `--config` CLI argument to specify a file.
+All this searching can be short-circuited by passing `options.configPath` to specify a file.
 cosmiconfig will read that file and try parsing it as JSON, YAML, or JS.
 
 ## Caching
