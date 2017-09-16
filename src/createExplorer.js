@@ -135,11 +135,10 @@ module.exports = function createExplorer(options: {
       result => {
         if (result) return result;
 
-        const splitPath = directory.split(path.sep);
-        const nextDirectory =
-          splitPath.length > 1 ? splitPath.slice(0, -1).join(path.sep) : null;
+        const nextDirectory = path.dirname(directory);
 
-        if (!nextDirectory || directory === options.stopDir) return null;
+        if (nextDirectory === directory || directory === options.stopDir)
+          return null;
 
         return searchDirectory(nextDirectory);
       },
