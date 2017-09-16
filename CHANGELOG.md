@@ -1,13 +1,14 @@
 # Changelog
 
-## master
+## 3.0.0
 
-- Added: `sync` option.
-- Throw error on getting empty config file.
-- Removed: support for Node versions < 4.
-- Fixed: when a `options.configPath` is `package.json`, return the package prop, not the entire JSON file.
 - Removed: support for loading config path using the `--config` flag. cosmiconfig will not parse command line arguments. Your application can parse command line arguments and pass them to cosmiconfig.
 - Removed: `argv` config option.
+- Removed: support for Node versions < 4.
+- Added: `sync` option.
+- Fixed: Throw a clear error on getting empty config file.
+- Fixed: when a `options.configPath` is `package.json`, return the package prop, not the entire JSON file.
+
 ## 2.2.2
 
 - Fixed: `options.configPath` and `--config` flag are respected.
