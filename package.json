@@ -4,7 +4,6 @@
   "description": "Find and load configuration from a package.json property, rc file, or CommonJS module",
   "main": "dist/index.js",
   "files": [
-    "index.js",
     "dist"
   ],
   "scripts": {
@@ -12,7 +11,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "pretest": "npm run lint && flow check",
-    "test": "jest",
+    "test": "jest --coverage",
     "test:watch": "jest --watch",
     "coverage": "jest --coverage --coverageReporters=html --coverageReporters=text",
     "build": "flow-remove-types src --out-dir dist --quiet",
@@ -54,7 +53,15 @@
     "testEnvironment": "node",
     "collectCoverageFrom": [
       "src/*.js"
-    ]
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    }
   },
   "babel": {
     "plugins": [
