@@ -46,9 +46,9 @@ module.exports = function loadRc(
     let foundConfig = null;
     return funcRunner(readRcFile('json'), [
       (jsonContent: ?string) => {
-        if (foundConfig) {
-          return;
-        } else if (jsonContent) {
+        // Since this is the first try, config cannot have been found, so don't
+        // check `if (foundConfig)`.
+        if (jsonContent) {
           const successFilepath = `${filepath}.json`;
           foundConfig = {
             config: parseJson(jsonContent, successFilepath),
@@ -101,10 +101,8 @@ module.exports = function loadRc(
     ]);
   }
 
-  function readRcFile(extension: ?string): Promise<?string> | ?string {
-    const filepathWithExtension = extension
-      ? `${filepath}.${extension}`
-      : filepath;
+  function readRcFile(extension: string): Promise<?string> | ?string {
+    const filepathWithExtension = `${filepath}.${extension}`;
     return !options.sync
       ? readFile(filepathWithExtension)
       : readFile.sync(filepathWithExtension);

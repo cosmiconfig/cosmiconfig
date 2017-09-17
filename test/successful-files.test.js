@@ -8,10 +8,10 @@ const configFileLoader = util.configFileLoader;
 const testFuncsRunner = util.testFuncsRunner;
 const testSyncAndAsync = util.testSyncAndAsync;
 
-function makeFileTest(file) {
+function makeFileTest(file, format) {
   return sync => () => {
     expect.hasAssertions();
-    return testFuncsRunner(sync, configFileLoader({ sync }, file), [
+    return testFuncsRunner(sync, configFileLoader({ sync, format }, file), [
       result => {
         expect(result.config).toEqual({
           foo: true,
@@ -24,25 +24,49 @@ function makeFileTest(file) {
 
 describe('cosmiconfig', () => {
   describe('load from file', () => {
-    testSyncAndAsync(
-      'loads defined JSON config path',
-      makeFileTest('fixtures/foo.json')
-    );
+    describe('format not specified', () => {
+      testSyncAndAsync(
+        'loads defined JSON config path',
+        makeFileTest('fixtures/foo.json')
+      );
 
-    testSyncAndAsync(
-      'loads defined YAML config path',
-      makeFileTest('fixtures/foo.yaml')
-    );
+      testSyncAndAsync(
+        'loads defined YAML config path',
+        makeFileTest('fixtures/foo.yaml')
+      );
 
-    testSyncAndAsync(
-      'loads defined JS config path',
-      makeFileTest('fixtures/foo.js')
-    );
+      testSyncAndAsync(
+        'loads defined JS config path',
+        makeFileTest('fixtures/foo.js')
+      );
 
-    testSyncAndAsync(
-      'loads modularized JS config path',
-      makeFileTest('fixtures/foo-module.js')
-    );
+      testSyncAndAsync(
+        'loads modularized JS config path',
+        makeFileTest('fixtures/foo-module.js')
+      );
+    });
+
+    describe('format specified', () => {
+      testSyncAndAsync(
+        'loads defined JSON config path',
+        makeFileTest('fixtures/foo.json', 'json')
+      );
+
+      testSyncAndAsync(
+        'loads defined YAML config path',
+        makeFileTest('fixtures/foo.yaml', 'yaml')
+      );
+
+      testSyncAndAsync(
+        'loads defined JS config path',
+        makeFileTest('fixtures/foo.js', 'js')
+      );
+
+      testSyncAndAsync(
+        'loads modularized JS config path',
+        makeFileTest('fixtures/foo-module.js', 'js')
+      );
+    });
 
     testSyncAndAsync('respects options.configPath', sync => () => {
       const configPath = absolutePath('fixtures/foo.json');
@@ -58,7 +82,7 @@ describe('cosmiconfig', () => {
     });
 
     testSyncAndAsync(
-      'loads package prop when --config is package.json',
+      'loads package prop when configPath is package.json',
       sync => () => {
         const configPath = absolutePath('fixtures/package.json');
         const explorer = cosmiconfig('foo', { configPath, sync });
