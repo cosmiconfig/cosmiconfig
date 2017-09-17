@@ -1,5 +1,10 @@
 # Changelog
 
+## master
+
+- Fixed: memory leak due to bug in `require-from-string`
+- Added: for JSON files, append position to end of error message
+
 ## 3.0.0
 
 - Removed: support for loading config path using the `--config` flag. cosmiconfig will not parse command line arguments. Your application can parse command line arguments and pass them to cosmiconfig.
