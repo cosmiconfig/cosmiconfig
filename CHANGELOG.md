@@ -1,9 +1,9 @@
 # Changelog
 
-## master
+## 3.0.1
 
-- Fixed: memory leak due to bug in `require-from-string`
-- Added: for JSON files, append position to end of error message
+- Fixed: memory leak due to bug in `require-from-string`.
+- Added: for JSON files, append position to end of error message.
 
 ## 3.0.0
 
