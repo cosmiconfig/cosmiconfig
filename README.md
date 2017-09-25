@@ -3,16 +3,16 @@
 [![Build Status](https://img.shields.io/travis/davidtheclark/cosmiconfig/master.svg?label=unix%20build)](https://travis-ci.org/davidtheclark/cosmiconfig) [![Build status](https://img.shields.io/appveyor/ci/davidtheclark/cosmiconfig/master.svg?label=windows%20build)](https://ci.appveyor.com/project/davidtheclark/cosmiconfig/branch/master)
 
 Find and load a configuration object from
-- a `package.json` property (anywhere down the file tree)
-- a JSON or YAML "rc file" (anywhere down the file tree)
-- a `.config.js` CommonJS module (anywhere down the file tree)
+- a `package.json` property (anywhere up the directory tree)
+- a JSON or YAML "rc file" (anywhere up the directory tree)
+- a `.config.js` CommonJS module (anywhere up the directory tree)
 
 For example, if your module's name is "soursocks," cosmiconfig will search out configuration in the following places:
-- a `soursocks` property in `package.json` (anywhere down the file tree)
-- a `.soursocksrc` file in JSON or YAML format (anywhere down the file tree)
-- a `soursocks.config.js` file exporting a JS object (anywhere down the file tree)
+- a `soursocks` property in `package.json` (anywhere up the directory tree)
+- a `.soursocksrc` file in JSON or YAML format (anywhere up the directory tree)
+- a `soursocks.config.js` file exporting a JS object (anywhere up the directory tree)
 
-cosmiconfig continues to search in these places all the way down the file tree until it finds acceptable configuration (or hits the home directory).
+cosmiconfig continues to search in these places all the way up the directory tree until it finds acceptable configuration (or hits the home directory).
 
 Additionally, all of these search locations are configurable: you can customize filenames or turn off any location.
 
@@ -55,7 +55,7 @@ So let's say `var yourModuleName = 'goldengrahams'` — here's how cosmiconfig w
   1. A `goldengrahams` property in a `package.json` file (or some other property defined by `options.packageProp`);
   2. A `.goldengrahamsrc` file with JSON or YAML syntax (or some other filename defined by `options.rc`);
   3. A `goldengrahams.config.js` JS file exporting the object (or some other filename defined by `options.js`).
-- If none of those searches reveal a configuration object, it moves down one directory and tries again. So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking those three locations in each directory.
+- If none of those searches reveal a configuration object, it moves up one directory level and tries again. So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking those three locations in each directory.
 - It continues searching until it arrives at your home directory (or some other directory defined by `options.stopDir`).
 - If at any point a parseable configuration is found, the `cosmiconfig()` Promise resolves with its result object.
 - If no configuration object is found, the `cosmiconfig()` Promise resolves with `null`.
@@ -198,7 +198,7 @@ explorer.load('start/search/at/this/file.css');
 explorer.load(null, 'load/this/file.json');
 ```
 
-If you provide `searchPath`, cosmiconfig will start its search at `searchPath` and continue to search up the file tree, as documented above.
+If you provide `searchPath`, cosmiconfig will start its search at `searchPath` and continue to search up the directory tree, as documented above.
 
 If you provide `configPath` (i.e. you already know where the configuration is that you want to load), cosmiconfig will try to read and parse that file.
 
@@ -220,7 +220,7 @@ Performs both `clearFileCache()` and `clearDirectoryCache()`.
 
 - Looks for configuration in some different places: in a `package.json` property, an rc file, a `.config.js` file, and rc files with extensions.
 - Built-in support for JSON, YAML, and CommonJS formats.
-- Stops at the first configuration found, instead of finding all that can be found down the filetree and merging them automatically.
+- Stops at the first configuration found, instead of finding all that can be found up the directory tree and merging them automatically.
 - Options.
 - Asynchronous by default (though can be run synchronously).
 
