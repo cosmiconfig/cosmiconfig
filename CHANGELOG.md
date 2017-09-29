@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Fixed: infer format based on filePath
+
 ## 3.0.1
 
 - Fixed: memory leak due to bug in `require-from-string`.
