@@ -5,6 +5,7 @@ const yaml = require('js-yaml');
 const requireFromString = require('require-from-string');
 const readFile = require('./readFile');
 const parseJson = require('./parseJson');
+const path = require('path');
 
 module.exports = function loadDefinedFile(
   filepath: string,
@@ -20,15 +21,7 @@ module.exports = function loadDefinedFile(
 
     let parsedConfig;
 
-    const format =
-      options.format ||
-      (/\.(js)$/.test(filepath)
-        ? 'js'
-        : /\.(json)$/.test(filepath)
-          ? 'json'
-          : /\.(yml|yaml)$/.test(filepath) ? 'yaml' : undefined);
-
-    switch (format) {
+    switch (options.format || inferFormat(filepath)) {
       case 'json':
         parsedConfig = parseJson(content, filepath);
         break;
@@ -58,6 +51,21 @@ module.exports = function loadDefinedFile(
     ? readFile(filepath, { throwNotFound: true }).then(parseContent)
     : parseContent(readFile.sync(filepath, { throwNotFound: true }));
 };
+
+function inferFormat(filepath: string): ?string {
+  switch (path.extname(filepath)) {
+    case '.js':
+      return 'js';
+    case '.json':
+      return 'json';
+    // istanbul ignore next
+    case '.yml':
+    case '.yaml':
+      return 'yaml';
+    default:
+      return undefined;
+  }
+}
 
 function tryAllParsing(content: string, filepath: string): ?Object {
   return tryYaml(content, filepath, () => {
