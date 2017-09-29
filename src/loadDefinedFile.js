@@ -19,7 +19,16 @@ module.exports = function loadDefinedFile(
     }
 
     let parsedConfig;
-    switch (options.format) {
+
+    const format =
+      options.format ||
+      (/\.(js)$/.test(filepath)
+        ? 'js'
+        : /\.(json)$/.test(filepath)
+          ? 'json'
+          : /\.(yml|yaml)$/.test(filepath) ? 'yaml' : undefined);
+
+    switch (format) {
       case 'json':
         parsedConfig = parseJson(content, filepath);
         break;
