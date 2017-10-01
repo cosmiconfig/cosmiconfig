@@ -1,8 +1,8 @@
 # Changelog
 
-## Unreleased
+## 3.1.0
 
-- Fixed: infer format based on filePath
+- Added: infer format based on filePath
 
 ## 3.0.1
 
