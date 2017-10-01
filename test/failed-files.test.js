@@ -6,8 +6,20 @@ const cosmiconfig = require('../src');
 
 const configFileLoader = util.configFileLoader;
 
-function makeSyntaxErrTest(format) {
-  const file = `fixtures/foo-invalid.${format}`;
+const expectForFormat = {
+  json(err) {
+    expect(err.message).toMatch(/JSON Error/);
+  },
+  yaml(err) {
+    expect(err.name).toBe('YAMLException');
+  },
+  js(err) {
+    expect(err.name).toBe('ReferenceError');
+  },
+};
+
+function makeSyntaxErrWithoutKnownExtnameTest(format) {
+  const file = `fixtures/foo-invalid-${format}`;
 
   return () => {
     expect.assertions(2);
@@ -21,20 +33,24 @@ function makeSyntaxErrTest(format) {
   };
 }
 
-const expectForFormat = {
-  json(err) {
-    expect(err.message).toMatch(/JSON Error/);
-  },
-  yaml(err) {
-    expect(err.name).toBe('YAMLException');
-  },
-  js(err) {
-    expect(err.name).toBe('ReferenceError');
-  },
-};
+function makeSyntaxErrTest(format) {
+  const file = `fixtures/foo-invalid.${format}`;
+
+  return () => {
+    expect.assertions(2);
+    try {
+      configFileLoader({ sync: true }, file);
+    } catch (err) {
+      expectForFormat[format](err);
+    }
+
+    return configFileLoader(null, file).catch(expectForFormat[format]);
+  };
+}
 
 function makeSyntaxErrWithFormatTest(format) {
   const file = `fixtures/foo-invalid.${format}`;
+
   return () => {
     expect.assertions(2);
     try {
@@ -141,6 +157,23 @@ describe('cosmiconfig', () => {
       it(
         'throws error for empty file, format YAML',
         makeEmptyFileTest('yaml', true)
+      );
+    });
+
+    describe('with unknown extname', () => {
+      it(
+        'throws error if defined JSON file has syntax error',
+        makeSyntaxErrWithoutKnownExtnameTest('json')
+      );
+
+      it(
+        'throws error if defined YAML file has syntax error',
+        makeSyntaxErrWithoutKnownExtnameTest('yaml')
+      );
+
+      it(
+        'throws error if defined JS file has syntax error',
+        makeSyntaxErrWithoutKnownExtnameTest('js')
       );
     });
 
