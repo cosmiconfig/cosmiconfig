@@ -183,12 +183,12 @@ If provided, cosmiconfig will load and parse a config from this path, and will n
 
 ##### format
 
-Type: `string`
+Type: `'json' | 'yaml' | 'js'`
 
-The expected file format for the config loaded from `configPath`. Can be one of `'json' | 'yaml' | 'js'`.
+The expected file format for the config loaded from `configPath`.
 
-If not specified, cosmiconfig will try to infer the format using the extension name(if it has one).
-In the event that the file does not have an extension, cosmiconfig will try to parse it as a JSON, YAML, or JS file.
+If not specified, cosmiconfig will try to infer the format using the extension name (if it has one).
+In the event that the file does not have an extension or the extension is unrecognized, cosmiconfig will try to parse it as a JSON, YAML, or JS file.
 
 ### Instance methods (on `explorer`)
 
