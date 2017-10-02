@@ -181,6 +181,15 @@ Type: `string`
 
 If provided, cosmiconfig will load and parse a config from this path, and will not perform its usual search.
 
+##### format
+
+Type: `'json' | 'yaml' | 'js'`
+
+The expected file format for the config loaded from `configPath`.
+
+If not specified, cosmiconfig will try to infer the format using the extension name (if it has one).
+In the event that the file does not have an extension or the extension is unrecognized, cosmiconfig will try to parse it as a JSON, YAML, or JS file.
+
 ### Instance methods (on `explorer`)
 
 #### `load([searchPath, configPath])`
@@ -200,7 +209,7 @@ explorer.load(null, 'load/this/file.json');
 
 If you provide `searchPath`, cosmiconfig will start its search at `searchPath` and continue to search up the directory tree, as documented above.
 
-If you provide `configPath` (i.e. you already know where the configuration is that you want to load), cosmiconfig will try to read and parse that file.
+If you provide `configPath` (i.e. you already know where the configuration is that you want to load), cosmiconfig will try to read and parse that file. Note that the [`format` option](#format) is applicable for this as well.
 
 #### `clearFileCache()`
 
