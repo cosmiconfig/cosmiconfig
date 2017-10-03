@@ -10,6 +10,7 @@ const loadDefinedFile = require('./loadDefinedFile');
 const funcRunner = require('./funcRunner');
 const getDirectory = require('./getDirectory');
 
+// istanbul ignore next
 const isUncStopDir = (regExp => fsPath => regExp.test(fsPath))(
   new RegExp(`^${uncPathRegex().source}$`)
 );
@@ -140,7 +141,8 @@ module.exports = function createExplorer(options: {
       result => {
         if (result) return result;
 
-        // istanbul ignore if (test only runs on Windows)
+        // Test only runs on Windows
+        // istanbul ignore next
         if (process.platform === 'win32' && isUncStopDir(directory))
           return null;
 
