@@ -141,7 +141,8 @@ module.exports = function createExplorer(options: {
         if (result) return result;
 
         // istanbul ignore if (test only runs on Windows)
-        if (isUncStopDir(directory)) return null;
+        if (process.platform === 'win32' && isUncStopDir(directory))
+          return null;
 
         const nextDirectory = path.dirname(directory);
 

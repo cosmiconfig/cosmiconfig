@@ -150,11 +150,16 @@ describe('cosmiconfig', () => {
           expect.hasAssertions();
           return testFuncsRunner(sync, loadConfig(startDir), [
             result => {
-              util.assertSearchSequence(readFileMock, [
-                '\\\\device\\c$\\a\\b\\package.json',
-                '\\\\device\\c$\\a\\package.json',
-                '\\\\device\\c$\\package.json',
-              ]);
+              util.assertSearchSequence(
+                readFileMock,
+                [
+                  '\\\\device\\c$\\a\\b\\package.json',
+                  '\\\\device\\c$\\a\\package.json',
+                  '\\\\device\\c$\\package.json',
+                ],
+                0,
+                true
+              );
               expect(result).toBe(null);
             },
           ]);
