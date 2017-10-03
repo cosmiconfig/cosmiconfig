@@ -141,7 +141,11 @@ describe('cosmiconfig', () => {
           const readFileMock = mockReadFile(sync, readFile);
 
           const startDir = '\\\\device\\c$\\a\\b\\';
-          const loadConfig = cosmiconfig('foo', { sync }).load;
+          const loadConfig = cosmiconfig('foo', {
+            js: false,
+            rc: false,
+            sync,
+          }).load;
 
           expect.hasAssertions();
           return testFuncsRunner(sync, loadConfig(startDir), [
