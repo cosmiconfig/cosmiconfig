@@ -72,7 +72,8 @@
     "is-directory": "^0.3.1",
     "js-yaml": "^3.9.0",
     "parse-json": "^3.0.0",
-    "require-from-string": "^2.0.1"
+    "require-from-string": "^2.0.1",
+    "unc-path-regex": "^0.1.2"
   },
   "devDependencies": {
     "babel-eslint": "^8.0.0",

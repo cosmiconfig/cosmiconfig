@@ -2,12 +2,17 @@
 'use strict';
 
 const path = require('path');
+const uncPathRegex = require('unc-path-regex');
 const loadPackageProp = require('./loadPackageProp');
 const loadRc = require('./loadRc');
 const loadJs = require('./loadJs');
 const loadDefinedFile = require('./loadDefinedFile');
 const funcRunner = require('./funcRunner');
 const getDirectory = require('./getDirectory');
+
+const isUncStopDir = (regExp => fsPath => regExp.test(fsPath))(
+  new RegExp(`^${uncPathRegex().source}$`)
+);
 
 module.exports = function createExplorer(options: {
   packageProp?: string | false,
@@ -134,6 +139,9 @@ module.exports = function createExplorer(options: {
       },
       result => {
         if (result) return result;
+
+        // istanbul ignore if (test only runs on Windows)
+        if (isUncStopDir(directory)) return null;
 
         const nextDirectory = path.dirname(directory);
 
