@@ -75,19 +75,19 @@
     "require-from-string": "^2.0.1"
   },
   "devDependencies": {
-    "babel-eslint": "^8.0.0",
+    "babel-eslint": "^8.0.3",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
-    "eslint": "^4.7.0",
-    "eslint-config-davidtheclark-node": "^0.2.0",
-    "eslint-config-prettier": "^2.5.0",
-    "eslint-plugin-flowtype": "^2.35.1",
-    "eslint-plugin-node": "^3.0.5",
+    "eslint": "^4.12.1",
+    "eslint-config-davidtheclark-node": "^0.2.2",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-flowtype": "^2.39.1",
+    "eslint-plugin-node": "^5.2.1",
     "flow-bin": "^0.54.1",
-    "flow-remove-types": "^1.2.1",
+    "flow-remove-types": "^1.2.3",
     "husky": "^0.14.3",
-    "jest": "^21.1.0",
-    "lint-staged": "^4.2.1",
-    "prettier": "^1.7.0"
+    "jest": "^21.2.1",
+    "lint-staged": "^6.0.0",
+    "prettier": "^1.8.2"
   },
   "engines": {
     "node": ">=4"
