@@ -124,6 +124,49 @@ describe('cosmiconfig', () => {
       ]);
     });
 
+    if (process.platform === 'win32') {
+      testSyncAndAsync(
+        'stops at UNC path device name and gives up',
+        sync => () => {
+          function readFile(searchPath) {
+            switch (searchPath) {
+              case '\\\\device\\c$\\a\\b\\package.json':
+              case '\\\\device\\c$\\a\\package.json':
+              case '\\\\device\\c$\\package.json':
+                throw { code: 'ENOENT' };
+              default:
+                throw new Error(`irrelevant path ${searchPath}`);
+            }
+          }
+          const readFileMock = mockReadFile(sync, readFile);
+
+          const startDir = '\\\\device\\c$\\a\\b\\';
+          const loadConfig = cosmiconfig('foo', {
+            js: false,
+            rc: false,
+            sync,
+          }).load;
+
+          expect.hasAssertions();
+          return testFuncsRunner(sync, loadConfig(startDir), [
+            result => {
+              util.assertSearchSequence(
+                readFileMock,
+                [
+                  '\\\\device\\c$\\a\\b\\package.json',
+                  '\\\\device\\c$\\a\\package.json',
+                  '\\\\device\\c$\\package.json',
+                ],
+                0,
+                true
+              );
+              expect(result).toBe(null);
+            },
+          ]);
+        }
+      );
+    }
+
     it('throws error for invalid YAML in rc file', () => {
       function readFile(searchPath) {
         switch (searchPath) {

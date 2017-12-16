@@ -49,7 +49,8 @@ exports.mockStatIsDirectory = function mockStatIsDirectory(result) {
 exports.assertSearchSequence = function assertSearchSequence(
   readFileMock,
   searchPaths,
-  startCount
+  startCount,
+  isAbsolute
 ) {
   startCount = startCount || 0;
 
@@ -57,7 +58,7 @@ exports.assertSearchSequence = function assertSearchSequence(
 
   searchPaths.forEach((searchPath, idx) => {
     expect(readFileMock.mock.calls[idx + startCount][0]).toBe(
-      path.join(__dirname, searchPath)
+      path.join(isAbsolute ? '' : __dirname, searchPath)
     );
   });
 };
