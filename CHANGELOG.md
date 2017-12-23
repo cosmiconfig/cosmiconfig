@@ -1,5 +1,10 @@
 # Changelog
 
+## master
+
+- Licensing improvement: updated `parse-json` from `3.0.0` to `4.0.0`(see [sindresorhus/parse-json#12][parse-json-pr-12]).
+- Changed: error message format for `JSON` parse errors(see [#101][pr-101]). If you were relying on the format of JSON-parsing error messages, this will be a breaking change for you.
+
 ## 3.1.0
 
 - Added: infer format based on filePath
@@ -72,3 +77,6 @@
 ## 1.0.0
 
 - Initial release.
+
+[parse-json-pr-12]: https://github.com/sindresorhus/parse-json/pull/12
+[pr-101]: https://github.com/davidtheclark/cosmiconfig/pull/101
