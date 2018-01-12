@@ -4,6 +4,7 @@
 
 - Licensing improvement: updated `parse-json` from `3.0.0` to `4.0.0`(see [sindresorhus/parse-json#12][parse-json-pr-12]).
 - Changed: error message format for `JSON` parse errors(see [#101][pr-101]). If you were relying on the format of JSON-parsing error messages, this will be a breaking change for you.
+- Changed: set default for `searchPath` as `process.cwd()` in `explorer.load`.
 
 ## 3.1.0
 

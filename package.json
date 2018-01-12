@@ -10,6 +10,7 @@
     "precommit": "lint-staged && jest && flow check",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"{src/*.js,test/*.js}\"",
     "pretest": "npm run lint && flow check",
     "test": "jest --coverage",
     "test:watch": "jest --watch",

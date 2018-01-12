@@ -54,9 +54,8 @@ module.exports = function createExplorer(options: {
     searchPath: string,
     configPath?: string
   ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
-    if (!configPath && options.configPath) {
-      configPath = options.configPath;
-    }
+    if (!searchPath) searchPath = process.cwd();
+    if (!configPath && options.configPath) configPath = options.configPath;
 
     if (configPath) {
       const absoluteConfigPath = path.resolve(process.cwd(), configPath);
@@ -94,8 +93,6 @@ module.exports = function createExplorer(options: {
       if (fileCache) fileCache.set(absoluteConfigPath, result);
       return result;
     }
-
-    if (!searchPath) return !options.sync ? Promise.resolve(null) : null;
 
     const absoluteSearchPath = path.resolve(process.cwd(), searchPath);
     const searchPathDir = getDirectory(absoluteSearchPath, options.sync);

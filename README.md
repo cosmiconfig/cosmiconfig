@@ -34,7 +34,7 @@ var cosmiconfig = require('cosmiconfig');
 
 var explorer = cosmiconfig(yourModuleName[, options]);
 
-explorer.load(yourSearchPath)
+explorer.load()
   .then((result) => {
     // result.config is the parsed configuration object
     // result.filepath is the path to the config file that was found
@@ -198,9 +198,11 @@ Find and load a configuration file. Returns a Promise that resolves with `null`,
 - `config`: The loaded and parsed configuration.
 - `filepath`: The filepath where this configuration was found.
 
-You should provide *either* `searchPath` *or* `configPath`. Use `configPath` if you know the path of the configuration file you want to load. Otherwise, use `searchPath`.
+You should provide *either* `searchPath` *or* `configPath`. Use `configPath` if you know the path of the configuration file you want to load. Note that `configPath` takes priority over `searchPath` if both parameters are specified.
 
 ```js
+explorer.load()
+
 explorer.load('start/search/here');
 explorer.load('start/search/at/this/file.css');
 
@@ -208,6 +210,7 @@ explorer.load(null, 'load/this/file.json');
 ```
 
 If you provide `searchPath`, cosmiconfig will start its search at `searchPath` and continue to search up the directory tree, as documented above.
+By default, `searchPath` is set to `process.cwd()`.
 
 If you provide `configPath` (i.e. you already know where the configuration is that you want to load), cosmiconfig will try to read and parse that file. Note that the [`format` option](#format) is applicable for this as well.
 
