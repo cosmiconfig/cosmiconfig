@@ -192,26 +192,38 @@ In the event that the file does not have an extension or the extension is unreco
 
 ### Instance methods (on `explorer`)
 
-#### `search([searchPath])`
+#### `search([searchPath][, searchOptions])`
 
 Searches for a configuration file. Returns a Promise that resolves with `null`, if nothing is found, or an object with two properties:
 - `config`: The loaded and parsed configuration.
 - `filepath`: The filepath where this configuration was found.
 
+When the [search option](#searchoptions) `ignoreEmpty` is set to false and an empty configuration file is found, the result will have `config` set to `undefined` and an additional property `isEmpty` set to true.
+
 ```js
 explorer.search() // searches from process.cwd()
 explorer.search('start/search/here');
 explorer.search('start/search/at/this/file.css');
+
+// will stop on an empty configuration file
+explorer.search('start/search/here', { ignoreEmpty: false })
 ```
 
 If you provide `searchPath`, cosmiconfig will start its search at `searchPath` and continue to search up the directory tree, as documented above.
 By default, `searchPath` is set to `process.cwd()`.
+
+##### searchOptions
+
+Can be an object containing a single property `ignoreEmpty`.  This defaults to true and tells cosmiconfig whether to continue searching
+for files when an empty one is found.
 
 #### `load([configPath])`
 
 Loads a configuration file directly.  Rejects with an error if the file does not exist, if the file contents are empty, or if the file cannot be parsed.  Upon success it returns a Promise that resolves with an object with two properties:
 - `config`: The loaded and parsed configuration.
 - `filepath`: The filepath where this configuration was found.
+
+If the file is empty then `config` will be set to `undefined` and an additional property `isEmpty` will be set to true
 
 ```js
 explorer.load() // loads options.configPath

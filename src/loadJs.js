@@ -3,19 +3,17 @@
 
 const requireFromString = require('require-from-string');
 const readFile = require('./readFile');
+const createParseFile = require('./createParseFile');
 
 module.exports = function loadJs(
   filepath: string,
-  options: { sync?: boolean }
+  options: { ignoreEmpty: boolean, sync?: boolean }
 ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
-  function parseJsFile(content: ?string): ?cosmiconfig$Result {
-    if (!content) return null;
-
-    return {
-      config: requireFromString(content, filepath),
-      filepath,
-    };
-  }
+  const parseJsFile = createParseFile(
+    filepath,
+    requireFromString,
+    options.ignoreEmpty
+  );
 
   return !options.sync
     ? readFile(filepath).then(parseJsFile)
