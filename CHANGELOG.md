@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.0
+
+- Changed: `load([searchPath, configPath])` is now split into two functions `search([searchPath])` and `load([configPath])`.  The functionality of searching for a configuration and loading a configuration directly remains the same.
+
 ## 4.0.0
 
 - Licensing improvement: updated `parse-json` from `3.0.0` to `4.0.0`(see [sindresorhus/parse-json#12][parse-json-pr-12]).

@@ -79,7 +79,7 @@ function makeEmptyFileTest(fileFormat, withFormat) {
 }
 
 describe('cosmiconfig', () => {
-  describe('load from file', () => {
+  describe('search from file', () => {
     it('throws error if defined file does not exist', () => {
       expect.assertions(2);
       try {
@@ -166,18 +166,17 @@ describe('cosmiconfig', () => {
     });
 
     it('returns null if configuration file does not exist', () => {
-      const loadConfig = sync =>
-        cosmiconfig('not_exist_rc_name', { sync }).load('.');
+      const load = sync =>
+        cosmiconfig('not_exist_rc_name', { sync }).search('.');
 
       expect.assertions(2);
-      expect(loadConfig(true)).toBe(null);
-      return expect(loadConfig(false)).resolves.toBe(null);
+      expect(load(true)).toBe(null);
+      return expect(load(false)).resolves.toBe(null);
     });
 
     it('in sync mode, throws error if configPath is package.json and packageProp is false', () => {
       expect(() =>
         cosmiconfig('foo', { sync: true, packageProp: false }).load(
-          null,
           path.join(__dirname, 'fixtures/package.json')
         )
       ).toThrow(/Please specify the packageProp option/);
@@ -186,12 +185,24 @@ describe('cosmiconfig', () => {
     it('in async mode, rejects if configPath is package.json and packageProp is false', () => {
       expect.assertions(1);
       return cosmiconfig('foo', { packageProp: false })
-        .load(null, path.join(__dirname, 'fixtures/package.json'))
+        .load(path.join(__dirname, 'fixtures/package.json'))
         .catch(error => {
           expect(error.message).toContain(
             'Please specify the packageProp option'
           );
         });
+    });
+
+    it('throws an error if no configPath was specified', () => {
+      const load = sync => cosmiconfig('not_exist_rc_name', { sync }).load();
+      const errorRegex = /^configPath must be a nonempty string/;
+
+      expect.assertions(2);
+      expect(() => load(true)).toThrow(errorRegex);
+
+      return load(false).catch(error => {
+        expect(error.message).toMatch(errorRegex);
+      });
     });
   });
 });

@@ -50,49 +50,10 @@ module.exports = function createExplorer(options: {
     }
   }
 
-  function load(
-    searchPath: string,
-    configPath?: string
+  function search(
+    searchPath: string
   ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
     if (!searchPath) searchPath = process.cwd();
-    if (!configPath && options.configPath) configPath = options.configPath;
-
-    if (configPath) {
-      const absoluteConfigPath = path.resolve(process.cwd(), configPath);
-      if (fileCache && fileCache.has(absoluteConfigPath)) {
-        return fileCache.get(absoluteConfigPath);
-      }
-
-      let load;
-      if (path.basename(absoluteConfigPath) === 'package.json') {
-        if (!packageProp) {
-          return throwError(
-            new Error(
-              'Please specify the packageProp option. The configPath argument cannot point to a package.json file if packageProp is false.'
-            )
-          );
-        }
-        load = () =>
-          loadPackageProp(path.dirname(absoluteConfigPath), {
-            packageProp,
-            sync: options.sync,
-          });
-      } else {
-        load = () =>
-          loadDefinedFile(absoluteConfigPath, {
-            sync: options.sync,
-            format: options.format,
-          });
-      }
-
-      const loadResult = load();
-      const result =
-        loadResult instanceof Promise
-          ? loadResult.then(transform)
-          : transform(loadResult);
-      if (fileCache) fileCache.set(absoluteConfigPath, result);
-      return result;
-    }
 
     const absoluteSearchPath = path.resolve(process.cwd(), searchPath);
     const searchPathDir = getDirectory(absoluteSearchPath, options.sync);
@@ -100,6 +61,57 @@ module.exports = function createExplorer(options: {
     return searchPathDir instanceof Promise
       ? searchPathDir.then(searchDirectory)
       : searchDirectory(searchPathDir);
+  }
+
+  function load(
+    configPath: string
+  ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
+    if (!configPath && options.configPath) configPath = options.configPath;
+
+    if (typeof configPath !== 'string' || configPath === '') {
+      return throwError(
+        new Error(
+          `configPath must be a nonempty string\nconfigPath: ${JSON.stringify(
+            configPath
+          )}`
+        )
+      );
+    }
+
+    const absoluteConfigPath = path.resolve(process.cwd(), configPath);
+    if (fileCache && fileCache.has(absoluteConfigPath)) {
+      return fileCache.get(absoluteConfigPath);
+    }
+
+    let loadIt;
+    if (path.basename(absoluteConfigPath) === 'package.json') {
+      if (!packageProp) {
+        return throwError(
+          new Error(
+            'Please specify the packageProp option. The configPath argument cannot point to a package.json file if packageProp is false.'
+          )
+        );
+      }
+      loadIt = () =>
+        loadPackageProp(path.dirname(absoluteConfigPath), {
+          packageProp,
+          sync: options.sync,
+        });
+    } else {
+      loadIt = () =>
+        loadDefinedFile(absoluteConfigPath, {
+          sync: options.sync,
+          format: options.format,
+        });
+    }
+
+    const loadResult = loadIt();
+    const result =
+      loadResult instanceof Promise
+        ? loadResult.then(transform)
+        : transform(loadResult);
+    if (fileCache) fileCache.set(absoluteConfigPath, result);
+    return result;
   }
 
   function searchDirectory(
@@ -147,6 +159,7 @@ module.exports = function createExplorer(options: {
   }
 
   return {
+    search,
     load,
     clearFileCache,
     clearDirectoryCache,

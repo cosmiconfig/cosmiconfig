@@ -59,22 +59,25 @@ afterAll(() => {
   jest.resetAllMockss();
 });
 
-const cachedLoadConfig = cosmiconfig('foo').load;
-const cachedLoadConfigSync = cosmiconfig('foo', { sync: true }).load;
-const cachedLoaderFor = sync =>
-  sync === true ? cachedLoadConfigSync : cachedLoadConfig;
+const cachedSearch = cosmiconfig('foo').search;
+const cachedSearchSync = cosmiconfig('foo', { sync: true }).search;
+const cachedLoad = cosmiconfig('foo').load;
+const cachedLoadSync = cosmiconfig('foo', { sync: true }).load;
+const cachedSearchFor = sync =>
+  sync === true ? cachedSearchSync : cachedSearch;
+const cachedLoadFor = sync => (sync === true ? cachedLoadSync : cachedLoad);
 const readFileMockFor = sync =>
   sync === true ? fsMock.readFileSync : fsMock.readFile;
 
 describe('cosmiconfig', () => {
   describe('cache', () => {
     testSyncAndAsync('is not used initially', sync => () => {
-      const loadConfig = cachedLoaderFor(sync);
+      const search = cachedSearchFor(sync);
       const searchPath = absolutePath('a/b/c/d/e');
       mockStatIsDirectory(true);
 
       expect.hasAssertions();
-      return testFuncsRunner(sync, loadConfig(searchPath), [
+      return testFuncsRunner(sync, search(searchPath), [
         result => {
           util.assertSearchSequence(readFileMockFor(sync), [
             'a/b/c/d/e/package.json',
@@ -92,13 +95,13 @@ describe('cosmiconfig', () => {
     });
 
     testSyncAndAsync('is used for already visited directories', sync => () => {
-      const loadConfig = cachedLoaderFor(sync);
+      const search = cachedSearchFor(sync);
       // E and D visited above
       const searchPath = absolutePath('a/b/c/d/e');
       mockStatIsDirectory(true);
 
       expect.hasAssertions();
-      return testFuncsRunner(sync, loadConfig(searchPath), [
+      return testFuncsRunner(sync, search(searchPath), [
         result => {
           expect(readFileMockFor(sync)).toHaveBeenCalledTimes(0);
           expect(result).toEqual({
@@ -112,13 +115,13 @@ describe('cosmiconfig', () => {
     testSyncAndAsync(
       'is used when some directories in search are already visted',
       sync => () => {
-        const loadConfig = cachedLoaderFor(sync);
+        const search = cachedSearchFor(sync);
         // E and D visited above, not F
         const searchPath = absolutePath('a/b/c/d/e/f');
         mockStatIsDirectory(true);
 
         expect.hasAssertions();
-        return testFuncsRunner(sync, loadConfig(searchPath), [
+        return testFuncsRunner(sync, search(searchPath), [
           result => {
             util.assertSearchSequence(readFileMockFor(sync), [
               'a/b/c/d/e/f/package.json',
@@ -135,13 +138,13 @@ describe('cosmiconfig', () => {
     );
 
     testSyncAndAsync('is not used for unvisited config file', sync => () => {
-      const loadConfig = cachedLoaderFor(sync);
+      const load = cachedLoadFor(sync);
       // B not yet visited
       const configFile = absolutePath('a/b/package.json');
       mockStatIsDirectory(false);
 
       expect.hasAssertions();
-      return testFuncsRunner(sync, loadConfig(null, configFile), [
+      return testFuncsRunner(sync, load(configFile), [
         result => {
           expect(readFileMockFor(sync)).toHaveBeenCalledTimes(1);
           expect(result).toEqual({
@@ -155,12 +158,12 @@ describe('cosmiconfig', () => {
     testSyncAndAsync(
       'is not used in a new cosmiconfig instance',
       sync => () => {
-        const loadConfig = cosmiconfig('foo', { sync }).load;
+        const search = cosmiconfig('foo', { sync }).search;
         const searchPath = absolutePath('a/b/c/d/e');
         mockStatIsDirectory(true);
 
         expect.hasAssertions();
-        return testFuncsRunner(sync, loadConfig(searchPath), [
+        return testFuncsRunner(sync, search(searchPath), [
           result => {
             util.assertSearchSequence(readFileMockFor(sync), [
               'a/b/c/d/e/package.json',
@@ -179,12 +182,12 @@ describe('cosmiconfig', () => {
     );
 
     testSyncAndAsync('still works on old instance', sync => () => {
-      const loadConfig = cachedLoaderFor(sync);
+      const search = cachedSearchFor(sync);
       const searchPath = absolutePath('a/b/c/d/e');
       mockStatIsDirectory(true);
 
       expect.hasAssertions();
-      return testFuncsRunner(sync, loadConfig(searchPath), [
+      return testFuncsRunner(sync, search(searchPath), [
         result => {
           expect(readFileMockFor(sync)).toHaveBeenCalledTimes(0);
           expect(result).toEqual({
@@ -214,14 +217,14 @@ describe('cosmiconfig', () => {
         }
 
         expect.hasAssertions();
-        return testFuncsRunner(sync, explorer.load(null, searchPath), [
+        return testFuncsRunner(sync, explorer.load(searchPath), [
           expectation,
-          () => explorer.load(null, searchPath),
+          () => explorer.load(searchPath),
           expectation,
           () => {
             explorer.clearFileCache();
           },
-          () => explorer.load(null, searchPath),
+          () => explorer.load(searchPath),
           result => {
             util.assertSearchSequence(readFileMock, [
               'a/b/c/d/.foorc',
@@ -258,14 +261,14 @@ describe('cosmiconfig', () => {
         }
 
         expect.hasAssertions();
-        return testFuncsRunner(sync, explorer.load(searchPath), [
+        return testFuncsRunner(sync, explorer.search(searchPath), [
           expectation,
-          () => explorer.load(searchPath),
+          () => explorer.search(searchPath),
           expectation,
           () => {
             explorer.clearDirectoryCache();
           },
-          () => explorer.load(searchPath),
+          () => explorer.search(searchPath),
           result => {
             util.assertSearchSequence(readFileMock, [
               'a/b/c/d/e/package.json',
@@ -319,12 +322,12 @@ describe('cosmiconfig', () => {
 
         function loadFromFile() {
           mockStatIsDirectory(false);
-          return explorer.load(null, searchPathFile);
+          return explorer.load(searchPathFile);
         }
 
         function loadFromDir() {
           mockStatIsDirectory(true);
-          return explorer.load(searchPathDir);
+          return explorer.search(searchPathDir);
         }
 
         expect.hasAssertions();
@@ -332,7 +335,7 @@ describe('cosmiconfig', () => {
           freshLoadFileExpect,
           loadFromFile,
           result => {
-            // cachedLoadFileExpect
+            // cachedSearchFileExpect
             expect(readFileMock).not.toHaveBeenCalled();
             expect(result).toEqual(expectedResult);
           },
@@ -340,7 +343,7 @@ describe('cosmiconfig', () => {
           freshLoadDirExpect,
           loadFromDir,
           result => {
-            // cachedLoadDirExpect
+            // cachedSearchDirExpect
             expect(readFileMock).not.toHaveBeenCalled(); // so no need to clear
             expect(result).toEqual(expectedResult);
           },
@@ -371,7 +374,7 @@ describe('cosmiconfig', () => {
     });
 
     testSyncAndAsync('does not cache directory results', sync => () => {
-      const loadConfig = cosmiconfig('foo', { sync, cache: false }).load;
+      const search = cosmiconfig('foo', { sync, cache: false }).search;
       const searchPath = absolutePath('a/b/c/d');
       mockStatIsDirectory(true);
 
@@ -391,9 +394,9 @@ describe('cosmiconfig', () => {
       }
 
       expect.hasAssertions();
-      return testFuncsRunner(sync, loadConfig(searchPath), [
+      return testFuncsRunner(sync, search(searchPath), [
         expectation,
-        () => loadConfig(searchPath),
+        () => search(searchPath),
         expectation,
       ]);
     });
@@ -416,9 +419,9 @@ describe('cosmiconfig', () => {
       }
 
       expect.hasAssertions();
-      return testFuncsRunner(sync, explorer.load(null, searchPath), [
+      return testFuncsRunner(sync, explorer.load(searchPath), [
         expectation,
-        () => explorer.load(null, searchPath),
+        () => explorer.load(searchPath),
         expectation,
       ]);
     });

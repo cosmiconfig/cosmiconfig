@@ -8,8 +8,8 @@ const cosmiconfig = require('../src');
 const absolutePath = (exports.absolutePath = str => path.join(__dirname, str));
 
 exports.configFileLoader = function configFileLoader(options, file) {
-  const loadConfig = cosmiconfig(null, options).load;
-  return loadConfig(null, absolutePath(file));
+  const load = cosmiconfig(null, options).load;
+  return load(absolutePath(file));
 };
 
 const chainFuncsSync = (result, func) => func(result);

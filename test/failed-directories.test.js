@@ -34,7 +34,7 @@ afterAll(() => {
 const statMockFor = sync => (sync === true ? fsMock.statSync : fsMock.stat);
 
 describe('cosmiconfig', () => {
-  describe('load from directory', () => {
+  describe('search from directory', () => {
     testSyncAndAsync('gives up if it cannot find the file', sync => () => {
       function readFile(searchPath) {
         switch (searchPath) {
@@ -56,13 +56,13 @@ describe('cosmiconfig', () => {
       const statMock = statMockFor(sync);
 
       const startDir = absolutePath('a/b');
-      const loadConfig = cosmiconfig('foo', {
+      const search = cosmiconfig('foo', {
         stopDir: absolutePath('.'),
         sync,
-      }).load;
+      }).search;
 
       expect.hasAssertions();
-      return testFuncsRunner(sync, loadConfig(startDir), [
+      return testFuncsRunner(sync, search(startDir), [
         result => {
           expect(statMock).toHaveBeenCalledTimes(1);
           expect(statMock.mock.calls[0][0]).toBe(startDir);
@@ -103,13 +103,13 @@ describe('cosmiconfig', () => {
       const readFileMock = mockReadFile(sync, readFile);
 
       const startDir = absolutePath('a/b');
-      const loadConfig = cosmiconfig('foo', {
+      const search = cosmiconfig('foo', {
         stopDir: absolutePath('a'),
         sync,
-      }).load;
+      }).search;
 
       expect.hasAssertions();
-      return testFuncsRunner(sync, loadConfig(startDir), [
+      return testFuncsRunner(sync, search(startDir), [
         result => {
           util.assertSearchSequence(readFileMock, [
             'a/b/package.json',
@@ -139,16 +139,18 @@ describe('cosmiconfig', () => {
       mockReadFile(false, readFile);
 
       const startDir = absolutePath('a/b');
-      const loadConfig = sync =>
-        cosmiconfig('foo', { stopDir: absolutePath('a'), sync }).load(startDir);
+      const search = sync =>
+        cosmiconfig('foo', { stopDir: absolutePath('a'), sync }).search(
+          startDir
+        );
 
       expect.assertions(2);
       try {
-        loadConfig(true);
+        search(true);
       } catch (err) {
         expect(err.name).toBe('YAMLException');
       }
-      return loadConfig(false).catch(err => {
+      return search(false).catch(err => {
         expect(err.name).toBe('YAMLException');
       });
     });
@@ -168,16 +170,16 @@ describe('cosmiconfig', () => {
       mockReadFile(false, readFile);
 
       const startDir = absolutePath('a/b');
-      const loadConfig = sync =>
+      const search = sync =>
         cosmiconfig('foo', {
           stopDir: absolutePath('a'),
           rcStrictJson: true,
           sync,
-        }).load(startDir);
+        }).search(startDir);
 
       expect.assertions(2);
-      expect(() => loadConfig(true)).toThrow(/JSON Error/);
-      return loadConfig(false).catch(err => {
+      expect(() => search(true)).toThrow(/JSON Error/);
+      return search(false).catch(err => {
         expect(err.message).toMatch(/JSON Error/);
       });
     });
@@ -195,12 +197,14 @@ describe('cosmiconfig', () => {
       mockReadFile(false, readFile);
 
       const startDir = absolutePath('a/b');
-      const loadConfig = sync =>
-        cosmiconfig('foo', { stopDir: absolutePath('a'), sync }).load(startDir);
+      const search = sync =>
+        cosmiconfig('foo', { stopDir: absolutePath('a'), sync }).search(
+          startDir
+        );
 
       expect.assertions(2);
-      expect(() => loadConfig(true)).toThrow(/JSON Error/);
-      return loadConfig(false).catch(err => {
+      expect(() => search(true)).toThrow(/JSON Error/);
+      return search(false).catch(err => {
         expect(err.message).toMatch(/JSON Error/);
       });
     });
@@ -221,28 +225,30 @@ describe('cosmiconfig', () => {
       mockReadFile(false, readFile);
 
       const startDir = absolutePath('a/b');
-      const loadConfig = sync =>
-        cosmiconfig('foo', { stopDir: absolutePath('a'), sync }).load(startDir);
+      const search = sync =>
+        cosmiconfig('foo', { stopDir: absolutePath('a'), sync }).search(
+          startDir
+        );
 
       expect.assertions(2);
       try {
-        loadConfig(true);
+        search(true);
       } catch (err) {
         expect(err.name).toBe('SyntaxError');
       }
-      return loadConfig(false).catch(err => {
+      return search(false).catch(err => {
         expect(err.name).toBe('SyntaxError');
       });
     });
 
     describe('with rcExtensions', () => {
       const startDir = absolutePath('a/b/c/d/e/f');
-      const loadConfig = sync =>
+      const search = sync =>
         cosmiconfig('foo', {
           stopDir: absolutePath('.'),
           rcExtensions: true,
           sync,
-        }).load(startDir);
+        }).search(startDir);
       it('throws error for invalid JSON in .foorc.json', () => {
         function readFile(searchPath) {
           switch (searchPath) {
@@ -259,8 +265,8 @@ describe('cosmiconfig', () => {
         mockReadFile(false, readFile);
 
         expect.assertions(2);
-        expect(() => loadConfig(true)).toThrow(/JSON Error/);
-        return loadConfig(false).catch(err => {
+        expect(() => search(true)).toThrow(/JSON Error/);
+        return search(false).catch(err => {
           expect(err.message).toMatch(/JSON Error/);
         });
       });
@@ -284,11 +290,11 @@ describe('cosmiconfig', () => {
 
         expect.assertions(2);
         try {
-          loadConfig(true);
+          search(true);
         } catch (err) {
           expect(err.name).toBe('YAMLException');
         }
-        return loadConfig(false).catch(err => {
+        return search(false).catch(err => {
           expect(err.name).toBe('YAMLException');
         });
       });
@@ -313,11 +319,11 @@ describe('cosmiconfig', () => {
 
         expect.assertions(2);
         try {
-          loadConfig(true);
+          search(true);
         } catch (err) {
           expect(err.name).toBe('SyntaxError');
         }
-        return loadConfig(false).catch(err => {
+        return search(false).catch(err => {
           expect(err.name).toBe('SyntaxError');
         });
       });
