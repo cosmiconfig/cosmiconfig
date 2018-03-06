@@ -220,17 +220,17 @@ explorer.load('load/this/file.json');
 
 Note the [`format` option](#format) is applicable for this.
 
-#### `clearFileCache()`
+#### `clearLoadCache()`
 
 Clears the cache used in `load`.
 
-#### `clearDirectoryCache()`
+#### `clearSearchCache()`
 
 Clears the cache used in `search`.
 
 #### `clearCaches()`
 
-Performs both `clearFileCache()` and `clearDirectoryCache()`.
+Performs both `clearLoadCache()` and `clearSearchCache()`.
 
 ## Differences from [rc](https://github.com/dominictarr/rc)
 

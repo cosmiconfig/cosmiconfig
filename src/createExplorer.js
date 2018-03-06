@@ -24,22 +24,22 @@ module.exports = function createExplorer(options: {
 }) {
   // When `options.sync` is `false` (default),
   // these cache Promises that resolve with results, not the results themselves.
-  const fileCache = options.cache ? new Map() : null;
-  const directoryCache = options.cache ? new Map() : null;
+  const loadCache = options.cache ? new Map() : null;
+  const searchCache = options.cache ? new Map() : null;
   const transform = options.transform || identity;
   const packageProp = options.packageProp;
 
-  function clearFileCache() {
-    if (fileCache) fileCache.clear();
+  function clearLoadCache() {
+    if (loadCache) loadCache.clear();
   }
 
-  function clearDirectoryCache() {
-    if (directoryCache) directoryCache.clear();
+  function clearSearchCache() {
+    if (searchCache) searchCache.clear();
   }
 
   function clearCaches() {
-    clearFileCache();
-    clearDirectoryCache();
+    clearLoadCache();
+    clearSearchCache();
   }
 
   function throwError(error) {
@@ -79,8 +79,8 @@ module.exports = function createExplorer(options: {
     }
 
     const absoluteConfigPath = path.resolve(process.cwd(), configPath);
-    if (fileCache && fileCache.has(absoluteConfigPath)) {
-      return fileCache.get(absoluteConfigPath);
+    if (loadCache && loadCache.has(absoluteConfigPath)) {
+      return loadCache.get(absoluteConfigPath);
     }
 
     let loadIt;
@@ -110,15 +110,15 @@ module.exports = function createExplorer(options: {
       loadResult instanceof Promise
         ? loadResult.then(transform)
         : transform(loadResult);
-    if (fileCache) fileCache.set(absoluteConfigPath, result);
+    if (loadCache) loadCache.set(absoluteConfigPath, result);
     return result;
   }
 
   function searchDirectory(
     directory: string
   ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
-    if (directoryCache && directoryCache.has(directory)) {
-      return directoryCache.get(directory);
+    if (searchCache && searchCache.has(directory)) {
+      return searchCache.get(directory);
     }
 
     const result = funcRunner(!options.sync ? Promise.resolve() : undefined, [
@@ -154,15 +154,15 @@ module.exports = function createExplorer(options: {
       transform,
     ]);
 
-    if (directoryCache) directoryCache.set(directory, result);
+    if (searchCache) searchCache.set(directory, result);
     return result;
   }
 
   return {
     search,
     load,
-    clearFileCache,
-    clearDirectoryCache,
+    clearLoadCache,
+    clearSearchCache,
     clearCaches,
   };
 };

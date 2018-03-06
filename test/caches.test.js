@@ -199,7 +199,7 @@ describe('cosmiconfig', () => {
     });
 
     testSyncAndAsync(
-      'clears file cache on calling clearFileCache',
+      'clears load cache on calling clearLoadCache',
       sync => () => {
         const explorer = cosmiconfig('foo', { sync });
         const searchPath = absolutePath('a/b/c/d/.foorc');
@@ -222,7 +222,7 @@ describe('cosmiconfig', () => {
           () => explorer.load(searchPath),
           expectation,
           () => {
-            explorer.clearFileCache();
+            explorer.clearLoadCache();
           },
           () => explorer.load(searchPath),
           result => {
@@ -237,7 +237,7 @@ describe('cosmiconfig', () => {
     );
 
     testSyncAndAsync(
-      'clears directory cache on calling clearDirectoryCache',
+      'clears search cache on calling clearSearchCache',
       sync => () => {
         const explorer = cosmiconfig('foo', { sync });
         const searchPath = absolutePath('a/b/c/d/e');
@@ -266,7 +266,7 @@ describe('cosmiconfig', () => {
           () => explorer.search(searchPath),
           expectation,
           () => {
-            explorer.clearDirectoryCache();
+            explorer.clearSearchCache();
           },
           () => explorer.search(searchPath),
           result => {
@@ -289,7 +289,7 @@ describe('cosmiconfig', () => {
     );
 
     testSyncAndAsync(
-      'clears both file and directory cache on calling clearCaches',
+      'clears both load and search cache on calling clearCaches',
       sync => () => {
         const explorer = cosmiconfig('foo', { sync });
         const searchPathFile = absolutePath('a/b/c/d/.foorc');
@@ -362,18 +362,18 @@ describe('cosmiconfig', () => {
   describe('cache disabled', () => {
     const explorer = cosmiconfig('foo', { cache: false });
 
-    it('does not throw an error when clearFileCache is called', () => {
-      expect(() => explorer.clearFileCache()).not.toThrow();
+    it('does not throw an error when clearLoadCache is called', () => {
+      expect(() => explorer.clearLoadCache()).not.toThrow();
     });
 
-    it('does not throw an error when clearDirectoryCache is called', () => {
-      expect(() => explorer.clearDirectoryCache()).not.toThrow();
+    it('does not throw an error when clearSearchCache is called', () => {
+      expect(() => explorer.clearSearchCache()).not.toThrow();
     });
     it('does not throw an error when clearCaches is called', () => {
       expect(() => explorer.clearCaches()).not.toThrow();
     });
 
-    testSyncAndAsync('does not cache directory results', sync => () => {
+    testSyncAndAsync('does not cache search results', sync => () => {
       const search = cosmiconfig('foo', { sync, cache: false }).search;
       const searchPath = absolutePath('a/b/c/d');
       mockStatIsDirectory(true);
@@ -401,7 +401,7 @@ describe('cosmiconfig', () => {
       ]);
     });
 
-    testSyncAndAsync('does not cache file results', sync => () => {
+    testSyncAndAsync('does not cache load results', sync => () => {
       const explorer = cosmiconfig('foo', { sync, cache: false });
       const searchPath = absolutePath('a/b/c/d/.foorc');
       mockStatIsDirectory(false);

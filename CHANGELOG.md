@@ -4,6 +4,8 @@
 
 - Changed: `load([searchPath, configPath])` is now split into two functions `search([searchPath])` and `load([configPath])`.  The functionality of searching for a configuration and loading a configuration directly remains the same.
 
+- Changed: `clearFileCache()` and `clearDirectoryCache()` have been renamed to `clearLoadCache()` and `clearSearchPath()` respectively.
+
 ## 4.0.0
 
 - Licensing improvement: updated `parse-json` from `3.0.0` to `4.0.0`(see [sindresorhus/parse-json#12][parse-json-pr-12]).
