@@ -32,9 +32,9 @@ afterAll(() => {
 });
 
 describe('cosmiconfig', () => {
-  describe('load from directory', () => {
-    const loadConfig = (sync, startDir) =>
-      cosmiconfig('foo', { stopDir: absolutePath('.'), sync }).load(startDir);
+  describe('search from directory', () => {
+    const search = (sync, startDir) =>
+      cosmiconfig('foo', { stopDir: absolutePath('.'), sync }).search(startDir);
 
     testSyncAndAsync(
       'finds rc file in third searched dir, with a package.json lacking prop',
@@ -60,7 +60,7 @@ describe('cosmiconfig', () => {
         const startDir = absolutePath('a/b/c/d/e/f');
 
         expect.hasAssertions();
-        return testFuncsRunner(sync, loadConfig(sync, startDir), [
+        return testFuncsRunner(sync, search(sync, startDir), [
           result => {
             util.assertSearchSequence(readFileMock, [
               'a/b/c/d/e/f/package.json',
@@ -103,7 +103,7 @@ describe('cosmiconfig', () => {
         const startDir = absolutePath('a/b/c/d/e/f');
 
         expect.hasAssertions();
-        return testFuncsRunner(sync, loadConfig(sync, startDir), [
+        return testFuncsRunner(sync, search(sync, startDir), [
           result => {
             util.assertSearchSequence(readFileMock, [
               'a/b/c/d/e/f/package.json',
@@ -140,7 +140,7 @@ describe('cosmiconfig', () => {
       const startDir = absolutePath('a/b/c/d/e/f');
 
       expect.hasAssertions();
-      return testFuncsRunner(sync, loadConfig(sync, startDir), [
+      return testFuncsRunner(sync, search(sync, startDir), [
         result => {
           util.assertSearchSequence(readFileMock, [
             'a/b/c/d/e/f/package.json',
@@ -183,7 +183,7 @@ describe('cosmiconfig', () => {
             packageProp: 'heeha',
             stopDir: absolutePath('.'),
             sync,
-          }).load(startDir),
+          }).search(startDir),
           [
             result => {
               util.assertSearchSequence(readFileMock, [
@@ -233,7 +233,7 @@ describe('cosmiconfig', () => {
             rcStrictJson: true,
             stopDir: absolutePath('.'),
             sync,
-          }).load(startDir),
+          }).search(startDir),
           [
             result => {
               util.assertSearchSequence(readFileMock, [
@@ -282,7 +282,7 @@ describe('cosmiconfig', () => {
             rc: false,
             stopDir: absolutePath('.'),
             sync,
-          }).load(startDir),
+          }).search(startDir),
           [
             result => {
               util.assertSearchSequence(readFileMock, [
@@ -300,15 +300,60 @@ describe('cosmiconfig', () => {
       }
     );
 
+    testSyncAndAsync('finds JS file traversing from cwd', sync => () => {
+      const originalCwd = process.cwd;
+      expect.hasAssertions();
+
+      function readFile(searchPath) {
+        switch (searchPath) {
+          case absolutePath('a/b/c/d/e/f/package.json'):
+          case absolutePath('a/b/c/d/e/f/.foorc'):
+          case absolutePath('a/b/c/d/e/f/foo.config.js'):
+          case absolutePath('a/b/c/d/e/package.json'):
+          case absolutePath('a/b/c/d/e/.foorc'):
+            throw { code: 'ENOENT' };
+          case absolutePath('a/b/c/d/e/foo.config.js'):
+            return 'module.exports = { found: true };';
+          default:
+            throw new Error(`irrelevant path ${searchPath}`);
+        }
+      }
+
+      try {
+        const readFileMock = mockReadFile(sync, readFile);
+        process.cwd = jest.fn(() => absolutePath('a/b/c/d/e/f'));
+
+        return testFuncsRunner(sync, search(sync), [
+          result => {
+            util.assertSearchSequence(readFileMock, [
+              'a/b/c/d/e/f/package.json',
+              'a/b/c/d/e/f/.foorc',
+              'a/b/c/d/e/f/foo.config.js',
+              'a/b/c/d/e/package.json',
+              'a/b/c/d/e/.foorc',
+              'a/b/c/d/e/foo.config.js',
+            ]);
+
+            expect(result).toEqual({
+              config: { found: true },
+              filepath: absolutePath('a/b/c/d/e/foo.config.js'),
+            });
+          },
+        ]);
+      } finally {
+        process.cwd = originalCwd;
+      }
+    });
+
     // RC file with specified extension
 
     describe('with rcExtensions', () => {
-      const loadConfig = (sync, startDir) =>
+      const search = (sync, startDir) =>
         cosmiconfig('foo', {
           stopDir: absolutePath('.'),
           rcExtensions: true,
           sync,
-        }).load(startDir);
+        }).search(startDir);
 
       testSyncAndAsync(
         'finds .foorc.json in second searched dir',
@@ -335,7 +380,7 @@ describe('cosmiconfig', () => {
           const startDir = absolutePath('a/b/c/d/e/f');
 
           expect.hasAssertions();
-          return testFuncsRunner(sync, loadConfig(sync, startDir), [
+          return testFuncsRunner(sync, search(sync, startDir), [
             result => {
               util.assertSearchSequence(readFileMock, [
                 'a/b/c/d/e/f/package.json',
@@ -378,7 +423,7 @@ describe('cosmiconfig', () => {
           const startDir = absolutePath('a/b/c/d/e/f');
 
           expect.hasAssertions();
-          return testFuncsRunner(sync, loadConfig(sync, startDir), [
+          return testFuncsRunner(sync, search(sync, startDir), [
             result => {
               util.assertSearchSequence(readFileMock, [
                 'a/b/c/d/e/f/package.json',
@@ -416,7 +461,7 @@ describe('cosmiconfig', () => {
           const startDir = absolutePath('a/b/c/d/e/f');
 
           expect.hasAssertions();
-          return testFuncsRunner(sync, loadConfig(sync, startDir), [
+          return testFuncsRunner(sync, search(sync, startDir), [
             result => {
               util.assertSearchSequence(readFileMock, [
                 'a/b/c/d/e/f/package.json',
@@ -454,7 +499,7 @@ describe('cosmiconfig', () => {
         const startDir = absolutePath('a/b/c/d/e/f');
 
         expect.hasAssertions();
-        return testFuncsRunner(sync, loadConfig(sync, startDir), [
+        return testFuncsRunner(sync, search(sync, startDir), [
           result => {
             util.assertSearchSequence(readFileMock, [
               'a/b/c/d/e/f/package.json',

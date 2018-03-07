@@ -81,7 +81,7 @@ describe('cosmiconfig', () => {
     testSyncAndAsync('respects options.configPath', sync => () => {
       const configPath = absolutePath('fixtures/foo.json');
       const explorer = cosmiconfig('foo', { configPath, sync });
-      return testFuncsRunner(sync, explorer.load('./path/does/not/exist'), [
+      return testFuncsRunner(sync, explorer.load(), [
         result => {
           expect(result.config).toEqual({
             foo: true,
@@ -96,17 +96,13 @@ describe('cosmiconfig', () => {
       sync => () => {
         const configPath = absolutePath('fixtures/package.json');
         const explorer = cosmiconfig('foo', { configPath, sync });
-        return testFuncsRunner(
-          sync,
-          explorer.load('./fixtures/foo-module.js'),
-          [
-            result => {
-              expect(result.config).toEqual({
-                bar: 'baz',
-              });
-            },
-          ]
-        );
+        return testFuncsRunner(sync, explorer.load(), [
+          result => {
+            expect(result.config).toEqual({
+              bar: 'baz',
+            });
+          },
+        ]);
       }
     );
 
@@ -133,7 +129,7 @@ describe('cosmiconfig', () => {
     });
 
     it('does not swallow transform errors', () => {
-      const loadConfig = sync =>
+      const load = sync =>
         configFileLoader(
           {
             sync,
@@ -145,11 +141,9 @@ describe('cosmiconfig', () => {
         );
 
       expect.assertions(2);
-      expect(() => loadConfig(true)).toThrow(
-        'These pretzels are making me thirsty!'
-      );
+      expect(() => load(true)).toThrow('These pretzels are making me thirsty!');
 
-      return loadConfig(false).catch(err => {
+      return load(false).catch(err => {
         expect(err.message).toBe('These pretzels are making me thirsty!');
       });
     });
