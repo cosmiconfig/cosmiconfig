@@ -24,22 +24,22 @@ module.exports = function createExplorer(options: {
 }) {
   // When `options.sync` is `false` (default),
   // these cache Promises that resolve with results, not the results themselves.
-  const fileCache = options.cache ? new Map() : null;
-  const directoryCache = options.cache ? new Map() : null;
+  const loadCache = options.cache ? new Map() : null;
+  const searchCache = options.cache ? new Map() : null;
   const transform = options.transform || identity;
   const packageProp = options.packageProp;
 
-  function clearFileCache() {
-    if (fileCache) fileCache.clear();
+  function clearLoadCache() {
+    if (loadCache) loadCache.clear();
   }
 
-  function clearDirectoryCache() {
-    if (directoryCache) directoryCache.clear();
+  function clearSearchCache() {
+    if (searchCache) searchCache.clear();
   }
 
   function clearCaches() {
-    clearFileCache();
-    clearDirectoryCache();
+    clearLoadCache();
+    clearSearchCache();
   }
 
   function throwError(error) {
@@ -50,49 +50,10 @@ module.exports = function createExplorer(options: {
     }
   }
 
-  function load(
-    searchPath: string,
-    configPath?: string
+  function search(
+    searchPath: string
   ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
     if (!searchPath) searchPath = process.cwd();
-    if (!configPath && options.configPath) configPath = options.configPath;
-
-    if (configPath) {
-      const absoluteConfigPath = path.resolve(process.cwd(), configPath);
-      if (fileCache && fileCache.has(absoluteConfigPath)) {
-        return fileCache.get(absoluteConfigPath);
-      }
-
-      let load;
-      if (path.basename(absoluteConfigPath) === 'package.json') {
-        if (!packageProp) {
-          return throwError(
-            new Error(
-              'Please specify the packageProp option. The configPath argument cannot point to a package.json file if packageProp is false.'
-            )
-          );
-        }
-        load = () =>
-          loadPackageProp(path.dirname(absoluteConfigPath), {
-            packageProp,
-            sync: options.sync,
-          });
-      } else {
-        load = () =>
-          loadDefinedFile(absoluteConfigPath, {
-            sync: options.sync,
-            format: options.format,
-          });
-      }
-
-      const loadResult = load();
-      const result =
-        loadResult instanceof Promise
-          ? loadResult.then(transform)
-          : transform(loadResult);
-      if (fileCache) fileCache.set(absoluteConfigPath, result);
-      return result;
-    }
 
     const absoluteSearchPath = path.resolve(process.cwd(), searchPath);
     const searchPathDir = getDirectory(absoluteSearchPath, options.sync);
@@ -102,11 +63,62 @@ module.exports = function createExplorer(options: {
       : searchDirectory(searchPathDir);
   }
 
+  function load(
+    configPath: string
+  ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
+    if (!configPath && options.configPath) configPath = options.configPath;
+
+    if (typeof configPath !== 'string' || configPath === '') {
+      return throwError(
+        new Error(
+          `configPath must be a nonempty string\nconfigPath: ${JSON.stringify(
+            configPath
+          )}`
+        )
+      );
+    }
+
+    const absoluteConfigPath = path.resolve(process.cwd(), configPath);
+    if (loadCache && loadCache.has(absoluteConfigPath)) {
+      return loadCache.get(absoluteConfigPath);
+    }
+
+    let loadIt;
+    if (path.basename(absoluteConfigPath) === 'package.json') {
+      if (!packageProp) {
+        return throwError(
+          new Error(
+            'Please specify the packageProp option. The configPath argument cannot point to a package.json file if packageProp is false.'
+          )
+        );
+      }
+      loadIt = () =>
+        loadPackageProp(path.dirname(absoluteConfigPath), {
+          packageProp,
+          sync: options.sync,
+        });
+    } else {
+      loadIt = () =>
+        loadDefinedFile(absoluteConfigPath, {
+          sync: options.sync,
+          format: options.format,
+        });
+    }
+
+    const loadResult = loadIt();
+    const result =
+      loadResult instanceof Promise
+        ? loadResult.then(transform)
+        : transform(loadResult);
+    if (loadCache) loadCache.set(absoluteConfigPath, result);
+    return result;
+  }
+
   function searchDirectory(
     directory: string
   ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
-    if (directoryCache && directoryCache.has(directory)) {
-      return directoryCache.get(directory);
+    if (searchCache && searchCache.has(directory)) {
+      return searchCache.get(directory);
     }
 
     const result = funcRunner(!options.sync ? Promise.resolve() : undefined, [
@@ -142,14 +154,15 @@ module.exports = function createExplorer(options: {
       transform,
     ]);
 
-    if (directoryCache) directoryCache.set(directory, result);
+    if (searchCache) searchCache.set(directory, result);
     return result;
   }
 
   return {
+    search,
     load,
-    clearFileCache,
-    clearDirectoryCache,
+    clearLoadCache,
+    clearSearchCache,
     clearCaches,
   };
 };
