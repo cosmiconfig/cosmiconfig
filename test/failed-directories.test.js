@@ -347,6 +347,7 @@ describe('cosmiconfig', () => {
               throw { code: 'ENOENT' };
             case absolutePath('a/b/c/d/e/f/.foorc.json'):
             case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
+              // This proves the default 'ignoreEmpty' skips over these files as expected
               return '';
             case absolutePath('a/b/c/d/e/f/.foorc.yml'):
               return 'found: thing: true';
@@ -374,10 +375,9 @@ describe('cosmiconfig', () => {
             case absolutePath('a/b/c/d/e/f/package.json'):
             case absolutePath('a/b/c/d/e/f/.foorc'):
             case absolutePath('a/b/c/d/e/f/.foorc.json'):
-              throw { code: 'ENOENT' };
             case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
             case absolutePath('a/b/c/d/e/f/.foorc.yml'):
-              return '';
+              throw { code: 'ENOENT' };
             case absolutePath('a/b/c/d/e/f/.foorc.js'):
               return 'module.exports = found: true };';
             default:

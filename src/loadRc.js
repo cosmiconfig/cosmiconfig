@@ -55,7 +55,7 @@ module.exports = function loadRc(
         if (result != null) return result;
 
         // Try to load the rc file for the given extension.
-        return funcRunner(readRcFile(extension), [parseRcFile]);
+        return funcRunner(readRcFile(fpath), [parseRcFile]);
       };
     }
 
@@ -70,10 +70,7 @@ module.exports = function loadRc(
     ]);
   }
 
-  function readRcFile(extension: string): Promise<?string> | ?string {
-    const filepathWithExtension = `${filepath}.${extension}`;
-    return !options.sync
-      ? readFile(filepathWithExtension)
-      : readFile.sync(filepathWithExtension);
+  function readRcFile(filepath: string): Promise<?string> | ?string {
+    return !options.sync ? readFile(filepath) : readFile.sync(filepath);
   }
 };
