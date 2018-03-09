@@ -120,6 +120,8 @@ describe('cosmiconfig', () => {
         makeEmptyFileTest('js')
       );
 
+      it('throws error for empty file, format JS', makeEmptyFileTest('js'));
+
       it(
         'returns an empty config result for an empty file, format JSON',
         makeEmptyFileTest('json')
@@ -178,6 +180,11 @@ describe('cosmiconfig', () => {
         'throws error if defined JS file has syntax error',
         makeSyntaxErrWithoutKnownExtnameTest('js')
       );
+
+      it(
+        'throws error if defined JS ES Modules file has syntax error',
+        makeSyntaxErrWithoutKnownExtnameTest('cjs-es-module-js')
+      );
     });
 
     it('returns null if configuration file does not exist', () => {
@@ -211,6 +218,34 @@ describe('cosmiconfig', () => {
     it('throws an error if no configPath was specified', () => {
       const load = sync => cosmiconfig('not_exist_rc_name', { sync }).load();
       const errorRegex = /^configPath must be a nonempty string/;
+
+      expect.assertions(2);
+      expect(() => load(true)).toThrow(errorRegex);
+
+      return load(false).catch(error => {
+        expect(error.message).toMatch(errorRegex);
+      });
+    });
+
+    it('throws an error if non-default es module', () => {
+      const load = sync =>
+        cosmiconfig('foo', { sync }).load(
+          path.join(__dirname, 'fixtures/cjs-es-module-missing-default.js')
+        );
+      const errorRegex = /must use default export with ES Modules/;
+
+      expect.assertions(2);
+      expect(() => load(true)).toThrow(errorRegex);
+
+      return load(false).catch(error => {
+        expect(error.message).toMatch(errorRegex);
+      });
+    });
+
+    it('throws an error if non-default es module with missing extension', () => {
+      const load = sync =>
+        configFileLoader({ sync }, 'fixtures/cjs-es-module-missing-default');
+      const errorRegex = /must use default export with ES Modules/;
 
       expect.assertions(2);
       expect(() => load(true)).toThrow(errorRegex);
