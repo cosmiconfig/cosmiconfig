@@ -107,7 +107,7 @@ Name of the "rc file" to look for, which can be formatted as JSON or YAML.
 
 If `false`, cosmiconfig will not look for an rc file.
 
-If `rcExtensions: true`, the rc file can also have extensions that specify the syntax, e.g. `.${moduleName]rc.json`.
+If `rcExtensions: true`, the rc file can also have extensions that specify the syntax, e.g. `.${moduleName}rc.json`.
 You may like extensions on your rc files because you'll get syntax highlighting and linting in text editors.
 Also, with `rcExtensions: true`, you can use JS modules as rc files, e.g. `.${moduleName}rc.js`.
 
@@ -230,7 +230,7 @@ Default: `process.cwd()`.
 Type: `boolean`.
 Default: `true`.
 
-By default, `search`, ignores empty configuration files and continues searching up the tree. If the `search` option [`ignoreEmpty`] is set to `false` and an empty configuration file is found, the [result] will have include `config: undefined` and `isEmpty: true`.
+By default, `search` ignores empty configuration files and continues searching up the tree. If the `search` option [`ignoreEmpty`] is set to `false` and an empty configuration file is found, the [result] will have include `config: undefined` and `isEmpty: true`.
 
 ### explorer.load
 
