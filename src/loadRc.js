@@ -6,15 +6,25 @@ const requireFromString = require('require-from-string');
 const readFile = require('./readFile');
 const parseJson = require('./parseJson');
 const funcRunner = require('./funcRunner');
+const createParseFile = require('./createParseFile');
 
 module.exports = function loadRc(
   filepath: string,
   options: {
+    ignoreEmpty: boolean,
     sync?: boolean,
     rcStrictJson?: boolean,
     rcExtensions?: boolean,
   }
 ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
+  const parseYaml = (content, filename) => yaml.safeLoad(content, { filename });
+  const parse = options.rcStrictJson ? parseJson : parseYaml;
+  const parseExtensionlessRcFile = createParseFile(
+    filepath,
+    parse,
+    options.ignoreEmpty
+  );
+
   if (!options.sync) {
     return readFile(filepath)
       .then(parseExtensionlessRcFile)
@@ -31,80 +41,36 @@ module.exports = function loadRc(
     return null;
   }
 
-  function parseExtensionlessRcFile(content: ?string): ?cosmiconfig$Result {
-    if (!content) return null;
-    const pasedConfig = options.rcStrictJson
-      ? parseJson(content, filepath)
-      : yaml.safeLoad(content, { filename: filepath });
-    return {
-      config: pasedConfig,
-      filepath,
-    };
-  }
-
   function loadRcWithExtensions() {
-    let foundConfig = null;
-    return funcRunner(readRcFile('json'), [
-      (jsonContent: ?string) => {
-        // Since this is the first try, config cannot have been found, so don't
-        // check `if (foundConfig)`.
-        if (jsonContent) {
-          const successFilepath = `${filepath}.json`;
-          foundConfig = {
-            config: parseJson(jsonContent, successFilepath),
-            filepath: successFilepath,
-          };
-        } else {
-          return readRcFile('yaml');
-        }
-      },
-      (yamlContent: ?string) => {
-        if (foundConfig) {
-          return;
-        } else if (yamlContent) {
-          const successFilepath = `${filepath}.yaml`;
-          foundConfig = {
-            config: yaml.safeLoad(yamlContent, { filename: successFilepath }),
-            filepath: successFilepath,
-          };
-        } else {
-          return readRcFile('yml');
-        }
-      },
-      (ymlContent: ?string) => {
-        if (foundConfig) {
-          return;
-        } else if (ymlContent) {
-          const successFilepath = `${filepath}.yml`;
-          foundConfig = {
-            config: yaml.safeLoad(ymlContent, { filename: successFilepath }),
-            filepath: successFilepath,
-          };
-        } else {
-          return readRcFile('js');
-        }
-      },
-      (jsContent: ?string) => {
-        if (foundConfig) {
-          return;
-        } else if (jsContent) {
-          const successFilepath = `${filepath}.js`;
-          foundConfig = {
-            config: requireFromString(jsContent, successFilepath),
-            filepath: successFilepath,
-          };
-        } else {
-          return;
-        }
-      },
-      () => foundConfig,
+    function loadExtension(
+      extension: string,
+      parse: (content: string, filename: string) => Object
+    ) {
+      const fpath = `${filepath}.${extension}`;
+      const parseRcFile = createParseFile(fpath, parse, options.ignoreEmpty);
+
+      // Check the result from the previous `loadExtension` invocation. If result
+      // isn't null, just return that.
+      return result => {
+        if (result != null) return result;
+
+        // Try to load the rc file for the given extension.
+        return funcRunner(readRcFile(fpath), [parseRcFile]);
+      };
+    }
+
+    const parseYml = (content: string, filename: string) =>
+      yaml.safeLoad(content, { filename });
+
+    return funcRunner(!options.sync ? Promise.resolve() : undefined, [
+      loadExtension('json', parseJson),
+      loadExtension('yaml', parseYml),
+      loadExtension('yml', parseYml),
+      loadExtension('js', requireFromString),
     ]);
   }
 
-  function readRcFile(extension: string): Promise<?string> | ?string {
-    const filepathWithExtension = `${filepath}.${extension}`;
-    return !options.sync
-      ? readFile(filepathWithExtension)
-      : readFile.sync(filepathWithExtension);
+  function readRcFile(filepath: string): Promise<?string> | ?string {
+    return !options.sync ? readFile(filepath) : readFile.sync(filepath);
   }
 };
