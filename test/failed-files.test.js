@@ -68,13 +68,19 @@ function makeEmptyFileTest(fileFormat, withFormat) {
   const file = `fixtures/foo-empty.${fileFormat}`;
   return () => {
     expect.assertions(2);
-    expect(() => configFileLoader({ sync: true, format }, file)).toThrow(
-      /^Config file is empty/
+    const expectedResult = {
+      config: undefined,
+      filepath: path.join(__dirname, file),
+      isEmpty: true,
+    };
+
+    expect(configFileLoader({ sync: true, format }, file)).toEqual(
+      expectedResult
     );
 
-    return configFileLoader({ format }, file).catch(err => {
-      expect(err.message).toMatch(/^Config file is empty/);
-    });
+    return expect(configFileLoader({ format }, file)).resolves.toEqual(
+      expectedResult
+    );
   };
 }
 
@@ -109,11 +115,20 @@ describe('cosmiconfig', () => {
         makeSyntaxErrTest('js')
       );
 
-      it('throws error for empty file, format JS', makeEmptyFileTest('js'));
+      it(
+        'returns an empty config result for an empty file, format JS',
+        makeEmptyFileTest('js')
+      );
 
-      it('throws error for empty file, format JSON', makeEmptyFileTest('json'));
+      it(
+        'returns an empty config result for an empty file, format JSON',
+        makeEmptyFileTest('json')
+      );
 
-      it('throws error for empty file, format YAML', makeEmptyFileTest('yaml'));
+      it(
+        'returns an empty config result for an empty file, format YAML',
+        makeEmptyFileTest('yaml')
+      );
     });
 
     describe('with expected format', () => {
@@ -133,17 +148,17 @@ describe('cosmiconfig', () => {
       );
 
       it(
-        'throws error for empty file, format JS',
+        'returns an empty config result for an empty file, format JS',
         makeEmptyFileTest('js', true)
       );
 
       it(
-        'throws error for empty file, format JSON',
+        'returns an empty config result for an empty file, format JSON',
         makeEmptyFileTest('json', true)
       );
 
       it(
-        'throws error for empty file, format YAML',
+        'returns an empty config result for an empty file, format YAML',
         makeEmptyFileTest('yaml', true)
       );
     });

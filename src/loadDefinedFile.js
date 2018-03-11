@@ -16,7 +16,7 @@ module.exports = function loadDefinedFile(
 ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
   function parseContent(content: ?string): ?cosmiconfig$Result {
     if (!content) {
-      throw new Error(`Config file is empty! Filepath - "${filepath}".`);
+      return { config: undefined, filepath, isEmpty: true };
     }
 
     let parsedConfig;
