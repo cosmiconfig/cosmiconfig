@@ -40,16 +40,15 @@ const explorer = cosmiconfig(moduleName);
 
 // Search for a configuration by walking up directories.
 // See documentation for search, below.
-explorer.search().then(
-  (result) => {
+explorer.search()
+  .then((result) => {
     // result.config is the parsed configuration object.
     // result.filepath is the path to the config file that was found.
     // result.isEmpty is true if there was nothing to parse in the config file.
-  },
-  (parsingError) => {
+  })
+  .catch((error) => {
     // Do something constructive.
-  }
-);
+  });
 
 // Load a configuration directly when you know where it should be.
 // The result object is the same as for search.
@@ -71,7 +70,7 @@ The result object you get from `search` or `load` has the following properties:
 
 - **config:** The parsed configuration object. `undefined` if the file is empty.
 - **filepath:** The path to the configuration file that was found.
-- **isEmpty:** `true` if the configuration file is empty.
+- **isEmpty:** `true` if the configuration file is empty. This property will not be present if the configuration file is not empty.
 
 ### Create an explorer
 
@@ -101,7 +100,7 @@ If `false`, cosmiconfig will not look in `package.json` files.
 ##### rc
 
 Type: `string` or `false`.
-Default: `\`.${moduleName}rc\`\`.
+Default: `.${moduleName}rc`.
 
 Name of the "rc file" to look for, which can be formatted as JSON or YAML.
 
@@ -114,7 +113,7 @@ Also, with `rcExtensions: true`, you can use JS modules as rc files, e.g. `.${mo
 ##### js
 
 Type: `string` or `false`.
-Default: `\`${moduleName}.config.js\`\`.
+Default: `${moduleName}.config.js`.
 
 Name of the JS file to look for, which must export the configuration object.
 
@@ -202,7 +201,7 @@ explorer.search([searchPath][, searchOptions])
 
 Searches for a configuration file. In async mode (default), returns a Promise that resolves a [result] object or with `null`, if no configuration file is found. In [`sync`] mode, returns a [result] object or `null`.
 
-So let's say `const explorer = cosmiconfig('goldengrahams');` — here's how `explorer.search` will work:
+So let's say `const explorer = cosmiconfig('goldengrahams');` — here's how [`search()`] will work:
 
 - Starting from `process.cwd()` (or some other directory defined by the `searchPath` argument to [`search()`]), it looks for configuration objects in three places, in this order:
   1. A `goldengrahams` property in a `package.json` file (or some other property defined by the cosmiconfig option [`packageProp`]);
@@ -230,7 +229,7 @@ Default: `process.cwd()`.
 Type: `boolean`.
 Default: `true`.
 
-By default, `search` ignores empty configuration files and continues searching up the tree. If the `search` option [`ignoreEmpty`] is set to `false` and an empty configuration file is found, the [result] will have include `config: undefined` and `isEmpty: true`.
+By default, `search` ignores empty configuration files and continues searching up the tree. If the `search` option [`ignoreEmpty`] is set to `false` and an empty configuration file is found, the [result] will include `config: undefined` and `isEmpty: true`.
 
 ### explorer.load
 
@@ -263,7 +262,7 @@ Performs both [`clearLoadCache()`] and [`clearSearchCache()`].
 
 ## Caching
 
-As of v2, cosmiconfig uses a few caches to reduce the need for repetitious reading of the filesystem. Every new cosmiconfig instance (created with `cosmiconfig()`) has its own caches.
+As of v2, cosmiconfig uses caching to reduce the need for repetitious reading of the filesystem. Every new cosmiconfig instance (created with `cosmiconfig()`) has its own caches.
 
 To avoid or work around caching, you can do the following:
 
