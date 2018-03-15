@@ -229,7 +229,7 @@ Default: `process.cwd()`.
 Type: `boolean`.
 Default: `true`.
 
-By default, `search` ignores empty configuration files and continues searching up the tree. If the `search` option [`ignoreEmpty`] is set to `false` and an empty configuration file is found, the [result] will include `config: undefined` and `isEmpty: true`.
+By default, `search` ignores empty configuration files and continues searching up the tree. If this option is `false` and an empty configuration file is found, the [result] will include `config: undefined` and `isEmpty: true`.
 
 ### explorer.load
 
