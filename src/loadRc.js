@@ -16,7 +16,7 @@ module.exports = function loadRc(
     rcStrictJson?: boolean,
     rcExtensions?: boolean,
   }
-): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
+): Promise<?CosmiconfigResult> | ?CosmiconfigResult {
   const parseYaml = (content, filename) => yaml.safeLoad(content, { filename });
   const parse = options.rcStrictJson ? parseJson : parseYaml;
   const parseExtensionlessRcFile = createParseFile(

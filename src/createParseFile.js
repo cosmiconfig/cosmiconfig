@@ -1,11 +1,12 @@
+// @flow
 'use strict';
 
 module.exports = function createParseFile(
   filepath: string,
   parse: (string, string) => Object,
   ignoreEmpty: boolean
-): string => cosmiconfig$Result {
-  return function parseFile(content: string): cosmiconfig$Result {
+): string => ?CosmiconfigResult {
+  return function parseFile(content: string): ?CosmiconfigResult {
     const isEmpty = content === '';
     if (content == null || (isEmpty && ignoreEmpty)) return null;
 

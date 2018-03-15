@@ -13,8 +13,8 @@ module.exports = function loadDefinedFile(
     sync?: boolean,
     format?: 'json' | 'yaml' | 'js',
   }
-): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
-  function parseContent(content: ?string): ?cosmiconfig$Result {
+): Promise<?CosmiconfigResult> | ?CosmiconfigResult {
+  function parseContent(content: ?string): ?CosmiconfigResult {
     if (!content) {
       return { config: undefined, filepath, isEmpty: true };
     }

@@ -2,39 +2,40 @@
 'use strict';
 
 const path = require('path');
-const loadPackageProp = require('./loadPackageProp');
-const loadRc = require('./loadRc');
-const loadJs = require('./loadJs');
 const loadDefinedFile = require('./loadDefinedFile');
-const funcRunner = require('./funcRunner');
 const getDirectory = require('./getDirectory');
+const loader = require('./loader');
+const loaderSeries = require('./loaderSeries');
 
-module.exports = function createExplorer(options: {
-  packageProp?: string | false,
-  rc?: string | false,
-  js?: string | false,
-  format?: 'json' | 'yaml' | 'js',
-  rcStrictJson?: boolean,
-  rcExtensions?: boolean,
-  stopDir?: string,
-  cache?: boolean,
-  sync?: boolean,
-  transform?: (?Object) => ?Object,
-  configPath?: string,
-}) {
+type SearchOptions = {
+  ignoreEmpty: boolean,
+};
+
+function defaultSearchOptions(userOptions: SearchOptions): SearchOptions {
+  return Object.assign(
+    {
+      ignoreEmpty: true,
+    },
+    userOptions
+  );
+}
+
+module.exports = function createExplorer(options: CreateExplorerOptions) {
   // When `options.sync` is `false` (default),
   // these cache Promises that resolve with results, not the results themselves.
   const loadCache = options.cache ? new Map() : null;
-  const searchCache = options.cache ? new Map() : null;
+  const syncSearchCache: Map<string, CosmiconfigResult> = new Map();
+  const searchCache: Map<string, Promise<CosmiconfigResult>> = new Map();
   const transform = options.transform || identity;
   const packageProp = options.packageProp;
 
   function clearLoadCache() {
-    if (loadCache) loadCache.clear();
+    loadCache.clear();
   }
 
   function clearSearchCache() {
-    if (searchCache) searchCache.clear();
+    searchCache.clear();
+    syncSearchCache.clear();
   }
 
   function clearCaches() {
@@ -52,78 +53,118 @@ module.exports = function createExplorer(options: {
 
   function search(
     searchPath: string,
-    searchOptions: { ignoreEmpty?: boolean }
-  ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
-    const sanitizedOpts = Object.assign(
-      {},
-      {
-        ignoreEmpty: true,
-      },
-      searchOptions
-    );
-
-    if (!searchPath) searchPath = process.cwd();
-
+    userSearchOptions: SearchOptions
+  ): Promise<CosmiconfigResult> {
+    searchPath = searchPath || process.cwd();
+    const searchOptions = defaultSearchOptions(userSearchOptions);
     const absoluteSearchPath = path.resolve(process.cwd(), searchPath);
-    const searchPathDir = getDirectory(absoluteSearchPath, options.sync);
+    return getDirectory(absoluteSearchPath).then(dir => {
+      return searchDirectory(dir, searchOptions);
+    });
+  }
 
-    return searchPathDir instanceof Promise
-      ? searchPathDir.then(pathDir => searchDirectory(pathDir, sanitizedOpts))
-      : searchDirectory(searchPathDir, sanitizedOpts);
+  function searchSync(
+    searchPath: string,
+    userSearchOptions: SearchOptions
+  ): CosmiconfigResult {
+    searchPath = searchPath || process.cwd();
+    const searchOptions = defaultSearchOptions(userSearchOptions);
+    const absoluteSearchPath = path.resolve(process.cwd(), searchPath);
+    const dir = getDirectory.sync(absoluteSearchPath);
+    return searchDirectorySync(dir, searchOptions);
   }
 
   function searchDirectory(
     directory: string,
-    searchOptions: { ignoreEmpty: boolean }
-  ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
-    if (searchCache && searchCache.has(directory)) {
-      return searchCache.get(directory);
+    searchOptions: SearchOptions
+  ): Promise<CosmiconfigResult> {
+    if (options.cache) {
+      const cached = searchCache.get(directory);
+      if (cached !== undefined) return cached;
     }
 
-    const result = funcRunner(!options.sync ? Promise.resolve() : undefined, [
-      () => {
-        if (!packageProp) return;
-        return loadPackageProp(directory, {
-          packageProp,
-          sync: options.sync,
-        });
-      },
-      result => {
-        if (result || !options.rc) return result;
-        return loadRc(path.join(directory, options.rc), {
-          ignoreEmpty: searchOptions.ignoreEmpty,
-          sync: options.sync,
-          rcStrictJson: options.rcStrictJson,
-          rcExtensions: options.rcExtensions,
-        });
-      },
-      result => {
-        if (result || !options.js) return result;
-        return loadJs(path.join(directory, options.js), {
-          ignoreEmpty: searchOptions.ignoreEmpty,
-          sync: options.sync,
-        });
-      },
-      result => {
-        if (result) return result;
+    const resultPromise = loaderSeries(
+      [
+        () => {
+          if (!packageProp) return null;
+          return loader.loadPackageProp(directory, packageProp);
+        },
+        () => {
+          if (!options.rc) return null;
+          return loader.loadRcFile(path.join(directory, options.rc), {
+            strictJson: options.rcStrictJson,
+            extensions: options.rcExtensions,
+            ignoreEmpty: searchOptions.ignoreEmpty,
+          });
+        },
+        () => {
+          if (!options.js) return null;
+          return loader.loadJsFile(path.join(directory, options.js));
+        },
+        () => {
+          const nextDirectory = path.dirname(directory);
+          if (nextDirectory === directory || directory === options.stopDir) {
+            return null;
+          }
+          return search(nextDirectory, searchOptions);
+        },
+      ],
+      { ignoreEmpty: searchOptions.ignoreEmpty }
+    );
 
-        const nextDirectory = path.dirname(directory);
+    if (options.cache) {
+      searchCache.set(directory, resultPromise);
+    }
+    return resultPromise;
+  }
 
-        if (nextDirectory === directory || directory === options.stopDir)
-          return null;
+  function searchDirectorySync(
+    directory: string,
+    searchOptions: SearchOptions
+  ): CosmiconfigResult {
+    if (options.cache) {
+      const cached = syncSearchCache.get(directory);
+      if (cached !== undefined) return cached;
+    }
 
-        return searchDirectory(nextDirectory, searchOptions);
-      },
-      transform,
-    ]);
+    const result = loaderSeries.sync(
+      [
+        () => {
+          if (!packageProp) return null;
+          return loader.loadPackagePropSync(directory, packageProp);
+        },
+        () => {
+          if (!options.rc) return null;
+          return loader.loadRcFileSync(path.join(directory, options.rc), {
+            strictJson: options.rcStrictJson,
+            extensions: options.rcExtensions,
+            ignoreEmpty: searchOptions.ignoreEmpty,
+          });
+        },
+        () => {
+          if (!options.js) return null;
+          return loader.loadJsFileSync(path.join(directory, options.js));
+        },
+        () => {
+          const nextDirectory = path.dirname(directory);
+          if (nextDirectory === directory || directory === options.stopDir) {
+            return null;
+          }
+          return searchDirectorySync(nextDirectory, searchOptions);
+        },
+      ],
+      { ignoreEmpty: searchOptions.ignoreEmpty }
+    );
 
-    if (searchCache) searchCache.set(directory, result);
+    if (options.cache) {
+      syncSearchCache.set(directory, result);
+    }
     return result;
   }
 
   function load(
     configPath: string
-  ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
+  ): Promise<CosmiconfigResult> | CosmiconfigResult {
     if (!configPath && options.configPath) configPath = options.configPath;
 
     if (typeof configPath !== 'string' || configPath === '') {
@@ -174,6 +215,7 @@ module.exports = function createExplorer(options: {
 
   return {
     search,
+    searchSync,
     load,
     clearLoadCache,
     clearSearchCache,
