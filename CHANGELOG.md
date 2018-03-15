@@ -26,7 +26,7 @@
 
 - Removed: support for loading config path using the `--config` flag. cosmiconfig will not parse command line arguments. Your application can parse command line arguments and pass them to cosmiconfig.
 - Removed: `argv` config option.
-- Removed: support for Node versions < 4.
+- Removed: support for Node versions &lt; 4.
 - Added: `sync` option.
 - Fixed: Throw a clear error on getting empty config file.
 - Fixed: when a `options.configPath` is `package.json`, return the package prop, not the entire JSON file.
@@ -68,7 +68,7 @@
 
 - Changed: module now creates cosmiconfig instances with `load` methods (see README).
 - Added: caching (enabled by the change above).
-- Removed: support for Node versions <4.
+- Removed: support for Node versions &lt;4.
 
 ## 1.1.0
 
@@ -87,4 +87,5 @@
 - Initial release.
 
 [parse-json-pr-12]: https://github.com/sindresorhus/parse-json/pull/12
+
 [pr-101]: https://github.com/davidtheclark/cosmiconfig/pull/101

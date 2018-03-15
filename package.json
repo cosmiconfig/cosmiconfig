@@ -8,8 +8,10 @@
   ],
   "scripts": {
     "precommit": "lint-staged && jest && flow check",
-    "lint": "eslint .",
+    "lint:md-partial": "remark -u remark-preset-davidtheclark --frail --quiet --no-stdout --output --",
+    "lint:md": "npm run lint:md-partial -- *.md",
     "lint:fix": "eslint . --fix",
+    "lint": "eslint . && npm run lint:md",
     "format": "prettier --write \"{src/*.js,test/*.js}\"",
     "pretest": "npm run lint && flow check",
     "test": "jest --coverage",
@@ -22,6 +24,10 @@
     "*.js": [
       "eslint --fix",
       "prettier --write",
+      "git add"
+    ],
+    "*.md": [
+      "npm run lint:md-partial",
       "git add"
     ]
   },
@@ -88,7 +94,9 @@
     "husky": "^0.14.3",
     "jest": "^21.2.1",
     "lint-staged": "^6.0.0",
-    "prettier": "^1.8.2"
+    "prettier": "^1.8.2",
+    "remark-cli": "^5.0.0",
+    "remark-preset-davidtheclark": "^0.7.0"
   },
   "engines": {
     "node": ">=4"
