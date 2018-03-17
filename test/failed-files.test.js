@@ -104,8 +104,8 @@ describe('returns an empty config result for empty file, format JS', () => {
     expect(result).toEqual({
       config: undefined,
       filepath: file,
-      isEmpty: true
-    })
+      isEmpty: true,
+    });
   };
 
   test('async', () => {
@@ -127,8 +127,8 @@ describe('returns an empty config result for empty file, format JSON', () => {
     expect(result).toEqual({
       config: undefined,
       filepath: file,
-      isEmpty: true
-    })
+      isEmpty: true,
+    });
   };
 
   test('async', () => {
@@ -150,8 +150,8 @@ describe('returns an empty config result for empty file, format YAML', () => {
     expect(result).toEqual({
       config: undefined,
       filepath: file,
-      isEmpty: true
-    })
+      isEmpty: true,
+    });
   };
 
   test('async', () => {
@@ -244,11 +244,33 @@ test('throws error if configPath is package.json and packageProp is false', () =
   ).toThrow(/Please specify the packageProp option/);
 });
 
-it('in async mode, rejects if configPath is package.json and packageProp is false', () => {
+test('in async mode, rejects if configPath is package.json and packageProp is false', () => {
   expect.assertions(1);
   return cosmiconfig('foo', { packageProp: false })
     .load(path.join(__dirname, 'fixtures/package.json'))
     .catch(error => {
       expect(error.message).toContain('Please specify the packageProp option');
     });
+});
+
+describe('throws an error if no configPath was specified and load is called without an argument', () => {
+  const checkError = error => {
+    expect(error.message).toMatch(/^configPath must be a nonempty string/);
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('not_exist_rc_name')
+      .load()
+      .catch(checkError);
+  });
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('not_exist_rc_name', { sync: true }).load();
+    } catch (error) {
+      checkError(error);
+    }
+  });
 });

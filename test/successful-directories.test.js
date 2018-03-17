@@ -579,3 +579,67 @@ describe('with rcExtensions, finds .foorc.js in first searched dir', () => {
     checkResult(readFileMock, result);
   });
 });
+
+describe('finds JS file traversing from cwd', () => {
+  let originalCwd;
+  beforeEach(() => {
+    originalCwd = process.cwd;
+  });
+  afterEach(() => {
+    process.cwd = originalCwd;
+  });
+
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFile = searchPath => {
+    switch (searchPath) {
+      case absolutePath('a/b/c/d/e/f/package.json'):
+      case absolutePath('a/b/c/d/e/f/.foorc'):
+      case absolutePath('a/b/c/d/e/f/foo.config.js'):
+      case absolutePath('a/b/c/d/e/package.json'):
+      case absolutePath('a/b/c/d/e/.foorc'):
+        throw { code: 'ENOENT' };
+      case absolutePath('a/b/c/d/e/foo.config.js'):
+        return 'module.exports = { found: true };';
+      default:
+        throw new Error(`irrelevant path ${searchPath}`);
+    }
+  };
+
+  const checkResult = (readFileMock, result) => {
+    util.assertSearchSequence(readFileMock, [
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/package.json',
+      'a/b/c/d/e/.foorc',
+      'a/b/c/d/e/foo.config.js',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: absolutePath('a/b/c/d/e/foo.config.js'),
+    });
+  };
+
+  test('async', () => {
+    process.cwd = jest.fn(() => absolutePath('a/b/c/d/e/f'));
+    const readFileMock = mockReadFile(false, readFile);
+    return cosmiconfig('foo', {
+      stopDir: absolutePath('.'),
+    })
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileMock, result);
+      });
+  });
+
+  test('sync', () => {
+    process.cwd = jest.fn(() => absolutePath('a/b/c/d/e/f'));
+    const readFileMock = mockReadFile(true, readFile);
+    const result = cosmiconfig('foo', {
+      stopDir: absolutePath('.'),
+      sync: true,
+    }).search(startDir);
+    checkResult(readFileMock, result);
+  });
+});
