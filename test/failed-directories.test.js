@@ -430,3 +430,218 @@ describe('with rcExtensions, throws error for invalid JS in .foorc.js', () => {
     }
   });
 });
+
+describe('with ignoreEmpty: false, returns an empty config result for an empty rc file', () => {
+  const startDir = absolutePath('a/b');
+  const readFile = searchPath => {
+    switch (searchPath) {
+      case absolutePath('a/b/package.json'):
+        throw { code: 'ENOENT' };
+      case absolutePath('a/b/.foorc'):
+        return '';
+      default:
+        throw new Error(`irrelevant path ${searchPath}`);
+    }
+  };
+
+  const checkResult = result => {
+    expect(result).toEqual({
+      config: undefined,
+      filepath: absolutePath('a/b/.foorc'),
+      isEmpty: true,
+    });
+  };
+
+  test('async', () => {
+    mockReadFile(false, readFile);
+    return cosmiconfig('foo', { stopDir: absolutePath('a') })
+      .search(startDir, { ignoreEmpty: false })
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    mockReadFile(true, readFile);
+    const result = cosmiconfig('foo', {
+      stopDir: absolutePath('a'),
+      sync: true,
+    }).search(startDir, { ignoreEmpty: false });
+    checkResult(result);
+  });
+});
+
+describe('with ignoreEmpty: false, returns an empty config result for an empty .config.js file', () => {
+  const startDir = absolutePath('a/b');
+  const readFile = searchPath => {
+    switch (searchPath) {
+      case absolutePath('a/b/package.json'):
+      case absolutePath('a/b/.foorc'):
+        throw { code: 'ENOENT' };
+      case absolutePath('a/b/foo.config.js'):
+        return '';
+      default:
+        throw new Error(`irrelevant path ${searchPath}`);
+    }
+  };
+
+  const checkResult = result => {
+    expect(result).toEqual({
+      config: undefined,
+      filepath: absolutePath('a/b/foo.config.js'),
+      isEmpty: true,
+    });
+  };
+
+  test('async', () => {
+    mockReadFile(false, readFile);
+    return cosmiconfig('foo', { stopDir: absolutePath('a') })
+      .search(startDir, { ignoreEmpty: false })
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    mockReadFile(true, readFile);
+    const result = cosmiconfig('foo', {
+      stopDir: absolutePath('a'),
+      sync: true,
+    }).search(startDir, { ignoreEmpty: false });
+    checkResult(result);
+  });
+});
+
+describe('with ignoreEmtpy and rcExtensions, returns an empty config result for an empty .json rc file', () => {
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFile = searchPath => {
+    switch (searchPath) {
+      case absolutePath('a/b/c/d/e/f/package.json'):
+      case absolutePath('a/b/c/d/e/f/.foorc'):
+      case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
+      case absolutePath('a/b/c/d/e/f/.foorc.yml'):
+      case absolutePath('a/b/c/d/e/f/.foorc.js'):
+        throw { code: 'ENOENT' };
+      case absolutePath('a/b/c/d/e/f/.foorc.json'):
+        return '';
+      default:
+        throw new Error(`irrelevant path ${searchPath}`);
+    }
+  };
+
+  const checkResult = result => {
+    expect(result).toEqual({
+      config: undefined,
+      filepath: absolutePath('a/b/c/d/e/f/.foorc.json'),
+      isEmpty: true,
+    });
+  };
+
+  test('async', () => {
+    mockReadFile(false, readFile);
+    return cosmiconfig('foo', {
+      rcExtensions: true,
+      stopDir: absolutePath('a'),
+    })
+      .search(startDir, { ignoreEmpty: false })
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    mockReadFile(true, readFile);
+    const result = cosmiconfig('foo', {
+      rcExtensions: true,
+      stopDir: absolutePath('a'),
+      sync: true,
+    }).search(startDir, { ignoreEmpty: false });
+    checkResult(result);
+  });
+});
+
+describe('with ignoreEmtpy and rcExtensions, returns an empty config result for an empty .yaml rc file', () => {
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFile = searchPath => {
+    switch (searchPath) {
+      case absolutePath('a/b/c/d/e/f/package.json'):
+      case absolutePath('a/b/c/d/e/f/.foorc'):
+      case absolutePath('a/b/c/d/e/f/.foorc.json'):
+      case absolutePath('a/b/c/d/e/f/.foorc.yml'):
+      case absolutePath('a/b/c/d/e/f/.foorc.js'):
+        throw { code: 'ENOENT' };
+      case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
+        return '';
+      default:
+        throw new Error(`irrelevant path ${searchPath}`);
+    }
+  };
+
+  const checkResult = result => {
+    expect(result).toEqual({
+      config: undefined,
+      filepath: absolutePath('a/b/c/d/e/f/.foorc.yaml'),
+      isEmpty: true,
+    });
+  };
+
+  test('async', () => {
+    mockReadFile(false, readFile);
+    return cosmiconfig('foo', {
+      rcExtensions: true,
+      stopDir: absolutePath('a'),
+    })
+      .search(startDir, { ignoreEmpty: false })
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    mockReadFile(true, readFile);
+    const result = cosmiconfig('foo', {
+      rcExtensions: true,
+      stopDir: absolutePath('a'),
+      sync: true,
+    }).search(startDir, { ignoreEmpty: false });
+    checkResult(result);
+  });
+});
+
+describe('with ignoreEmtpy and rcExtensions, returns an empty config result for an empty .js rc file', () => {
+  const startDir = absolutePath('a/b/c/d/e/f');
+  const readFile = searchPath => {
+    switch (searchPath) {
+      case absolutePath('a/b/c/d/e/f/package.json'):
+      case absolutePath('a/b/c/d/e/f/.foorc'):
+      case absolutePath('a/b/c/d/e/f/.foorc.json'):
+      case absolutePath('a/b/c/d/e/f/.foorc.yml'):
+      case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
+        throw { code: 'ENOENT' };
+      case absolutePath('a/b/c/d/e/f/.foorc.js'):
+        return '';
+      default:
+        throw new Error(`irrelevant path ${searchPath}`);
+    }
+  };
+
+  const checkResult = result => {
+    expect(result).toEqual({
+      config: undefined,
+      filepath: absolutePath('a/b/c/d/e/f/.foorc.js'),
+      isEmpty: true,
+    });
+  };
+
+  test('async', () => {
+    mockReadFile(false, readFile);
+    return cosmiconfig('foo', {
+      rcExtensions: true,
+      stopDir: absolutePath('a'),
+    })
+      .search(startDir, { ignoreEmpty: false })
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    mockReadFile(true, readFile);
+    const result = cosmiconfig('foo', {
+      rcExtensions: true,
+      stopDir: absolutePath('a'),
+      sync: true,
+    }).search(startDir, { ignoreEmpty: false });
+    checkResult(result);
+  });
+});
