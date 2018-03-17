@@ -13,6 +13,7 @@ describe('throws error if defined file does not exist', () => {
   };
 
   test('async', () => {
+    expect.hasAssertions();
     return cosmiconfig(null)
       .load(file)
       .catch(checkError);
@@ -35,6 +36,7 @@ describe('throws error if defined JSON file has syntax error', () => {
   };
 
   test('async', () => {
+    expect.hasAssertions();
     return cosmiconfig(null)
       .load(file)
       .catch(checkError);
@@ -57,6 +59,7 @@ describe('throws error if defined YAML file has syntax error', () => {
   };
 
   test('async', () => {
+    expect.hasAssertions();
     return cosmiconfig(null)
       .load(file)
       .catch(checkError);
@@ -79,6 +82,7 @@ describe('throws error if defined JS file has syntax error', () => {
   };
 
   test('async', () => {
+    expect.hasAssertions();
     return cosmiconfig(null)
       .load(file)
       .catch(checkError);
@@ -105,6 +109,7 @@ describe('returns an empty config result for empty file, format JS', () => {
   };
 
   test('async', () => {
+    expect.hasAssertions();
     return cosmiconfig(null)
       .load(file)
       .then(checkResult);
@@ -127,6 +132,7 @@ describe('returns an empty config result for empty file, format JSON', () => {
   };
 
   test('async', () => {
+    expect.hasAssertions();
     return cosmiconfig(null)
       .load(file)
       .then(checkResult);
@@ -149,6 +155,7 @@ describe('returns an empty config result for empty file, format YAML', () => {
   };
 
   test('async', () => {
+    expect.hasAssertions();
     return cosmiconfig(null)
       .load(file)
       .then(checkResult);
@@ -167,6 +174,7 @@ describe('throws error if defined JSON file has unknown extension', () => {
   };
 
   test('async', () => {
+    expect.hasAssertions();
     return cosmiconfig(null)
       .load(file)
       .catch(checkError);
@@ -189,6 +197,7 @@ describe('throws error if defined YAML file has unknown extension', () => {
   };
 
   test('async', () => {
+    expect.hasAssertions();
     return cosmiconfig(null)
       .load(file)
       .catch(checkError);
@@ -211,6 +220,7 @@ describe('throws error if defined JS file has unknown extension', () => {
   };
 
   test('async', () => {
+    expect.hasAssertions();
     return cosmiconfig(null)
       .load(file)
       .catch(checkError);

@@ -172,18 +172,23 @@ describe('does not swallow transform errors', () => {
     throw new Error('These pretzels are making me thirsty!');
   };
 
+  const checkError = error => {
+    expect(error.message).toBe('These pretzels are making me thirsty!');
+  };
+
   test('async', () => {
     expect.hasAssertions();
     return cosmiconfig(null, { transform })
       .load(configPath)
-      .catch(error => {
-        expect(error.message).toBe('These pretzels are making me thirsty!');
-      });
+      .catch(checkError);
   });
 
   test('sync', () => {
-    expect(() => {
+    expect.hasAssertions();
+    try {
       cosmiconfig(null, { transform, sync: true }).load(configPath);
-    }).toThrow('These pretzels are making me thirsty!');
+    } catch (error) {
+      checkError(error);
+    }
   });
 });

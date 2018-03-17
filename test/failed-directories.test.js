@@ -158,6 +158,7 @@ describe('throws error for invalid YAML in rc file', () => {
 
   test('async', () => {
     mockReadFile(false, readFile);
+    expect.hasAssertions();
     return cosmiconfig('foo', { stopDir: absolutePath('a') })
       .search(startDir)
       .catch(checkError);
@@ -195,6 +196,7 @@ describe('throws error for invalid JSON in rc file with rcStrictJson', () => {
 
   test('async', () => {
     mockReadFile(false, readFile);
+    expect.hasAssertions();
     return cosmiconfig('foo', {
       rcStrictJson: true,
       stopDir: absolutePath('a'),
@@ -235,6 +237,7 @@ describe('throws error for invalid package.json', () => {
 
   test('async', () => {
     mockReadFile(false, readFile);
+    expect.hasAssertions();
     return cosmiconfig('foo', {
       stopDir: absolutePath('a'),
     })
@@ -276,6 +279,7 @@ describe('throws error for invalid JS in .config.js file', () => {
 
   test('async', () => {
     mockReadFile(false, readFile);
+    expect.hasAssertions();
     return cosmiconfig('foo', {
       stopDir: absolutePath('a'),
     })
@@ -317,6 +321,7 @@ describe('with rcExtensions, throws error for invalid JSON in .foorc.json', () =
 
   test('async', () => {
     mockReadFile(false, readFile);
+    expect.hasAssertions();
     return cosmiconfig('foo', {
       rcExtensions: true,
       stopDir: absolutePath('.'),
@@ -362,6 +367,7 @@ describe('with rcExtensions, throws error for invalid YAML in .foorc.yml', () =>
 
   test('async', () => {
     mockReadFile(false, readFile);
+    expect.hasAssertions();
     return cosmiconfig('foo', {
       rcExtensions: true,
       stopDir: absolutePath('.'),
@@ -408,6 +414,7 @@ describe('with rcExtensions, throws error for invalid JS in .foorc.js', () => {
 
   test('async', () => {
     mockReadFile(false, readFile);
+    expect.hasAssertions();
     return cosmiconfig('foo', {
       rcExtensions: true,
       stopDir: absolutePath('.'),
