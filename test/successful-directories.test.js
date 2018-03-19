@@ -157,6 +157,45 @@ describe('cosmiconfig', () => {
     });
 
     testSyncAndAsync(
+      'finds JS ES Modules file in first searched dir',
+      sync => () => {
+        function readFile(searchPath) {
+          switch (searchPath) {
+            case absolutePath('a/b/c/d/e/f/package.json'):
+            case absolutePath('a/b/c/d/e/f/.foorc'):
+            case absolutePath('a/b/c/d/e/package.json'):
+            case absolutePath('a/b/c/d/e/.foorc'):
+            case absolutePath('a/b/c/d/e/foo.config.js'):
+              throw { code: 'ENOENT' };
+            case absolutePath('a/b/c/d/e/f/foo.config.js'):
+              return `Object.defineProperty(exports, '__esModule',{value: true});
+              const config={found:true};exports.default=config;`;
+            default:
+              throw new Error(`irrelevant path ${searchPath}`);
+          }
+        }
+        const readFileMock = mockReadFile(sync, readFile);
+        const startDir = absolutePath('a/b/c/d/e/f');
+
+        expect.hasAssertions();
+        return testFuncsRunner(sync, search(sync, startDir), [
+          result => {
+            util.assertSearchSequence(readFileMock, [
+              'a/b/c/d/e/f/package.json',
+              'a/b/c/d/e/f/.foorc',
+              'a/b/c/d/e/f/foo.config.js',
+            ]);
+
+            expect(result).toEqual({
+              config: { found: true },
+              filepath: absolutePath('a/b/c/d/e/f/foo.config.js'),
+            });
+          },
+        ]);
+      }
+    );
+
+    testSyncAndAsync(
       'finds package.json in second dir searched, with alternate names',
       sync => () => {
         function readFile(searchPath) {

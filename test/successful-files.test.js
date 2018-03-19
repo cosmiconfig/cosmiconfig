@@ -46,6 +46,11 @@ describe('cosmiconfig', () => {
       );
 
       testSyncAndAsync(
+        'loads defined JS ES Modules config path',
+        makeFileTest('fixtures/cjs-es-module.js')
+      );
+
+      testSyncAndAsync(
         'loads yaml-like JS config path',
         makeFileTest('fixtures/foo-yaml-like.js')
       );
@@ -70,6 +75,11 @@ describe('cosmiconfig', () => {
       testSyncAndAsync(
         'loads modularized JS config path',
         makeFileTest('fixtures/foo-module.js', 'js')
+      );
+
+      testSyncAndAsync(
+        'loads defined JS ES Modules config path',
+        makeFileTest('fixtures/cjs-es-module.js', 'js')
       );
 
       testSyncAndAsync(

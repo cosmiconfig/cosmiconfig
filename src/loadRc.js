@@ -2,7 +2,7 @@
 'use strict';
 
 const yaml = require('js-yaml');
-const requireFromString = require('require-from-string');
+const requireJs = require('./requireJs');
 const readFile = require('./readFile');
 const parseJson = require('./parseJson');
 const funcRunner = require('./funcRunner');
@@ -66,7 +66,7 @@ module.exports = function loadRc(
       loadExtension('json', parseJson),
       loadExtension('yaml', parseYml),
       loadExtension('yml', parseYml),
-      loadExtension('js', requireFromString),
+      loadExtension('js', requireJs),
     ]);
   }
 
