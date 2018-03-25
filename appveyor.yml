@@ -8,6 +8,7 @@ environment:
 branches:
   only:
     - master
+    - v5
 
 version: "{build}"
 build: off
