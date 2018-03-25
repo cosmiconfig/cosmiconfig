@@ -4,3 +4,5 @@ node_modules
 coverage
 *.DS_Store
 dist
+.idea
+.vscode
