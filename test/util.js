@@ -3,36 +3,7 @@
 const fsMock = require('fs');
 const path = require('path');
 
-const cosmiconfig = require('../src');
-
-const absolutePath = (exports.absolutePath = str => path.join(__dirname, str));
-
-exports.configFileLoader = function configFileLoader(options, file) {
-  const load = cosmiconfig(null, options).load;
-  return load(absolutePath(file));
-};
-
-const chainFuncsSync = (result, func) => func(result);
-const chainFuncsAsync = (result, func) => result.then(func);
-
-exports.testFuncsRunner = (sync, init, funcs) =>
-  funcs.reduce(sync === true ? chainFuncsSync : chainFuncsAsync, init);
-
-/**
- * A utility function to run a given test in both sync and async.
- *
- * @param {string} name
- * @param {Function} testFn
- */
-exports.testSyncAndAsync = function testSyncAndAsync(name, testFn) {
-  describe('sync', () => {
-    it(name, testFn(true));
-  });
-
-  describe('async', () => {
-    it(name, testFn(false));
-  });
-};
+exports.absolutePath = str => path.join(__dirname, str);
 
 exports.mockStatIsDirectory = function mockStatIsDirectory(result) {
   const stats = {

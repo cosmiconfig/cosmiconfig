@@ -9,6 +9,7 @@ Find and load a configuration object from
 - a `.config.js` CommonJS module (anywhere up the directory tree)
 
 For example, if your module's name is "soursocks", cosmiconfig will search out configuration in the following places:
+
 - a `soursocks` property in `package.json` (anywhere up the directory tree)
 - a `.soursocksrc` file in JSON or YAML format (anywhere up the directory tree)
 - a `soursocks.config.js` file exporting a JS object (anywhere up the directory tree)

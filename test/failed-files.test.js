@@ -4,220 +4,273 @@ const path = require('path');
 const util = require('./util');
 const cosmiconfig = require('../src');
 
-const configFileLoader = util.configFileLoader;
+const absolutePath = util.absolutePath;
 
-const expectForFormat = {
-  json(err) {
-    expect(err.message).toMatch(/JSON Error/);
-  },
-  yaml(err) {
-    expect(err.name).toBe('YAMLException');
-  },
-  js(err) {
-    expect(err.name).toBe('ReferenceError');
-  },
-};
-
-function makeSyntaxErrWithoutKnownExtnameTest(format) {
-  const file = `fixtures/foo-invalid-${format}`;
-
-  return () => {
-    expect.assertions(2);
-    expect(() => configFileLoader({ sync: true }, file)).toThrow(
-      /^Failed to parse/
-    );
-
-    return configFileLoader(null, file).catch(err => {
-      expect(err.message).toMatch(/^Failed to parse/);
-    });
+describe('throws error if defined file does not exist', () => {
+  const file = absolutePath('does/not/exist');
+  const checkError = error => {
+    expect(error.code).toBe('ENOENT');
   };
-}
 
-function makeSyntaxErrTest(format) {
-  const file = `fixtures/foo-invalid.${format}`;
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig(null)
+      .load(file)
+      .catch(checkError);
+  });
 
-  return () => {
-    expect.assertions(2);
+  test('sync', () => {
+    expect.hasAssertions();
     try {
-      configFileLoader({ sync: true }, file);
-    } catch (err) {
-      expectForFormat[format](err);
+      cosmiconfig(null, { sync: true }).load(file);
+    } catch (error) {
+      checkError(error);
     }
+  });
+});
 
-    return configFileLoader(null, file).catch(expectForFormat[format]);
+describe('throws error if defined JSON file has syntax error', () => {
+  const file = absolutePath(`fixtures/foo-invalid.json`);
+  const checkError = error => {
+    expect(error.message).toMatch(/JSON Error/);
   };
-}
 
-function makeSyntaxErrWithFormatTest(format) {
-  const file = `fixtures/foo-invalid.${format}`;
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig(null)
+      .load(file)
+      .catch(checkError);
+  });
 
-  return () => {
-    expect.assertions(2);
+  test('sync', () => {
+    expect.hasAssertions();
     try {
-      configFileLoader({ sync: true, format }, file);
-    } catch (err) {
-      expectForFormat[format](err);
+      cosmiconfig(null, { sync: true }).load(file);
+    } catch (error) {
+      checkError(error);
     }
+  });
+});
 
-    return configFileLoader({ format }, file).catch(expectForFormat[format]);
+describe('throws error if defined YAML file has syntax error', () => {
+  const file = absolutePath(`fixtures/foo-invalid.yaml`);
+  const checkError = error => {
+    expect(error.name).toBe('YAMLException');
   };
-}
 
-function makeEmptyFileTest(fileFormat, withFormat) {
-  const format = withFormat === true ? fileFormat : undefined;
-  const file = `fixtures/foo-empty.${fileFormat}`;
-  return () => {
-    expect.assertions(2);
-    const expectedResult = {
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig(null)
+      .load(file)
+      .catch(checkError);
+  });
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig(null, { sync: true }).load(file);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+describe('throws error if defined JS file has syntax error', () => {
+  const file = absolutePath(`fixtures/foo-invalid.js`);
+  const checkError = error => {
+    expect(error.name).toBe('ReferenceError');
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig(null)
+      .load(file)
+      .catch(checkError);
+  });
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig(null, { sync: true }).load(file);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+describe('returns an empty config result for empty file, format JS', () => {
+  const file = absolutePath(`fixtures/foo-empty.js`);
+  const checkResult = result => {
+    expect(result).toEqual({
       config: undefined,
-      filepath: path.join(__dirname, file),
+      filepath: file,
       isEmpty: true,
-    };
-
-    expect(configFileLoader({ sync: true, format }, file)).toEqual(
-      expectedResult
-    );
-
-    return expect(configFileLoader({ format }, file)).resolves.toEqual(
-      expectedResult
-    );
+    });
   };
-}
 
-describe('cosmiconfig', () => {
-  describe('search from file', () => {
-    it('throws error if defined file does not exist', () => {
-      expect.assertions(2);
-      try {
-        configFileLoader({ sync: true }, 'does/not/exist');
-      } catch (err) {
-        expect(err.code).toBe('ENOENT');
-      }
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig(null)
+      .load(file)
+      .then(checkResult);
+  });
 
-      return configFileLoader(null, 'does/not/exist').catch(err => {
-        expect(err.code).toBe('ENOENT');
-      });
+  test('sync', () => {
+    const result = cosmiconfig(null, { sync: true }).load(file);
+    checkResult(result);
+  });
+});
+
+describe('returns an empty config result for empty file, format JSON', () => {
+  const file = absolutePath(`fixtures/foo-empty.json`);
+  const checkResult = result => {
+    expect(result).toEqual({
+      config: undefined,
+      filepath: file,
+      isEmpty: true,
     });
+  };
 
-    describe('without expected format', () => {
-      it(
-        'throws error if defined JSON file has syntax error',
-        makeSyntaxErrTest('json')
-      );
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig(null)
+      .load(file)
+      .then(checkResult);
+  });
 
-      it(
-        'throws error if defined YAML file has syntax error',
-        makeSyntaxErrTest('yaml')
-      );
+  test('sync', () => {
+    const result = cosmiconfig(null, { sync: true }).load(file);
+    checkResult(result);
+  });
+});
 
-      it(
-        'throws error if defined JS file has syntax error',
-        makeSyntaxErrTest('js')
-      );
-
-      it(
-        'returns an empty config result for an empty file, format JS',
-        makeEmptyFileTest('js')
-      );
-
-      it(
-        'returns an empty config result for an empty file, format JSON',
-        makeEmptyFileTest('json')
-      );
-
-      it(
-        'returns an empty config result for an empty file, format YAML',
-        makeEmptyFileTest('yaml')
-      );
+describe('returns an empty config result for empty file, format YAML', () => {
+  const file = absolutePath(`fixtures/foo-empty.yaml`);
+  const checkResult = result => {
+    expect(result).toEqual({
+      config: undefined,
+      filepath: file,
+      isEmpty: true,
     });
+  };
 
-    describe('with expected format', () => {
-      it(
-        'throws error if defined JSON file has syntax error',
-        makeSyntaxErrWithFormatTest('json')
-      );
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig(null)
+      .load(file)
+      .then(checkResult);
+  });
 
-      it(
-        'throws error if defined YAML file has syntax error',
-        makeSyntaxErrWithFormatTest('yaml')
-      );
+  test('sync', () => {
+    const result = cosmiconfig(null, { sync: true }).load(file);
+    checkResult(result);
+  });
+});
 
-      it(
-        'throws error if defined JS file has syntax error',
-        makeSyntaxErrWithFormatTest('js')
-      );
+describe('throws error if defined JSON file has unknown extension', () => {
+  const file = absolutePath(`fixtures/foo-invalid-json`);
+  const checkError = error => {
+    expect(error.message).toMatch(/^Failed to parse/);
+  };
 
-      it(
-        'returns an empty config result for an empty file, format JS',
-        makeEmptyFileTest('js', true)
-      );
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig(null)
+      .load(file)
+      .catch(checkError);
+  });
 
-      it(
-        'returns an empty config result for an empty file, format JSON',
-        makeEmptyFileTest('json', true)
-      );
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig(null, { sync: true }).load(file);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
 
-      it(
-        'returns an empty config result for an empty file, format YAML',
-        makeEmptyFileTest('yaml', true)
-      );
+describe('throws error if defined YAML file has unknown extension', () => {
+  const file = absolutePath(`fixtures/foo-invalid-yaml`);
+  const checkError = error => {
+    expect(error.message).toMatch(/^Failed to parse/);
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig(null)
+      .load(file)
+      .catch(checkError);
+  });
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig(null, { sync: true }).load(file);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+describe('throws error if defined JS file has unknown extension', () => {
+  const file = absolutePath(`fixtures/foo-invalid-js`);
+  const checkError = error => {
+    expect(error.message).toMatch(/^Failed to parse/);
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig(null)
+      .load(file)
+      .catch(checkError);
+  });
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig(null, { sync: true }).load(file);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+test('throws error if configPath is package.json and packageProp is false', () => {
+  expect(() =>
+    cosmiconfig('foo', { sync: true, packageProp: false }).load(
+      path.join(__dirname, 'fixtures/package.json')
+    )
+  ).toThrow(/Please specify the packageProp option/);
+});
+
+test('in async mode, rejects if configPath is package.json and packageProp is false', () => {
+  expect.assertions(1);
+  return cosmiconfig('foo', { packageProp: false })
+    .load(path.join(__dirname, 'fixtures/package.json'))
+    .catch(error => {
+      expect(error.message).toContain('Please specify the packageProp option');
     });
+});
 
-    describe('with unknown extname', () => {
-      it(
-        'throws error if defined JSON file has syntax error',
-        makeSyntaxErrWithoutKnownExtnameTest('json')
-      );
+describe('throws an error if no configPath was specified and load is called without an argument', () => {
+  const checkError = error => {
+    expect(error.message).toMatch(/^configPath must be a nonempty string/);
+  };
 
-      it(
-        'throws error if defined YAML file has syntax error',
-        makeSyntaxErrWithoutKnownExtnameTest('yaml')
-      );
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('not_exist_rc_name')
+      .load()
+      .catch(checkError);
+  });
 
-      it(
-        'throws error if defined JS file has syntax error',
-        makeSyntaxErrWithoutKnownExtnameTest('js')
-      );
-    });
-
-    it('returns null if configuration file does not exist', () => {
-      const load = sync =>
-        cosmiconfig('not_exist_rc_name', { sync }).search('.');
-
-      expect.assertions(2);
-      expect(load(true)).toBe(null);
-      return expect(load(false)).resolves.toBe(null);
-    });
-
-    it('in sync mode, throws error if configPath is package.json and packageProp is false', () => {
-      expect(() =>
-        cosmiconfig('foo', { sync: true, packageProp: false }).load(
-          path.join(__dirname, 'fixtures/package.json')
-        )
-      ).toThrow(/Please specify the packageProp option/);
-    });
-
-    it('in async mode, rejects if configPath is package.json and packageProp is false', () => {
-      expect.assertions(1);
-      return cosmiconfig('foo', { packageProp: false })
-        .load(path.join(__dirname, 'fixtures/package.json'))
-        .catch(error => {
-          expect(error.message).toContain(
-            'Please specify the packageProp option'
-          );
-        });
-    });
-
-    it('throws an error if no configPath was specified', () => {
-      const load = sync => cosmiconfig('not_exist_rc_name', { sync }).load();
-      const errorRegex = /^configPath must be a nonempty string/;
-
-      expect.assertions(2);
-      expect(() => load(true)).toThrow(errorRegex);
-
-      return load(false).catch(error => {
-        expect(error.message).toMatch(errorRegex);
-      });
-    });
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('not_exist_rc_name', { sync: true }).load();
+    } catch (error) {
+      checkError(error);
+    }
   });
 });
