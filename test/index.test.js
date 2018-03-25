@@ -27,9 +27,9 @@ describe('cosmiconfig', () => {
       rc: `.${moduleName}rc`,
       js: `${moduleName}.config.js`,
       rcStrictJson: false,
+      rcExtensions: false,
       stopDir,
       cache: true,
-      sync: false,
     });
   });
 
@@ -39,9 +39,9 @@ describe('cosmiconfig', () => {
       rc: `.${moduleName}barrc`,
       js: `${moduleName}bar.config.js`,
       rcStrictJson: true,
+      rcExtensions: true,
       stopDir: __dirname,
       cache: false,
-      sync: true,
       configPath,
     });
 
@@ -50,9 +50,9 @@ describe('cosmiconfig', () => {
       rc: `.${moduleName}barrc`,
       js: `${moduleName}bar.config.js`,
       rcStrictJson: true,
+      rcExtensions: true,
       stopDir: __dirname,
       cache: false,
-      sync: true,
       configPath,
     });
   });

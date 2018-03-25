@@ -107,26 +107,38 @@ function loadRcFileWithExtensions(
   filepath: string,
   options: { strictJson: boolean, ignoreEmpty: boolean }
 ): Promise<CosmiconfigResult> {
-  return loaderSeries([
-    () => loadRcFileWithoutExtensions(filepath, options.strictJson),
-    () => loadJsonFile(`${filepath}.json`),
-    () => loadYamlFile(`${filepath}.yaml`),
-    () => loadYamlFile(`${filepath}.yml`),
-    () => loadJsFile(`${filepath}.js`),
-  ], { ignoreEmpty: options.ignoreEmpty });
+  return loaderSeries(
+    [
+      () =>
+        loadRcFileWithoutExtensions(filepath, {
+          strictJson: options.strictJson,
+        }),
+      () => loadJsonFile(`${filepath}.json`),
+      () => loadYamlFile(`${filepath}.yaml`),
+      () => loadYamlFile(`${filepath}.yml`),
+      () => loadJsFile(`${filepath}.js`),
+    ],
+    { ignoreEmpty: options.ignoreEmpty }
+  );
 }
 
 function loadRcFileWithExtensionsSync(
   filepath: string,
   options: { strictJson: boolean, ignoreEmpty: boolean }
 ): CosmiconfigResult {
-  return loaderSeries.sync([
-    () => loadRcFileWithoutExtensionsSync(filepath, options.strictJson),
-    () => loadJsonFileSync(`${filepath}.json`),
-    () => loadYamlFileSync(`${filepath}.yaml`),
-    () => loadYamlFileSync(`${filepath}.yml`),
-    () => loadJsFileSync(`${filepath}.js`),
-  ], { ignoreEmpty: options.ignoreEmpty });
+  return loaderSeries.sync(
+    [
+      () =>
+        loadRcFileWithoutExtensionsSync(filepath, {
+          strictJson: options.strictJson,
+        }),
+      () => loadJsonFileSync(`${filepath}.json`),
+      () => loadYamlFileSync(`${filepath}.yaml`),
+      () => loadYamlFileSync(`${filepath}.yml`),
+      () => loadJsFileSync(`${filepath}.js`),
+    ],
+    { ignoreEmpty: options.ignoreEmpty }
+  );
 }
 
 function loadRcFile(

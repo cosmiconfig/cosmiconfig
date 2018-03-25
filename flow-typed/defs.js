@@ -10,7 +10,7 @@ type LoaderResult = {
 };
 
 // These are the user options with defaults applied.
-type CreateExplorerOptions = {
+type ExplorerOptions = {
   packageProp: string | false,
   rc: string | false,
   js: string | false,
@@ -18,7 +18,6 @@ type CreateExplorerOptions = {
   rcExtensions: boolean,
   stopDir: string,
   cache: boolean,
-  sync: boolean,
-  transform?: (?Object) => ?Object,
+  transform?: CosmiconfigResult => CosmiconfigResult,
   configPath?: string,
 };

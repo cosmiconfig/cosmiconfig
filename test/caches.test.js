@@ -87,7 +87,7 @@ describe('cache is not used initially', () => {
 
   test('sync', () => {
     mockStatIsDirectory(true);
-    const cachedSearchSync = cosmiconfig('foo', { sync: true }).search;
+    const cachedSearchSync = cosmiconfig('foo').searchSync;
     const result = cachedSearchSync(searchPath);
     checkResult(fsMock.readFileSync, result);
   });
@@ -120,7 +120,7 @@ describe('cache is used for already-visited directories', () => {
 
   test('sync', () => {
     mockStatIsDirectory(true);
-    const cachedSearchSync = cosmiconfig('foo', { sync: true }).search;
+    const cachedSearchSync = cosmiconfig('foo').searchSync;
     // First pass, prime the cache ...
     cachedSearchSync(searchPath);
     // Reset readFile mocks and search again.
@@ -157,7 +157,7 @@ describe('cache is used for already-loaded file', () => {
 
   test('sync', () => {
     mockStatIsDirectory(true);
-    const cachedLoadSync = cosmiconfig('foo', { sync: true }).load;
+    const cachedLoadSync = cosmiconfig('foo').loadSync;
     // First pass, prime the cache ...
     cachedLoadSync(loadPath);
     // Reset readFile mocks and search again.
@@ -199,7 +199,7 @@ describe('cache is used when some directories in search are already visted', () 
 
   test('sync', () => {
     mockStatIsDirectory(true);
-    const cachedSearchSync = cosmiconfig('foo', { sync: true }).search;
+    const cachedSearchSync = cosmiconfig('foo').searchSync;
     // First pass, prime the cache ...
     cachedSearchSync(firstSearchPath);
     // Reset readFile mocks and search again.
@@ -239,13 +239,13 @@ describe('cache is not used when directly loading an unvisited file', () => {
 
   test('sync', () => {
     mockStatIsDirectory(true);
-    const explorer = cosmiconfig('foo', { sync: true });
+    const explorer = cosmiconfig('foo');
     // First pass, prime the cache ...
-    explorer.search(firstSearchPath);
+    explorer.searchSync(firstSearchPath);
     // Reset readFile mocks and search again.
     resetReadFileMocks();
     mockStatIsDirectory(false);
-    const result = explorer.load(loadPath);
+    const result = explorer.loadSync(loadPath);
     checkResult(fsMock.readFileSync, result);
   });
 });
@@ -282,10 +282,10 @@ describe('cache is not used in a new cosmiconfig instance', () => {
 
   test('sync', () => {
     mockStatIsDirectory(true);
-    cosmiconfig('foo', { sync: true }).search(searchPath);
+    cosmiconfig('foo').searchSync(searchPath);
     // Reset readFile mocks and search again.
     resetReadFileMocks();
-    const result = cosmiconfig('foo', { sync: true }).search(searchPath);
+    const result = cosmiconfig('foo').searchSync(searchPath);
     checkResult(fsMock.readFileSync, result);
   });
 });
@@ -318,12 +318,12 @@ describe('clears file cache on calling clearLoadCache', () => {
 
   test('sync', () => {
     mockStatIsDirectory(false);
-    const explorer = cosmiconfig('foo', { sync: true });
-    explorer.load(loadPath);
+    const explorer = cosmiconfig('foo');
+    explorer.loadSync(loadPath);
     // Reset readFile mocks and search again.
     resetReadFileMocks();
     explorer.clearLoadCache();
-    const result = explorer.load(loadPath);
+    const result = explorer.loadSync(loadPath);
     checkResult(fsMock.readFileSync, result);
   });
 });
@@ -356,12 +356,12 @@ describe('clears file cache on calling clearCaches', () => {
 
   test('sync', () => {
     mockStatIsDirectory(false);
-    const explorer = cosmiconfig('foo', { sync: true });
-    explorer.load(loadPath);
+    const explorer = cosmiconfig('foo');
+    explorer.loadSync(loadPath);
     // Reset readFile mocks and search again.
     resetReadFileMocks();
     explorer.clearCaches();
-    const result = explorer.load(loadPath);
+    const result = explorer.loadSync(loadPath);
     checkResult(fsMock.readFileSync, result);
   });
 });
@@ -400,12 +400,12 @@ describe('clears directory cache on calling clearSearchCache', () => {
 
   test('sync', () => {
     mockStatIsDirectory(true);
-    const explorer = cosmiconfig('foo', { sync: true });
-    explorer.search(searchPath);
+    const explorer = cosmiconfig('foo');
+    explorer.searchSync(searchPath);
     // Reset readFile mocks and search again.
     resetReadFileMocks();
     explorer.clearSearchCache();
-    const result = explorer.search(searchPath);
+    const result = explorer.searchSync(searchPath);
     checkResult(fsMock.readFileSync, result);
   });
 });
@@ -444,12 +444,12 @@ describe('clears directory cache on calling clearCaches', () => {
 
   test('sync', () => {
     mockStatIsDirectory(true);
-    const explorer = cosmiconfig('foo', { sync: true });
-    explorer.search(searchPath);
+    const explorer = cosmiconfig('foo');
+    explorer.searchSync(searchPath);
     // Reset readFile mocks and search again.
     resetReadFileMocks();
     explorer.clearCaches();
-    const result = explorer.search(searchPath);
+    const result = explorer.searchSync(searchPath);
     checkResult(fsMock.readFileSync, result);
   });
 });
@@ -503,11 +503,11 @@ describe('with cache disabled, does not cache directory results', () => {
 
   test('sync', () => {
     mockStatIsDirectory(true);
-    const explorer = cosmiconfig('foo', { cache: false, sync: true });
-    explorer.search(searchPath);
+    const explorer = cosmiconfig('foo', { cache: false });
+    explorer.searchSync(searchPath);
     // Reset readFile mocks and search again.
     resetReadFileMocks();
-    const result = explorer.search(searchPath);
+    const result = explorer.searchSync(searchPath);
     checkResult(fsMock.readFileSync, result);
   });
 });
@@ -539,11 +539,11 @@ describe('with cache disabled, does not cache file results', () => {
 
   test('sync', () => {
     mockStatIsDirectory(false);
-    const explorer = cosmiconfig('foo', { cache: false, sync: true });
-    explorer.load(loadPath);
+    const explorer = cosmiconfig('foo', { cache: false });
+    explorer.loadSync(loadPath);
     // Reset readFile mocks and search again.
     resetReadFileMocks();
-    const result = explorer.load(loadPath);
+    const result = explorer.loadSync(loadPath);
     checkResult(fsMock.readFileSync, result);
   });
 });

@@ -16,12 +16,11 @@ module.exports = function cosmiconfig(
     rcExtensions?: boolean,
     stopDir?: string,
     cache?: boolean,
-    sync?: boolean,
-    transform?: (?Object) => ?Object,
+    transform?: CosmiconfigResult => CosmiconfigResult,
     configPath?: string,
   }
 ) {
-  const x: CreateExplorerOptions = Object.assign(
+  const x: ExplorerOptions = Object.assign(
     {},
     {
       packageProp: moduleName,
@@ -31,7 +30,6 @@ module.exports = function cosmiconfig(
       rcExtensions: false,
       stopDir: homedir,
       cache: true,
-      sync: false,
     },
     options
   );
