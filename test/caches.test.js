@@ -130,6 +130,43 @@ describe('cache is used for already-visited directories', () => {
   });
 });
 
+describe('cache is used for already-loaded file', () => {
+  const loadPath = absolutePath('a/b/c/d/.foorc');
+  const checkResult = (readFileMock, result) => {
+    expect(readFileMock).toHaveBeenCalledTimes(0);
+    expect(result).toEqual({
+      filepath: absolutePath('a/b/c/d/.foorc'),
+      config: { foundInD: true },
+    });
+  };
+
+  test('async', () => {
+    mockStatIsDirectory(true);
+    const cachedLoad = cosmiconfig('foo').load;
+    // First pass, prime the cache ...
+    return cachedLoad(loadPath)
+      .then(() => {
+        // Reset readFile mocks and search again.
+        resetReadFileMocks();
+        return cachedLoad(loadPath);
+      })
+      .then(result => {
+        checkResult(fsMock.readFile, result);
+      });
+  });
+
+  test('sync', () => {
+    mockStatIsDirectory(true);
+    const cachedLoadSync = cosmiconfig('foo', { sync: true }).load;
+    // First pass, prime the cache ...
+    cachedLoadSync(loadPath);
+    // Reset readFile mocks and search again.
+    resetReadFileMocks();
+    const result = cachedLoadSync(loadPath);
+    checkResult(fsMock.readFileSync, result);
+  });
+});
+
 describe('cache is used when some directories in search are already visted', () => {
   const firstSearchPath = absolutePath('a/b/c/d/e');
   const secondSearchPath = absolutePath('a/b/c/d/e/f');

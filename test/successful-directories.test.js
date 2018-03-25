@@ -589,7 +589,6 @@ describe('finds JS file traversing from cwd', () => {
     process.cwd = originalCwd;
   });
 
-  const startDir = absolutePath('a/b/c/d/e/f');
   const readFile = searchPath => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -627,7 +626,7 @@ describe('finds JS file traversing from cwd', () => {
     return cosmiconfig('foo', {
       stopDir: absolutePath('.'),
     })
-      .search(startDir)
+      .search()
       .then(result => {
         checkResult(readFileMock, result);
       });
@@ -639,7 +638,7 @@ describe('finds JS file traversing from cwd', () => {
     const result = cosmiconfig('foo', {
       stopDir: absolutePath('.'),
       sync: true,
-    }).search(startDir);
+    }).search();
     checkResult(readFileMock, result);
   });
 });
