@@ -1,8 +1,11 @@
 // @flow
 'use strict';
 
-function tryNextLoader(prevResult: CosmiconfigResult, options: { ignoreEmpty: boolean }) {
-  return prevResult === null || prevResult.isEmpty && options.ignoreEmpty;
+function tryNextLoader(
+  prevResult: CosmiconfigResult,
+  options: { ignoreEmpty: boolean }
+) {
+  return prevResult === null || (prevResult.isEmpty && options.ignoreEmpty);
 }
 
 function loaderSeries(
@@ -24,12 +27,12 @@ loaderSeries.sync = function loaderSeriesSync(
   loaders: Array<(CosmiconfigResult) => CosmiconfigResult>,
   options: { ignoreEmpty: boolean }
 ): CosmiconfigResult {
-  return loaders.reduce((prevResult, nextLoader) => {
-    if (tryNextLoader(prevResult, options)) {
-      return nextLoader(prevResult);
-    }
-    return prevResult;
-  }, null);
+  let result = null;
+  for (const loader of loaders) {
+    result = loader(result);
+    if (!tryNextLoader(result, options)) break;
+  }
+  return result;
 };
 
 module.exports = loaderSeries;
