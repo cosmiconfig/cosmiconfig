@@ -15,7 +15,7 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "coverage": "jest --coverage --coverageReporters=html --coverageReporters=text",
-    "build": "flow-remove-types src --out-dir dist --quiet",
+    "build": "flow-remove-types src --out-dir dist --quiet && flow gen-flow-files src/index.js --out-dir dist",
     "prepublishOnly": "npm run build"
   },
   "lint-staged": {
