@@ -28,7 +28,6 @@ function parsePackageFile(
   filepath: string
 ): Object | null {
   const parsedContent = parseJson(content, filepath);
-  if (!parsedContent) return null;
   const packagePropValue = parsedContent[packageProp];
   return packagePropValue || null;
 }

@@ -12,16 +12,8 @@ type SearchOptions = {
 };
 
 function defaultSearchOptions(userOptions: SearchOptions): SearchOptions {
-  return Object.assign(
-    {
-      ignoreEmpty: true,
-    },
-    userOptions
-  );
+  return Object.assign({ ignoreEmpty: true }, userOptions);
 }
-
-const configPathPackagePropError =
-  'Please specify the packageProp option. The configPath argument cannot point to a package.json file if packageProp is false.';
 
 module.exports = function createExplorer(options: ExplorerOptions) {
   const loadCache: Map<string, Promise<CosmiconfigResult>> = new Map();
@@ -83,78 +75,65 @@ module.exports = function createExplorer(options: ExplorerOptions) {
     return searchDirectorySync(dir, searchOptions);
   }
 
+  function getSearchDirectoryLoaderSeries(
+    sync: boolean,
+    dir: string,
+    searchOptions: SearchOptions
+  ): Array<Function> {
+    const pkg = sync ? loader.loadPackagePropSync : loader.loadPackageProp;
+    const rcFile = sync ? loader.loadRcFileSync : loader.loadRcFile;
+    const js = sync ? loader.loadJsFileSync : loader.loadJsFile;
+    const search = sync ? searchDirectorySync : searchDirectory;
+
+    return [
+      () => {
+        if (!packageProp) return null;
+        return pkg(dir, packageProp);
+      },
+      () => {
+        if (!options.rc) return null;
+        return rcFile(path.join(dir, options.rc), {
+          strictJson: options.rcStrictJson,
+          extensions: options.rcExtensions,
+          ignoreEmpty: searchOptions.ignoreEmpty,
+        });
+      },
+      () => {
+        if (!options.js) return null;
+        return js(path.join(dir, options.js));
+      },
+      () => {
+        const nextDirectory = path.dirname(dir);
+        if (nextDirectory === dir || dir === options.stopDir) {
+          return null;
+        }
+        return search(nextDirectory, searchOptions);
+      },
+    ];
+  }
+
   function searchDirectory(
-    directory: string,
+    dir: string,
     searchOptions: SearchOptions
   ): Promise<CosmiconfigResult> {
-    return cacheWrapper(searchCache, directory, () => {
-      const resultPromise = loaderSeries(
-        [
-          () => {
-            if (!packageProp) return null;
-            return loader.loadPackageProp(directory, packageProp);
-          },
-          () => {
-            if (!options.rc) return null;
-            return loader.loadRcFile(path.join(directory, options.rc), {
-              strictJson: options.rcStrictJson,
-              extensions: options.rcExtensions,
-              ignoreEmpty: searchOptions.ignoreEmpty,
-            });
-          },
-          () => {
-            if (!options.js) return null;
-            return loader.loadJsFile(path.join(directory, options.js));
-          },
-          () => {
-            const nextDirectory = path.dirname(directory);
-            if (nextDirectory === directory || directory === options.stopDir) {
-              return null;
-            }
-            return searchDirectory(nextDirectory, searchOptions);
-          },
-        ],
-        { ignoreEmpty: searchOptions.ignoreEmpty }
-      );
-
+    return cacheWrapper(searchCache, dir, () => {
+      const series = getSearchDirectoryLoaderSeries(false, dir, searchOptions);
+      const resultPromise = loaderSeries(series, {
+        ignoreEmpty: searchOptions.ignoreEmpty,
+      });
       return resultPromise.then(transform);
     });
   }
 
   function searchDirectorySync(
-    directory: string,
+    dir: string,
     searchOptions: SearchOptions
   ): CosmiconfigResult {
-    return cacheWrapper(searchSyncCache, directory, () => {
-      const rawResult = loaderSeries.sync(
-        [
-          () => {
-            if (!packageProp) return null;
-            return loader.loadPackagePropSync(directory, packageProp);
-          },
-          () => {
-            if (!options.rc) return null;
-            return loader.loadRcFileSync(path.join(directory, options.rc), {
-              strictJson: options.rcStrictJson,
-              extensions: options.rcExtensions,
-              ignoreEmpty: searchOptions.ignoreEmpty,
-            });
-          },
-          () => {
-            if (!options.js) return null;
-            return loader.loadJsFileSync(path.join(directory, options.js));
-          },
-          () => {
-            const nextDirectory = path.dirname(directory);
-            if (nextDirectory === directory || directory === options.stopDir) {
-              return null;
-            }
-            return searchDirectorySync(nextDirectory, searchOptions);
-          },
-        ],
-        { ignoreEmpty: searchOptions.ignoreEmpty }
-      );
-
+    return cacheWrapper(searchSyncCache, dir, () => {
+      const series = getSearchDirectoryLoaderSeries(true, dir, searchOptions);
+      const rawResult = loaderSeries.sync(series, {
+        ignoreEmpty: searchOptions.ignoreEmpty,
+      });
       return transform(rawResult);
     });
   }
@@ -175,23 +154,25 @@ module.exports = function createExplorer(options: ExplorerOptions) {
     return path.resolve(process.cwd(), configPath);
   }
 
+  function getLoadResult(sync: boolean, absoluteConfigPath: string): any {
+    const pkg = sync ? loader.loadPackagePropSync : loader.loadPackageProp;
+    const definedFile = sync ? loadDefinedFile.sync : loadDefinedFile;
+    if (path.basename(absoluteConfigPath) === 'package.json') {
+      if (!packageProp) {
+        throw new Error(
+          'Please specify the packageProp option. The configPath argument cannot point to a package.json file if packageProp is false.'
+        );
+      }
+      return pkg(path.dirname(absoluteConfigPath), packageProp);
+    }
+    return definedFile(absoluteConfigPath);
+  }
+
   function load(configPath?: string): Promise<CosmiconfigResult> {
     return Promise.resolve().then(() => {
       const absoluteConfigPath = getAbsoluteConfigPath(configPath);
-
       return cacheWrapper(loadCache, absoluteConfigPath, () => {
-        let resultPromise;
-        if (path.basename(absoluteConfigPath) === 'package.json') {
-          if (!packageProp) {
-            throw new Error(configPathPackagePropError);
-          }
-          resultPromise = loader.loadPackageProp(
-            path.dirname(absoluteConfigPath),
-            packageProp
-          );
-        } else {
-          resultPromise = loadDefinedFile(absoluteConfigPath);
-        }
+        const resultPromise = getLoadResult(false, absoluteConfigPath);
         return resultPromise.then(transform);
       });
     });
@@ -199,21 +180,8 @@ module.exports = function createExplorer(options: ExplorerOptions) {
 
   function loadSync(configPath?: string): CosmiconfigResult {
     const absoluteConfigPath = getAbsoluteConfigPath(configPath);
-
     return cacheWrapper(loadSyncCache, absoluteConfigPath, () => {
-      let rawResult;
-      if (path.basename(absoluteConfigPath) === 'package.json') {
-        if (!packageProp) {
-          throw new Error(configPathPackagePropError);
-        }
-        rawResult = loader.loadPackagePropSync(
-          path.dirname(absoluteConfigPath),
-          packageProp
-        );
-      } else {
-        rawResult = loadDefinedFile.sync(absoluteConfigPath);
-      }
-
+      const rawResult = getLoadResult(true, absoluteConfigPath);
       return transform(rawResult);
     });
   }

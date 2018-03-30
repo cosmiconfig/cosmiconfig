@@ -18,42 +18,44 @@ function fileContentToResult(
   return { config, filepath };
 }
 
-function loadJsFile(filepath: string): Promise<CosmiconfigResult> {
+function getResultFromFile(
+  filepath: string,
+  parse: (string, string) => Object | null
+): Promise<CosmiconfigResult> {
   return readFile(filepath).then(content => {
-    return fileContentToResult(content, filepath, parser.parseJs);
+    return fileContentToResult(content, filepath, parse);
   });
+}
+
+function getResultFromFileSync(
+  filepath: string,
+  parse: (string, string) => Object | null
+): CosmiconfigResult {
+  return fileContentToResult(readFile.sync(filepath), filepath, parse);
+}
+
+function loadJsFile(filepath: string): Promise<CosmiconfigResult> {
+  return getResultFromFile(filepath, parser.parseJs);
 }
 
 function loadJsFileSync(filepath: string): CosmiconfigResult {
-  return fileContentToResult(readFile.sync(filepath), filepath, parser.parseJs);
+  return getResultFromFileSync(filepath, parser.parseJs);
 }
 
 function loadJsonFile(filepath: string): Promise<CosmiconfigResult> {
-  return readFile(filepath).then(content => {
-    return fileContentToResult(content, filepath, parser.parseJson);
-  });
+  return getResultFromFile(filepath, parser.parseJson);
 }
 
 function loadJsonFileSync(filepath: string): CosmiconfigResult {
-  return fileContentToResult(
-    readFile.sync(filepath),
-    filepath,
-    parser.parseJson
-  );
+  return getResultFromFileSync(filepath, parser.parseJson);
 }
 
 function loadYamlFile(filepath: string): Promise<CosmiconfigResult> {
-  return readFile(filepath).then(content => {
-    return fileContentToResult(content, filepath, parser.parseYaml);
-  });
+  return getResultFromFile(filepath, parser.parseYaml);
 }
 
 function loadYamlFileSync(filepath: string): CosmiconfigResult {
-  return fileContentToResult(
-    readFile.sync(filepath),
-    filepath,
-    parser.parseYaml
-  );
+  return getResultFromFileSync(filepath, parser.parseYaml);
 }
 
 function loadPackageProp(
@@ -61,13 +63,10 @@ function loadPackageProp(
   packageProp: string
 ): Promise<CosmiconfigResult> {
   const filepath = path.join(directory, 'package.json');
-  return readFile(filepath).then(content => {
-    return fileContentToResult(
-      content,
-      filepath,
-      parser.parsePackageFile.bind(null, packageProp)
-    );
-  });
+  return getResultFromFile(
+    filepath,
+    parser.parsePackageFile.bind(null, packageProp)
+  );
 }
 
 function loadPackagePropSync(
@@ -75,9 +74,7 @@ function loadPackagePropSync(
   packageProp: string
 ): CosmiconfigResult {
   const filepath = path.join(directory, 'package.json');
-  const content = readFile.sync(filepath);
-  return fileContentToResult(
-    content,
+  return getResultFromFileSync(
     filepath,
     parser.parsePackageFile.bind(null, packageProp)
   );
@@ -103,23 +100,34 @@ function loadRcFileWithoutExtensionsSync(
   return loadYamlFileSync(filepath);
 }
 
+function getRcLoaderSeries(
+  sync: boolean,
+  filepath: string,
+  strictJson: boolean
+): Array<Function> {
+  const withoutExtensions = sync
+    ? loadRcFileWithoutExtensionsSync
+    : loadRcFileWithoutExtensions;
+  const json = sync ? loadJsonFileSync : loadJsonFile;
+  const yaml = sync ? loadYamlFileSync : loadYamlFile;
+  const js = sync ? loadJsFileSync : loadJsFile;
+
+  return [
+    () => withoutExtensions(filepath, { strictJson }),
+    () => json(`${filepath}.json`),
+    () => yaml(`${filepath}.yaml`),
+    () => yaml(`${filepath}.yml`),
+    () => js(`${filepath}.js`),
+  ];
+}
+
 function loadRcFileWithExtensions(
   filepath: string,
   options: { strictJson: boolean, ignoreEmpty: boolean }
 ): Promise<CosmiconfigResult> {
-  return loaderSeries(
-    [
-      () =>
-        loadRcFileWithoutExtensions(filepath, {
-          strictJson: options.strictJson,
-        }),
-      () => loadJsonFile(`${filepath}.json`),
-      () => loadYamlFile(`${filepath}.yaml`),
-      () => loadYamlFile(`${filepath}.yml`),
-      () => loadJsFile(`${filepath}.js`),
-    ],
-    { ignoreEmpty: options.ignoreEmpty }
-  );
+  return loaderSeries(getRcLoaderSeries(false, filepath, options.strictJson), {
+    ignoreEmpty: options.ignoreEmpty,
+  });
 }
 
 function loadRcFileWithExtensionsSync(
@@ -127,16 +135,7 @@ function loadRcFileWithExtensionsSync(
   options: { strictJson: boolean, ignoreEmpty: boolean }
 ): CosmiconfigResult {
   return loaderSeries.sync(
-    [
-      () =>
-        loadRcFileWithoutExtensionsSync(filepath, {
-          strictJson: options.strictJson,
-        }),
-      () => loadJsonFileSync(`${filepath}.json`),
-      () => loadYamlFileSync(`${filepath}.yaml`),
-      () => loadYamlFileSync(`${filepath}.yml`),
-      () => loadJsFileSync(`${filepath}.js`),
-    ],
+    getRcLoaderSeries(true, filepath, options.strictJson),
     { ignoreEmpty: options.ignoreEmpty }
   );
 }

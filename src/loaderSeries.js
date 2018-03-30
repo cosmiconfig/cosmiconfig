@@ -9,14 +9,13 @@ function tryNextLoader(
 }
 
 function loaderSeries(
-  loaders: Array<(CosmiconfigResult) => null | Promise<CosmiconfigResult>>,
+  loaders: Array<() => null | Promise<CosmiconfigResult>>,
   options: { ignoreEmpty: boolean }
 ): Promise<CosmiconfigResult> {
   return loaders.reduce((prev, nextLoader) => {
-    if (prev === null) return Promise.resolve(nextLoader(null));
     return prev.then(prevResult => {
       if (tryNextLoader(prevResult, options)) {
-        return nextLoader(prevResult);
+        return nextLoader();
       }
       return prevResult;
     });
@@ -24,12 +23,12 @@ function loaderSeries(
 }
 
 loaderSeries.sync = function loaderSeriesSync(
-  loaders: Array<(CosmiconfigResult) => CosmiconfigResult>,
+  loaders: Array<() => CosmiconfigResult>,
   options: { ignoreEmpty: boolean }
 ): CosmiconfigResult {
   let result = null;
   for (const loader of loaders) {
-    result = loader(result);
+    result = loader();
     if (!tryNextLoader(result, options)) break;
   }
   return result;
