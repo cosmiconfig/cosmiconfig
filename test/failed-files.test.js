@@ -14,7 +14,7 @@ describe('throws error if defined file does not exist', () => {
 
   test('async', () => {
     expect.hasAssertions();
-    return cosmiconfig(null)
+    return cosmiconfig()
       .load(file)
       .catch(checkError);
   });
@@ -22,7 +22,7 @@ describe('throws error if defined file does not exist', () => {
   test('sync', () => {
     expect.hasAssertions();
     try {
-      cosmiconfig(null, { sync: true }).load(file);
+      cosmiconfig().loadSync(file);
     } catch (error) {
       checkError(error);
     }
@@ -37,7 +37,7 @@ describe('throws error if defined JSON file has syntax error', () => {
 
   test('async', () => {
     expect.hasAssertions();
-    return cosmiconfig(null)
+    return cosmiconfig()
       .load(file)
       .catch(checkError);
   });
@@ -45,7 +45,7 @@ describe('throws error if defined JSON file has syntax error', () => {
   test('sync', () => {
     expect.hasAssertions();
     try {
-      cosmiconfig(null, { sync: true }).load(file);
+      cosmiconfig().loadSync(file);
     } catch (error) {
       checkError(error);
     }
@@ -60,7 +60,7 @@ describe('throws error if defined YAML file has syntax error', () => {
 
   test('async', () => {
     expect.hasAssertions();
-    return cosmiconfig(null)
+    return cosmiconfig()
       .load(file)
       .catch(checkError);
   });
@@ -68,7 +68,7 @@ describe('throws error if defined YAML file has syntax error', () => {
   test('sync', () => {
     expect.hasAssertions();
     try {
-      cosmiconfig(null, { sync: true }).load(file);
+      cosmiconfig().loadSync(file);
     } catch (error) {
       checkError(error);
     }
@@ -83,7 +83,7 @@ describe('throws error if defined JS file has syntax error', () => {
 
   test('async', () => {
     expect.hasAssertions();
-    return cosmiconfig(null)
+    return cosmiconfig()
       .load(file)
       .catch(checkError);
   });
@@ -91,7 +91,7 @@ describe('throws error if defined JS file has syntax error', () => {
   test('sync', () => {
     expect.hasAssertions();
     try {
-      cosmiconfig(null, { sync: true }).load(file);
+      cosmiconfig().loadSync(file);
     } catch (error) {
       checkError(error);
     }
@@ -110,13 +110,13 @@ describe('returns an empty config result for empty file, format JS', () => {
 
   test('async', () => {
     expect.hasAssertions();
-    return cosmiconfig(null)
+    return cosmiconfig()
       .load(file)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig(null, { sync: true }).load(file);
+    const result = cosmiconfig().loadSync(file);
     checkResult(result);
   });
 });
@@ -133,13 +133,13 @@ describe('returns an empty config result for empty file, format JSON', () => {
 
   test('async', () => {
     expect.hasAssertions();
-    return cosmiconfig(null)
+    return cosmiconfig()
       .load(file)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig(null, { sync: true }).load(file);
+    const result = cosmiconfig().loadSync(file);
     checkResult(result);
   });
 });
@@ -156,13 +156,13 @@ describe('returns an empty config result for empty file, format YAML', () => {
 
   test('async', () => {
     expect.hasAssertions();
-    return cosmiconfig(null)
+    return cosmiconfig()
       .load(file)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig(null, { sync: true }).load(file);
+    const result = cosmiconfig().loadSync(file);
     checkResult(result);
   });
 });
@@ -175,7 +175,7 @@ describe('throws error if defined JSON file has unknown extension', () => {
 
   test('async', () => {
     expect.hasAssertions();
-    return cosmiconfig(null)
+    return cosmiconfig()
       .load(file)
       .catch(checkError);
   });
@@ -183,7 +183,7 @@ describe('throws error if defined JSON file has unknown extension', () => {
   test('sync', () => {
     expect.hasAssertions();
     try {
-      cosmiconfig(null, { sync: true }).load(file);
+      cosmiconfig().loadSync(file);
     } catch (error) {
       checkError(error);
     }
@@ -198,7 +198,7 @@ describe('throws error if defined YAML file has unknown extension', () => {
 
   test('async', () => {
     expect.hasAssertions();
-    return cosmiconfig(null)
+    return cosmiconfig()
       .load(file)
       .catch(checkError);
   });
@@ -206,7 +206,7 @@ describe('throws error if defined YAML file has unknown extension', () => {
   test('sync', () => {
     expect.hasAssertions();
     try {
-      cosmiconfig(null, { sync: true }).load(file);
+      cosmiconfig().loadSync(file);
     } catch (error) {
       checkError(error);
     }
@@ -221,7 +221,7 @@ describe('throws error if defined JS file has unknown extension', () => {
 
   test('async', () => {
     expect.hasAssertions();
-    return cosmiconfig(null)
+    return cosmiconfig()
       .load(file)
       .catch(checkError);
   });
@@ -229,7 +229,7 @@ describe('throws error if defined JS file has unknown extension', () => {
   test('sync', () => {
     expect.hasAssertions();
     try {
-      cosmiconfig(null, { sync: true }).load(file);
+      cosmiconfig().loadSync(file);
     } catch (error) {
       checkError(error);
     }
@@ -238,7 +238,7 @@ describe('throws error if defined JS file has unknown extension', () => {
 
 test('throws error if configPath is package.json and packageProp is false', () => {
   expect(() =>
-    cosmiconfig('foo', { sync: true, packageProp: false }).load(
+    cosmiconfig('foo', { packageProp: false }).loadSync(
       path.join(__dirname, 'fixtures/package.json')
     )
   ).toThrow(/Please specify the packageProp option/);
@@ -268,7 +268,7 @@ describe('throws an error if no configPath was specified and load is called with
   test('sync', () => {
     expect.hasAssertions();
     try {
-      cosmiconfig('not_exist_rc_name', { sync: true }).load();
+      cosmiconfig('not_exist_rc_name').loadSync();
     } catch (error) {
       checkError(error);
     }

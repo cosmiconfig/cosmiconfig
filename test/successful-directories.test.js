@@ -31,6 +31,8 @@ afterAll(() => {
 
 describe('finds rc file in third searched dir, with a package.json lacking prop', () => {
   const startDir = absolutePath('a/b/c/d/e/f');
+  const explorerOptions = { stopDir: absolutePath('.') };
+
   const readFile = searchPath => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -69,7 +71,7 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
 
   test('async', () => {
     const readFileMock = mockReadFile(false, readFile);
-    return cosmiconfig('foo', { stopDir: absolutePath('.') })
+    return cosmiconfig('foo', explorerOptions)
       .search(startDir)
       .then(result => {
         checkResult(readFileMock, result);
@@ -78,16 +80,15 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
 
   test('sync', () => {
     const readFileMock = mockReadFile(true, readFile);
-    const result = cosmiconfig('foo', {
-      stopDir: absolutePath('.'),
-      sync: true,
-    }).search(startDir);
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(readFileMock, result);
   });
 });
 
 describe('finds package.json prop in second searched dir', () => {
   const startDir = absolutePath('a/b/c/d/e/f');
+  const explorerOptions = { stopDir: absolutePath('.') };
+
   const readFile = searchPath => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -119,7 +120,7 @@ describe('finds package.json prop in second searched dir', () => {
 
   test('async', () => {
     const readFileMock = mockReadFile(false, readFile);
-    return cosmiconfig('foo', { stopDir: absolutePath('.') })
+    return cosmiconfig('foo', explorerOptions)
       .search(startDir)
       .then(result => {
         checkResult(readFileMock, result);
@@ -128,16 +129,15 @@ describe('finds package.json prop in second searched dir', () => {
 
   test('sync', () => {
     const readFileMock = mockReadFile(true, readFile);
-    const result = cosmiconfig('foo', {
-      stopDir: absolutePath('.'),
-      sync: true,
-    }).search(startDir);
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(readFileMock, result);
   });
 });
 
 describe('finds JS file in first searched dir', () => {
   const startDir = absolutePath('a/b/c/d/e/f');
+  const explorerOptions = { stopDir: absolutePath('.') };
+
   const readFile = searchPath => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -168,7 +168,7 @@ describe('finds JS file in first searched dir', () => {
 
   test('async', () => {
     const readFileMock = mockReadFile(false, readFile);
-    return cosmiconfig('foo', { stopDir: absolutePath('.') })
+    return cosmiconfig('foo', explorerOptions)
       .search(startDir)
       .then(result => {
         checkResult(readFileMock, result);
@@ -177,16 +177,20 @@ describe('finds JS file in first searched dir', () => {
 
   test('sync', () => {
     const readFileMock = mockReadFile(true, readFile);
-    const result = cosmiconfig('foo', {
-      stopDir: absolutePath('.'),
-      sync: true,
-    }).search(startDir);
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(readFileMock, result);
   });
 });
 
 describe('finds package.json in second dir searched, with alternate names', () => {
   const startDir = absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: absolutePath('.'),
+    rc: '.wowza',
+    js: 'wowzaConfig.js',
+    packageProp: 'heeha',
+  };
+
   const readFile = searchPath => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -216,12 +220,7 @@ describe('finds package.json in second dir searched, with alternate names', () =
 
   test('async', () => {
     const readFileMock = mockReadFile(false, readFile);
-    return cosmiconfig('foo', {
-      rc: '.wowza',
-      js: 'wowzaConfig.js',
-      packageProp: 'heeha',
-      stopDir: absolutePath('.'),
-    })
+    return cosmiconfig('foo', explorerOptions)
       .search(startDir)
       .then(result => {
         checkResult(readFileMock, result);
@@ -230,19 +229,19 @@ describe('finds package.json in second dir searched, with alternate names', () =
 
   test('sync', () => {
     const readFileMock = mockReadFile(true, readFile);
-    const result = cosmiconfig('foo', {
-      rc: '.wowza',
-      js: 'wowzaConfig.js',
-      packageProp: 'heeha',
-      stopDir: absolutePath('.'),
-      sync: true,
-    }).search(startDir);
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(readFileMock, result);
   });
 });
 
 describe('finds rc file in third searched dir, skipping packageProp, with rcStrictJson', () => {
   const startDir = absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: absolutePath('.'),
+    packageProp: false,
+    rcStrictJson: true,
+  };
+
   const readFile = searchPath => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -277,11 +276,7 @@ describe('finds rc file in third searched dir, skipping packageProp, with rcStri
 
   test('async', () => {
     const readFileMock = mockReadFile(false, readFile);
-    return cosmiconfig('foo', {
-      packageProp: false,
-      rcStrictJson: true,
-      stopDir: absolutePath('.'),
-    })
+    return cosmiconfig('foo', explorerOptions)
       .search(startDir)
       .then(result => {
         checkResult(readFileMock, result);
@@ -290,18 +285,18 @@ describe('finds rc file in third searched dir, skipping packageProp, with rcStri
 
   test('sync', () => {
     const readFileMock = mockReadFile(true, readFile);
-    const result = cosmiconfig('foo', {
-      packageProp: false,
-      rcStrictJson: true,
-      stopDir: absolutePath('.'),
-      sync: true,
-    }).search(startDir);
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(readFileMock, result);
   });
 });
 
 describe('finds rc file in third searched dir, skipping JS and RC files, with rcStrictJson', () => {
   const startDir = absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    js: false,
+    rc: false,
+  };
+
   const readFile = searchPath => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -331,11 +326,7 @@ describe('finds rc file in third searched dir, skipping JS and RC files, with rc
 
   test('async', () => {
     const readFileMock = mockReadFile(false, readFile);
-    return cosmiconfig('foo', {
-      js: false,
-      rc: false,
-      stopDir: absolutePath('.'),
-    })
+    return cosmiconfig('foo', explorerOptions)
       .search(startDir)
       .then(result => {
         checkResult(readFileMock, result);
@@ -344,18 +335,18 @@ describe('finds rc file in third searched dir, skipping JS and RC files, with rc
 
   test('sync', () => {
     const readFileMock = mockReadFile(true, readFile);
-    const result = cosmiconfig('foo', {
-      js: false,
-      rc: false,
-      stopDir: absolutePath('.'),
-      sync: true,
-    }).search(startDir);
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(readFileMock, result);
   });
 });
 
 describe('with rcExtensions, finds .foorc.json in second searched dir', () => {
   const startDir = absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: absolutePath('.'),
+    rcExtensions: true,
+  };
+
   const readFile = searchPath => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -397,10 +388,7 @@ describe('with rcExtensions, finds .foorc.json in second searched dir', () => {
 
   test('async', () => {
     const readFileMock = mockReadFile(false, readFile);
-    return cosmiconfig('foo', {
-      rcExtensions: true,
-      stopDir: absolutePath('.'),
-    })
+    return cosmiconfig('foo', explorerOptions)
       .search(startDir)
       .then(result => {
         checkResult(readFileMock, result);
@@ -409,17 +397,18 @@ describe('with rcExtensions, finds .foorc.json in second searched dir', () => {
 
   test('sync', () => {
     const readFileMock = mockReadFile(true, readFile);
-    const result = cosmiconfig('foo', {
-      rcExtensions: true,
-      stopDir: absolutePath('.'),
-      sync: true,
-    }).search(startDir);
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(readFileMock, result);
   });
 });
 
 describe('with rcExtensions, finds .foorc.yaml in first searched dir', () => {
   const startDir = absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: absolutePath('.'),
+    rcExtensions: true,
+  };
+
   const readFile = searchPath => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -449,10 +438,7 @@ describe('with rcExtensions, finds .foorc.yaml in first searched dir', () => {
 
   test('async', () => {
     const readFileMock = mockReadFile(false, readFile);
-    return cosmiconfig('foo', {
-      rcExtensions: true,
-      stopDir: absolutePath('.'),
-    })
+    return cosmiconfig('foo', explorerOptions)
       .search(startDir)
       .then(result => {
         checkResult(readFileMock, result);
@@ -461,17 +447,18 @@ describe('with rcExtensions, finds .foorc.yaml in first searched dir', () => {
 
   test('sync', () => {
     const readFileMock = mockReadFile(true, readFile);
-    const result = cosmiconfig('foo', {
-      rcExtensions: true,
-      stopDir: absolutePath('.'),
-      sync: true,
-    }).search(startDir);
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(readFileMock, result);
   });
 });
 
 describe('with rcExtensions, finds .foorc.yml in first searched dir', () => {
   const startDir = absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: absolutePath('.'),
+    rcExtensions: true,
+  };
+
   const readFile = searchPath => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -503,10 +490,7 @@ describe('with rcExtensions, finds .foorc.yml in first searched dir', () => {
 
   test('async', () => {
     const readFileMock = mockReadFile(false, readFile);
-    return cosmiconfig('foo', {
-      rcExtensions: true,
-      stopDir: absolutePath('.'),
-    })
+    return cosmiconfig('foo', explorerOptions)
       .search(startDir)
       .then(result => {
         checkResult(readFileMock, result);
@@ -515,17 +499,18 @@ describe('with rcExtensions, finds .foorc.yml in first searched dir', () => {
 
   test('sync', () => {
     const readFileMock = mockReadFile(true, readFile);
-    const result = cosmiconfig('foo', {
-      rcExtensions: true,
-      stopDir: absolutePath('.'),
-      sync: true,
-    }).search(startDir);
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(readFileMock, result);
   });
 });
 
 describe('with rcExtensions, finds .foorc.js in first searched dir', () => {
   const startDir = absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: absolutePath('.'),
+    rcExtensions: true,
+  };
+
   const readFile = searchPath => {
     switch (searchPath) {
       case absolutePath('a/b/c/d/e/f/package.json'):
@@ -559,10 +544,7 @@ describe('with rcExtensions, finds .foorc.js in first searched dir', () => {
 
   test('async', () => {
     const readFileMock = mockReadFile(false, readFile);
-    return cosmiconfig('foo', {
-      rcExtensions: true,
-      stopDir: absolutePath('.'),
-    })
+    return cosmiconfig('foo', explorerOptions)
       .search(startDir)
       .then(result => {
         checkResult(readFileMock, result);
@@ -571,16 +553,16 @@ describe('with rcExtensions, finds .foorc.js in first searched dir', () => {
 
   test('sync', () => {
     const readFileMock = mockReadFile(true, readFile);
-    const result = cosmiconfig('foo', {
-      rcExtensions: true,
-      stopDir: absolutePath('.'),
-      sync: true,
-    }).search(startDir);
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(readFileMock, result);
   });
 });
 
 describe('finds JS file traversing from cwd', () => {
+  const explorerOptions = {
+    stopDir: absolutePath('.'),
+  };
+
   let originalCwd;
   beforeEach(() => {
     originalCwd = process.cwd;
@@ -623,9 +605,7 @@ describe('finds JS file traversing from cwd', () => {
   test('async', () => {
     process.cwd = jest.fn(() => absolutePath('a/b/c/d/e/f'));
     const readFileMock = mockReadFile(false, readFile);
-    return cosmiconfig('foo', {
-      stopDir: absolutePath('.'),
-    })
+    return cosmiconfig('foo', explorerOptions)
       .search()
       .then(result => {
         checkResult(readFileMock, result);
@@ -635,10 +615,7 @@ describe('finds JS file traversing from cwd', () => {
   test('sync', () => {
     process.cwd = jest.fn(() => absolutePath('a/b/c/d/e/f'));
     const readFileMock = mockReadFile(true, readFile);
-    const result = cosmiconfig('foo', {
-      stopDir: absolutePath('.'),
-      sync: true,
-    }).search();
+    const result = cosmiconfig('foo', explorerOptions).searchSync();
     checkResult(readFileMock, result);
   });
 });

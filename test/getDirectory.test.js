@@ -13,7 +13,7 @@ describe('returns the searchPath if it is a directory', () => {
   });
 
   test('sync', () => {
-    checkResult(getDirectory(subject, true));
+    checkResult(getDirectory.sync(subject, true));
   });
 });
 
@@ -28,7 +28,7 @@ describe('returns the parent directory if it is a file', () => {
   });
 
   test('sync', () => {
-    checkResult(getDirectory(subject, true));
+    checkResult(getDirectory.sync(subject, true));
   });
 });
 
@@ -41,7 +41,7 @@ test('returns a promise if sync is not true', () => {
 });
 
 test('propagates error thrown by is-directory in sync', () => {
-  expect(() => getDirectory(null, true)).toThrowError(
+  expect(() => getDirectory.sync(null, true)).toThrowError(
     'expected filepath to be a string'
   );
 });

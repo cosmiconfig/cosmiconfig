@@ -12,29 +12,27 @@ module.exports = function cosmiconfig(
     packageProp?: string | false,
     rc?: string | false,
     js?: string | false,
-    format?: 'json' | 'yaml' | 'js',
     rcStrictJson?: boolean,
     rcExtensions?: boolean,
     stopDir?: string,
     cache?: boolean,
-    sync?: boolean,
-    transform?: (?Object) => ?Object,
+    transform?: CosmiconfigResult => CosmiconfigResult,
     configPath?: string,
   }
 ) {
-  options = Object.assign(
+  const x: ExplorerOptions = Object.assign(
     {},
     {
       packageProp: moduleName,
       rc: `.${moduleName}rc`,
       js: `${moduleName}.config.js`,
       rcStrictJson: false,
+      rcExtensions: false,
       stopDir: homedir,
       cache: true,
-      sync: false,
     },
     options
   );
 
-  return createExplorer(options);
+  return createExplorer(x);
 };
