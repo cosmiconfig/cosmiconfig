@@ -19,7 +19,7 @@ describe('loads defined JSON config path', () => {
   });
 
   test('sync', () => {
-    const result = cosmiconfig(null, { sync: true }).load(file);
+    const result = cosmiconfig().loadSync(file);
     checkResult(result);
   });
 });
@@ -38,7 +38,7 @@ describe('loads defined YAML config path', () => {
   });
 
   test('sync', () => {
-    const result = cosmiconfig(null, { sync: true }).load(file);
+    const result = cosmiconfig().loadSync(file);
     checkResult(result);
   });
 });
@@ -57,7 +57,7 @@ describe('loads defined JS config path', () => {
   });
 
   test('sync', () => {
-    const result = cosmiconfig(null, { sync: true }).load(file);
+    const result = cosmiconfig().loadSync(file);
     checkResult(result);
   });
 });
@@ -76,7 +76,7 @@ describe('loads modularized JS config path', () => {
   });
 
   test('sync', () => {
-    const result = cosmiconfig(null, { sync: true }).load(file);
+    const result = cosmiconfig().loadSync(file);
     checkResult(result);
   });
 });
@@ -95,7 +95,7 @@ describe('loads yaml-like JS config path', () => {
   });
 
   test('sync', () => {
-    const result = cosmiconfig(null, { sync: true }).load(file);
+    const result = cosmiconfig().loadSync(file);
     checkResult(result);
   });
 });
@@ -116,7 +116,7 @@ describe('respects options.configPath', () => {
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', { configPath, sync: true }).load();
+    const result = cosmiconfig('foo', { configPath }).loadSync();
     checkResult(result);
   });
 });
@@ -137,7 +137,7 @@ describe('loads package prop when configPath is package.json', () => {
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', { configPath, sync: true }).load();
+    const result = cosmiconfig('foo', { configPath }).loadSync();
     checkResult(result);
   });
 });
@@ -159,9 +159,7 @@ describe('runs transform', () => {
   });
 
   test('sync', () => {
-    const result = cosmiconfig(null, { transform, sync: true }).load(
-      configPath
-    );
+    const result = cosmiconfig(null, { transform }).loadSync(configPath);
     checkResult(result);
   });
 });
@@ -186,7 +184,7 @@ describe('does not swallow transform errors', () => {
   test('sync', () => {
     expect.hasAssertions();
     try {
-      cosmiconfig(null, { transform, sync: true }).load(configPath);
+      cosmiconfig(null, { transform }).loadSync(configPath);
     } catch (error) {
       checkError(error);
     }

@@ -89,7 +89,7 @@
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-flowtype": "^2.39.1",
     "eslint-plugin-node": "^5.2.1",
-    "flow-bin": "^0.54.1",
+    "flow-bin": "^0.68.0",
     "flow-remove-types": "^1.2.3",
     "husky": "^0.14.3",
     "jest": "^21.2.1",

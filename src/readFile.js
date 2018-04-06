@@ -7,7 +7,7 @@ type Options = {
   throwNotFound?: boolean,
 };
 
-function readFile(filepath: string, options?: Options): Promise<?string> {
+function readFile(filepath: string, options?: Options): Promise<string | null> {
   options = options || {};
   const throwNotFound = options.throwNotFound || false;
 
@@ -25,7 +25,7 @@ function readFile(filepath: string, options?: Options): Promise<?string> {
 readFile.sync = function readFileSync(
   filepath: string,
   options?: Options
-): ?string {
+): string | null {
   options = options || {};
   const throwNotFound = options.throwNotFound || false;
 
