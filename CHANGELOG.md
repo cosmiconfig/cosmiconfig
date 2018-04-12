@@ -9,6 +9,7 @@
 - Changed: `search()` now takes a second options argument which can be an object containing a single property `ignoreEmpty`.  This defaults to true and tells cosmiconfig whether to continue the search when an empty config file is found.
 - Changed: Only parse `JSON` and `YAML` for files without an extension.
 - Changed: Use `JSON`'s parser for `JSON` files without an extension.
+- Changed: Replace `require-from-string` with `require`.
 
 ## 4.0.0
 

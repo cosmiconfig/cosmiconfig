@@ -1,12 +1,13 @@
 // @flow
 'use strict';
 
-const requireFromString = require('require-from-string');
 const parseJsonCore = require('parse-json');
 const yaml = require('js-yaml');
 
 function parseJs(content: string, filepath: string): Object {
-  return requireFromString(content, filepath);
+  const result = require(filepath);
+
+  return result;
 }
 
 function parseJson(content: string, filepath: string): Object {
