@@ -190,3 +190,45 @@ describe('does not swallow transform errors', () => {
     }
   });
 });
+
+describe('loads defined JSON file has unknown extension', () => {
+  const file = absolutePath(`fixtures/foo-valid-json`);
+  const checkResult = result => {
+    expect(result.config).toEqual({ json: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig()
+      .load(file)
+      .then(result => {
+        checkResult(result);
+      });
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig().loadSync(file);
+    checkResult(result);
+  });
+});
+
+describe('loads defined YAML file has unknown extension', () => {
+  const file = absolutePath(`fixtures/foo-valid-yaml`);
+  const checkResult = result => {
+    expect(result.config).toEqual({ yaml: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig()
+      .load(file)
+      .then(result => {
+        checkResult(result);
+      });
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig().loadSync(file);
+    checkResult(result);
+  });
+});
