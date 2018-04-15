@@ -213,29 +213,6 @@ describe('throws error if defined YAML file has unknown extension', () => {
   });
 });
 
-describe('throws error if defined JS file has unknown extension', () => {
-  const file = absolutePath(`fixtures/foo-invalid-js`);
-  const checkError = error => {
-    expect(error.message).toMatch(/^Failed to parse/);
-  };
-
-  test('async', () => {
-    expect.hasAssertions();
-    return cosmiconfig()
-      .load(file)
-      .catch(checkError);
-  });
-
-  test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig().loadSync(file);
-    } catch (error) {
-      checkError(error);
-    }
-  });
-});
-
 test('throws error if configPath is package.json and packageProp is false', () => {
   expect(() =>
     cosmiconfig('foo', { packageProp: false }).loadSync(

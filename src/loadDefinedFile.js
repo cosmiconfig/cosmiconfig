@@ -55,28 +55,36 @@ function inferFormat(filepath: string): ?string {
 }
 
 function tryAllParsing(content: string, filepath: string): ?Object {
-  return tryYaml(content, filepath, () => {
-    return tryRequire(content, filepath, () => {
+  return tryJson(content, filepath, () => {
+    return tryYaml(content, filepath, () => {
       return null;
     });
   });
 }
 
-function tryYaml(content: string, filepath: string, cb: () => ?Object) {
+function tryJson(content: string, filepath: string, cb: () => ?Object) {
   try {
-    const result = parser.parseYaml(content, filepath);
+    const result = parser.parseJson(content, filepath);
+    // istanbul ignore next
     if (typeof result === 'string') {
       return cb();
     }
+
     return result;
   } catch (err) {
     return cb();
   }
 }
 
-function tryRequire(content: string, filepath: string, cb: () => ?Object) {
+function tryYaml(content: string, filepath: string, cb: () => ?Object) {
   try {
-    return parser.parseJs(content, filepath);
+    const result = parser.parseYaml(content, filepath);
+    // istanbul ignore next
+    if (typeof result === 'string') {
+      return cb();
+    }
+
+    return result;
   } catch (err) {
     return cb();
   }
