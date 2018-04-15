@@ -3,10 +3,27 @@
 const util = require('./util');
 const cosmiconfig = require('../src');
 
-const absolutePath = util.absolutePath;
+const temp = new util.TempDir();
+
+beforeEach(() => {
+  temp.clean();
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
+
+afterAll(() => {
+  // Remove temp.dir created for tests
+  temp.deleteTempDir();
+});
 
 describe('loads defined JSON config path', () => {
-  const file = absolutePath('fixtures/foo.json');
+  beforeEach(() => {
+    temp.createFile('foo.json', '{ "foo": true }');
+  });
+
+  const file = temp.absolutePath('foo.json');
   const checkResult = result => {
     expect(result.config).toEqual({ foo: true });
     expect(result.filepath).toBe(file);
@@ -25,7 +42,11 @@ describe('loads defined JSON config path', () => {
 });
 
 describe('loads defined YAML config path', () => {
-  const file = absolutePath('fixtures/foo.yaml');
+  beforeEach(() => {
+    temp.createFile('foo.yaml', 'foo: true');
+  });
+
+  const file = temp.absolutePath('foo.yaml');
   const checkResult = result => {
     expect(result.config).toEqual({ foo: true });
     expect(result.filepath).toBe(file);
@@ -44,7 +65,11 @@ describe('loads defined YAML config path', () => {
 });
 
 describe('loads defined JS config path', () => {
-  const file = absolutePath('fixtures/foo.js');
+  beforeEach(() => {
+    temp.createFile('foo.js', 'module.exports = { foo: true };');
+  });
+
+  const file = temp.absolutePath('foo.js');
   const checkResult = result => {
     expect(result.config).toEqual({ foo: true });
     expect(result.filepath).toBe(file);
@@ -63,7 +88,12 @@ describe('loads defined JS config path', () => {
 });
 
 describe('loads modularized JS config path', () => {
-  const file = absolutePath('fixtures/foo-module.js');
+  beforeEach(() => {
+    temp.createFile('foo.js', 'module.exports = { foo: true };');
+    temp.createFile('foo-module.js', 'module.exports = require("./foo");');
+  });
+
+  const file = temp.absolutePath('foo-module.js');
   const checkResult = result => {
     expect(result.config).toEqual({ foo: true });
     expect(result.filepath).toBe(file);
@@ -82,7 +112,11 @@ describe('loads modularized JS config path', () => {
 });
 
 describe('loads yaml-like JS config path', () => {
-  const file = absolutePath('fixtures/foo-yaml-like.js');
+  beforeEach(() => {
+    temp.createFile('foo-yaml-like.js', 'module.exports = { foo: true };');
+  });
+
+  const file = temp.absolutePath('foo-yaml-like.js');
   const checkResult = result => {
     expect(result.config).toEqual({ foo: true });
     expect(result.filepath).toBe(file);
@@ -101,7 +135,11 @@ describe('loads yaml-like JS config path', () => {
 });
 
 describe('respects options.configPath', () => {
-  const configPath = absolutePath('fixtures/foo.json');
+  beforeEach(() => {
+    temp.createFile('foo.json', '{ "foo": true }');
+  });
+
+  const configPath = temp.absolutePath('foo.json');
   const checkResult = result => {
     expect(result.config).toEqual({
       foo: true,
@@ -122,7 +160,11 @@ describe('respects options.configPath', () => {
 });
 
 describe('loads package prop when configPath is package.json', () => {
-  const configPath = absolutePath('fixtures/package.json');
+  beforeEach(() => {
+    temp.createFile('package.json', '{ "foo": { "bar": "baz" } }');
+  });
+
+  const configPath = temp.absolutePath('package.json');
   const checkResult = result => {
     expect(result.config).toEqual({
       bar: 'baz',
@@ -143,7 +185,11 @@ describe('loads package prop when configPath is package.json', () => {
 });
 
 describe('runs transform', () => {
-  const configPath = absolutePath('fixtures/foo.json');
+  beforeEach(() => {
+    temp.createFile('foo.json', '{ "foo": true }');
+  });
+
+  const configPath = temp.absolutePath('foo.json');
   const transform = result => {
     result.config.foo = [result.config.foo];
     return result;
@@ -165,7 +211,11 @@ describe('runs transform', () => {
 });
 
 describe('does not swallow transform errors', () => {
-  const configPath = absolutePath('fixtures/foo.json');
+  beforeEach(() => {
+    temp.createFile('foo.json', '{ "foo": true }');
+  });
+
+  const configPath = temp.absolutePath('foo.json');
   const transform = () => {
     throw new Error('These pretzels are making me thirsty!');
   };
@@ -192,7 +242,11 @@ describe('does not swallow transform errors', () => {
 });
 
 describe('loads defined JSON file has unknown extension', () => {
-  const file = absolutePath(`fixtures/foo-valid-json`);
+  beforeEach(() => {
+    temp.createFile('foo-valid-json', '{ "json": true }');
+  });
+
+  const file = temp.absolutePath('foo-valid-json');
   const checkResult = result => {
     expect(result.config).toEqual({ json: true });
     expect(result.filepath).toBe(file);
@@ -213,7 +267,11 @@ describe('loads defined JSON file has unknown extension', () => {
 });
 
 describe('loads defined YAML file has unknown extension', () => {
-  const file = absolutePath(`fixtures/foo-valid-yaml`);
+  beforeEach(() => {
+    temp.createFile('foo-valid-yaml', 'yaml: true');
+  });
+
+  const file = temp.absolutePath('foo-valid-yaml');
   const checkResult = result => {
     expect(result.config).toEqual({ yaml: true });
     expect(result.filepath).toBe(file);

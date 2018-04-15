@@ -12,7 +12,16 @@ function fileContentToResult(
   parse: (string, string) => Object | null
 ): CosmiconfigResult {
   if (content === null) return null;
-  if (content === '') return { filepath, config: undefined, isEmpty: true };
+
+  // Remove all whitespace to ensure empty file is equal to an empty string
+  const contentWithoutWhitespace = content.trim();
+  if (contentWithoutWhitespace === '') {
+    return {
+      filepath,
+      config: undefined,
+      isEmpty: true,
+    };
+  }
   const config = parse(content, filepath);
   if (config === null) return null;
   return { config, filepath };
