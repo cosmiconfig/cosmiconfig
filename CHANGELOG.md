@@ -6,6 +6,8 @@
 - Changed: `clearFileCache()` and `clearDirectoryCache()` have been renamed to `clearLoadCache()` and `clearSearchPath()` respectively.
 - Changed: `load()` now returns an undefined config and an additional property `isEmpty: true` when loading an empty file.
 - Changed: `search()` now takes a second options argument which can be an object containing a single property `ignoreEmpty`.  This defaults to true and tells cosmiconfig whether to continue the search when an empty config file is found.
+- Changed: Only parse `JSON` and `YAML` for files without an extension.
+- Changed: Use `JSON`'s parser for `JSON` files without an extension.
 
 ## 4.0.0
 
