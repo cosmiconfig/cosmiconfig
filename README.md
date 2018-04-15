@@ -55,11 +55,9 @@ explorer.search()
 // See documentation for load, below.
 explorer.load(pathToConfig).then(..);
 
-// You can also search and load synchronously by specifying
-// { sync: true } in your options.
-const syncExplorer = cosmiconfig(moduleName, { sync: true });
-const searchedFor = explorer.search();
-const loaded = explorer.load(pathToConfig);
+// You can also search and load synchronously.
+const searchedFor = explorer.searchSync();
+const loaded = explorer.loadSync(pathToConfig);
 ```
 
 ## API
@@ -159,22 +157,14 @@ Default: `true`.
 If `false`, no caches will be used.
 Read more about ["Caching"](#caching) below.
 
-##### sync
-
-Type: `boolean`.
-Default: `false`.
-
-If `true`, cosmiconfig will search and load configurations *synchronously*.
-By default, it's asynchronous.
-
 ##### transform
 
 Type: `(Result) => Promise<Result> | Result`.
 
 A function that transforms the parsed configuration. Receives the [result] object.
 
-If the option [`sync`] is `false` (default), the function must return a Promise that resolves with the transformed result.
-If the option [`sync`] is `true`, the function must be synchronous and return the transformed result.
+If using [`search()`] or [`load()`] \(which are async), the transform function can return the transformed result or return a Promise that resolves with the transformed result.
+If using [`searchSync()`] or [`loadSync()`], the function must be synchronous and return the transformed result.
 
 The reason you might use this option instead of simply applying your transform function some other way is that *the transformed result will be cached*. If your transformation involves additional filesystem I/O or other potentially slow processing, you can use this option to avoid repeating those steps every time a given configuration is searched or loaded.
 
@@ -199,7 +189,7 @@ In the event that the file does not have an extension or the extension is unreco
 explorer.search([searchPath][, searchOptions])
 ```
 
-Searches for a configuration file. In async mode (default), returns a Promise that resolves a [result] object or with `null`, if no configuration file is found. In [`sync`] mode, returns a [result] object or `null`.
+Searches for a configuration file. Returns a Promise that resolves with a [result] object or with `null`, if no configuration file is found.
 
 So let's say `const explorer = cosmiconfig('goldengrahams');` — here's how [`search()`] will work:
 
@@ -209,11 +199,11 @@ So let's say `const explorer = cosmiconfig('goldengrahams');` — here's how [`s
   3. A `goldengrahams.config.js` JS file exporting the object (or some other filename defined by the cosmiconfig option [`js`]).
 - If none of those searches reveal a configuration object, it moves up one directory level and tries again. So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking those three locations in each directory.
 - It continues searching until it arrives at your home directory (or some other directory defined by the cosmiconfig option [`stopDir`]).
-- If at any point a parseable configuration is found, the [`search()`] Promise resolves with its [result] \(or, in [`sync`] mode, the [result] is returned).
-- If no configuration object is found, the [`search()`] Promise resolves with `null` (or, in [`sync`] mode, `null` is returned).
-- If a configuration object is found *but is malformed* (causing a parsing error), the [`search()`] Promise rejects and shares that error (so you should `.catch()` it). (Or, in [`sync`] mode, the error is thrown.)
+- If at any point a parseable configuration is found, the [`search()`] Promise resolves with its [result] \(or, with [`searchSync()`], the [result] is returned).
+- If no configuration object is found, the [`search()`] Promise resolves with `null` (or, with [`searchSync()`], `null` is returned).
+- If a configuration object is found *but is malformed* (causing a parsing error), the [`search()`] Promise rejects with that error (so you should `.catch()` it). (Or, with [`searchSync()`], the error is thrown.)
 
-\*\*If you know where your configuration file should be located, you should instead use [`load()`], instead.
+**If you know where your configuration file should be, you can use [`load()`], instead.**
 
 #### searchPath
 
@@ -231,6 +221,12 @@ Default: `true`.
 
 By default, `search` ignores empty configuration files and continues searching up the tree. If this option is `false` and an empty configuration file is found, the [result] will include `config: undefined` and `isEmpty: true`.
 
+### explorer.searchSync
+
+Synchronous version of [`search()`].
+
+Returns a [result] or `null`.
+
 ### explorer.load
 
 ```js
@@ -239,14 +235,18 @@ explorer.load([loadPath])
 
 Loads a configuration file directly. Rejects with an error if the file does not exist or if the file cannot be parsed. Upon success it returns a Promise that resolves with a [result].
 
-In [`sync`] mode, directly returns the [result] or throws an error.
-
 If you have set the `cosmiconfig` option [`configPath`], [`load()`] will look there by default.
 
 ```js
 explorer.load() // Tries to load cosmiconfigOptions.configPath.
 explorer.load('load/this/file.json'); // Tries to load load/this/file.json.
 ```
+
+### explorer.loadSync
+
+Synchronous version of [`load()`].
+
+Returns a [result].
 
 ### explorer.clearLoadCache
 
@@ -288,11 +288,13 @@ And please do participate!
 
 [result]: #result
 
-[`sync`]: #sync
-
 [`load()`]: #explorerload
 
+[`loadsync()`]: #explorerloadsync
+
 [`search()`]: #explorersearch
+
+[`searchsync()`]: #explorersearchsync
 
 [`clearloadcache()`]: #explorerclearloadcache
 

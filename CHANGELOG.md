@@ -3,6 +3,7 @@
 ## 5.0.0
 
 - Changed: `load([searchPath, configPath])` is now split into two functions `search([searchPath])` and `load([configPath])`.  The functionality of searching for a configuration and loading a configuration directly remains the same.
+- Changed: the `sync` option has been replaced with separate synchronous functions: `searchSync()` and `loadSync()`.
 - Changed: `clearFileCache()` and `clearDirectoryCache()` have been renamed to `clearLoadCache()` and `clearSearchPath()` respectively.
 - Changed: `load()` now returns an undefined config and an additional property `isEmpty: true` when loading an empty file.
 - Changed: `search()` now takes a second options argument which can be an object containing a single property `ignoreEmpty`.  This defaults to true and tells cosmiconfig whether to continue the search when an empty config file is found.
