@@ -23,6 +23,7 @@ module.exports = function cosmiconfig(
   const x: ExplorerOptions = Object.assign(
     {},
     {
+      moduleName,
       packageProp: moduleName,
       rc: `.${moduleName}rc`,
       js: `${moduleName}.config.js`,

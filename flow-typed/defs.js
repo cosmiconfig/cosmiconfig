@@ -11,6 +11,7 @@ type LoaderResult = {
 
 // These are the user options with defaults applied.
 type ExplorerOptions = {
+  moduleName: string,
   packageProp: string | false,
   rc: string | false,
   js: string | false,

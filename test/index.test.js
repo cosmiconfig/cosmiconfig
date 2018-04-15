@@ -34,6 +34,7 @@ describe('cosmiconfig', () => {
 
     expect(createExplorerMock).toHaveBeenCalledTimes(1);
     expect(createExplorerMock).toHaveBeenCalledWith({
+      moduleName,
       packageProp: moduleName,
       rc: `.${moduleName}rc`,
       js: `${moduleName}.config.js`,
@@ -49,6 +50,7 @@ describe('cosmiconfig', () => {
 
     const configPath = temp.absolutePath('foo.json');
     cosmiconfig(moduleName, {
+      moduleName,
       rc: `.${moduleName}barrc`,
       js: `${moduleName}bar.config.js`,
       rcStrictJson: true,
@@ -59,6 +61,7 @@ describe('cosmiconfig', () => {
     });
 
     expect(createExplorerMock).toHaveBeenCalledWith({
+      moduleName,
       packageProp: moduleName,
       rc: `.${moduleName}barrc`,
       js: `${moduleName}bar.config.js`,

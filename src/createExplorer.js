@@ -5,7 +5,9 @@ const path = require('path');
 const loadDefinedFile = require('./loadDefinedFile');
 const getDirectory = require('./getDirectory');
 const loader = require('./loader');
-const loaderSeries = require('./loaderSeries');
+const parser = require('./parser');
+const searcher = require('./search');
+const normalizeSearchSchema = require('./normalizeSearchSchema');
 
 type SearchOptions = {
   ignoreEmpty: boolean,
@@ -15,6 +17,15 @@ function defaultSearchOptions(userOptions: SearchOptions): SearchOptions {
   return Object.assign({ ignoreEmpty: true }, userOptions);
 }
 
+type Loader = (string, string) => Object | null;
+type RawSearchSchemaItem =
+  | string
+  | {
+      filename: string,
+      loader?: Loader,
+      property?: string,
+    };
+
 module.exports = function createExplorer(options: ExplorerOptions) {
   const loadCache: Map<string, Promise<CosmiconfigResult>> = new Map();
   const loadSyncCache: Map<string, CosmiconfigResult> = new Map();
@@ -22,6 +33,32 @@ module.exports = function createExplorer(options: ExplorerOptions) {
   const searchSyncCache: Map<string, CosmiconfigResult> = new Map();
   const transform = options.transform || identity;
   const packageProp = options.packageProp;
+
+  const rawSearchSchema: Array<RawSearchSchemaItem> = [];
+  if (packageProp) {
+    rawSearchSchema.push({ filename: 'package.json', property: packageProp });
+  }
+  const rcFilename = options.rc;
+  if (rcFilename !== false) {
+    if (options.rcStrictJson) {
+      rawSearchSchema.push({ filename: rcFilename, loader: parser.parseJson });
+    } else {
+      rawSearchSchema.push(rcFilename);
+    }
+    if (options.rcExtensions) {
+      rawSearchSchema.push(`${rcFilename}.json`);
+      rawSearchSchema.push(`${rcFilename}.yaml`);
+      rawSearchSchema.push(`${rcFilename}.yml`);
+      rawSearchSchema.push(`${rcFilename}.js`);
+    }
+  }
+  if (options.js) {
+    rawSearchSchema.push(options.js);
+  }
+  const searchSchema = normalizeSearchSchema(
+    rawSearchSchema,
+    options.moduleName
+  );
 
   function clearLoadCache() {
     loadCache.clear();
@@ -56,11 +93,14 @@ module.exports = function createExplorer(options: ExplorerOptions) {
     searchPath: string,
     userSearchOptions: SearchOptions
   ): Promise<CosmiconfigResult> {
-    searchPath = searchPath || process.cwd();
     const searchOptions = defaultSearchOptions(userSearchOptions);
-    const absoluteSearchPath = path.resolve(process.cwd(), searchPath);
+    const absoluteSearchPath = path.resolve(process.cwd(), searchPath || '.');
     return getDirectory(absoluteSearchPath).then(dir => {
-      return searchDirectory(dir, searchOptions);
+      return searcher(searchSchema, dir, {
+        ignoreEmpty: searchOptions.ignoreEmpty,
+        stopDir: options.stopDir,
+        cache: options.cache ? searchCache : null,
+      });
     });
   }
 
@@ -68,73 +108,13 @@ module.exports = function createExplorer(options: ExplorerOptions) {
     searchPath: string,
     userSearchOptions: SearchOptions
   ): CosmiconfigResult {
-    searchPath = searchPath || process.cwd();
     const searchOptions = defaultSearchOptions(userSearchOptions);
-    const absoluteSearchPath = path.resolve(process.cwd(), searchPath);
+    const absoluteSearchPath = path.resolve(process.cwd(), searchPath || '.');
     const dir = getDirectory.sync(absoluteSearchPath);
-    return searchDirectorySync(dir, searchOptions);
-  }
-
-  function getSearchDirectoryLoaderSeries(
-    sync: boolean,
-    dir: string,
-    searchOptions: SearchOptions
-  ): Array<Function> {
-    const pkg = sync ? loader.loadPackagePropSync : loader.loadPackageProp;
-    const rcFile = sync ? loader.loadRcFileSync : loader.loadRcFile;
-    const js = sync ? loader.loadJsFileSync : loader.loadJsFile;
-    const search = sync ? searchDirectorySync : searchDirectory;
-
-    return [
-      () => {
-        if (!packageProp) return null;
-        return pkg(dir, packageProp);
-      },
-      () => {
-        if (!options.rc) return null;
-        return rcFile(path.join(dir, options.rc), {
-          strictJson: options.rcStrictJson,
-          extensions: options.rcExtensions,
-          ignoreEmpty: searchOptions.ignoreEmpty,
-        });
-      },
-      () => {
-        if (!options.js) return null;
-        return js(path.join(dir, options.js));
-      },
-      () => {
-        const nextDirectory = path.dirname(dir);
-        if (nextDirectory === dir || dir === options.stopDir) {
-          return null;
-        }
-        return search(nextDirectory, searchOptions);
-      },
-    ];
-  }
-
-  function searchDirectory(
-    dir: string,
-    searchOptions: SearchOptions
-  ): Promise<CosmiconfigResult> {
-    return cacheWrapper(searchCache, dir, () => {
-      const series = getSearchDirectoryLoaderSeries(false, dir, searchOptions);
-      const resultPromise = loaderSeries(series, {
-        ignoreEmpty: searchOptions.ignoreEmpty,
-      });
-      return resultPromise.then(transform);
-    });
-  }
-
-  function searchDirectorySync(
-    dir: string,
-    searchOptions: SearchOptions
-  ): CosmiconfigResult {
-    return cacheWrapper(searchSyncCache, dir, () => {
-      const series = getSearchDirectoryLoaderSeries(true, dir, searchOptions);
-      const rawResult = loaderSeries.sync(series, {
-        ignoreEmpty: searchOptions.ignoreEmpty,
-      });
-      return transform(rawResult);
+    return searcher.sync(searchSchema, dir, {
+      ignoreEmpty: searchOptions.ignoreEmpty,
+      stopDir: options.stopDir,
+      cache: options.cache ? searchSyncCache : null,
     });
   }
 
