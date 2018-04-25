@@ -1,55 +1,101 @@
 'use strict';
 
-const fsMock = require('fs');
 const path = require('path');
+const del = require('del');
+const makeDir = require('make-dir');
+const parentModule = require('parent-module');
+const os = require('os');
+const fs = require.requireActual('fs');
 
-exports.absolutePath = str => path.join(__dirname, str);
+class TempDir {
+  dir: string;
 
-exports.mockStatIsDirectory = function mockStatIsDirectory(result) {
-  const stats = {
-    isDirectory: () => result,
-  };
+  constructor() {
+    /**
+     * Get the actual path for temp directories that are symlinks (MacOS).
+     * Without the actual path, tests that use process.chdir will unexpectedly
+     * return the real path instead of symlink path.
+     */
+    const tempDir = fs.realpathSync(os.tmpdir());
+    /**
+     * Get the pathname of the file that imported util.js.
+     * Used to create a unique directory name for each test suite.
+     */
+    const parent = parentModule();
+    const relativeParent = path.relative(process.cwd(), parent);
 
-  jest.spyOn(fsMock, 'stat').mockImplementation((path, callback) => {
-    callback(null, stats);
-  });
+    /**
+     * Each temp directory will be unique to the test file.
+     * This ensures that temp files/dirs won't cause side effects for other tests.
+     */
+    this.dir = path.resolve(tempDir, 'cosmiconfig', `${relativeParent}-dir`);
 
-  jest.spyOn(fsMock, 'statSync').mockImplementation(() => stats);
-};
+    // create directory
+    makeDir.sync(this.dir);
 
-exports.assertSearchSequence = function assertSearchSequence(
-  readFileMock,
-  searchPaths,
-  startCount
-) {
-  startCount = startCount || 0;
-
-  expect(readFileMock).toHaveBeenCalledTimes(searchPaths.length + startCount);
-
-  searchPaths.forEach((searchPath, idx) => {
-    expect(readFileMock.mock.calls[idx + startCount][0]).toBe(
-      path.join(__dirname, searchPath)
-    );
-  });
-};
-
-function makeReadFileMockImpl(readFile) {
-  return (searchPath, encoding, callback) => {
-    try {
-      callback(null, readFile(searchPath));
-    } catch (err) {
-      callback(err);
-    }
-  };
-}
-exports.makeReadFileMockImpl = makeReadFileMockImpl;
-
-exports.mockReadFile = function mockReadFile(sync, readFile) {
-  if (sync === true) {
-    return jest.spyOn(fsMock, 'readFileSync').mockImplementation(readFile);
-  } else {
-    return jest
-      .spyOn(fsMock, 'readFile')
-      .mockImplementation(makeReadFileMockImpl(readFile));
+    (this: any).absolutePath = this.absolutePath.bind(this);
+    (this: any).createDir = this.createDir.bind(this);
+    (this: any).createFile = this.createFile.bind(this);
+    (this: any).clean = this.clean.bind(this);
+    (this: any).deleteTempDir = this.deleteTempDir.bind(this);
   }
+
+  absolutePath(dir: string) {
+    // Use path.join to ensure dir is always inside the working temp directory
+    const absolutePath = path.join(this.dir, dir);
+
+    return absolutePath;
+  }
+
+  createDir(dir: string) {
+    const dirname = this.absolutePath(dir);
+    makeDir.sync(dirname);
+  }
+
+  createFile(file: string, contents: string) {
+    const filePath = this.absolutePath(file);
+    const fileDir = path.parse(filePath).dir;
+    makeDir.sync(fileDir);
+
+    fs.writeFileSync(filePath, `${contents}\n`);
+  }
+
+  getSpyPathCalls(spy) {
+    const calls = spy.mock.calls;
+
+    const result = calls.map(call => {
+      const filePath = call[0];
+      const relativePath = path.relative(this.dir, filePath);
+
+      /**
+       * Replace Windows backslash directory separators with forward slashes
+       * so expected paths will be consistent cross platform
+       */
+      const normalizeCrossPlatform = relativePath.replace(/\\/g, '/');
+
+      return normalizeCrossPlatform;
+    });
+
+    return result;
+  }
+
+  clean() {
+    const cleanPattern = this.absolutePath('**/*');
+    const removed = del.sync(cleanPattern, {
+      dot: true,
+      force: true,
+    });
+
+    return removed;
+  }
+
+  deleteTempDir() {
+    const removed = del.sync(this.dir, { force: true, dot: true });
+
+    return removed;
+  }
+}
+
+module.exports = {
+  TempDir,
 };

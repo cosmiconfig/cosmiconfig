@@ -1,13 +1,25 @@
 'use strict';
 
-const path = require('path');
 const util = require('./util');
 const cosmiconfig = require('../src');
 
-const absolutePath = util.absolutePath;
+const temp = new util.TempDir();
+
+beforeEach(() => {
+  temp.clean();
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
+
+afterAll(() => {
+  // Remove temp.dir created for tests
+  temp.deleteTempDir();
+});
 
 describe('throws error if defined file does not exist', () => {
-  const file = absolutePath('does/not/exist');
+  const file = temp.absolutePath('does/not/exist');
   const checkError = error => {
     expect(error.code).toBe('ENOENT');
   };
@@ -30,7 +42,11 @@ describe('throws error if defined file does not exist', () => {
 });
 
 describe('throws error if defined JSON file has syntax error', () => {
-  const file = absolutePath(`fixtures/foo-invalid.json`);
+  beforeEach(() => {
+    temp.createFile('foo-invalid.json', '{ "foo": true: }');
+  });
+
+  const file = temp.absolutePath('foo-invalid.json');
   const checkError = error => {
     expect(error.message).toMatch(/JSON Error/);
   };
@@ -53,7 +69,11 @@ describe('throws error if defined JSON file has syntax error', () => {
 });
 
 describe('throws error if defined YAML file has syntax error', () => {
-  const file = absolutePath(`fixtures/foo-invalid.yaml`);
+  beforeEach(() => {
+    temp.createFile('foo-invalid.yaml', 'foo: true: false');
+  });
+
+  const file = temp.absolutePath('foo-invalid.yaml');
   const checkError = error => {
     expect(error.name).toBe('YAMLException');
   };
@@ -76,7 +96,11 @@ describe('throws error if defined YAML file has syntax error', () => {
 });
 
 describe('throws error if defined JS file has syntax error', () => {
-  const file = absolutePath(`fixtures/foo-invalid.js`);
+  beforeEach(() => {
+    temp.createFile('foo-invalid.js', 'module.exports = { foo }');
+  });
+
+  const file = temp.absolutePath('foo-invalid.js');
   const checkError = error => {
     expect(error.name).toBe('ReferenceError');
   };
@@ -99,7 +123,11 @@ describe('throws error if defined JS file has syntax error', () => {
 });
 
 describe('returns an empty config result for empty file, format JS', () => {
-  const file = absolutePath(`fixtures/foo-empty.js`);
+  beforeEach(() => {
+    temp.createFile('foo-empty.js', '');
+  });
+
+  const file = temp.absolutePath('foo-empty.js');
   const checkResult = result => {
     expect(result).toEqual({
       config: undefined,
@@ -122,7 +150,11 @@ describe('returns an empty config result for empty file, format JS', () => {
 });
 
 describe('returns an empty config result for empty file, format JSON', () => {
-  const file = absolutePath(`fixtures/foo-empty.json`);
+  beforeEach(() => {
+    temp.createFile('foo-empty.json', '');
+  });
+
+  const file = temp.absolutePath('foo-empty.json');
   const checkResult = result => {
     expect(result).toEqual({
       config: undefined,
@@ -145,7 +177,11 @@ describe('returns an empty config result for empty file, format JSON', () => {
 });
 
 describe('returns an empty config result for empty file, format YAML', () => {
-  const file = absolutePath(`fixtures/foo-empty.yaml`);
+  beforeEach(() => {
+    temp.createFile('foo-empty.yaml', '');
+  });
+
+  const file = temp.absolutePath('foo-empty.yaml');
   const checkResult = result => {
     expect(result).toEqual({
       config: undefined,
@@ -168,7 +204,11 @@ describe('returns an empty config result for empty file, format YAML', () => {
 });
 
 describe('throws error if defined JSON file has unknown extension', () => {
-  const file = absolutePath(`fixtures/foo-invalid-json`);
+  beforeEach(() => {
+    temp.createFile('foo-invalid-json', '{ "foo": true: }');
+  });
+
+  const file = temp.absolutePath('foo-invalid-json');
   const checkError = error => {
     expect(error.message).toMatch(/^Failed to parse/);
   };
@@ -191,7 +231,11 @@ describe('throws error if defined JSON file has unknown extension', () => {
 });
 
 describe('throws error if defined YAML file has unknown extension', () => {
-  const file = absolutePath(`fixtures/foo-invalid-yaml`);
+  beforeEach(() => {
+    temp.createFile('foo-invalid-yaml', 'foo: true: false');
+  });
+
+  const file = temp.absolutePath('foo-invalid-yaml');
   const checkError = error => {
     expect(error.message).toMatch(/^Failed to parse/);
   };
@@ -213,21 +257,31 @@ describe('throws error if defined YAML file has unknown extension', () => {
   });
 });
 
-test('throws error if configPath is package.json and packageProp is false', () => {
-  expect(() =>
-    cosmiconfig('foo', { packageProp: false }).loadSync(
-      path.join(__dirname, 'fixtures/package.json')
-    )
-  ).toThrow(/Please specify the packageProp option/);
-});
+describe('throws error if configPath is package.json and packageProp is false', () => {
+  beforeEach(() => {
+    temp.createFile('package.json', '{ "foo": { "bar": "baz" } }');
+  });
 
-test('in async mode, rejects if configPath is package.json and packageProp is false', () => {
-  expect.assertions(1);
-  return cosmiconfig('foo', { packageProp: false })
-    .load(path.join(__dirname, 'fixtures/package.json'))
-    .catch(error => {
-      expect(error.message).toContain('Please specify the packageProp option');
-    });
+  const file = temp.absolutePath('package.json');
+  const checkError = error => {
+    expect(error.message).toMatch(/^Please specify the packageProp option/);
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('foo', { packageProp: false })
+      .load(file)
+      .catch(checkError);
+  });
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('foo', { packageProp: false }).loadSync(file);
+    } catch (error) {
+      checkError(error);
+    }
+  });
 });
 
 describe('throws an error if no configPath was specified and load is called without an argument', () => {
