@@ -3,10 +3,11 @@
 
 const os = require('os');
 const createExplorer = require('./createExplorer');
+const parser = require('./parser');
 
 const homedir = os.homedir();
 
-module.exports = function cosmiconfig(
+function cosmiconfig(
   moduleName: string,
   options: {
     packageProp?: string | false,
@@ -24,16 +25,26 @@ module.exports = function cosmiconfig(
     {},
     {
       moduleName,
-      packageProp: moduleName,
-      rc: `.${moduleName}rc`,
-      js: `${moduleName}.config.js`,
-      rcStrictJson: false,
-      rcExtensions: false,
       stopDir: homedir,
       cache: true,
+      searchSchema: [
+        `package.json`,
+        `.${moduleName}rc`,
+        // `.${moduleName}rc.json`,
+        // `.${moduleName}rc.yaml`,
+        // `.${moduleName}rc.yml`,
+        // `.${moduleName}rc.js`,
+        `${moduleName}.config.js`
+      ]
     },
     options
   );
 
   return createExplorer(x);
 };
+
+cosmiconfig.loadJson = parser.parseJson;
+cosmiconfig.loadJs = parser.parseJs;
+cosmiconfig.loadYaml = parser.parseYaml;
+
+module.exports = cosmiconfig;

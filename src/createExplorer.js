@@ -6,68 +6,83 @@ const loadDefinedFile = require('./loadDefinedFile');
 const getDirectory = require('./getDirectory');
 const loader = require('./loader');
 const parser = require('./parser');
-const searcher = require('./search');
+const searchDirectory = require('./searchDirectory');
 const normalizeSearchSchema = require('./normalizeSearchSchema');
+const cacheWrapper = require('./cacheWrapper');
 
+type RawSearchOptions = ?{
+  ignoreEmpty?: boolean,
+};
 type SearchOptions = {
   ignoreEmpty: boolean,
 };
-
-function defaultSearchOptions(userOptions: SearchOptions): SearchOptions {
+function normalizeSearchOptions(userOptions: RawSearchOptions): SearchOptions {
   return Object.assign({ ignoreEmpty: true }, userOptions);
 }
 
-type Loader = (string, string) => Object | null;
-type RawSearchSchemaItem =
-  | string
-  | {
-      filename: string,
-      loader?: Loader,
-      property?: string,
-    };
+type RawLoadOptions = ?{
+  property?: string,
+};
+type LoadOptions = {
+  property: string,
+};
+function normalizeLoadOptions(
+  userOptions: RawLoadOptions,
+  moduleName: string
+): LoadOptions {
+  return Object.assign({ property: moduleName }, userOptions);
+}
 
 module.exports = function createExplorer(options: ExplorerOptions) {
-  const loadCache: Map<string, Promise<CosmiconfigResult>> = new Map();
-  const loadSyncCache: Map<string, CosmiconfigResult> = new Map();
-  const searchCache: Map<string, Promise<CosmiconfigResult>> = new Map();
-  const searchSyncCache: Map<string, CosmiconfigResult> = new Map();
+  const loadCache: ?Map<string, Promise<CosmiconfigResult>> = options.cache
+    ? new Map()
+    : null;
+  const loadSyncCache: ?Map<string, CosmiconfigResult> = options.cache
+    ? new Map()
+    : null;
+  const searchCache: ?Map<string, Promise<CosmiconfigResult>> = options.cache
+    ? new Map()
+    : null;
+  const searchSyncCache: ?Map<string, CosmiconfigResult> = options.cache
+    ? new Map()
+    : null;
   const transform = options.transform || identity;
-  const packageProp = options.packageProp;
+  // const packageProp = options.packageProp;
 
-  const rawSearchSchema: Array<RawSearchSchemaItem> = [];
-  if (packageProp) {
-    rawSearchSchema.push({ filename: 'package.json', property: packageProp });
-  }
-  const rcFilename = options.rc;
-  if (rcFilename !== false) {
-    if (options.rcStrictJson) {
-      rawSearchSchema.push({ filename: rcFilename, loader: parser.parseJson });
-    } else {
-      rawSearchSchema.push(rcFilename);
-    }
-    if (options.rcExtensions) {
-      rawSearchSchema.push(`${rcFilename}.json`);
-      rawSearchSchema.push(`${rcFilename}.yaml`);
-      rawSearchSchema.push(`${rcFilename}.yml`);
-      rawSearchSchema.push(`${rcFilename}.js`);
-    }
-  }
-  if (options.js) {
-    rawSearchSchema.push(options.js);
-  }
+  // const rawSearchSchema: Array<RawSearchSchemaItem> = [];
+  // if (packageProp) {
+  //   rawSearchSchema.push({ filename: 'package.json', property: packageProp });
+  // }
+  // const rcFilename = options.rc;
+  // if (rcFilename !== false) {
+  //   if (options.rcStrictJson) {
+  //     rawSearchSchema.push({ filename: rcFilename, loader: parser.parseJson });
+  //   } else {
+  //     rawSearchSchema.push(rcFilename);
+  //   }
+  //   if (options.rcExtensions) {
+  //     rawSearchSchema.push(`${rcFilename}.json`);
+  //     rawSearchSchema.push(`${rcFilename}.yaml`);
+  //     rawSearchSchema.push(`${rcFilename}.yml`);
+  //     rawSearchSchema.push(`${rcFilename}.js`);
+  //   }
+  // }
+  // if (options.js) {
+  //   rawSearchSchema.push(options.js);
+  // }
   const searchSchema = normalizeSearchSchema(
-    rawSearchSchema,
+    options.searchSchema,
     options.moduleName
   );
 
   function clearLoadCache() {
-    loadCache.clear();
-    loadSyncCache.clear();
+    loadCache && loadCache.clear();
+    loadSyncCache && loadSyncCache.clear();
   }
 
   function clearSearchCache() {
-    searchCache.clear();
-    searchSyncCache.clear();
+    searchCache && searchCache.clear();
+    searchSyncCache && searchSyncCache.clear();
   }
 
   function clearCaches() {
@@ -75,46 +90,32 @@ module.exports = function createExplorer(options: ExplorerOptions) {
     clearSearchCache();
   }
 
-  function cacheWrapper<T>(cache: Map<string, T>, key: string, fn: () => T): T {
-    if (options.cache) {
-      const cached = cache.get(key);
-      if (cached !== undefined) return cached;
-    }
-
-    const result = fn();
-
-    if (options.cache) {
-      cache.set(key, result);
-    }
-    return result;
-  }
-
   function search(
     searchPath: string,
-    userSearchOptions: SearchOptions
+    rawSearchOptions: RawSearchOptions
   ): Promise<CosmiconfigResult> {
-    const searchOptions = defaultSearchOptions(userSearchOptions);
+    const searchOptions = normalizeSearchOptions(rawSearchOptions);
     const absoluteSearchPath = path.resolve(process.cwd(), searchPath || '.');
     return getDirectory(absoluteSearchPath).then(dir => {
-      return searcher(searchSchema, dir, {
+      return searchDirectory(searchSchema, dir, {
         ignoreEmpty: searchOptions.ignoreEmpty,
         stopDir: options.stopDir,
-        cache: options.cache ? searchCache : null,
+        cache: searchCache,
       });
     });
   }
 
   function searchSync(
     searchPath: string,
-    userSearchOptions: SearchOptions
+    rawSearchOptions: RawSearchOptions
   ): CosmiconfigResult {
-    const searchOptions = defaultSearchOptions(userSearchOptions);
+    const searchOptions = normalizeSearchOptions(rawSearchOptions);
     const absoluteSearchPath = path.resolve(process.cwd(), searchPath || '.');
     const dir = getDirectory.sync(absoluteSearchPath);
-    return searcher.sync(searchSchema, dir, {
+    return searchDirectory.sync(searchSchema, dir, {
       ignoreEmpty: searchOptions.ignoreEmpty,
       stopDir: options.stopDir,
-      cache: options.cache ? searchSyncCache : null,
+      cache: searchSyncCache,
     });
   }
 
@@ -134,34 +135,37 @@ module.exports = function createExplorer(options: ExplorerOptions) {
     return path.resolve(process.cwd(), configPath);
   }
 
-  function getLoadResult(sync: boolean, absoluteConfigPath: string): any {
+  function getLoadResult(sync: boolean, absoluteConfigPath: string, options: LoadOptions): any {
     const pkg = sync ? loader.loadPackagePropSync : loader.loadPackageProp;
     const definedFile = sync ? loadDefinedFile.sync : loadDefinedFile;
     if (path.basename(absoluteConfigPath) === 'package.json') {
-      if (!packageProp) {
-        throw new Error(
-          'Please specify the packageProp option. The configPath argument cannot point to a package.json file if packageProp is false.'
-        );
-      }
       return pkg(path.dirname(absoluteConfigPath), packageProp);
     }
     return definedFile(absoluteConfigPath);
   }
 
-  function load(configPath?: string): Promise<CosmiconfigResult> {
+  function load(
+    configPath?: string,
+    rawLoadOptions: RawLoadOptions
+  ): Promise<CosmiconfigResult> {
+    const loadOptions = normalizeLoadOptions(rawLoadOptions);
     return Promise.resolve().then(() => {
       const absoluteConfigPath = getAbsoluteConfigPath(configPath);
       return cacheWrapper(loadCache, absoluteConfigPath, () => {
-        const resultPromise = getLoadResult(false, absoluteConfigPath);
+        const resultPromise = getLoadResult(false, absoluteConfigPath, options);
         return resultPromise.then(transform);
       });
     });
   }
 
-  function loadSync(configPath?: string): CosmiconfigResult {
+  function loadSync(
+    configPath?: string,
+    rawLoadOptions: RawLoadOptions
+  ): CosmiconfigResult {
+    const loadOptions = normalizeLoadOptions(rawLoadOptions);
     const absoluteConfigPath = getAbsoluteConfigPath(configPath);
     return cacheWrapper(loadSyncCache, absoluteConfigPath, () => {
-      const rawResult = getLoadResult(true, absoluteConfigPath);
+      const rawResult = getLoadResult(true, absoluteConfigPath, options);
       return transform(rawResult);
     });
   }

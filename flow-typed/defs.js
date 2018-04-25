@@ -22,3 +22,19 @@ type ExplorerOptions = {
   transform?: CosmiconfigResult => CosmiconfigResult,
   configPath?: string,
 };
+
+type Loader = (string, string) => Object | null;
+
+type RawSearchSchemaItem =
+  | string
+  | {
+      filename: string,
+      loader?: Loader,
+      property?: string,
+    };
+
+type SearchSchemaItem = {
+  filename: string,
+  loader: Loader,
+  property: string | null,
+};
