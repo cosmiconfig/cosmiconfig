@@ -9,7 +9,11 @@ function parseFileContent(
   content: ?string,
   filepath: string
 ): CosmiconfigResult {
-  if (!content) {
+  // Remove all whitespace to ensure empty file is equal to an empty string
+  // Extra guards to keep flow happy, but lowers coverage
+  // istanbul ignore next
+  const contentWithoutWhitespace = content ? content.trim() : content;
+  if (!content || contentWithoutWhitespace === '') {
     return { config: undefined, filepath, isEmpty: true };
   }
 
