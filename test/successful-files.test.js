@@ -134,31 +134,6 @@ describe('loads yaml-like JS config path', () => {
   });
 });
 
-describe('respects options.configPath', () => {
-  beforeEach(() => {
-    temp.createFile('foo.json', '{ "foo": true }');
-  });
-
-  const configPath = temp.absolutePath('foo.json');
-  const checkResult = result => {
-    expect(result.config).toEqual({
-      foo: true,
-    });
-    expect(result.filepath).toBe(configPath);
-  };
-
-  test('async', () => {
-    return cosmiconfig('foo', { configPath })
-      .load()
-      .then(checkResult);
-  });
-
-  test('sync', () => {
-    const result = cosmiconfig('foo', { configPath }).loadSync();
-    checkResult(result);
-  });
-});
-
 describe('loads package prop when configPath is package.json', () => {
   beforeEach(() => {
     temp.createFile('package.json', '{ "foo": { "bar": "baz" } }');
@@ -173,13 +148,13 @@ describe('loads package prop when configPath is package.json', () => {
   };
 
   test('async', () => {
-    return cosmiconfig('foo', { configPath })
-      .load()
+    return cosmiconfig('foo')
+      .load(configPath)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', { configPath }).loadSync();
+    const result = cosmiconfig('foo').loadSync(configPath);
     checkResult(result);
   });
 });

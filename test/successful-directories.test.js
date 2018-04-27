@@ -157,9 +157,8 @@ describe('finds package.json in second dir searched, with alternate names', () =
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
-    rc: '.wowza',
-    js: 'wowzaConfig.js',
     packageProp: 'heeha',
+    searchPlaces: ['package.json', '.wowza', 'wowzaConfig.js'],
   };
 
   const checkResult = (readFileSpy, result) => {
@@ -193,7 +192,7 @@ describe('finds package.json in second dir searched, with alternate names', () =
   });
 });
 
-describe('finds rc file in third searched dir, skipping packageProp, with rcStrictJson', () => {
+describe('finds rc file in third searched dir, skipping packageProp, parsing extensionless files as JSON', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/.foorc', '{ "found": true }');
   });
@@ -201,8 +200,10 @@ describe('finds rc file in third searched dir, skipping packageProp, with rcStri
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
-    packageProp: false,
-    rcStrictJson: true,
+    loaders: {
+      noExt: cosmiconfig.loadJson,
+    },
+    searchPlaces: ['.foorc', 'foo.config.js'],
   };
 
   const checkResult = (readFileSpy, result) => {
@@ -237,7 +238,7 @@ describe('finds rc file in third searched dir, skipping packageProp, with rcStri
   });
 });
 
-describe('finds rc file in third searched dir, skipping JS and RC files, with rcStrictJson', () => {
+describe('finds package.json file in second searched dir, skipping JS and RC files', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/package.json',
@@ -247,8 +248,7 @@ describe('finds rc file in third searched dir, skipping JS and RC files, with rc
 
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
-    js: false,
-    rc: false,
+    searchPlaces: ['package.json'],
   };
 
   const checkResult = (readFileSpy, result) => {
@@ -280,7 +280,7 @@ describe('finds rc file in third searched dir, skipping JS and RC files, with rc
   });
 });
 
-describe('with rcExtensions, finds .foorc.json in second searched dir', () => {
+describe('searching for rc files with extensions, finds .foorc.json in second searched dir', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/.foorc.json', '{ "found": true }');
   });
@@ -288,7 +288,15 @@ describe('with rcExtensions, finds .foorc.json in second searched dir', () => {
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
-    rcExtensions: true,
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
   };
 
   const checkResult = (readFileSpy, result) => {
@@ -328,7 +336,7 @@ describe('with rcExtensions, finds .foorc.json in second searched dir', () => {
   });
 });
 
-describe('with rcExtensions, finds .foorc.yaml in first searched dir', () => {
+describe('searching for rc files with extensions, finds .foorc.yaml in first searched dir', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.yaml', 'found: true');
   });
@@ -336,7 +344,15 @@ describe('with rcExtensions, finds .foorc.yaml in first searched dir', () => {
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
-    rcExtensions: true,
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
   };
 
   const checkResult = (readFileSpy, result) => {
@@ -370,7 +386,7 @@ describe('with rcExtensions, finds .foorc.yaml in first searched dir', () => {
   });
 });
 
-describe('with rcExtensions, finds .foorc.yml in first searched dir', () => {
+describe('searching for rc files with extensions, finds .foorc.yml in first searched dir', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.yml', 'found: true');
   });
@@ -378,7 +394,15 @@ describe('with rcExtensions, finds .foorc.yml in first searched dir', () => {
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
-    rcExtensions: true,
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
   };
 
   const checkResult = (readFileSpy, result) => {
@@ -413,7 +437,7 @@ describe('with rcExtensions, finds .foorc.yml in first searched dir', () => {
   });
 });
 
-describe('with rcExtensions, finds .foorc.js in first searched dir', () => {
+describe('searching for rc files with extensions, finds .foorc.js in first searched dir', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/.foorc.js',
@@ -424,7 +448,15 @@ describe('with rcExtensions, finds .foorc.js in first searched dir', () => {
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
-    rcExtensions: true,
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
   };
 
   const checkResult = (readFileSpy, result) => {

@@ -11,13 +11,24 @@ type LoaderResult = {
 
 // These are the user options with defaults applied.
 type ExplorerOptions = {
-  packageProp: string | false,
-  rc: string | false,
-  js: string | false,
-  rcStrictJson: boolean,
-  rcExtensions: boolean,
   stopDir: string,
   cache: boolean,
-  transform?: CosmiconfigResult => CosmiconfigResult,
-  configPath?: string,
+  transform: CosmiconfigResult => CosmiconfigResult,
+  packageProp: string,
+  loaders: Loaders,
+  searchPlaces: Array<string>,
+  ignoreEmptySearchPlaces: boolean,
+};
+
+type ExplorerContext = ExplorerOptions & {
+  loadCache: ?Map<string, Promise<CosmiconfigResult>>,
+  loadSyncCache: ?Map<string, CosmiconfigResult>,
+  searchCache: ?Map<string, Promise<CosmiconfigResult>>,
+  searchSyncCache: ?Map<string, CosmiconfigResult>,
+};
+
+type Loader = (string, string) => Object | null;
+
+type Loaders = {
+  [string]: Loader,
 };
