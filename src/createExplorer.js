@@ -198,34 +198,24 @@ class Explorer {
     return Promise.resolve().then(() => {
       this.validateFilePath(filepath);
       const absoluteFilePath = path.resolve(process.cwd(), filepath);
-      const run = () => {
+      return cacheWrapper(this.loadCache, absoluteFilePath, () => {
         return readFile(absoluteFilePath, { throwNotFound: true })
           .then(content => {
             return this.createCosmiconfigResult(filepath, content);
           })
           .then(this.config.transform);
-      };
-
-      if (this.loadCache) {
-        return cacheWrapper(this.loadCache, absoluteFilePath, run);
-      }
-      return run();
+      });
     });
   }
 
   loadSync(filepath: string): CosmiconfigResult {
     this.validateFilePath(filepath);
     const absoluteFilePath = path.resolve(process.cwd(), filepath);
-    const run = () => {
+    return cacheWrapper(this.loadSyncCache, absoluteFilePath, () => {
       const content = readFile.sync(absoluteFilePath, { throwNotFound: true });
       const result = this.createCosmiconfigResult(filepath, content);
       return this.config.transform(result);
-    };
-
-    if (this.loadSyncCache) {
-      return cacheWrapper(this.loadSyncCache, absoluteFilePath, run);
-    }
-    return run();
+    });
   }
 }
 

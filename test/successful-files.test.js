@@ -216,7 +216,7 @@ describe('does not swallow transform errors', () => {
   });
 });
 
-describe('loads defined JSON file has unknown extension', () => {
+describe('loads defined JSON file with no extension', () => {
   beforeEach(() => {
     temp.createFile('foo-valid-json', '{ "json": true }');
   });
@@ -241,7 +241,7 @@ describe('loads defined JSON file has unknown extension', () => {
   });
 });
 
-describe('loads defined YAML file has unknown extension', () => {
+describe('loads defined YAML file with no extension', () => {
   beforeEach(() => {
     temp.createFile('foo-valid-yaml', 'yaml: true');
   });

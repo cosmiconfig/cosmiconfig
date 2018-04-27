@@ -561,3 +561,119 @@ describe('without ignoring empty configs and searching for rc files with extensi
     checkResult(result);
   });
 });
+
+describe('throws error if a file in searchPlaces does not have a corresponding loader', () => {
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/e/f/.foorc.things', 'one\ntwo');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.things',
+      '.foorc.js',
+      'foo.config.js',
+    ],
+  };
+
+  const checkError = error => {
+    expect(error.message).toMatch(
+      /No loader specified for extension "\.things"\. Cannot load/
+    );
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .catch(checkError);
+  });
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+describe('throws error if an extensionless file in searchPlaces does not have a corresponding loader', () => {
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/e/f/.foorc', '{ "foo": "bar" }');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['package.json', '.foorc'],
+    loaders: {
+      noExt: undefined,
+    },
+  };
+
+  const checkError = error => {
+    expect(error.message).toMatch(
+      /No loader specified for files without extensions\. Cannot load/
+    );
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .catch(checkError);
+  });
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+describe('does not swallow errors from custom loaders', () => {
+  const loadJs = () => {
+    throw new Error('Failed to load JS');
+  };
+
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/e/f/.foorc.js', 'module.exports = {};');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['package.json', '.foorc', '.foorc.js'],
+    loaders: {
+      '.js': loadJs,
+    },
+  };
+
+  const checkError = error => {
+    expect(error.message).toBe('Failed to load JS');
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .catch(checkError);
+  });
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
