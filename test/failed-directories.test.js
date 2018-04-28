@@ -563,11 +563,6 @@ describe('without ignoring empty configs and searching for rc files with extensi
 });
 
 describe('throws error if a file in searchPlaces does not have a corresponding loader', () => {
-  beforeEach(() => {
-    temp.createFile('a/b/c/d/e/f/.foorc.things', 'one\ntwo');
-  });
-
-  const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
     searchPlaces: [
@@ -581,21 +576,14 @@ describe('throws error if a file in searchPlaces does not have a corresponding l
 
   const checkError = error => {
     expect(error.message).toMatch(
-      /No loader specified for extension "\.things"\. Cannot load/
+      /No loader specified for extension "\.things"/
     );
   };
 
-  test('async', () => {
-    expect.hasAssertions();
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .catch(checkError);
-  });
-
-  test('sync', () => {
+  test('on instantiation', () => {
     expect.hasAssertions();
     try {
-      cosmiconfig('foo', explorerOptions).searchSync(startDir);
+      cosmiconfig('foo', explorerOptions);
     } catch (error) {
       checkError(error);
     }
@@ -607,7 +595,6 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
     temp.createFile('a/b/c/d/e/f/.foorc', '{ "foo": "bar" }');
   });
 
-  const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
     searchPlaces: ['package.json', '.foorc'],
@@ -618,21 +605,14 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
 
   const checkError = error => {
     expect(error.message).toMatch(
-      /No loader specified for files without extensions\. Cannot load/
+      /No loader specified for files without extensions/
     );
   };
 
-  test('async', () => {
-    expect.hasAssertions();
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .catch(checkError);
-  });
-
-  test('sync', () => {
+  test('on instantiation', () => {
     expect.hasAssertions();
     try {
-      cosmiconfig('foo', explorerOptions).searchSync(startDir);
+      cosmiconfig('foo', explorerOptions);
     } catch (error) {
       checkError(error);
     }
@@ -667,6 +647,188 @@ describe('does not swallow errors from custom loaders', () => {
       .search(startDir)
       .catch(checkError);
   });
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+describe('errors not swallowed when async custom loader throws them', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const expectedError = new Error();
+  const loadThingsAsync = () => {
+    throw expectedError;
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const checkError = error => {
+    expect(error).toBe(expectedError);
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .catch(checkError);
+  });
+});
+
+describe('errors not swallowed when async custom loader rejects', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const expectedError = new Error();
+  const loadThingsAsync = () => {
+    return Promise.reject(expectedError);
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const checkError = error => {
+    expect(error).toBe(expectedError);
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .catch(checkError);
+  });
+});
+
+describe('errors if only async loader is set but you call sync search', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const loadThings = () => {
+    return Promise.resolve({ things: true });
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { async: loadThings },
+    },
+  };
+
+  const checkError = error => {
+    expect(error.message).toMatch(
+      /No sync loader specified for extension "\.things"/
+    );
+  };
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+describe('errors if it cannot figure out an async loader', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const loadThings = () => {
+    return Promise.resolve({ things: true });
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { wawa: loadThings },
+    },
+  };
+
+  const checkError = error => {
+    expect(error.message).toMatch(
+      /No async loader specified for extension "\.things"/
+    );
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .catch(checkError);
+  });
+});
+
+describe('errors if sync loader returns a Promise', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const loadThings = () => {
+    return Promise.resolve({ things: true });
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { sync: loadThings },
+    },
+  };
+
+  const checkError = error => {
+    expect(error.message).toMatch(
+      /The sync loader for "\.foorc.things" returned a Promise/
+    );
+  };
 
   test('sync', () => {
     expect.hasAssertions();

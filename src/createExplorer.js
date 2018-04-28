@@ -7,6 +7,14 @@ const readFile = require('./readFile');
 const cacheWrapper = require('./cacheWrapper');
 const getDirectory = require('./getDirectory');
 
+const MODE_SYNC = 'sync';
+
+// An object value represents a config object.
+// null represents that the loader did not find anything relevant.
+// undefined represents that the loader found something relevant
+// but it was empty.
+type LoadedFileContent = Object | null | void;
+
 class Explorer {
   loadCache: ?Map<string, Promise<CosmiconfigResult>>;
   loadSyncCache: ?Map<string, CosmiconfigResult>;
@@ -20,6 +28,7 @@ class Explorer {
     this.searchCache = options.cache ? new Map() : null;
     this.searchSyncCache = options.cache ? new Map() : null;
     this.config = options;
+    this.validateConfig();
   }
 
   clearLoadCache() {
@@ -43,6 +52,22 @@ class Explorer {
   clearCaches() {
     this.clearLoadCache();
     this.clearSearchCache();
+  }
+
+  validateConfig() {
+    const config = this.config;
+
+    config.searchPlaces.forEach(place => {
+      const ext = path.extname(place);
+      const loader = ext ? config.loaders[ext] : config.loaders.noExt;
+      if (!loader) {
+        throw new Error(
+          `No loader specified for ${getExtensionDescription(
+            place
+          )}, so searchPlaces item "${place}" is invalid`
+        );
+      }
+    });
   }
 
   search(searchFrom?: string): Promise<CosmiconfigResult> {
@@ -129,7 +154,7 @@ class Explorer {
   loadSearchPlaceSync(dir: string, place: string): CosmiconfigResult {
     const filepath = path.join(dir, place);
     const content = readFile.sync(filepath);
-    return this.createCosmiconfigResult(filepath, content);
+    return this.createCosmiconfigResultSync(filepath, content);
   }
 
   nextDirectoryToSearch(
@@ -152,40 +177,97 @@ class Explorer {
     return packagePropValue || null;
   }
 
-  getLoaderForFile(filepath: string): Loader {
+  getLoaderEntryForFile(filepath: string): LoaderEntry {
     if (path.basename(filepath) === 'package.json') {
-      return this.loadPackageProp.bind(this);
+      const loader = this.loadPackageProp.bind(this);
+      return { sync: loader, async: loader };
     }
-    const extname = path.extname(filepath);
-    let loader =
-      extname === '' ? this.config.loaders.noExt : this.config.loaders[extname];
-    if (!loader) {
-      const extensionDescription = extname
-        ? `extension "${extname}"`
-        : 'files without extensions';
+
+    const ext = path.extname(filepath);
+    return ext === '' ? this.config.loaders.noExt : this.config.loaders[ext];
+  }
+
+  getSyncLoaderForFile(filepath: string): SyncLoader {
+    const entry = this.getLoaderEntryForFile(filepath);
+    if (!entry.sync) {
       throw new Error(
-        `No loader specified for ${extensionDescription}. Cannot load ${filepath}.`
+        `No sync loader specified for ${getExtensionDescription(filepath)}`
+      );
+    }
+    return entry.sync;
+  }
+
+  getAsyncLoaderForFile(filepath: string): AsyncLoader {
+    const entry = this.getLoaderEntryForFile(filepath);
+    const loader = entry.async || entry.sync;
+    if (!loader) {
+      throw new Error(
+        `No async loader specified for ${getExtensionDescription(filepath)}`
       );
     }
     return loader;
   }
 
-  createCosmiconfigResult(
+  loadFileContent(
+    mode: 'sync' | 'async',
     filepath: string,
     content: string | null
-  ): CosmiconfigResult {
+  ): Promise<LoadedFileContent> | LoadedFileContent {
     if (content === null) {
       return null;
     }
     if (content.trim() === '') {
-      return { filepath, config: undefined, isEmpty: true };
+      return undefined;
     }
-    const loader = this.getLoaderForFile(filepath);
-    const config = loader(filepath, content);
-    if (config === null) {
+    const loader =
+      mode === MODE_SYNC
+        ? this.getSyncLoaderForFile(filepath)
+        : this.getAsyncLoaderForFile(filepath);
+    const loadedContent = loader(filepath, content);
+
+    if (mode === MODE_SYNC && loadedContent instanceof Promise) {
+      throw new Error(
+        `The sync loader for "${path.basename(
+          filepath
+        )}" returned a Promise. Sync loaders need to be synchronous.`
+      );
+    }
+
+    return loadedContent;
+  }
+
+  loadedContentToCosmiconfigResult(
+    filepath: string,
+    loadedContent: LoadedFileContent
+  ): CosmiconfigResult {
+    if (loadedContent === null) {
       return null;
     }
-    return { config, filepath };
+    if (loadedContent === undefined) {
+      return { filepath, config: undefined, isEmpty: true };
+    }
+    return { config: loadedContent, filepath };
+  }
+
+  createCosmiconfigResult(
+    filepath: string,
+    content: string | null
+  ): Promise<CosmiconfigResult> {
+    return Promise.resolve()
+      .then(() => {
+        return this.loadFileContent('async', filepath, content);
+      })
+      .then(loaderResult => {
+        return this.loadedContentToCosmiconfigResult(filepath, loaderResult);
+      });
+  }
+
+  createCosmiconfigResultSync(
+    filepath: string,
+    content: string | null
+  ): CosmiconfigResult {
+    const loaderResult = this.loadFileContent('sync', filepath, content);
+    return this.loadedContentToCosmiconfigResult(filepath, loaderResult);
   }
 
   validateFilePath(filepath?: string) {
@@ -213,7 +295,7 @@ class Explorer {
     const absoluteFilePath = path.resolve(process.cwd(), filepath);
     return cacheWrapper(this.loadSyncCache, absoluteFilePath, () => {
       const content = readFile.sync(absoluteFilePath, { throwNotFound: true });
-      const result = this.createCosmiconfigResult(filepath, content);
+      const result = this.createCosmiconfigResultSync(filepath, content);
       return this.config.transform(result);
     });
   }
@@ -235,4 +317,9 @@ module.exports = function createExplorer(options: ExplorerOptions) {
 
 function nextDirUp(dir: string): string {
   return path.dirname(dir);
+}
+
+function getExtensionDescription(filepath: string): string {
+  const ext = path.extname(filepath);
+  return ext ? `extension "${ext}"` : 'files without extensions';
 }

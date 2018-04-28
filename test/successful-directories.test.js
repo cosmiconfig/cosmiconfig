@@ -665,7 +665,7 @@ describe('custom loaders allow non-default file types', () => {
     ],
     loaders: {
       '.things': loadThings,
-      '.grumly': loadGrumbly,
+      '.grumbly': loadGrumbly,
     },
   };
 
@@ -733,7 +733,7 @@ describe('adding custom loaders allows for default and non-default file types', 
     ],
     loaders: {
       '.things': loadThings,
-      '.grumly': loadGrumbly,
+      '.grumbly': loadGrumbly,
     },
   };
 
@@ -809,6 +809,152 @@ describe('defaults loaders can be overridden', () => {
     expect(result).toEqual({
       config: { grumbly: true },
       filepath: temp.absolutePath('a/b/c/d/e/foo.config.js'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('custom loaders can be async', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  let loadThingsSync;
+  let loadThingsAsync;
+  let explorerOptions;
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+    loadThingsSync = jest.fn(() => {
+      return { things: true };
+    });
+    loadThingsAsync = jest.fn(() => {
+      return Promise.resolve({ things: true });
+    });
+    explorerOptions = {
+      stopDir: temp.absolutePath('.'),
+      searchPlaces: ['.foorc.things'],
+      loaders: {
+        '.things': { sync: loadThingsSync, async: loadThingsAsync },
+      },
+    };
+  });
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual(['a/b/c/d/e/f/.foorc.things']);
+
+    expect(result).toEqual({
+      config: { things: true },
+      filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.things'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        expect(loadThingsSync).not.toHaveBeenCalled();
+        expect(loadThingsAsync).toHaveBeenCalled();
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    expect(loadThingsSync).toHaveBeenCalled();
+    expect(loadThingsAsync).not.toHaveBeenCalled();
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('a custom loader entry can include just an async loader', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const loadThingsAsync = () => {
+    return Promise.resolve({ things: true });
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual(['a/b/c/d/e/f/.foorc.things']);
+
+    expect(result).toEqual({
+      config: { things: true },
+      filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.things'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+});
+
+describe('a custom loader entry can include only a sync loader and work for both sync and async functions', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const loadThingsSync = () => {
+    return { things: true };
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { sync: loadThingsSync },
+    },
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual(['a/b/c/d/e/f/.foorc.things']);
+
+    expect(result).toEqual({
+      config: { things: true },
+      filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.things'),
     });
   };
 

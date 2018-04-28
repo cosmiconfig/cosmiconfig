@@ -11,7 +11,7 @@ function cosmiconfig(
   moduleName: string,
   options: {
     packageProp?: string,
-    loaders?: Loaders,
+    loaders?: Object,
     searchPlaces?: Array<string>,
     ignoreEmptySearchPlaces?: boolean,
     stopDir?: string,
@@ -48,17 +48,28 @@ cosmiconfig.loadJs = loaders.loadJs;
 cosmiconfig.loadJson = loaders.loadJson;
 cosmiconfig.loadYaml = loaders.loadYaml;
 
-function normalizeLoaders(rawLoaders: ?Loaders): Loaders {
-  return Object.assign(
-    {
-      '.js': loaders.loadJs,
-      '.json': loaders.loadJson,
-      '.yaml': loaders.loadYaml,
-      '.yml': loaders.loadYaml,
-      noExt: loaders.loadYaml,
-    },
-    rawLoaders
-  );
+function normalizeLoaders(rawLoaders?: Object): Loaders {
+  const defaults = {
+    '.js': { sync: loaders.loadJs, async: loaders.loadJs },
+    '.json': { sync: loaders.loadJson, async: loaders.loadJson },
+    '.yaml': { sync: loaders.loadYaml, async: loaders.loadYaml },
+    '.yml': { sync: loaders.loadYaml, async: loaders.loadYaml },
+    noExt: { sync: loaders.loadYaml, async: loaders.loadYaml },
+  };
+
+  if (!rawLoaders) {
+    return defaults;
+  }
+
+  return Object.keys(rawLoaders).reduce((result, ext) => {
+    const entry = rawLoaders && rawLoaders[ext];
+    if (typeof entry === 'function') {
+      result[ext] = { sync: entry, async: entry };
+    } else {
+      result[ext] = entry;
+    }
+    return result;
+  }, defaults);
 }
 
 function identity(x) {

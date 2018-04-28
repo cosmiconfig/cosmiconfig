@@ -224,3 +224,93 @@ describe('throws an error if no configPath was specified and load is called with
     }
   });
 });
+
+describe('errors not swallowed when async custom loader throws them', () => {
+  const file = temp.absolutePath('.foorc.things');
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const expectedError = new Error();
+  const loadThingsAsync = () => {
+    throw expectedError;
+  };
+
+  const explorerOptions = {
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const checkError = error => {
+    expect(error).toBe(expectedError);
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('not_exist_rc_name', explorerOptions)
+      .load(file)
+      .catch(checkError);
+  });
+});
+
+describe('errors not swallowed when async custom loader rejects', () => {
+  const file = temp.absolutePath('.foorc.things');
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const expectedError = new Error();
+  const loadThingsAsync = () => {
+    return Promise.reject(expectedError);
+  };
+
+  const explorerOptions = {
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const checkError = error => {
+    expect(error).toBe(expectedError);
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('not_exist_rc_name', explorerOptions)
+      .load(file)
+      .catch(checkError);
+  });
+});
+
+describe('errors if only async loader is set but you call sync search', () => {
+  const file = temp.absolutePath('.foorc.things');
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const loadThingsAsync = () => {
+    return Promise.resolve({ things: true });
+  };
+
+  const explorerOptions = {
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const checkError = error => {
+    expect(error.message).toMatch(
+      /No sync loader specified for extension "\.things"/
+    );
+  };
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('not_exist_rc_name', explorerOptions).loadSync(file);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});

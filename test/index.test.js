@@ -45,11 +45,11 @@ describe('cosmiconfig', () => {
       stopDir: os.homedir(),
       cache: true,
       loaders: {
-        '.js': loaders.loadJs,
-        '.json': loaders.loadJson,
-        '.yaml': loaders.loadYaml,
-        '.yml': loaders.loadYaml,
-        noExt: loaders.loadYaml,
+        '.js': { sync: loaders.loadJs, async: loaders.loadJs },
+        '.json': { sync: loaders.loadJson, async: loaders.loadJson },
+        '.yaml': { sync: loaders.loadYaml, async: loaders.loadYaml },
+        '.yml': { sync: loaders.loadYaml, async: loaders.loadYaml },
+        noExt: { sync: loaders.loadYaml, async: loaders.loadYaml },
       },
       transform: expect.any(Function),
     });
@@ -68,6 +68,8 @@ describe('cosmiconfig', () => {
 
     const noExtLoader = () => {};
     const jsLoader = () => {};
+    const jsonLoader = () => {};
+    const yamlLoader = () => {};
 
     cosmiconfig(moduleName, {
       stopDir: __dirname,
@@ -77,7 +79,9 @@ describe('cosmiconfig', () => {
       ignoreEmptySearchPlaces: false,
       loaders: {
         noExt: noExtLoader,
-        '.js': jsLoader,
+        '.js': { async: jsLoader },
+        '.json': { sync: jsonLoader },
+        '.yaml': { sync: yamlLoader, async: yamlLoader },
       },
     });
 
@@ -89,11 +93,11 @@ describe('cosmiconfig', () => {
       stopDir: __dirname,
       cache: false,
       loaders: {
-        '.js': jsLoader,
-        '.json': loaders.loadJson,
-        '.yaml': loaders.loadYaml,
-        '.yml': loaders.loadYaml,
-        noExt: noExtLoader,
+        '.js': { async: jsLoader },
+        '.json': { sync: jsonLoader },
+        '.yaml': { sync: yamlLoader, async: yamlLoader },
+        '.yml': { sync: loaders.loadYaml, async: loaders.loadYaml },
+        noExt: { sync: noExtLoader, async: noExtLoader },
       },
       transform: expect.any(Function),
     });

@@ -265,3 +265,101 @@ describe('loads defined YAML file with no extension', () => {
     checkResult(result);
   });
 });
+
+describe('custom loaders can be async', () => {
+  let loadThingsSync;
+  let loadThingsAsync;
+  let explorerOptions;
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+    loadThingsSync = jest.fn(() => {
+      return { things: true };
+    });
+    loadThingsAsync = jest.fn(() => {
+      return Promise.resolve({ things: true });
+    });
+    explorerOptions = {
+      loaders: {
+        '.things': { sync: loadThingsSync, async: loadThingsAsync },
+      },
+    };
+  });
+
+  const file = temp.absolutePath('.foorc.things');
+  const checkResult = result => {
+    expect(result.config).toEqual({ things: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig('foo', explorerOptions)
+      .load(file)
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig('foo', explorerOptions).loadSync(file);
+    checkResult(result);
+  });
+});
+
+describe('a custom loader entry can include just an async loader', () => {
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const loadThingsAsync = () => {
+    return Promise.resolve({ things: true });
+  };
+
+  const explorerOptions = {
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const file = temp.absolutePath('.foorc.things');
+  const checkResult = result => {
+    expect(result.config).toEqual({ things: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig('foo', explorerOptions)
+      .load(file)
+      .then(checkResult);
+  });
+});
+
+describe('a custom loader entry can include only a sync loader and work for both sync and async functions', () => {
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const loadThingsAsync = () => {
+    return { things: true };
+  };
+
+  const explorerOptions = {
+    loaders: {
+      '.things': { sync: loadThingsAsync },
+    },
+  };
+
+  const file = temp.absolutePath('.foorc.things');
+  const checkResult = result => {
+    expect(result.config).toEqual({ things: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig('foo', explorerOptions)
+      .load(file)
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig('foo', explorerOptions).loadSync(file);
+    checkResult(result);
+  });
+});

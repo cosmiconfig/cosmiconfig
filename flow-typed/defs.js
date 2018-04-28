@@ -27,8 +27,15 @@ type ExplorerContext = ExplorerOptions & {
   searchSyncCache: ?Map<string, CosmiconfigResult>,
 };
 
-type Loader = (string, string) => Object | null;
-
+type SyncLoader = (filepath: string, content: string) => Object | null;
+type AsyncLoader = (
+  filepath: string,
+  content: string
+) => Object | null | Promise<Object | null>;
+type LoaderEntry = {
+  sync?: SyncLoader,
+  async?: AsyncLoader,
+};
 type Loaders = {
-  [string]: Loader,
+  [string]: LoaderEntry,
 };
