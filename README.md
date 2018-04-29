@@ -21,6 +21,33 @@ For example, if your module's name is "soursocks", cosmiconfig will search for c
 
 Cosmiconfig continues to search up the directory tree, checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
 
+## Table of contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Result](#result)
+- [cosmiconfig()](#cosmiconfig-1)
+  - [moduleName](#modulename)
+- [explorer.search()](#explorersearch)
+  - [searchFrom](#searchfrom)
+- [explorer.searchSync()](#explorersearchsync)
+- [explorer.load()](#explorerload)
+- [explorer.loadSync()](#explorerloadsync)
+- [explorer.clearLoadCache()](#explorerclearloadcache)
+- [explorer.clearSearchCache()](#explorerclearsearchcache)
+- [explorer.clearCaches()](#explorerclearcaches)
+- [cosmiconfigOptions](#cosmiconfigoptions)
+  - [searchPlaces](#searchplaces)
+  - [loaders](#loaders)
+  - [packageProp](#packageprop)
+  - [stopDir](#stopdir)
+  - [cache](#cache)
+  - [transform](#transform)
+  - [ignoreEmptySearchPlaces](#ignoreemptysearchplaces)
+- [Caching](#caching)
+- [Differences from rc](#differences-from-rc)
+- [Contributing & Development](#contributing--development)
+
 ## Installation
 
 ```
@@ -60,9 +87,7 @@ const searchedFor = explorer.searchSync();
 const loaded = explorer.loadSync(pathToConfig);
 ```
 
-## API
-
-### Result
+## Result
 
 The result object you get from `search` or `load` has the following properties:
 
@@ -70,7 +95,7 @@ The result object you get from `search` or `load` has the following properties:
 - **filepath:** The path to the configuration file that was found.
 - **isEmpty:** `true` if the configuration file is empty. This property will not be present if the configuration file is not empty.
 
-### Create an explorer
+## cosmiconfig()
 
 ```js
 const explorer = cosmiconfig(moduleName[, cosmiconfigOptions])
@@ -78,7 +103,7 @@ const explorer = cosmiconfig(moduleName[, cosmiconfigOptions])
 
 Creates a cosmiconfig instance ("explorer") configured according to the arguments, and initializes its caches.
 
-#### moduleName
+### moduleName
 
 Type: `string`. **Required.**
 
@@ -87,7 +112,7 @@ Your module name. This is used to create the default [`searchPlaces`] and [`pack
 **[`cosmiconfigOptions`] are documented below.**
 You may not need them, and should first read about the functions you'll use.
 
-### explorer.search
+## explorer.search()
 
 ```js
 explorer.search([searchFrom]).then(result => {..})
@@ -116,7 +141,7 @@ Here's how your default [`search()`] will work:
 **The search process is highly customizable.**
 Use the cosmiconfig options [`searchPlaces`] and [`loaders`] to precisely define where you want to look for configurations and how you want to load them.
 
-#### searchFrom
+### searchFrom
 
 Type: `string`.
 Default: `process.cwd()`.
@@ -127,7 +152,7 @@ A filename.
 If the value is a directory, that's where the search starts.
 If it's a file, the search starts in that file's directory.
 
-### explorer.searchSync
+## explorer.searchSync()
 
 ```js
 const result = explorer.search([searchFrom]);
@@ -137,7 +162,7 @@ Synchronous version of [`search()`].
 
 Returns a [result] or `null`.
 
-### explorer.load
+## explorer.load()
 
 ```js
 explorer.load([loadPath]).then(result => {..})
@@ -153,7 +178,7 @@ explorer.load('load/this/file.json'); // Tries to load load/this/file.json.
 
 If you load a `package.json` file, the result will be derived from whatever property is specified as your [`packageProp`].
 
-### explorer.loadSync
+## explorer.loadSync()
 
 ```js
 const result = explorer.load([loadPath]);
@@ -163,15 +188,15 @@ Synchronous version of [`load()`].
 
 Returns a [result].
 
-### explorer.clearLoadCache
+## explorer.clearLoadCache()
 
 Clears the cache used in [`load()`].
 
-### explorer.clearSearchCache
+## explorer.clearSearchCache()
 
 Clears the cache used in [`search()`].
 
-### explorer.clearCaches
+## explorer.clearCaches()
 
 Performs both [`clearLoadCache()`] and [`clearSearchCache()`].
 
@@ -382,6 +407,17 @@ If using [`search()`] or [`load()`] \(which are async), the transform function c
 If using [`searchSync()`] or [`loadSync()`], the function must be synchronous and return the transformed result.
 
 The reason you might use this option — instead of simply applying your transform function some other way — is that *the transformed result will be cached*. If your transformation involves additional filesystem I/O or other potentially slow processing, you can use this option to avoid repeating those steps every time a given configuration is searched or loaded.
+
+### ignoreEmptySearchPlaces
+
+Type: `boolean`.
+Default: `true`.
+
+By default, if [`search()`] encounters an empty file (containing nothing but whitespace) in one of the [`searchPlaces`], it will ignore the empty file and move on.
+If you'd like to load empty configuration files, instead, set this option to `false`.
+
+Why might you want to load empty configuration files?
+If you want to throw an error, or if an empty configuration file means something to your program.
 
 ## Caching
 
