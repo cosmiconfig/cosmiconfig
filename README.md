@@ -372,8 +372,8 @@ Examples:
 }
 ```
 
-Note that **special JS syntax can often be handled by using a `require`-hook**, because `cosmiconfig.loadJs` just uses `require`.
-Whether you use custom loaders or a `require`-hook is up to you.
+Note that **special JS syntax can often be handled by using a `require` hook**, because `cosmiconfig.loadJs` just uses `require`.
+Whether you use custom loaders or a `require` hook is up to you.
 
 ### packageProp
 
