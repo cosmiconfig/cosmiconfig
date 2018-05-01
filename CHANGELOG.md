@@ -18,12 +18,13 @@ Additionally, the overloaded `load()` function has been split up into several cl
 
 More details:
 
-- The default JS loader uses `require`, instead of `require-from-string`. So you could use `require` hooks to control the loading of JS files (e.g. pass them through esm or Babel).
+- The default JS loader uses `require`, instead of `require-from-string`. So you *could* use `require` hooks to control the loading of JS files (e.g. pass them through esm or Babel). In most cases it is probably preferable to use a custom loader.
 - The options `rc`, `js`, and `rcExtensions` have all been removed. You can accomplish the same and more with `searchPlaces`.
 - The option `rcStrictJson` has been removed. To get the same effect, you can specify `noExt: cosmiconfig.loadJson` in your `loaders` object.
 - `packageProp` no longer accepts `false`. If you don't want to look in `package.json`, write a `searchPlaces` array that does not include it.
 - By default, empty files are ignored by `search()`. The new option `ignoreEmptySearchPlaces` allows you to load them, instead, in case you want to do something with empty files.
 - The option `configPath` has been removed. Just pass your filepaths directory to `load()`.
+- Removed the `format` option.  Formats are now all handled via the file extensions specified in `loaders`.
 
 ## 4.0.0
 

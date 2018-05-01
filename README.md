@@ -274,7 +274,7 @@ Other examples:
   '.porgyrc',
   '.config/.porgyrc',
   '.porgyrc.json',
-  '.config/.porgyrc.json
+  '.config/.porgyrc.json'
 ]
 ```
 
@@ -372,7 +372,7 @@ Examples:
 }
 ```
 
-Note that **special JS syntax can often be handled by using a `require` hook**, because `cosmiconfig.loadJs` just uses `require`.
+Note that **special JS syntax can also be handled by using a `require` hook**, because `cosmiconfig.loadJs` just uses `require`.
 Whether you use custom loaders or a `require` hook is up to you.
 
 ### packageProp

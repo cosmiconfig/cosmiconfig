@@ -58,8 +58,8 @@ class Explorer {
     const config = this.config;
 
     config.searchPlaces.forEach(place => {
-      const ext = path.extname(place);
-      const loader = ext ? config.loaders[ext] : config.loaders.noExt;
+      const loaderKey = path.extname(place) || 'noExt';
+      const loader = config.loaders[loaderKey];
       if (!loader) {
         throw new Error(
           `No loader specified for ${getExtensionDescription(
@@ -183,8 +183,8 @@ class Explorer {
       return { sync: loader, async: loader };
     }
 
-    const ext = path.extname(filepath);
-    return ext === '' ? this.config.loaders.noExt : this.config.loaders[ext];
+    const loaderKey = path.extname(filepath) || 'noExt';
+    return this.config.loaders[loaderKey];
   }
 
   getSyncLoaderForFile(filepath: string): SyncLoader {
