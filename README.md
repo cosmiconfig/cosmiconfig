@@ -21,6 +21,11 @@ For example, if your module's name is "soursocks", cosmiconfig will search for c
 
 Cosmiconfig continues to search up the directory tree, checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
 
+👀 **Looking for the v4 docs?**
+v5 involves significant revisions to Cosmiconfig's API, allowing for much greater flexibility and clarifying some things.
+If you have trouble switching from v4 to v5, please file an issue.
+If you are still using v4, those v4 docs are available [in the `4.0.0` tag](https://github.com/davidtheclark/cosmiconfig/tree/4.0.0).
+
 ## Table of contents
 
 - [Installation](#installation)
