@@ -32,12 +32,21 @@ describe('gives up if it cannot find the file', () => {
     expect(filesChecked).toEqual([
       'a/b/package.json',
       'a/b/.foorc',
+      'a/b/.foorc.json',
+      'a/b/.foorc.yaml',
+      'a/b/.foorc.yml',
       'a/b/foo.config.js',
       'a/package.json',
       'a/.foorc',
+      'a/.foorc.json',
+      'a/.foorc.yaml',
+      'a/.foorc.yml',
       'a/foo.config.js',
       'package.json',
       '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
       'foo.config.js',
     ]);
 
@@ -71,9 +80,15 @@ describe('stops at stopDir and gives up', () => {
     expect(filesChecked).toEqual([
       'a/b/package.json',
       'a/b/.foorc',
+      'a/b/.foorc.json',
+      'a/b/.foorc.yaml',
+      'a/b/.foorc.yml',
       'a/b/foo.config.js',
       'a/package.json',
       'a/.foorc',
+      'a/.foorc.json',
+      'a/.foorc.yaml',
+      'a/.foorc.yml',
       'a/foo.config.js',
     ]);
 
@@ -220,7 +235,7 @@ describe('throws error for invalid JS in .config.js file', () => {
   });
 });
 
-describe('searching for rc files with extensions, throws error for invalid JSON in .foorc.json', () => {
+describe('throws error for invalid JSON in .foorc.json', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.json', '{ "found": true,, }');
   });
@@ -228,15 +243,6 @@ describe('searching for rc files with extensions, throws error for invalid JSON 
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
-    searchPlaces: [
-      'package.json',
-      '.foorc',
-      '.foorc.json',
-      '.foorc.yaml',
-      '.foorc.yml',
-      '.foorc.js',
-      'foo.config.js',
-    ],
   };
 
   const checkError = error => {
@@ -260,7 +266,7 @@ describe('searching for rc files with extensions, throws error for invalid JSON 
   });
 });
 
-describe('searching for rc files with extensions, throws error for invalid YAML in .foorc.yml', () => {
+describe('throws error for invalid YAML in .foorc.yml', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.yml', 'found: thing: true');
   });
@@ -268,15 +274,6 @@ describe('searching for rc files with extensions, throws error for invalid YAML 
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
-    searchPlaces: [
-      'package.json',
-      '.foorc',
-      '.foorc.json',
-      '.foorc.yaml',
-      '.foorc.yml',
-      '.foorc.js',
-      'foo.config.js',
-    ],
   };
 
   const checkError = error => {
@@ -300,7 +297,7 @@ describe('searching for rc files with extensions, throws error for invalid YAML 
   });
 });
 
-describe('searching for rc files with extensions, throws error for invalid JS in .foorc.js', () => {
+describe('searching for rc files with specified extensions, throws error for invalid JS in .foorc.js', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.js', 'module.exports = found: true };');
   });
@@ -402,7 +399,7 @@ describe('without ignoring empty files, returns an empty config result for an em
   });
 });
 
-describe('without ignoring empty files and searching for rc files with extensions, returns an empty config result for an empty .json rc file', () => {
+describe('without ignoring empty files, returns an empty config result for an empty .json rc file', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.json', '');
   });
@@ -411,15 +408,6 @@ describe('without ignoring empty files and searching for rc files with extension
   const explorerOptions = {
     stopDir: temp.absolutePath('a'),
     ignoreEmptySearchPlaces: false,
-    searchPlaces: [
-      'package.json',
-      '.foorc',
-      '.foorc.json',
-      '.foorc.yaml',
-      '.foorc.yml',
-      '.foorc.js',
-      'foo.config.js',
-    ],
   };
 
   const checkResult = result => {
@@ -442,7 +430,7 @@ describe('without ignoring empty files and searching for rc files with extension
   });
 });
 
-describe('without ignoring empty configs and searching for rc files with extensions, returns an empty config result for an empty .yaml rc file', () => {
+describe('returns an empty config result for an empty .yaml rc file', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.yaml', '');
   });
@@ -451,15 +439,6 @@ describe('without ignoring empty configs and searching for rc files with extensi
   const explorerOptions = {
     stopDir: temp.absolutePath('a'),
     ignoreEmptySearchPlaces: false,
-    searchPlaces: [
-      'package.json',
-      '.foorc',
-      '.foorc.json',
-      '.foorc.yaml',
-      '.foorc.yml',
-      '.foorc.js',
-      'foo.config.js',
-    ],
   };
 
   const checkResult = result => {
@@ -482,7 +461,7 @@ describe('without ignoring empty configs and searching for rc files with extensi
   });
 });
 
-describe('without ignoring empty configs and searching for rc files with extensions, returns an empty config result for an empty .js rc file', () => {
+describe('without ignoring empty configs and searching for rc files with specified extensions, returns an empty config result for an empty .js rc file', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.js', '');
   });
@@ -522,7 +501,7 @@ describe('without ignoring empty configs and searching for rc files with extensi
   });
 });
 
-describe('without ignoring empty configs and searching for rc files with extensions, returns an empty config result for an empty .js rc file with whitespace', () => {
+describe('without ignoring empty configs and searching for rc files with specified extensions, returns an empty config result for an empty .js rc file with whitespace', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.js', ' \t\r\v\n\f');
   });
