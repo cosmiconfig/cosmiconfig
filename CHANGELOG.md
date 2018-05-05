@@ -20,7 +20,7 @@ More details:
 
 - The default JS loader uses `require`, instead of `require-from-string`. So you *could* use `require` hooks to control the loading of JS files (e.g. pass them through esm or Babel). In most cases it is probably preferable to use a custom loader.
 - The options `rc`, `js`, and `rcExtensions` have all been removed. You can accomplish the same and more with `searchPlaces`.
-- The default `searchPlaces` include `rc` files with extensions, e.g. `.thingrc.json`. This is the equivalent of switching the default value of the old `rcExtensions` option to `true`.
+- The default `searchPlaces` include `rc` files with extensions, e.g. `.thingrc.json`, `.thingrc.yaml`, `.thingrc.yml`. This is the equivalent of switching the default value of the old `rcExtensions` option to `true`.
 - The option `rcStrictJson` has been removed. To get the same effect, you can specify `noExt: cosmiconfig.loadJson` in your `loaders` object.
 - `packageProp` no longer accepts `false`. If you don't want to look in `package.json`, write a `searchPlaces` array that does not include it.
 - By default, empty files are ignored by `search()`. The new option `ignoreEmptySearchPlaces` allows you to load them, instead, in case you want to do something with empty files.
