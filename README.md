@@ -229,7 +229,7 @@ Read more about [`loaders`] below.
 `package.json` is a special value: When it is included in `searchPlaces`, Cosmiconfig will always parse it as JSON and load a property within it, not the whole file.
 That property is defined with the [`packageProp`] option, and defaults to your module name.
 
-Other examples:
+Examples:
 
 ```js
 // Allow optional extensions on rc files
@@ -283,7 +283,7 @@ Other examples:
 Type: `Object`.
 Default: See below.
 
-An object that maps extensions to the loader functions responsible for loading and parsing those extensions.
+An object that maps extensions to the loader functions responsible for loading and parsing files with those extensions.
 
 Cosmiconfig exposes its default loaders for `.js`, `.json`, and `.yaml` as `cosmiconfig.loadJs`, `cosmiconfig.loadJson`, and `cosmiconfig.loadYaml`, respectively.
 
@@ -293,7 +293,7 @@ Cosmiconfig exposes its default loaders for `.js`, `.json`, and `.yaml` as `cosm
 {
   '.json': cosmiconfig.loadJson,
   '.yaml': cosmiconfig.loadYaml,
-  '.yml': cosmiconfig.loadYml,
+  '.yml': cosmiconfig.loadYaml,
   '.js': cosmiconfig.loadJs,
   noExt: cosmiconfig.loadYaml
 }
@@ -301,15 +301,15 @@ Cosmiconfig exposes its default loaders for `.js`, `.json`, and `.yaml` as `cosm
 
 (YAML is a superset of JSON; which means YAML parsers can parse JSON; which is how extensionless files can be either YAML *or* JSON with only one parser.)
 
-**If you provide a value for `loaders`, your value will be *merged* with the defaults.**
+**If you provide a `loaders` object, your object will be *merged* with the defaults.**
 So you can override one or two without having to override them all.
 
 **Keys in `loaders`** are extensions (starting with a period), or `noExt` to specify the loader for files *without* extensions, like `.soursocksrc`.
 
 **Values in `loaders`** are either a loader function (described below) or an object with `sync` and/or `async` properties, whose values are loader functions.
 
-**The most common use case for custom loaders value is to load extensionless `rc` as strict JSON, instead of JSON *or* YAML.**
-To accomplish that, provide the following `loaders`:
+**The most common use case for custom loaders value is to load extensionless `rc` files as strict JSON**, instead of JSON *or* YAML (the default).
+To accomplish that, provide the following `loaders` value:
 
 ```js
 {
@@ -341,10 +341,13 @@ Do whatever you need to, and return either a configuration object or `null` (or,
 
 It's easiest if you make your custom loader function synchronous.
 Then it can be used regardless of whether you end up calling [`search()`] or [`searchSync()`], [`load()`] or [`loadSync()`].
-If you want or need to provide an async-only loader, you can do so by making the value on `loaders` an object with an `async` property whose value is the async loader.
+If you want or need to provide an async-only loader, you can do so by making the value of `loaders` an object with an `async` property whose value is the async loader.
 You can also add a `sync` property to designate a sync loader, if you want to use both async and sync search and load functions.
 
 If an extension has *only* an async loader but you try to use [`searchSync()`] or [`loadSync()`], an error will be thrown.
+
+Note that **special JS syntax can also be handled by using a `require` hook**, because `cosmiconfig.loadJs` just uses `require`.
+Whether you use custom loaders or a `require` hook is up to you.
 
 Examples:
 
@@ -359,21 +362,25 @@ Examples:
   '.xml': { async: asyncXmlLoader, sync: syncXmlLoader }
 }
 
-// Allow many flavors of JS:
-{
-  '.mjs': esmLoader,
-  '.ts': typeScriptLoader
-  '.coffee': coffeeScriptLoader
-}
-
 // Allow a special configuration syntax of your own creation:
 {
   '.special': specialLoader
 }
-```
 
-Note that **special JS syntax can also be handled by using a `require` hook**, because `cosmiconfig.loadJs` just uses `require`.
-Whether you use custom loaders or a `require` hook is up to you.
+// Allow many flavors of JS, using custom loaders:
+{
+  '.mjs': esmLoader,
+  '.ts': typeScriptLoader,
+  '.coffee': coffeeScriptLoader
+}
+
+// Allow many flavors of JS but rely on require hooks:
+{
+  '.mjs': cosmiconfig.loadJs,
+  '.ts': cosmiconfig.loadJs,
+  '.coffee': cosmiconfig.loadJs
+}
+```
 
 ### packageProp
 
@@ -421,12 +428,12 @@ If you want to throw an error, or if an empty configuration file means something
 
 ## Caching
 
-As of v2, cosmiconfig uses caching to reduce the need for repetitious reading of the filesystem. Every new cosmiconfig instance (created with `cosmiconfig()`) has its own caches.
+As of v2, cosmiconfig uses caching to reduce the need for repetitious reading of the filesystem or expensive transforms. Every new cosmiconfig instance (created with `cosmiconfig()`) has its own caches.
 
 To avoid or work around caching, you can do the following:
 
 - Set the `cosmiconfig` option [`cache`] to `false`.
-- Use the cache clearing methods [`clearLoadCache()`], [`clearSearchCache()`], and [`clearCaches()`].
+- Use the cache-clearing methods [`clearLoadCache()`], [`clearSearchCache()`], and [`clearCaches()`].
 - Create separate instances of cosmiconfig (separate "explorers").
 
 ## Differences from [rc](https://github.com/dominictarr/rc)
