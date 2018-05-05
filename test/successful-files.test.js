@@ -3,155 +3,363 @@
 const util = require('./util');
 const cosmiconfig = require('../src');
 
-const absolutePath = util.absolutePath;
-const configFileLoader = util.configFileLoader;
-const testFuncsRunner = util.testFuncsRunner;
-const testSyncAndAsync = util.testSyncAndAsync;
+const temp = new util.TempDir();
 
-function makeFileTest(file, format) {
-  return sync => () => {
-    expect.hasAssertions();
-    return testFuncsRunner(sync, configFileLoader({ sync, format }, file), [
-      result => {
-        expect(result.config).toEqual({
-          foo: true,
-        });
-        expect(result.filepath).toBe(absolutePath(file));
-      },
-    ]);
+beforeEach(() => {
+  temp.clean();
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
+
+afterAll(() => {
+  // Remove temp.dir created for tests
+  temp.deleteTempDir();
+});
+
+describe('loads defined JSON config path', () => {
+  beforeEach(() => {
+    temp.createFile('foo.json', '{ "foo": true }');
+  });
+
+  const file = temp.absolutePath('foo.json');
+  const checkResult = result => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
   };
-}
 
-describe('cosmiconfig', () => {
-  describe('load from file', () => {
-    describe('format not specified', () => {
-      testSyncAndAsync(
-        'loads defined JSON config path',
-        makeFileTest('fixtures/foo.json')
-      );
+  test('async', () => {
+    return cosmiconfig()
+      .load(file)
+      .then(checkResult);
+  });
 
-      testSyncAndAsync(
-        'loads defined YAML config path',
-        makeFileTest('fixtures/foo.yaml')
-      );
+  test('sync', () => {
+    const result = cosmiconfig().loadSync(file);
+    checkResult(result);
+  });
+});
 
-      testSyncAndAsync(
-        'loads defined JS config path',
-        makeFileTest('fixtures/foo.js')
-      );
+describe('loads defined YAML config path', () => {
+  beforeEach(() => {
+    temp.createFile('foo.yaml', 'foo: true');
+  });
 
-      testSyncAndAsync(
-        'loads modularized JS config path',
-        makeFileTest('fixtures/foo-module.js')
-      );
+  const file = temp.absolutePath('foo.yaml');
+  const checkResult = result => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
 
-      testSyncAndAsync(
-        'loads yaml-like JS config path',
-        makeFileTest('fixtures/foo-yaml-like.js')
-      );
+  test('async', () => {
+    return cosmiconfig()
+      .load(file)
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig().loadSync(file);
+    checkResult(result);
+  });
+});
+
+describe('loads defined JS config path', () => {
+  beforeEach(() => {
+    temp.createFile('foo.js', 'module.exports = { foo: true };');
+  });
+
+  const file = temp.absolutePath('foo.js');
+  const checkResult = result => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig()
+      .load(file)
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig().loadSync(file);
+    checkResult(result);
+  });
+});
+
+describe('loads modularized JS config path', () => {
+  beforeEach(() => {
+    temp.createFile('foo.js', 'module.exports = { foo: true };');
+    temp.createFile('foo-module.js', 'module.exports = require("./foo");');
+  });
+
+  const file = temp.absolutePath('foo-module.js');
+  const checkResult = result => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig()
+      .load(file)
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig().loadSync(file);
+    checkResult(result);
+  });
+});
+
+describe('loads yaml-like JS config path', () => {
+  beforeEach(() => {
+    temp.createFile('foo-yaml-like.js', 'module.exports = { foo: true };');
+  });
+
+  const file = temp.absolutePath('foo-yaml-like.js');
+  const checkResult = result => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig()
+      .load(file)
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig().loadSync(file);
+    checkResult(result);
+  });
+});
+
+describe('loads package prop when configPath is package.json', () => {
+  beforeEach(() => {
+    temp.createFile('package.json', '{ "foo": { "bar": "baz" } }');
+  });
+
+  const configPath = temp.absolutePath('package.json');
+  const checkResult = result => {
+    expect(result.config).toEqual({
+      bar: 'baz',
     });
+    expect(result.filepath).toBe(configPath);
+  };
 
-    describe('format specified', () => {
-      testSyncAndAsync(
-        'loads defined JSON config path',
-        makeFileTest('fixtures/foo.json', 'json')
-      );
+  test('async', () => {
+    return cosmiconfig('foo')
+      .load(configPath)
+      .then(checkResult);
+  });
 
-      testSyncAndAsync(
-        'loads defined YAML config path',
-        makeFileTest('fixtures/foo.yaml', 'yaml')
-      );
+  test('sync', () => {
+    const result = cosmiconfig('foo').loadSync(configPath);
+    checkResult(result);
+  });
+});
 
-      testSyncAndAsync(
-        'loads defined JS config path',
-        makeFileTest('fixtures/foo.js', 'js')
-      );
+describe('runs transform', () => {
+  beforeEach(() => {
+    temp.createFile('foo.json', '{ "foo": true }');
+  });
 
-      testSyncAndAsync(
-        'loads modularized JS config path',
-        makeFileTest('fixtures/foo-module.js', 'js')
-      );
+  const configPath = temp.absolutePath('foo.json');
+  const transform = result => {
+    result.config.foo = [result.config.foo];
+    return result;
+  };
+  const checkResult = result => {
+    expect(result.config).toEqual({ foo: [true] });
+  };
 
-      testSyncAndAsync(
-        'loads yaml-like JS config path',
-        makeFileTest('fixtures/foo-yaml-like.js', 'js')
-      );
-    });
+  test('async', () => {
+    return cosmiconfig(null, { transform })
+      .load(configPath)
+      .then(checkResult);
+  });
 
-    testSyncAndAsync('respects options.configPath', sync => () => {
-      const configPath = absolutePath('fixtures/foo.json');
-      const explorer = cosmiconfig('foo', { configPath, sync });
-      return testFuncsRunner(sync, explorer.load('./path/does/not/exist'), [
-        result => {
-          expect(result.config).toEqual({
-            foo: true,
-          });
-          expect(result.filepath).toBe(configPath);
-        },
-      ]);
-    });
+  test('sync', () => {
+    const result = cosmiconfig(null, { transform }).loadSync(configPath);
+    checkResult(result);
+  });
+});
 
-    testSyncAndAsync(
-      'loads package prop when configPath is package.json',
-      sync => () => {
-        const configPath = absolutePath('fixtures/package.json');
-        const explorer = cosmiconfig('foo', { configPath, sync });
-        return testFuncsRunner(
-          sync,
-          explorer.load('./fixtures/foo-module.js'),
-          [
-            result => {
-              expect(result.config).toEqual({
-                bar: 'baz',
-              });
-            },
-          ]
-        );
-      }
-    );
+describe('does not swallow transform errors', () => {
+  beforeEach(() => {
+    temp.createFile('foo.json', '{ "foo": true }');
+  });
 
-    testSyncAndAsync('runs transform', sync => () => {
-      expect.hasAssertions();
-      return testFuncsRunner(
-        sync,
-        configFileLoader(
-          {
-            sync,
-            transform(result) {
-              result.config.foo = [result.config.foo];
-              return result;
-            },
-          },
-          'fixtures/foo.json'
-        ),
-        [
-          result => {
-            expect(result.config).toEqual({ foo: [true] });
-          },
-        ]
-      );
-    });
+  const configPath = temp.absolutePath('foo.json');
+  const transform = () => {
+    throw new Error('These pretzels are making me thirsty!');
+  };
 
-    it('does not swallow transform errors', () => {
-      const loadConfig = sync =>
-        configFileLoader(
-          {
-            sync,
-            transform() {
-              throw new Error('These pretzels are making me thirsty!');
-            },
-          },
-          'fixtures/foo.json'
-        );
+  const checkError = error => {
+    expect(error.message).toBe('These pretzels are making me thirsty!');
+  };
 
-      expect.assertions(2);
-      expect(() => loadConfig(true)).toThrow(
-        'These pretzels are making me thirsty!'
-      );
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig(null, { transform })
+      .load(configPath)
+      .catch(checkError);
+  });
 
-      return loadConfig(false).catch(err => {
-        expect(err.message).toBe('These pretzels are making me thirsty!');
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig(null, { transform }).loadSync(configPath);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+describe('loads defined JSON file with no extension', () => {
+  beforeEach(() => {
+    temp.createFile('foo-valid-json', '{ "json": true }');
+  });
+
+  const file = temp.absolutePath('foo-valid-json');
+  const checkResult = result => {
+    expect(result.config).toEqual({ json: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig()
+      .load(file)
+      .then(result => {
+        checkResult(result);
       });
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig().loadSync(file);
+    checkResult(result);
+  });
+});
+
+describe('loads defined YAML file with no extension', () => {
+  beforeEach(() => {
+    temp.createFile('foo-valid-yaml', 'yaml: true');
+  });
+
+  const file = temp.absolutePath('foo-valid-yaml');
+  const checkResult = result => {
+    expect(result.config).toEqual({ yaml: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig()
+      .load(file)
+      .then(result => {
+        checkResult(result);
+      });
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig().loadSync(file);
+    checkResult(result);
+  });
+});
+
+describe('custom loaders can be async', () => {
+  let loadThingsSync;
+  let loadThingsAsync;
+  let explorerOptions;
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+    loadThingsSync = jest.fn(() => {
+      return { things: true };
     });
+    loadThingsAsync = jest.fn(() => {
+      return Promise.resolve({ things: true });
+    });
+    explorerOptions = {
+      loaders: {
+        '.things': { sync: loadThingsSync, async: loadThingsAsync },
+      },
+    };
+  });
+
+  const file = temp.absolutePath('.foorc.things');
+  const checkResult = result => {
+    expect(result.config).toEqual({ things: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig('foo', explorerOptions)
+      .load(file)
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig('foo', explorerOptions).loadSync(file);
+    checkResult(result);
+  });
+});
+
+describe('a custom loader entry can include just an async loader', () => {
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const loadThingsAsync = () => {
+    return Promise.resolve({ things: true });
+  };
+
+  const explorerOptions = {
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const file = temp.absolutePath('.foorc.things');
+  const checkResult = result => {
+    expect(result.config).toEqual({ things: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig('foo', explorerOptions)
+      .load(file)
+      .then(checkResult);
+  });
+});
+
+describe('a custom loader entry can include only a sync loader and work for both sync and async functions', () => {
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const loadThingsAsync = () => {
+    return { things: true };
+  };
+
+  const explorerOptions = {
+    loaders: {
+      '.things': { sync: loadThingsAsync },
+    },
+  };
+
+  const file = temp.absolutePath('.foorc.things');
+  const checkResult = result => {
+    expect(result.config).toEqual({ things: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig('foo', explorerOptions)
+      .load(file)
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig('foo', explorerOptions).loadSync(file);
+    checkResult(result);
   });
 });

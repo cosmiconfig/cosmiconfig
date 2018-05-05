@@ -2,158 +2,324 @@
 'use strict';
 
 const path = require('path');
-const loadPackageProp = require('./loadPackageProp');
-const loadRc = require('./loadRc');
-const loadJs = require('./loadJs');
-const loadDefinedFile = require('./loadDefinedFile');
-const funcRunner = require('./funcRunner');
+const loaders = require('./loaders');
+const readFile = require('./readFile');
+const cacheWrapper = require('./cacheWrapper');
 const getDirectory = require('./getDirectory');
 
-module.exports = function createExplorer(options: {
-  packageProp?: string | false,
-  rc?: string | false,
-  js?: string | false,
-  format?: 'json' | 'yaml' | 'js',
-  rcStrictJson?: boolean,
-  rcExtensions?: boolean,
-  stopDir?: string,
-  cache?: boolean,
-  sync?: boolean,
-  transform?: (?Object) => ?Object,
-  configPath?: string,
-}) {
-  // When `options.sync` is `false` (default),
-  // these cache Promises that resolve with results, not the results themselves.
-  const fileCache = options.cache ? new Map() : null;
-  const directoryCache = options.cache ? new Map() : null;
-  const transform = options.transform || identity;
-  const packageProp = options.packageProp;
+const MODE_SYNC = 'sync';
 
-  function clearFileCache() {
-    if (fileCache) fileCache.clear();
+// An object value represents a config object.
+// null represents that the loader did not find anything relevant.
+// undefined represents that the loader found something relevant
+// but it was empty.
+type LoadedFileContent = Object | null | void;
+
+class Explorer {
+  loadCache: ?Map<string, Promise<CosmiconfigResult>>;
+  loadSyncCache: ?Map<string, CosmiconfigResult>;
+  searchCache: ?Map<string, Promise<CosmiconfigResult>>;
+  searchSyncCache: ?Map<string, CosmiconfigResult>;
+  config: ExplorerOptions;
+
+  constructor(options: ExplorerOptions) {
+    this.loadCache = options.cache ? new Map() : null;
+    this.loadSyncCache = options.cache ? new Map() : null;
+    this.searchCache = options.cache ? new Map() : null;
+    this.searchSyncCache = options.cache ? new Map() : null;
+    this.config = options;
+    this.validateConfig();
   }
 
-  function clearDirectoryCache() {
-    if (directoryCache) directoryCache.clear();
-  }
-
-  function clearCaches() {
-    clearFileCache();
-    clearDirectoryCache();
-  }
-
-  function throwError(error) {
-    if (options.sync) {
-      throw error;
-    } else {
-      return Promise.reject(error);
+  clearLoadCache() {
+    if (this.loadCache) {
+      this.loadCache.clear();
+    }
+    if (this.loadSyncCache) {
+      this.loadSyncCache.clear();
     }
   }
 
-  function load(
-    searchPath: string,
-    configPath?: string
-  ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
-    if (!searchPath) searchPath = process.cwd();
-    if (!configPath && options.configPath) configPath = options.configPath;
+  clearSearchCache() {
+    if (this.searchCache) {
+      this.searchCache.clear();
+    }
+    if (this.searchSyncCache) {
+      this.searchSyncCache.clear();
+    }
+  }
 
-    if (configPath) {
-      const absoluteConfigPath = path.resolve(process.cwd(), configPath);
-      if (fileCache && fileCache.has(absoluteConfigPath)) {
-        return fileCache.get(absoluteConfigPath);
+  clearCaches() {
+    this.clearLoadCache();
+    this.clearSearchCache();
+  }
+
+  validateConfig() {
+    const config = this.config;
+
+    config.searchPlaces.forEach(place => {
+      const loaderKey = path.extname(place) || 'noExt';
+      const loader = config.loaders[loaderKey];
+      if (!loader) {
+        throw new Error(
+          `No loader specified for ${getExtensionDescription(
+            place
+          )}, so searchPlaces item "${place}" is invalid`
+        );
       }
+    });
+  }
 
-      let load;
-      if (path.basename(absoluteConfigPath) === 'package.json') {
-        if (!packageProp) {
-          return throwError(
-            new Error(
-              'Please specify the packageProp option. The configPath argument cannot point to a package.json file if packageProp is false.'
-            )
-          );
+  search(searchFrom?: string): Promise<CosmiconfigResult> {
+    searchFrom = searchFrom || process.cwd();
+    return getDirectory(searchFrom).then(dir => {
+      return this.searchFromDirectory(dir);
+    });
+  }
+
+  searchFromDirectory(dir: string): Promise<CosmiconfigResult> {
+    const absoluteDir = path.resolve(process.cwd(), dir);
+    const run = () => {
+      return this.searchDirectory(absoluteDir).then(result => {
+        const nextDir = this.nextDirectoryToSearch(absoluteDir, result);
+        if (nextDir) {
+          return this.searchFromDirectory(nextDir);
         }
-        load = () =>
-          loadPackageProp(path.dirname(absoluteConfigPath), {
-            packageProp,
-            sync: options.sync,
-          });
-      } else {
-        load = () =>
-          loadDefinedFile(absoluteConfigPath, {
-            sync: options.sync,
-            format: options.format,
-          });
-      }
+        return this.config.transform(result);
+      });
+    };
 
-      const loadResult = load();
-      const result =
-        loadResult instanceof Promise
-          ? loadResult.then(transform)
-          : transform(loadResult);
-      if (fileCache) fileCache.set(absoluteConfigPath, result);
-      return result;
+    if (this.searchCache) {
+      return cacheWrapper(this.searchCache, absoluteDir, run);
     }
-
-    const absoluteSearchPath = path.resolve(process.cwd(), searchPath);
-    const searchPathDir = getDirectory(absoluteSearchPath, options.sync);
-
-    return searchPathDir instanceof Promise
-      ? searchPathDir.then(searchDirectory)
-      : searchDirectory(searchPathDir);
+    return run();
   }
 
-  function searchDirectory(
-    directory: string
-  ): Promise<?cosmiconfig$Result> | ?cosmiconfig$Result {
-    if (directoryCache && directoryCache.has(directory)) {
-      return directoryCache.get(directory);
+  searchSync(searchFrom?: string): CosmiconfigResult {
+    searchFrom = searchFrom || process.cwd();
+    const dir = getDirectory.sync(searchFrom);
+    return this.searchFromDirectorySync(dir);
+  }
+
+  searchFromDirectorySync(dir: string): CosmiconfigResult {
+    const absoluteDir = path.resolve(process.cwd(), dir);
+    const run = () => {
+      const result = this.searchDirectorySync(absoluteDir);
+      const nextDir = this.nextDirectoryToSearch(absoluteDir, result);
+      if (nextDir) {
+        return this.searchFromDirectorySync(nextDir);
+      }
+      return this.config.transform(result);
+    };
+
+    if (this.searchSyncCache) {
+      return cacheWrapper(this.searchSyncCache, absoluteDir, run);
     }
+    return run();
+  }
 
-    const result = funcRunner(!options.sync ? Promise.resolve() : undefined, [
-      () => {
-        if (!packageProp) return;
-        return loadPackageProp(directory, {
-          packageProp,
-          sync: options.sync,
-        });
-      },
-      result => {
-        if (result || !options.rc) return result;
-        return loadRc(path.join(directory, options.rc), {
-          sync: options.sync,
-          rcStrictJson: options.rcStrictJson,
-          rcExtensions: options.rcExtensions,
-        });
-      },
-      result => {
-        if (result || !options.js) return result;
-        return loadJs(path.join(directory, options.js), { sync: options.sync });
-      },
-      result => {
-        if (result) return result;
+  searchDirectory(dir: string): Promise<CosmiconfigResult> {
+    return this.config.searchPlaces.reduce((prevResultPromise, place) => {
+      return prevResultPromise.then(prevResult => {
+        if (this.shouldSearchStopWithResult(prevResult)) {
+          return prevResult;
+        }
+        return this.loadSearchPlace(dir, place);
+      });
+    }, Promise.resolve(null));
+  }
 
-        const nextDirectory = path.dirname(directory);
-
-        if (nextDirectory === directory || directory === options.stopDir)
-          return null;
-
-        return searchDirectory(nextDirectory);
-      },
-      transform,
-    ]);
-
-    if (directoryCache) directoryCache.set(directory, result);
+  searchDirectorySync(dir: string): CosmiconfigResult {
+    let result = null;
+    for (const place of this.config.searchPlaces) {
+      result = this.loadSearchPlaceSync(dir, place);
+      if (this.shouldSearchStopWithResult(result)) break;
+    }
     return result;
   }
 
+  shouldSearchStopWithResult(result: CosmiconfigResult): boolean {
+    if (result === null) return false;
+    if (result.isEmpty && this.config.ignoreEmptySearchPlaces) return false;
+    return true;
+  }
+
+  loadSearchPlace(dir: string, place: string): Promise<CosmiconfigResult> {
+    const filepath = path.join(dir, place);
+    return readFile(filepath).then(content => {
+      return this.createCosmiconfigResult(filepath, content);
+    });
+  }
+
+  loadSearchPlaceSync(dir: string, place: string): CosmiconfigResult {
+    const filepath = path.join(dir, place);
+    const content = readFile.sync(filepath);
+    return this.createCosmiconfigResultSync(filepath, content);
+  }
+
+  nextDirectoryToSearch(
+    currentDir: string,
+    currentResult: CosmiconfigResult
+  ): ?string {
+    if (this.shouldSearchStopWithResult(currentResult)) {
+      return null;
+    }
+    const nextDir = nextDirUp(currentDir);
+    if (nextDir === currentDir || currentDir === this.config.stopDir) {
+      return null;
+    }
+    return nextDir;
+  }
+
+  loadPackageProp(filepath: string, content: string) {
+    const parsedContent = loaders.loadJson(filepath, content);
+    const packagePropValue = parsedContent[this.config.packageProp];
+    return packagePropValue || null;
+  }
+
+  getLoaderEntryForFile(filepath: string): LoaderEntry {
+    if (path.basename(filepath) === 'package.json') {
+      const loader = this.loadPackageProp.bind(this);
+      return { sync: loader, async: loader };
+    }
+
+    const loaderKey = path.extname(filepath) || 'noExt';
+    return this.config.loaders[loaderKey];
+  }
+
+  getSyncLoaderForFile(filepath: string): SyncLoader {
+    const entry = this.getLoaderEntryForFile(filepath);
+    if (!entry.sync) {
+      throw new Error(
+        `No sync loader specified for ${getExtensionDescription(filepath)}`
+      );
+    }
+    return entry.sync;
+  }
+
+  getAsyncLoaderForFile(filepath: string): AsyncLoader {
+    const entry = this.getLoaderEntryForFile(filepath);
+    const loader = entry.async || entry.sync;
+    if (!loader) {
+      throw new Error(
+        `No async loader specified for ${getExtensionDescription(filepath)}`
+      );
+    }
+    return loader;
+  }
+
+  loadFileContent(
+    mode: 'sync' | 'async',
+    filepath: string,
+    content: string | null
+  ): Promise<LoadedFileContent> | LoadedFileContent {
+    if (content === null) {
+      return null;
+    }
+    if (content.trim() === '') {
+      return undefined;
+    }
+    const loader =
+      mode === MODE_SYNC
+        ? this.getSyncLoaderForFile(filepath)
+        : this.getAsyncLoaderForFile(filepath);
+    const loadedContent = loader(filepath, content);
+
+    if (mode === MODE_SYNC && loadedContent instanceof Promise) {
+      throw new Error(
+        `The sync loader for "${path.basename(
+          filepath
+        )}" returned a Promise. Sync loaders need to be synchronous.`
+      );
+    }
+
+    return loadedContent;
+  }
+
+  loadedContentToCosmiconfigResult(
+    filepath: string,
+    loadedContent: LoadedFileContent
+  ): CosmiconfigResult {
+    if (loadedContent === null) {
+      return null;
+    }
+    if (loadedContent === undefined) {
+      return { filepath, config: undefined, isEmpty: true };
+    }
+    return { config: loadedContent, filepath };
+  }
+
+  createCosmiconfigResult(
+    filepath: string,
+    content: string | null
+  ): Promise<CosmiconfigResult> {
+    return Promise.resolve()
+      .then(() => {
+        return this.loadFileContent('async', filepath, content);
+      })
+      .then(loaderResult => {
+        return this.loadedContentToCosmiconfigResult(filepath, loaderResult);
+      });
+  }
+
+  createCosmiconfigResultSync(
+    filepath: string,
+    content: string | null
+  ): CosmiconfigResult {
+    const loaderResult = this.loadFileContent('sync', filepath, content);
+    return this.loadedContentToCosmiconfigResult(filepath, loaderResult);
+  }
+
+  validateFilePath(filepath?: string) {
+    if (!filepath) {
+      throw new Error('load and loadSync must be pass a non-empty string');
+    }
+  }
+
+  load(filepath: string): Promise<CosmiconfigResult> {
+    return Promise.resolve().then(() => {
+      this.validateFilePath(filepath);
+      const absoluteFilePath = path.resolve(process.cwd(), filepath);
+      return cacheWrapper(this.loadCache, absoluteFilePath, () => {
+        return readFile(absoluteFilePath, { throwNotFound: true })
+          .then(content => {
+            return this.createCosmiconfigResult(filepath, content);
+          })
+          .then(this.config.transform);
+      });
+    });
+  }
+
+  loadSync(filepath: string): CosmiconfigResult {
+    this.validateFilePath(filepath);
+    const absoluteFilePath = path.resolve(process.cwd(), filepath);
+    return cacheWrapper(this.loadSyncCache, absoluteFilePath, () => {
+      const content = readFile.sync(absoluteFilePath, { throwNotFound: true });
+      const result = this.createCosmiconfigResultSync(filepath, content);
+      return this.config.transform(result);
+    });
+  }
+}
+
+module.exports = function createExplorer(options: ExplorerOptions) {
+  const explorer = new Explorer(options);
+
   return {
-    load,
-    clearFileCache,
-    clearDirectoryCache,
-    clearCaches,
+    search: explorer.search.bind(explorer),
+    searchSync: explorer.searchSync.bind(explorer),
+    load: explorer.load.bind(explorer),
+    loadSync: explorer.loadSync.bind(explorer),
+    clearLoadCache: explorer.clearLoadCache.bind(explorer),
+    clearSearchCache: explorer.clearSearchCache.bind(explorer),
+    clearCaches: explorer.clearCaches.bind(explorer),
   };
 };
 
-function identity(x) {
-  return x;
+function nextDirUp(dir: string): string {
+  return path.dirname(dir);
+}
+
+function getExtensionDescription(filepath: string): string {
+  const ext = path.extname(filepath);
+  return ext ? `extension "${ext}"` : 'files without extensions';
 }

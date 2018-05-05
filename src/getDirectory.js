@@ -4,14 +4,7 @@
 const path = require('path');
 const isDirectory = require('is-directory');
 
-module.exports = function getDirectory(
-  filepath: string,
-  sync?: boolean
-): Promise<string> | string {
-  if (sync === true) {
-    return isDirectory.sync(filepath) ? filepath : path.dirname(filepath);
-  }
-
+function getDirectory(filepath: string): Promise<string> {
   return new Promise((resolve, reject) => {
     return isDirectory(filepath, (err, filepathIsDirectory) => {
       if (err) {
@@ -20,4 +13,10 @@ module.exports = function getDirectory(
       return resolve(filepathIsDirectory ? filepath : path.dirname(filepath));
     });
   });
+}
+
+getDirectory.sync = function getDirectorySync(filepath: string): string {
+  return isDirectory.sync(filepath) ? filepath : path.dirname(filepath);
 };
+
+module.exports = getDirectory;

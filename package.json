@@ -8,8 +8,10 @@
   ],
   "scripts": {
     "precommit": "lint-staged && jest && flow check",
-    "lint": "eslint .",
+    "lint:md-partial": "remark -u remark-preset-davidtheclark --frail --quiet --no-stdout --output --",
+    "lint:md": "npm run lint:md-partial -- *.md",
     "lint:fix": "eslint . --fix",
+    "lint": "eslint . && npm run lint:md",
     "format": "prettier --write \"{src/*.js,test/*.js}\"",
     "pretest": "npm run lint && flow check",
     "test": "jest --coverage",
@@ -22,6 +24,10 @@
     "*.js": [
       "eslint --fix",
       "prettier --write",
+      "git add"
+    ],
+    "*.md": [
+      "npm run lint:md-partial",
       "git add"
     ]
   },
@@ -55,6 +61,10 @@
     "collectCoverageFrom": [
       "src/*.js"
     ],
+    "coverageReporters": [
+      "text",
+      "html"
+    ],
     "coverageThreshold": {
       "global": {
         "branches": 100,
@@ -62,7 +72,9 @@
         "lines": 100,
         "statements": 100
       }
-    }
+    },
+    "resetModules": true,
+    "resetMocks": true
   },
   "babel": {
     "plugins": [
@@ -72,23 +84,27 @@
   "dependencies": {
     "is-directory": "^0.3.1",
     "js-yaml": "^3.9.0",
-    "parse-json": "^4.0.0",
-    "require-from-string": "^2.0.1"
+    "parse-json": "^4.0.0"
   },
   "devDependencies": {
     "babel-eslint": "^8.0.3",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "del": "^3.0.0",
     "eslint": "^4.12.1",
     "eslint-config-davidtheclark-node": "^0.2.2",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-flowtype": "^2.39.1",
     "eslint-plugin-node": "^5.2.1",
-    "flow-bin": "^0.54.1",
+    "flow-bin": "^0.68.0",
     "flow-remove-types": "^1.2.3",
     "husky": "^0.14.3",
     "jest": "^21.2.1",
     "lint-staged": "^6.0.0",
-    "prettier": "^1.8.2"
+    "make-dir": "^1.2.0",
+    "parent-module": "^0.1.0",
+    "prettier": "^1.8.2",
+    "remark-cli": "^5.0.0",
+    "remark-preset-davidtheclark": "^0.7.0"
   },
   "engines": {
     "node": ">=4"

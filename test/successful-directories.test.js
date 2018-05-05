@@ -1,477 +1,975 @@
 'use strict';
 
-jest.mock('fs');
-
-const fsMock = require('fs');
-
+const fs = require('fs');
 const util = require('./util');
 const cosmiconfig = require('../src');
 
-const absolutePath = util.absolutePath;
-const mockReadFile = util.mockReadFile;
-const testFuncsRunner = util.testFuncsRunner;
-const testSyncAndAsync = util.testSyncAndAsync;
+const temp = new util.TempDir();
 
-beforeAll(() => {
-  util.mockStatIsDirectory(true);
+beforeEach(() => {
+  temp.clean();
+  temp.createDir('a/b/c/d/e/f/');
 });
 
 afterEach(() => {
-  // Resets all information stored in the mock,
-  // including any inital implementation given.
-  fsMock.readFile.mockReset();
-  fsMock.readFileSync.mockReset();
-
-  // Clean up a mock's usage data between tests
-  fsMock.stat.mockClear();
-  fsMock.statSync.mockClear();
+  jest.restoreAllMocks();
 });
 
 afterAll(() => {
-  jest.resetAllMocks();
+  // Remove temp.dir created for tests
+  temp.deleteTempDir();
 });
 
-describe('cosmiconfig', () => {
-  describe('load from directory', () => {
-    const loadConfig = (sync, startDir) =>
-      cosmiconfig('foo', { stopDir: absolutePath('.'), sync }).load(startDir);
+describe('finds rc file in third searched dir, with a package.json lacking prop', () => {
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/package.json', '{ "false": "hope" }');
+    temp.createFile('a/b/c/d/.foorc', '{ "found": true }');
+  });
 
-    testSyncAndAsync(
-      'finds rc file in third searched dir, with a package.json lacking prop',
-      sync => () => {
-        function readFile(searchPath) {
-          switch (searchPath) {
-            case absolutePath('a/b/c/d/e/f/package.json'):
-            case absolutePath('a/b/c/d/e/f/.foorc'):
-            case absolutePath('a/b/c/d/e/f/foo.config.js'):
-            case absolutePath('a/b/c/d/e/package.json'):
-            case absolutePath('a/b/c/d/e/.foorc'):
-            case absolutePath('a/b/c/d/e/foo.config.js'):
-              throw { code: 'ENOENT' };
-            case absolutePath('a/b/c/d/package.json'):
-              return '{ "false": "hope" }';
-            case absolutePath('a/b/c/d/.foorc'):
-              return '{ "found": true }';
-            default:
-              throw new Error(`irrelevant path ${searchPath}`);
-          }
-        }
-        const readFileMock = mockReadFile(sync, readFile);
-        const startDir = absolutePath('a/b/c/d/e/f');
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = { stopDir: temp.absolutePath('.') };
 
-        expect.hasAssertions();
-        return testFuncsRunner(sync, loadConfig(sync, startDir), [
-          result => {
-            util.assertSearchSequence(readFileMock, [
-              'a/b/c/d/e/f/package.json',
-              'a/b/c/d/e/f/.foorc',
-              'a/b/c/d/e/f/foo.config.js',
-              'a/b/c/d/e/package.json',
-              'a/b/c/d/e/.foorc',
-              'a/b/c/d/e/foo.config.js',
-              'a/b/c/d/package.json',
-              'a/b/c/d/.foorc',
-            ]);
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/package.json',
+      'a/b/c/d/e/.foorc',
+      'a/b/c/d/e/foo.config.js',
+      'a/b/c/d/package.json',
+      'a/b/c/d/.foorc',
+    ]);
 
-            expect(result).toEqual({
-              config: { found: true },
-              filepath: absolutePath('a/b/c/d/.foorc'),
-            });
-          },
-        ]);
-      }
-    );
-
-    testSyncAndAsync(
-      'finds package.json prop in second searched dir',
-      sync => () => {
-        function readFile(searchPath) {
-          switch (searchPath) {
-            case absolutePath('a/b/c/d/e/f/package.json'):
-            case absolutePath('a/b/c/d/e/f/.foorc'):
-            case absolutePath('a/b/c/d/e/f/foo.config.js'):
-            case absolutePath('a/b/c/d/e/.foorc'):
-            case absolutePath('a/b/c/d/e/foo.config.js'):
-              throw { code: 'ENOENT' };
-            case absolutePath('a/b/c/d/e/package.json'):
-              return '{ "author": "Todd", "foo": { "found": true } }';
-            default:
-              throw new Error(`irrelevant path ${searchPath}`);
-          }
-        }
-        const readFileMock = mockReadFile(sync, readFile);
-        const startDir = absolutePath('a/b/c/d/e/f');
-
-        expect.hasAssertions();
-        return testFuncsRunner(sync, loadConfig(sync, startDir), [
-          result => {
-            util.assertSearchSequence(readFileMock, [
-              'a/b/c/d/e/f/package.json',
-              'a/b/c/d/e/f/.foorc',
-              'a/b/c/d/e/f/foo.config.js',
-              'a/b/c/d/e/package.json',
-            ]);
-
-            expect(result).toEqual({
-              config: { found: true },
-              filepath: absolutePath('a/b/c/d/e/package.json'),
-            });
-          },
-        ]);
-      }
-    );
-
-    testSyncAndAsync('finds JS file in first searched dir', sync => () => {
-      function readFile(searchPath) {
-        switch (searchPath) {
-          case absolutePath('a/b/c/d/e/f/package.json'):
-          case absolutePath('a/b/c/d/e/f/.foorc'):
-          case absolutePath('a/b/c/d/e/package.json'):
-          case absolutePath('a/b/c/d/e/.foorc'):
-          case absolutePath('a/b/c/d/e/foo.config.js'):
-            throw { code: 'ENOENT' };
-          case absolutePath('a/b/c/d/e/f/foo.config.js'):
-            return 'module.exports = { found: true };';
-          default:
-            throw new Error(`irrelevant path ${searchPath}`);
-        }
-      }
-      const readFileMock = mockReadFile(sync, readFile);
-      const startDir = absolutePath('a/b/c/d/e/f');
-
-      expect.hasAssertions();
-      return testFuncsRunner(sync, loadConfig(sync, startDir), [
-        result => {
-          util.assertSearchSequence(readFileMock, [
-            'a/b/c/d/e/f/package.json',
-            'a/b/c/d/e/f/.foorc',
-            'a/b/c/d/e/f/foo.config.js',
-          ]);
-
-          expect(result).toEqual({
-            config: { found: true },
-            filepath: absolutePath('a/b/c/d/e/f/foo.config.js'),
-          });
-        },
-      ]);
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/.foorc'),
     });
+  };
 
-    testSyncAndAsync(
-      'finds package.json in second dir searched, with alternate names',
-      sync => () => {
-        function readFile(searchPath) {
-          switch (searchPath) {
-            case absolutePath('a/b/c/d/e/f/package.json'):
-            case absolutePath('a/b/c/d/e/f/.wowza'):
-            case absolutePath('a/b/c/d/e/f/wowzaConfig.js'):
-              throw { code: 'ENOENT' };
-            case absolutePath('a/b/c/d/e/package.json'):
-              return '{ "heeha": { "found": true } }';
-            default:
-              throw new Error(`irrelevant path ${searchPath}`);
-          }
-        }
-        const readFileMock = mockReadFile(sync, readFile);
-        const startDir = absolutePath('a/b/c/d/e/f');
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
 
-        expect.hasAssertions();
-        return testFuncsRunner(
-          sync,
-          cosmiconfig('foo', {
-            rc: '.wowza',
-            js: 'wowzaConfig.js',
-            packageProp: 'heeha',
-            stopDir: absolutePath('.'),
-            sync,
-          }).load(startDir),
-          [
-            result => {
-              util.assertSearchSequence(readFileMock, [
-                'a/b/c/d/e/f/package.json',
-                'a/b/c/d/e/f/.wowza',
-                'a/b/c/d/e/f/wowzaConfig.js',
-                'a/b/c/d/e/package.json',
-              ]);
-
-              expect(result).toEqual({
-                config: { found: true },
-                filepath: absolutePath('a/b/c/d/e/package.json'),
-              });
-            },
-          ]
-        );
-      }
-    );
-
-    testSyncAndAsync(
-      'finds rc file in third searched dir, skipping packageProp, with rcStrictJson',
-      sync => () => {
-        function readFile(searchPath) {
-          switch (searchPath) {
-            case absolutePath('a/b/c/d/e/f/package.json'):
-            case absolutePath('a/b/c/d/e/f/.foorc'):
-            case absolutePath('a/b/c/d/e/f/foo.config.js'):
-            case absolutePath('a/b/c/d/e/package.json'):
-            case absolutePath('a/b/c/d/e/.foorc'):
-            case absolutePath('a/b/c/d/e/foo.config.js'):
-            case absolutePath('a/b/c/d/package.json'):
-              throw { code: 'ENOENT' };
-            case absolutePath('a/b/c/d/.foorc'):
-              return '{ "found": true }';
-            default:
-              throw new Error(`irrelevant path ${searchPath}`);
-          }
-        }
-        const readFileMock = mockReadFile(sync, readFile);
-        const startDir = absolutePath('a/b/c/d/e/f');
-
-        expect.hasAssertions();
-        return testFuncsRunner(
-          sync,
-          cosmiconfig('foo', {
-            packageProp: false,
-            rcStrictJson: true,
-            stopDir: absolutePath('.'),
-            sync,
-          }).load(startDir),
-          [
-            result => {
-              util.assertSearchSequence(readFileMock, [
-                'a/b/c/d/e/f/.foorc',
-                'a/b/c/d/e/f/foo.config.js',
-                'a/b/c/d/e/.foorc',
-                'a/b/c/d/e/foo.config.js',
-                'a/b/c/d/.foorc',
-              ]);
-
-              expect(result).toEqual({
-                config: { found: true },
-                filepath: absolutePath('a/b/c/d/.foorc'),
-              });
-            },
-          ]
-        );
-      }
-    );
-
-    testSyncAndAsync(
-      'finds rc file in third searched dir, skipping packageProp, with rcStrictJson',
-      sync => () => {
-        function readFile(searchPath) {
-          switch (searchPath) {
-            case absolutePath('a/b/c/d/e/f/package.json'):
-            case absolutePath('a/b/c/d/e/f/.foorc'):
-            case absolutePath('a/b/c/d/e/f/foo.config.js'):
-            case absolutePath('a/b/c/d/e/.foorc'):
-            case absolutePath('a/b/c/d/e/foo.config.js'):
-              throw { code: 'ENOENT' };
-            case absolutePath('a/b/c/d/e/package.json'):
-              return '{ "author": "Todd", "foo": { "found": true } }';
-            default:
-              throw new Error(`irrelevant path ${searchPath}`);
-          }
-        }
-        const readFileMock = mockReadFile(sync, readFile);
-        const startDir = absolutePath('a/b/c/d/e/f');
-
-        expect.hasAssertions();
-        return testFuncsRunner(
-          sync,
-          cosmiconfig('foo', {
-            js: false,
-            rc: false,
-            stopDir: absolutePath('.'),
-            sync,
-          }).load(startDir),
-          [
-            result => {
-              util.assertSearchSequence(readFileMock, [
-                'a/b/c/d/e/f/package.json',
-                'a/b/c/d/e/package.json',
-              ]);
-
-              expect(result).toEqual({
-                config: { found: true },
-                filepath: absolutePath('a/b/c/d/e/package.json'),
-              });
-            },
-          ]
-        );
-      }
-    );
-
-    // RC file with specified extension
-
-    describe('with rcExtensions', () => {
-      const loadConfig = (sync, startDir) =>
-        cosmiconfig('foo', {
-          stopDir: absolutePath('.'),
-          rcExtensions: true,
-          sync,
-        }).load(startDir);
-
-      testSyncAndAsync(
-        'finds .foorc.json in second searched dir',
-        sync => () => {
-          function readFile(searchPath) {
-            switch (searchPath) {
-              case absolutePath('a/b/c/d/e/f/package.json'):
-              case absolutePath('a/b/c/d/e/f/.foorc'):
-              case absolutePath('a/b/c/d/e/f/.foorc.json'):
-              case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
-              case absolutePath('a/b/c/d/e/f/.foorc.yml'):
-              case absolutePath('a/b/c/d/e/f/.foorc.js'):
-              case absolutePath('a/b/c/d/e/f/foo.config.js'):
-              case absolutePath('a/b/c/d/e/package.json'):
-              case absolutePath('a/b/c/d/e/.foorc'):
-                throw { code: 'ENOENT' };
-              case absolutePath('a/b/c/d/e/.foorc.json'):
-                return '{ "found": true }';
-              default:
-                throw new Error(`irrelevant path ${searchPath}`);
-            }
-          }
-          const readFileMock = mockReadFile(sync, readFile);
-          const startDir = absolutePath('a/b/c/d/e/f');
-
-          expect.hasAssertions();
-          return testFuncsRunner(sync, loadConfig(sync, startDir), [
-            result => {
-              util.assertSearchSequence(readFileMock, [
-                'a/b/c/d/e/f/package.json',
-                'a/b/c/d/e/f/.foorc',
-                'a/b/c/d/e/f/.foorc.json',
-                'a/b/c/d/e/f/.foorc.yaml',
-                'a/b/c/d/e/f/.foorc.yml',
-                'a/b/c/d/e/f/.foorc.js',
-                'a/b/c/d/e/f/foo.config.js',
-                'a/b/c/d/e/package.json',
-                'a/b/c/d/e/.foorc',
-                'a/b/c/d/e/.foorc.json',
-              ]);
-
-              expect(result).toEqual({
-                config: { found: true },
-                filepath: absolutePath('a/b/c/d/e/.foorc.json'),
-              });
-            },
-          ]);
-        }
-      );
-
-      testSyncAndAsync(
-        'finds .foorc.yaml in first searched dir',
-        sync => () => {
-          function readFile(searchPath) {
-            switch (searchPath) {
-              case absolutePath('a/b/c/d/e/f/package.json'):
-              case absolutePath('a/b/c/d/e/f/.foorc'):
-              case absolutePath('a/b/c/d/e/f/.foorc.json'):
-                throw { code: 'ENOENT' };
-              case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
-                return 'found: true';
-              default:
-                throw new Error(`irrelevant path ${searchPath}`);
-            }
-          }
-          const readFileMock = mockReadFile(sync, readFile);
-          const startDir = absolutePath('a/b/c/d/e/f');
-
-          expect.hasAssertions();
-          return testFuncsRunner(sync, loadConfig(sync, startDir), [
-            result => {
-              util.assertSearchSequence(readFileMock, [
-                'a/b/c/d/e/f/package.json',
-                'a/b/c/d/e/f/.foorc',
-                'a/b/c/d/e/f/.foorc.json',
-                'a/b/c/d/e/f/.foorc.yaml',
-              ]);
-
-              expect(result).toEqual({
-                config: { found: true },
-                filepath: absolutePath('a/b/c/d/e/f/.foorc.yaml'),
-              });
-            },
-          ]);
-        }
-      );
-
-      testSyncAndAsync(
-        'finds .foorc.yaml in first searched dir',
-        sync => () => {
-          function readFile(searchPath) {
-            switch (searchPath) {
-              case absolutePath('a/b/c/d/e/f/package.json'):
-              case absolutePath('a/b/c/d/e/f/.foorc'):
-              case absolutePath('a/b/c/d/e/f/.foorc.json'):
-              case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
-                throw { code: 'ENOENT' };
-              case absolutePath('a/b/c/d/e/f/.foorc.yml'):
-                return 'found: true';
-              default:
-                throw new Error(`irrelevant path ${searchPath}`);
-            }
-          }
-          const readFileMock = mockReadFile(sync, readFile);
-          const startDir = absolutePath('a/b/c/d/e/f');
-
-          expect.hasAssertions();
-          return testFuncsRunner(sync, loadConfig(sync, startDir), [
-            result => {
-              util.assertSearchSequence(readFileMock, [
-                'a/b/c/d/e/f/package.json',
-                'a/b/c/d/e/f/.foorc',
-                'a/b/c/d/e/f/.foorc.json',
-                'a/b/c/d/e/f/.foorc.yaml',
-                'a/b/c/d/e/f/.foorc.yml',
-              ]);
-
-              expect(result).toEqual({
-                config: { found: true },
-                filepath: absolutePath('a/b/c/d/e/f/.foorc.yml'),
-              });
-            },
-          ]);
-        }
-      );
-
-      testSyncAndAsync('finds .foorc.js in first searched dir', sync => () => {
-        function readFile(searchPath) {
-          switch (searchPath) {
-            case absolutePath('a/b/c/d/e/f/package.json'):
-            case absolutePath('a/b/c/d/e/f/.foorc'):
-            case absolutePath('a/b/c/d/e/f/.foorc.json'):
-            case absolutePath('a/b/c/d/e/f/.foorc.yaml'):
-            case absolutePath('a/b/c/d/e/f/.foorc.yml'):
-              throw { code: 'ENOENT' };
-            case absolutePath('a/b/c/d/e/f/.foorc.js'):
-              return 'module.exports = { found: true };';
-            default:
-              throw new Error(`irrelevant path ${searchPath}`);
-          }
-        }
-        const readFileMock = mockReadFile(sync, readFile);
-        const startDir = absolutePath('a/b/c/d/e/f');
-
-        expect.hasAssertions();
-        return testFuncsRunner(sync, loadConfig(sync, startDir), [
-          result => {
-            util.assertSearchSequence(readFileMock, [
-              'a/b/c/d/e/f/package.json',
-              'a/b/c/d/e/f/.foorc',
-              'a/b/c/d/e/f/.foorc.json',
-              'a/b/c/d/e/f/.foorc.yaml',
-              'a/b/c/d/e/f/.foorc.yml',
-              'a/b/c/d/e/f/.foorc.js',
-            ]);
-
-            expect(result).toEqual({
-              config: { found: true },
-              filepath: absolutePath('a/b/c/d/e/f/.foorc.js'),
-            });
-          },
-        ]);
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
       });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('finds package.json prop in second searched dir', () => {
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/package.json',
+      '{ "author": "Todd", "foo": { "found": true } }'
+    );
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = { stopDir: temp.absolutePath('.') };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/package.json',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/e/package.json'),
     });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('finds JS file in first searched dir', () => {
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/foo.config.js',
+      'module.exports = { found: true };'
+    );
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = { stopDir: temp.absolutePath('.') };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/foo.config.js',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/e/f/foo.config.js'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('skips over empty file to find JS file in first searched dir', () => {
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/foo.config.js',
+      'module.exports = { found: true };'
+    );
+    temp.createFile('a/b/c/d/e/f/.foorc', '');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = { stopDir: temp.absolutePath('.') };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/foo.config.js',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/e/f/foo.config.js'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('finds package.json in second dir searched, with alternate names', () => {
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/e/package.json', '{ "heeha": { "found": true } }');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    packageProp: 'heeha',
+    searchPlaces: ['package.json', '.wowza', 'wowzaConfig.js'],
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.wowza',
+      'a/b/c/d/e/f/wowzaConfig.js',
+      'a/b/c/d/e/package.json',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/e/package.json'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('finds rc file in third searched dir, skipping packageProp, parsing extensionless files as JSON', () => {
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/.foorc', '{ "found": true }');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    loaders: {
+      noExt: cosmiconfig.loadJson,
+    },
+    searchPlaces: ['.foorc', 'foo.config.js'],
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/.foorc',
+      'a/b/c/d/e/foo.config.js',
+      'a/b/c/d/.foorc',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/.foorc'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('finds package.json file in second searched dir, skipping JS and RC files', () => {
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/package.json',
+      '{ "author": "Todd", "foo": { "found": true } }'
+    );
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    searchPlaces: ['package.json'],
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/package.json',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/e/package.json'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('searching for rc files with extensions, finds .foorc.json in second searched dir', () => {
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/e/.foorc.json', '{ "found": true }');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/.foorc.json',
+      'a/b/c/d/e/f/.foorc.yaml',
+      'a/b/c/d/e/f/.foorc.yml',
+      'a/b/c/d/e/f/.foorc.js',
+      'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/package.json',
+      'a/b/c/d/e/.foorc',
+      'a/b/c/d/e/.foorc.json',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/e/.foorc.json'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('searching for rc files with extensions, finds .foorc.yaml in first searched dir', () => {
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/e/f/.foorc.yaml', 'found: true');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/.foorc.json',
+      'a/b/c/d/e/f/.foorc.yaml',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.yaml'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('searching for rc files with extensions, finds .foorc.yml in first searched dir', () => {
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/e/f/.foorc.yml', 'found: true');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/.foorc.json',
+      'a/b/c/d/e/f/.foorc.yaml',
+      'a/b/c/d/e/f/.foorc.yml',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.yml'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('searching for rc files with extensions, finds .foorc.js in first searched dir', () => {
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.js',
+      'module.exports = { found: true };'
+    );
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/.foorc.json',
+      'a/b/c/d/e/f/.foorc.yaml',
+      'a/b/c/d/e/f/.foorc.yml',
+      'a/b/c/d/e/f/.foorc.js',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.js'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('finds JS file traversing from cwd', () => {
+  const originalCwd = process.cwd();
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/foo.config.js',
+      'module.exports = { found: true };'
+    );
+
+    process.chdir(temp.absolutePath('a/b/c/d/e/f'));
+  });
+
+  afterEach(() => {
+    process.chdir(originalCwd);
+  });
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/package.json',
+      'a/b/c/d/e/.foorc',
+      'a/b/c/d/e/foo.config.js',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/e/foo.config.js'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search()
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync();
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('searchPlaces can include subdirectories', () => {
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/e/.config/.foorc.json', '{ "found": true }');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: [
+      '.foorc.json',
+      'package.json',
+      '.config/.foorc.json',
+      '.config/foo/config.json',
+    ],
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/.foorc.json',
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.config/.foorc.json',
+      'a/b/c/d/e/f/.config/foo/config.json',
+      'a/b/c/d/e/.foorc.json',
+      'a/b/c/d/e/package.json',
+      'a/b/c/d/e/.config/.foorc.json',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/e/.config/.foorc.json'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('custom loaders allow non-default file types', () => {
+  const loadThings = (filepath, content) => {
+    return {
+      things: content
+        .split('\n')
+        .map(x => x.trim())
+        .filter(x => !!x),
+    };
+  };
+
+  const loadGrumbly = () => ({ grumbly: true });
+
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/e/.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: [
+      'package.json',
+      '.foorc.json',
+      '.foorc.yml',
+      '.foorc.things',
+      '.foorc.grumbly',
+    ],
+    loaders: {
+      '.things': loadThings,
+      '.grumbly': loadGrumbly,
+    },
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc.json',
+      'a/b/c/d/e/f/.foorc.yml',
+      'a/b/c/d/e/f/.foorc.things',
+      'a/b/c/d/e/f/.foorc.grumbly',
+      'a/b/c/d/e/package.json',
+      'a/b/c/d/e/.foorc.json',
+      'a/b/c/d/e/.foorc.yml',
+      'a/b/c/d/e/.foorc.things',
+    ]);
+
+    expect(result).toEqual({
+      config: { things: ['one', 'two', 'three', 'four'] },
+      filepath: temp.absolutePath('a/b/c/d/e/.foorc.things'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('adding custom loaders allows for default and non-default file types', () => {
+  const loadThings = (filepath, content) => {
+    return {
+      things: content
+        .split('\n')
+        .map(x => x.trim())
+        .filter(x => !!x),
+    };
+  };
+
+  const loadGrumbly = () => ({ grumbly: true });
+
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/e/.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: [
+      'package.json',
+      '.foorc.json',
+      '.foorc.yml',
+      '.foorc.things',
+      '.foorc.grumbly',
+    ],
+    loaders: {
+      '.things': loadThings,
+      '.grumbly': loadGrumbly,
+    },
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc.json',
+      'a/b/c/d/e/f/.foorc.yml',
+      'a/b/c/d/e/f/.foorc.things',
+      'a/b/c/d/e/f/.foorc.grumbly',
+      'a/b/c/d/e/package.json',
+      'a/b/c/d/e/.foorc.json',
+      'a/b/c/d/e/.foorc.yml',
+      'a/b/c/d/e/.foorc.things',
+    ]);
+
+    expect(result).toEqual({
+      config: { things: ['one', 'two', 'three', 'four'] },
+      filepath: temp.absolutePath('a/b/c/d/e/.foorc.things'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('defaults loaders can be overridden', () => {
+  const loadGrumbly = () => ({ grumbly: true });
+
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/e/foo.config.js', 'foo');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: [
+      'package.json',
+      '.foorc.json',
+      'foo.config.js',
+      '.foorc.yml',
+    ],
+    loaders: {
+      '.js': loadGrumbly,
+    },
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc.json',
+      'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/f/.foorc.yml',
+      'a/b/c/d/e/package.json',
+      'a/b/c/d/e/.foorc.json',
+      'a/b/c/d/e/foo.config.js',
+    ]);
+
+    expect(result).toEqual({
+      config: { grumbly: true },
+      filepath: temp.absolutePath('a/b/c/d/e/foo.config.js'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('custom loaders can be async', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  let loadThingsSync;
+  let loadThingsAsync;
+  let explorerOptions;
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+    loadThingsSync = jest.fn(() => {
+      return { things: true };
+    });
+    loadThingsAsync = jest.fn(() => {
+      return Promise.resolve({ things: true });
+    });
+    explorerOptions = {
+      stopDir: temp.absolutePath('.'),
+      searchPlaces: ['.foorc.things'],
+      loaders: {
+        '.things': { sync: loadThingsSync, async: loadThingsAsync },
+      },
+    };
+  });
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual(['a/b/c/d/e/f/.foorc.things']);
+
+    expect(result).toEqual({
+      config: { things: true },
+      filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.things'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        expect(loadThingsSync).not.toHaveBeenCalled();
+        expect(loadThingsAsync).toHaveBeenCalled();
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    expect(loadThingsSync).toHaveBeenCalled();
+    expect(loadThingsAsync).not.toHaveBeenCalled();
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('a custom loader entry can include just an async loader', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const loadThingsAsync = () => {
+    return Promise.resolve({ things: true });
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual(['a/b/c/d/e/f/.foorc.things']);
+
+    expect(result).toEqual({
+      config: { things: true },
+      filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.things'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+});
+
+describe('a custom loader entry can include only a sync loader and work for both sync and async functions', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const loadThingsSync = () => {
+    return { things: true };
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { sync: loadThingsSync },
+    },
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual(['a/b/c/d/e/f/.foorc.things']);
+
+    expect(result).toEqual({
+      config: { things: true },
+      filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.things'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
   });
 });

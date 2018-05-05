@@ -1,5 +1,31 @@
 # Changelog
 
+## 5.0.0
+
+The API has been completely revamped to increase clarity and enable a very wide range of new usage. **Please read the readme for all the details.**
+
+While the defaults remain just as useful as before — and you can still pass no options at all — now you can also do all kinds of wild and crazy things.
+
+- The `loaders` option allows you specify custom functions to derive config objects from files. Your loader functions could parse ES2015 modules or TypeScript, JSON5, even INI or XML. Whatever suits you.
+- The `searchPlaces` option allows you to specify exactly where cosmiconfig looks within each directory it searches.
+- The combination of `loaders` and `searchPlaces` means that you should be able to load pretty much any kind of configuration file you want, from wherever you want it to look.
+
+Additionally, the overloaded `load()` function has been split up into several clear and focused functions:
+
+- `search()` now searches up the directory tree, and `load()` loads a configuration file that you don't need to search for.
+- The `sync` option has been replaced with separate synchronous functions: `searchSync()` and `loadSync()`.
+- `clearFileCache()` and `clearDirectoryCache()` have been renamed to `clearLoadCache()` and `clearSearchPath()` respectively.
+
+More details:
+
+- The default JS loader uses `require`, instead of `require-from-string`. So you *could* use `require` hooks to control the loading of JS files (e.g. pass them through esm or Babel). In most cases it is probably preferable to use a custom loader.
+- The options `rc`, `js`, and `rcExtensions` have all been removed. You can accomplish the same and more with `searchPlaces`.
+- The option `rcStrictJson` has been removed. To get the same effect, you can specify `noExt: cosmiconfig.loadJson` in your `loaders` object.
+- `packageProp` no longer accepts `false`. If you don't want to look in `package.json`, write a `searchPlaces` array that does not include it.
+- By default, empty files are ignored by `search()`. The new option `ignoreEmptySearchPlaces` allows you to load them, instead, in case you want to do something with empty files.
+- The option `configPath` has been removed. Just pass your filepaths directory to `load()`.
+- Removed the `format` option.  Formats are now all handled via the file extensions specified in `loaders`.
+
 ## 4.0.0
 
 - Licensing improvement: updated `parse-json` from `3.0.0` to `4.0.0`(see [sindresorhus/parse-json#12][parse-json-pr-12]).
@@ -19,7 +45,7 @@
 
 - Removed: support for loading config path using the `--config` flag. cosmiconfig will not parse command line arguments. Your application can parse command line arguments and pass them to cosmiconfig.
 - Removed: `argv` config option.
-- Removed: support for Node versions < 4.
+- Removed: support for Node versions &lt; 4.
 - Added: `sync` option.
 - Fixed: Throw a clear error on getting empty config file.
 - Fixed: when a `options.configPath` is `package.json`, return the package prop, not the entire JSON file.
@@ -61,7 +87,7 @@
 
 - Changed: module now creates cosmiconfig instances with `load` methods (see README).
 - Added: caching (enabled by the change above).
-- Removed: support for Node versions <4.
+- Removed: support for Node versions &lt;4.
 
 ## 1.1.0
 
@@ -80,4 +106,5 @@
 - Initial release.
 
 [parse-json-pr-12]: https://github.com/sindresorhus/parse-json/pull/12
+
 [pr-101]: https://github.com/davidtheclark/cosmiconfig/pull/101

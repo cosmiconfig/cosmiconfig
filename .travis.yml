@@ -7,3 +7,4 @@ node_js:
 branches:
   only:
     - master
+    - v5
