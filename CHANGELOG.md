@@ -1,6 +1,6 @@
 # Changelog
 
-## 5.0.0
+## 5.0.1
 
 The API has been completely revamped to increase clarity and enable a very wide range of new usage. **Please read the readme for all the details.**
 
@@ -26,6 +26,8 @@ More details:
 - By default, empty files are ignored by `search()`. The new option `ignoreEmptySearchPlaces` allows you to load them, instead, in case you want to do something with empty files.
 - The option `configPath` has been removed. Just pass your filepaths directory to `load()`.
 - Removed the `format` option.  Formats are now all handled via the file extensions specified in `loaders`.
+
+(If you're wondering with happened to 5.0.0 ... it was a silly publishing mistake.)
 
 ## 4.0.0
 
