@@ -11,12 +11,15 @@ By default, Cosmiconfig will start where you tell it to start and search up the 
 
 - a `package.json` property
 - a JSON or YAML, extensionless "rc file"
+- an "rc file" with the extensions `.json`, `.yaml`, or `.yml`.
 - a `.config.js` CommonJS module
 
 For example, if your module's name is "soursocks", cosmiconfig will search for configuration in the following places:
 
 - a `soursocks` property in `package.json` (anywhere up the directory tree)
 - a `.soursocksrc` file in JSON or YAML format (anywhere up the directory tree)
+- a `.soursocksrc.json` file
+- a `.soursocksrc.yaml` or `.soursocksrc.yml` file
 - a `soursocks.config.js` file exporting a JS object (anywhere up the directory tree)
 
 Cosmiconfig continues to search up the directory tree, checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
@@ -133,7 +136,9 @@ Here's how your default [`search()`] will work:
 - Starting from `process.cwd()` (or some other directory defined by the `searchFrom` argument to [`search()`]), look for configuration objects in the following places:
   1. A `goldengrahams` property in a `package.json` file.
   2. A `.goldengrahamsrc` file with JSON or YAML syntax.
-  3. A `goldengrahams.config.js` JS file exporting the object.
+  3. A `.goldengrahamsrc.json` file.
+  4. A `.goldengrahamsrc.yaml` or `.goldengrahamsrc.yml` file.
+  5. A `goldengrahams.config.js` JS file exporting the object.
 - If none of those searches reveal a configuration object, move up one directory level and try again.
   So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking the same places in each directory.
 - Continue searching until arriving at your home directory (or some other directory defined by the cosmiconfig option [`stopDir`]).
@@ -221,7 +226,10 @@ Each place is relative to the directory being searched, and the places are check
 [
   'package.json',
   `.${moduleName}rc`,
-  `${moduleName}.config.js`
+  `.${moduleName}rc.json`,
+  `.${moduleName}rc.yaml`,
+  `.${moduleName}rc.yml`,
+  `${moduleName}.config.js`,
 ]
 ```
 
@@ -234,17 +242,14 @@ Read more about [`loaders`] below.
 `package.json` is a special value: When it is included in `searchPlaces`, Cosmiconfig will always parse it as JSON and load a property within it, not the whole file.
 That property is defined with the [`packageProp`] option, and defaults to your module name.
 
-Examples:
+Examples, with a module named `porgy`:
 
 ```js
-// Allow optional extensions on rc files
-// (and your module name is "porgy"):
+// Disallow extensions on rc files:
 [
   'package.json',
   '.porgyrc',
-  '.porgyrc.json',
-  '.porgyrc.yaml',
-  '.porgyrc.yml'
+  'porgy.config.js'
 ]
 
 // ESLint searches for configuration in these places:

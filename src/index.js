@@ -25,6 +25,9 @@ function cosmiconfig(
     searchPlaces: [
       'package.json',
       `.${moduleName}rc`,
+      `.${moduleName}rc.json`,
+      `.${moduleName}rc.yaml`,
+      `.${moduleName}rc.yml`,
       `${moduleName}.config.js`,
     ],
     ignoreEmptySearchPlaces: true,

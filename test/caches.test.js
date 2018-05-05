@@ -30,6 +30,9 @@ describe('cache is not used initially', () => {
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
+      'a/b/c/d/e/.foorc.json',
+      'a/b/c/d/e/.foorc.yaml',
+      'a/b/c/d/e/.foorc.yml',
       'a/b/c/d/e/foo.config.js',
       'a/b/c/d/package.json',
       'a/b/c/d/.foorc',
@@ -144,6 +147,9 @@ describe('cache is used when some directories in search are already visted', () 
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/.foorc.json',
+      'a/b/c/d/e/f/.foorc.yaml',
+      'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/foo.config.js',
     ]);
 
@@ -228,6 +234,9 @@ describe('cache is not used in a new cosmiconfig instance', () => {
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
+      'a/b/c/d/e/.foorc.json',
+      'a/b/c/d/e/.foorc.yaml',
+      'a/b/c/d/e/.foorc.yml',
       'a/b/c/d/e/foo.config.js',
       'a/b/c/d/package.json',
       'a/b/c/d/.foorc',
@@ -350,6 +359,9 @@ describe('clears directory cache on calling clearSearchCache', () => {
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
+      'a/b/c/d/e/.foorc.json',
+      'a/b/c/d/e/.foorc.yaml',
+      'a/b/c/d/e/.foorc.yml',
       'a/b/c/d/e/foo.config.js',
       'a/b/c/d/package.json',
       'a/b/c/d/.foorc',
@@ -396,6 +408,9 @@ describe('clears directory cache on calling clearCaches', () => {
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
+      'a/b/c/d/e/.foorc.json',
+      'a/b/c/d/e/.foorc.yaml',
+      'a/b/c/d/e/.foorc.yml',
       'a/b/c/d/e/foo.config.js',
       'a/b/c/d/package.json',
       'a/b/c/d/.foorc',
@@ -458,6 +473,9 @@ describe('with cache disabled, does not cache directory results', () => {
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
+      'a/b/c/d/e/.foorc.json',
+      'a/b/c/d/e/.foorc.yaml',
+      'a/b/c/d/e/.foorc.yml',
       'a/b/c/d/e/foo.config.js',
       'a/b/c/d/package.json',
       'a/b/c/d/.foorc',
