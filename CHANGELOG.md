@@ -2,14 +2,29 @@
 
 ## 5.0.0
 
-- Changed: `load([searchPath, configPath])` is now split into two functions `search([searchPath])` and `load([configPath])`.  The functionality of searching for a configuration and loading a configuration directly remains the same.
-- Changed: the `sync` option has been replaced with separate synchronous functions: `searchSync()` and `loadSync()`.
-- Changed: `clearFileCache()` and `clearDirectoryCache()` have been renamed to `clearLoadCache()` and `clearSearchPath()` respectively.
-- Changed: `load()` now returns an undefined config and an additional property `isEmpty: true` when loading an empty file.
-- Changed: `search()` now takes a second options argument which can be an object containing a single property `ignoreEmpty`.  This defaults to true and tells cosmiconfig whether to continue the search when an empty config file is found.
-- Changed: Only parse `JSON` and `YAML` for files without an extension.
-- Changed: Use `JSON`'s parser for `JSON` files without an extension.
-- Changed: Replace `require-from-string` with `require`.
+The API has been completely revamped to increase clarity and enable a very wide range of new usage. **Please read the readme for all the details.**
+
+While the defaults remain just as useful as before — and you can still pass no options at all — now you can also do all kinds of wild and crazy things.
+
+- The `loaders` option allows you specify custom functions to derive config objects from files. Your loader functions could parse ES2015 modules or TypeScript, JSON5, even INI or XML. Whatever suits you.
+- The `searchPlaces` option allows you to specify exactly where cosmiconfig looks within each directory it searches.
+- The combination of `loaders` and `searchPlaces` means that you should be able to load pretty much any kind of configuration file you want, from wherever you want it to look.
+
+Additionally, the overloaded `load()` function has been split up into several clear and focused functions:
+
+- `search()` now searches up the directory tree, and `load()` loads a configuration file that you don't need to search for.
+- The `sync` option has been replaced with separate synchronous functions: `searchSync()` and `loadSync()`.
+- `clearFileCache()` and `clearDirectoryCache()` have been renamed to `clearLoadCache()` and `clearSearchPath()` respectively.
+
+More details:
+
+- The default JS loader uses `require`, instead of `require-from-string`. So you *could* use `require` hooks to control the loading of JS files (e.g. pass them through esm or Babel). In most cases it is probably preferable to use a custom loader.
+- The options `rc`, `js`, and `rcExtensions` have all been removed. You can accomplish the same and more with `searchPlaces`.
+- The option `rcStrictJson` has been removed. To get the same effect, you can specify `noExt: cosmiconfig.loadJson` in your `loaders` object.
+- `packageProp` no longer accepts `false`. If you don't want to look in `package.json`, write a `searchPlaces` array that does not include it.
+- By default, empty files are ignored by `search()`. The new option `ignoreEmptySearchPlaces` allows you to load them, instead, in case you want to do something with empty files.
+- The option `configPath` has been removed. Just pass your filepaths directory to `load()`.
+- Removed the `format` option.  Formats are now all handled via the file extensions specified in `loaders`.
 
 ## 4.0.0
 

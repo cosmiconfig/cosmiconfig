@@ -3,36 +3,75 @@
 
 const os = require('os');
 const createExplorer = require('./createExplorer');
+const loaders = require('./loaders');
 
-const homedir = os.homedir();
+module.exports = cosmiconfig;
 
-module.exports = function cosmiconfig(
+function cosmiconfig(
   moduleName: string,
   options: {
-    packageProp?: string | false,
-    rc?: string | false,
-    js?: string | false,
-    rcStrictJson?: boolean,
-    rcExtensions?: boolean,
+    packageProp?: string,
+    loaders?: Object,
+    searchPlaces?: Array<string>,
+    ignoreEmptySearchPlaces?: boolean,
     stopDir?: string,
     cache?: boolean,
     transform?: CosmiconfigResult => CosmiconfigResult,
-    configPath?: string,
   }
 ) {
-  const x: ExplorerOptions = Object.assign(
+  options = options || {};
+  const defaults = {
+    packageProp: moduleName,
+    searchPlaces: [
+      'package.json',
+      `.${moduleName}rc`,
+      `${moduleName}.config.js`,
+    ],
+    ignoreEmptySearchPlaces: true,
+    stopDir: os.homedir(),
+    cache: true,
+    transform: identity,
+  };
+  const normalizedOptions: ExplorerOptions = Object.assign(
     {},
+    defaults,
+    options,
     {
-      packageProp: moduleName,
-      rc: `.${moduleName}rc`,
-      js: `${moduleName}.config.js`,
-      rcStrictJson: false,
-      rcExtensions: false,
-      stopDir: homedir,
-      cache: true,
-    },
-    options
+      loaders: normalizeLoaders(options.loaders),
+    }
   );
 
-  return createExplorer(x);
-};
+  return createExplorer(normalizedOptions);
+}
+
+cosmiconfig.loadJs = loaders.loadJs;
+cosmiconfig.loadJson = loaders.loadJson;
+cosmiconfig.loadYaml = loaders.loadYaml;
+
+function normalizeLoaders(rawLoaders?: Object): Loaders {
+  const defaults = {
+    '.js': { sync: loaders.loadJs, async: loaders.loadJs },
+    '.json': { sync: loaders.loadJson, async: loaders.loadJson },
+    '.yaml': { sync: loaders.loadYaml, async: loaders.loadYaml },
+    '.yml': { sync: loaders.loadYaml, async: loaders.loadYaml },
+    noExt: { sync: loaders.loadYaml, async: loaders.loadYaml },
+  };
+
+  if (!rawLoaders) {
+    return defaults;
+  }
+
+  return Object.keys(rawLoaders).reduce((result, ext) => {
+    const entry = rawLoaders && rawLoaders[ext];
+    if (typeof entry === 'function') {
+      result[ext] = { sync: entry, async: entry };
+    } else {
+      result[ext] = entry;
+    }
+    return result;
+  }, defaults);
+}
+
+function identity(x) {
+  return x;
+}

@@ -203,90 +203,9 @@ describe('returns an empty config result for empty file, format YAML', () => {
   });
 });
 
-describe('throws error if defined JSON file has unknown extension', () => {
-  beforeEach(() => {
-    temp.createFile('foo-invalid-json', '{ "foo": true: }');
-  });
-
-  const file = temp.absolutePath('foo-invalid-json');
-  const checkError = error => {
-    expect(error.message).toMatch(/^Failed to parse/);
-  };
-
-  test('async', () => {
-    expect.hasAssertions();
-    return cosmiconfig()
-      .load(file)
-      .catch(checkError);
-  });
-
-  test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig().loadSync(file);
-    } catch (error) {
-      checkError(error);
-    }
-  });
-});
-
-describe('throws error if defined YAML file has unknown extension', () => {
-  beforeEach(() => {
-    temp.createFile('foo-invalid-yaml', 'foo: true: false');
-  });
-
-  const file = temp.absolutePath('foo-invalid-yaml');
-  const checkError = error => {
-    expect(error.message).toMatch(/^Failed to parse/);
-  };
-
-  test('async', () => {
-    expect.hasAssertions();
-    return cosmiconfig()
-      .load(file)
-      .catch(checkError);
-  });
-
-  test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig().loadSync(file);
-    } catch (error) {
-      checkError(error);
-    }
-  });
-});
-
-describe('throws error if configPath is package.json and packageProp is false', () => {
-  beforeEach(() => {
-    temp.createFile('package.json', '{ "foo": { "bar": "baz" } }');
-  });
-
-  const file = temp.absolutePath('package.json');
-  const checkError = error => {
-    expect(error.message).toMatch(/^Please specify the packageProp option/);
-  };
-
-  test('async', () => {
-    expect.hasAssertions();
-    return cosmiconfig('foo', { packageProp: false })
-      .load(file)
-      .catch(checkError);
-  });
-
-  test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig('foo', { packageProp: false }).loadSync(file);
-    } catch (error) {
-      checkError(error);
-    }
-  });
-});
-
 describe('throws an error if no configPath was specified and load is called without an argument', () => {
   const checkError = error => {
-    expect(error.message).toMatch(/^configPath must be a nonempty string/);
+    expect(error.message).toMatch(/non-empty string/);
   };
 
   test('async', () => {
@@ -300,6 +219,96 @@ describe('throws an error if no configPath was specified and load is called with
     expect.hasAssertions();
     try {
       cosmiconfig('not_exist_rc_name').loadSync();
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+describe('errors not swallowed when async custom loader throws them', () => {
+  const file = temp.absolutePath('.foorc.things');
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const expectedError = new Error();
+  const loadThingsAsync = () => {
+    throw expectedError;
+  };
+
+  const explorerOptions = {
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const checkError = error => {
+    expect(error).toBe(expectedError);
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('not_exist_rc_name', explorerOptions)
+      .load(file)
+      .catch(checkError);
+  });
+});
+
+describe('errors not swallowed when async custom loader rejects', () => {
+  const file = temp.absolutePath('.foorc.things');
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const expectedError = new Error();
+  const loadThingsAsync = () => {
+    return Promise.reject(expectedError);
+  };
+
+  const explorerOptions = {
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const checkError = error => {
+    expect(error).toBe(expectedError);
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('not_exist_rc_name', explorerOptions)
+      .load(file)
+      .catch(checkError);
+  });
+});
+
+describe('errors if only async loader is set but you call sync search', () => {
+  const file = temp.absolutePath('.foorc.things');
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const loadThingsAsync = () => {
+    return Promise.resolve({ things: true });
+  };
+
+  const explorerOptions = {
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const checkError = error => {
+    expect(error.message).toMatch(
+      /No sync loader specified for extension "\.things"/
+    );
+  };
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('not_exist_rc_name', explorerOptions).loadSync(file);
     } catch (error) {
       checkError(error);
     }

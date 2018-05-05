@@ -134,31 +134,6 @@ describe('loads yaml-like JS config path', () => {
   });
 });
 
-describe('respects options.configPath', () => {
-  beforeEach(() => {
-    temp.createFile('foo.json', '{ "foo": true }');
-  });
-
-  const configPath = temp.absolutePath('foo.json');
-  const checkResult = result => {
-    expect(result.config).toEqual({
-      foo: true,
-    });
-    expect(result.filepath).toBe(configPath);
-  };
-
-  test('async', () => {
-    return cosmiconfig('foo', { configPath })
-      .load()
-      .then(checkResult);
-  });
-
-  test('sync', () => {
-    const result = cosmiconfig('foo', { configPath }).loadSync();
-    checkResult(result);
-  });
-});
-
 describe('loads package prop when configPath is package.json', () => {
   beforeEach(() => {
     temp.createFile('package.json', '{ "foo": { "bar": "baz" } }');
@@ -173,13 +148,13 @@ describe('loads package prop when configPath is package.json', () => {
   };
 
   test('async', () => {
-    return cosmiconfig('foo', { configPath })
-      .load()
+    return cosmiconfig('foo')
+      .load(configPath)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', { configPath }).loadSync();
+    const result = cosmiconfig('foo').loadSync(configPath);
     checkResult(result);
   });
 });
@@ -241,7 +216,7 @@ describe('does not swallow transform errors', () => {
   });
 });
 
-describe('loads defined JSON file has unknown extension', () => {
+describe('loads defined JSON file with no extension', () => {
   beforeEach(() => {
     temp.createFile('foo-valid-json', '{ "json": true }');
   });
@@ -266,7 +241,7 @@ describe('loads defined JSON file has unknown extension', () => {
   });
 });
 
-describe('loads defined YAML file has unknown extension', () => {
+describe('loads defined YAML file with no extension', () => {
   beforeEach(() => {
     temp.createFile('foo-valid-yaml', 'yaml: true');
   });
@@ -287,6 +262,104 @@ describe('loads defined YAML file has unknown extension', () => {
 
   test('sync', () => {
     const result = cosmiconfig().loadSync(file);
+    checkResult(result);
+  });
+});
+
+describe('custom loaders can be async', () => {
+  let loadThingsSync;
+  let loadThingsAsync;
+  let explorerOptions;
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+    loadThingsSync = jest.fn(() => {
+      return { things: true };
+    });
+    loadThingsAsync = jest.fn(() => {
+      return Promise.resolve({ things: true });
+    });
+    explorerOptions = {
+      loaders: {
+        '.things': { sync: loadThingsSync, async: loadThingsAsync },
+      },
+    };
+  });
+
+  const file = temp.absolutePath('.foorc.things');
+  const checkResult = result => {
+    expect(result.config).toEqual({ things: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig('foo', explorerOptions)
+      .load(file)
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig('foo', explorerOptions).loadSync(file);
+    checkResult(result);
+  });
+});
+
+describe('a custom loader entry can include just an async loader', () => {
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const loadThingsAsync = () => {
+    return Promise.resolve({ things: true });
+  };
+
+  const explorerOptions = {
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const file = temp.absolutePath('.foorc.things');
+  const checkResult = result => {
+    expect(result.config).toEqual({ things: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig('foo', explorerOptions)
+      .load(file)
+      .then(checkResult);
+  });
+});
+
+describe('a custom loader entry can include only a sync loader and work for both sync and async functions', () => {
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const loadThingsAsync = () => {
+    return { things: true };
+  };
+
+  const explorerOptions = {
+    loaders: {
+      '.things': { sync: loadThingsAsync },
+    },
+  };
+
+  const file = temp.absolutePath('.foorc.things');
+  const checkResult = result => {
+    expect(result.config).toEqual({ things: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig('foo', explorerOptions)
+      .load(file)
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig('foo', explorerOptions).loadSync(file);
     checkResult(result);
   });
 });

@@ -61,6 +61,10 @@
     "collectCoverageFrom": [
       "src/*.js"
     ],
+    "coverageReporters": [
+      "text",
+      "html"
+    ],
     "coverageThreshold": {
       "global": {
         "branches": 100,

@@ -125,7 +125,7 @@ describe('throws error for invalid YAML in rc file', () => {
   });
 });
 
-describe('throws error for invalid JSON in rc file with rcStrictJson', () => {
+describe('throws error for invalid JSON in extensionless rc file loaded as JSON', () => {
   beforeEach(() => {
     temp.createFile('a/b/.foorc', 'found: true: broken');
   });
@@ -133,7 +133,9 @@ describe('throws error for invalid JSON in rc file with rcStrictJson', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = {
     stopDir: temp.absolutePath('a'),
-    rcStrictJson: true,
+    loaders: {
+      noExt: cosmiconfig.loadJson,
+    },
   };
 
   const checkError = error => {
@@ -218,7 +220,7 @@ describe('throws error for invalid JS in .config.js file', () => {
   });
 });
 
-describe('with rcExtensions, throws error for invalid JSON in .foorc.json', () => {
+describe('searching for rc files with extensions, throws error for invalid JSON in .foorc.json', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.json', '{ "found": true,, }');
   });
@@ -226,7 +228,15 @@ describe('with rcExtensions, throws error for invalid JSON in .foorc.json', () =
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
-    rcExtensions: true,
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
   };
 
   const checkError = error => {
@@ -250,7 +260,7 @@ describe('with rcExtensions, throws error for invalid JSON in .foorc.json', () =
   });
 });
 
-describe('with rcExtensions, throws error for invalid YAML in .foorc.yml', () => {
+describe('searching for rc files with extensions, throws error for invalid YAML in .foorc.yml', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.yml', 'found: thing: true');
   });
@@ -258,7 +268,15 @@ describe('with rcExtensions, throws error for invalid YAML in .foorc.yml', () =>
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
-    rcExtensions: true,
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
   };
 
   const checkError = error => {
@@ -282,7 +300,7 @@ describe('with rcExtensions, throws error for invalid YAML in .foorc.yml', () =>
   });
 });
 
-describe('with rcExtensions, throws error for invalid JS in .foorc.js', () => {
+describe('searching for rc files with extensions, throws error for invalid JS in .foorc.js', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.js', 'module.exports = found: true };');
   });
@@ -290,7 +308,15 @@ describe('with rcExtensions, throws error for invalid JS in .foorc.js', () => {
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
-    rcExtensions: true,
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
   };
 
   const checkError = error => {
@@ -314,13 +340,16 @@ describe('with rcExtensions, throws error for invalid JS in .foorc.js', () => {
   });
 });
 
-describe('with ignoreEmpty: false, returns an empty config result for an empty rc file', () => {
+describe('without ignoring empty files, returns an empty config result for an empty rc file', () => {
   beforeEach(() => {
     temp.createFile('a/b/.foorc', '');
   });
 
   const startDir = temp.absolutePath('a/b');
-  const explorerOptions = { stopDir: temp.absolutePath('a') };
+  const explorerOptions = {
+    stopDir: temp.absolutePath('a'),
+    ignoreEmptySearchPlaces: false,
+  };
 
   const checkResult = result => {
     expect(result).toEqual({
@@ -332,25 +361,26 @@ describe('with ignoreEmpty: false, returns an empty config result for an empty r
 
   test('async', () => {
     return cosmiconfig('foo', explorerOptions)
-      .search(startDir, { ignoreEmpty: false })
+      .search(startDir)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir, {
-      ignoreEmpty: false,
-    });
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(result);
   });
 });
 
-describe('with ignoreEmpty: false, returns an empty config result for an empty .config.js file', () => {
+describe('without ignoring empty files, returns an empty config result for an empty .config.js file', () => {
   beforeEach(() => {
     temp.createFile('a/b/foo.config.js', '');
   });
 
   const startDir = temp.absolutePath('a/b');
-  const explorerOptions = { stopDir: temp.absolutePath('a') };
+  const explorerOptions = {
+    stopDir: temp.absolutePath('a'),
+    ignoreEmptySearchPlaces: false,
+  };
 
   const checkResult = result => {
     expect(result).toEqual({
@@ -362,19 +392,17 @@ describe('with ignoreEmpty: false, returns an empty config result for an empty .
 
   test('async', () => {
     return cosmiconfig('foo', explorerOptions)
-      .search(startDir, { ignoreEmpty: false })
+      .search(startDir)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir, {
-      ignoreEmpty: false,
-    });
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(result);
   });
 });
 
-describe('with ignoreEmtpy and rcExtensions, returns an empty config result for an empty .json rc file', () => {
+describe('without ignoring empty files and searching for rc files with extensions, returns an empty config result for an empty .json rc file', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.json', '');
   });
@@ -382,7 +410,16 @@ describe('with ignoreEmtpy and rcExtensions, returns an empty config result for 
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('a'),
-    rcExtensions: true,
+    ignoreEmptySearchPlaces: false,
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
   };
 
   const checkResult = result => {
@@ -395,19 +432,17 @@ describe('with ignoreEmtpy and rcExtensions, returns an empty config result for 
 
   test('async', () => {
     return cosmiconfig('foo', explorerOptions)
-      .search(startDir, { ignoreEmpty: false })
+      .search(startDir)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir, {
-      ignoreEmpty: false,
-    });
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(result);
   });
 });
 
-describe('with ignoreEmtpy and rcExtensions, returns an empty config result for an empty .yaml rc file', () => {
+describe('without ignoring empty configs and searching for rc files with extensions, returns an empty config result for an empty .yaml rc file', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.yaml', '');
   });
@@ -415,7 +450,16 @@ describe('with ignoreEmtpy and rcExtensions, returns an empty config result for 
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('a'),
-    rcExtensions: true,
+    ignoreEmptySearchPlaces: false,
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
   };
 
   const checkResult = result => {
@@ -428,19 +472,17 @@ describe('with ignoreEmtpy and rcExtensions, returns an empty config result for 
 
   test('async', () => {
     return cosmiconfig('foo', explorerOptions)
-      .search(startDir, { ignoreEmpty: false })
+      .search(startDir)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir, {
-      ignoreEmpty: false,
-    });
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(result);
   });
 });
 
-describe('with ignoreEmpty and rcExtensions, returns an empty config result for an empty .js rc file', () => {
+describe('without ignoring empty configs and searching for rc files with extensions, returns an empty config result for an empty .js rc file', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.js', '');
   });
@@ -448,7 +490,16 @@ describe('with ignoreEmpty and rcExtensions, returns an empty config result for 
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('a'),
-    rcExtensions: true,
+    ignoreEmptySearchPlaces: false,
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
   };
 
   const checkResult = result => {
@@ -461,19 +512,17 @@ describe('with ignoreEmpty and rcExtensions, returns an empty config result for 
 
   test('async', () => {
     return cosmiconfig('foo', explorerOptions)
-      .search(startDir, { ignoreEmpty: false })
+      .search(startDir)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir, {
-      ignoreEmpty: false,
-    });
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(result);
   });
 });
 
-describe('with ignoreEmpty and rcExtensions, returns an empty config result for an empty .js rc file with whitespace', () => {
+describe('without ignoring empty configs and searching for rc files with extensions, returns an empty config result for an empty .js rc file with whitespace', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.js', ' \t\r\v\n\f');
   });
@@ -481,7 +530,16 @@ describe('with ignoreEmpty and rcExtensions, returns an empty config result for 
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
     stopDir: temp.absolutePath('a'),
-    rcExtensions: true,
+    ignoreEmptySearchPlaces: false,
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.json',
+      '.foorc.yaml',
+      '.foorc.yml',
+      '.foorc.js',
+      'foo.config.js',
+    ],
   };
 
   const checkResult = result => {
@@ -494,14 +552,290 @@ describe('with ignoreEmpty and rcExtensions, returns an empty config result for 
 
   test('async', () => {
     return cosmiconfig('foo', explorerOptions)
-      .search(startDir, { ignoreEmpty: false })
+      .search(startDir)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir, {
-      ignoreEmpty: false,
-    });
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
     checkResult(result);
+  });
+});
+
+describe('throws error if a file in searchPlaces does not have a corresponding loader', () => {
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: [
+      'package.json',
+      '.foorc',
+      '.foorc.things',
+      '.foorc.js',
+      'foo.config.js',
+    ],
+  };
+
+  const checkError = error => {
+    expect(error.message).toMatch(
+      /No loader specified for extension "\.things"/
+    );
+  };
+
+  test('on instantiation', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('foo', explorerOptions);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+describe('throws error if an extensionless file in searchPlaces does not have a corresponding loader', () => {
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/e/f/.foorc', '{ "foo": "bar" }');
+  });
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['package.json', '.foorc'],
+    loaders: {
+      noExt: undefined,
+    },
+  };
+
+  const checkError = error => {
+    expect(error.message).toMatch(
+      /No loader specified for files without extensions/
+    );
+  };
+
+  test('on instantiation', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('foo', explorerOptions);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+describe('does not swallow errors from custom loaders', () => {
+  const loadJs = () => {
+    throw new Error('Failed to load JS');
+  };
+
+  beforeEach(() => {
+    temp.createFile('a/b/c/d/e/f/.foorc.js', 'module.exports = {};');
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['package.json', '.foorc', '.foorc.js'],
+    loaders: {
+      '.js': loadJs,
+    },
+  };
+
+  const checkError = error => {
+    expect(error.message).toBe('Failed to load JS');
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .catch(checkError);
+  });
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+describe('errors not swallowed when async custom loader throws them', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const expectedError = new Error();
+  const loadThingsAsync = () => {
+    throw expectedError;
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const checkError = error => {
+    expect(error).toBe(expectedError);
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .catch(checkError);
+  });
+});
+
+describe('errors not swallowed when async custom loader rejects', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const expectedError = new Error();
+  const loadThingsAsync = () => {
+    return Promise.reject(expectedError);
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { async: loadThingsAsync },
+    },
+  };
+
+  const checkError = error => {
+    expect(error).toBe(expectedError);
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .catch(checkError);
+  });
+});
+
+describe('errors if only async loader is set but you call sync search', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const loadThings = () => {
+    return Promise.resolve({ things: true });
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { async: loadThings },
+    },
+  };
+
+  const checkError = error => {
+    expect(error.message).toMatch(
+      /No sync loader specified for extension "\.things"/
+    );
+  };
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
+
+describe('errors if it cannot figure out an async loader', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const loadThings = () => {
+    return Promise.resolve({ things: true });
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { wawa: loadThings },
+    },
+  };
+
+  const checkError = error => {
+    expect(error.message).toMatch(
+      /No async loader specified for extension "\.things"/
+    );
+  };
+
+  test('async', () => {
+    expect.hasAssertions();
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .catch(checkError);
+  });
+});
+
+describe('errors if sync loader returns a Promise', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.things',
+      'one\ntwo\nthree\t\t\n  four\n'
+    );
+  });
+
+  const loadThings = () => {
+    return Promise.resolve({ things: true });
+  };
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['.foorc.things'],
+    loaders: {
+      '.things': { sync: loadThings },
+    },
+  };
+
+  const checkError = error => {
+    expect(error.message).toMatch(
+      /The sync loader for "\.foorc.things" returned a Promise/
+    );
+  };
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    } catch (error) {
+      checkError(error);
+    }
   });
 });
