@@ -14,13 +14,13 @@ By default, Cosmiconfig will start where you tell it to start and search up the 
 - an "rc file" with the extensions `.json`, `.yaml`, or `.yml`.
 - a `.config.js` CommonJS module
 
-For example, if your module's name is "soursocks", cosmiconfig will search for configuration in the following places:
+For example, if your module's name is "soursocks", cosmiconfig will search up the directory tree for configuration in the following places:
 
-- a `soursocks` property in `package.json` (anywhere up the directory tree)
-- a `.soursocksrc` file in JSON or YAML format (anywhere up the directory tree)
+- a `soursocks` property in `package.json`
+- a `.soursocksrc` file in JSON or YAML format
 - a `.soursocksrc.json` file
 - a `.soursocksrc.yaml` or `.soursocksrc.yml` file
-- a `soursocks.config.js` file exporting a JS object (anywhere up the directory tree)
+- a `soursocks.config.js` file exporting a JS object
 
 Cosmiconfig continues to search up the directory tree, checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
 
