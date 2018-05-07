@@ -966,3 +966,29 @@ describe('a custom loader entry can include only a sync loader and work for both
     checkResult(readFileSpy, result);
   });
 });
+
+describe('works fine if sync loader returns a Promise from a JS file', () => {
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/foo.config.js',
+      'module.exports = Promise.resolve({ a: 1 });'
+    );
+  });
+
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['foo.config.js'],
+  };
+
+  test('sync', () => {
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    expect(result).toEqual({
+      filepath: temp.absolutePath('a/b/c/d/e/f/foo.config.js'),
+      config: expect.any(Promise),
+    });
+    return result.config.then(resolved => {
+      expect(resolved).toEqual({ a: 1 });
+    });
+  });
+});
