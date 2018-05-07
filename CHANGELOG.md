@@ -1,5 +1,9 @@
 # Changelog
 
+## HEAD
+
+- Fixed: Allow `searchSync` and `loadSync` to load JS configuration files whose export is a Promise.
+
 ## 5.0.1
 
 The API has been completely revamped to increase clarity and enable a very wide range of new usage. **Please read the readme for all the details.**

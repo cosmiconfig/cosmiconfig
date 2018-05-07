@@ -223,17 +223,7 @@ class Explorer {
       mode === MODE_SYNC
         ? this.getSyncLoaderForFile(filepath)
         : this.getAsyncLoaderForFile(filepath);
-    const loadedContent = loader(filepath, content);
-
-    if (mode === MODE_SYNC && loadedContent instanceof Promise) {
-      throw new Error(
-        `The sync loader for "${path.basename(
-          filepath
-        )}" returned a Promise. Sync loaders need to be synchronous.`
-      );
-    }
-
-    return loadedContent;
+    return loader(filepath, content);
   }
 
   loadedContentToCosmiconfigResult(

@@ -354,10 +354,11 @@ Then it can be used regardless of whether you end up calling [`search()`] or [`s
 If you want or need to provide an async-only loader, you can do so by making the value of `loaders` an object with an `async` property whose value is the async loader.
 You can also add a `sync` property to designate a sync loader, if you want to use both async and sync search and load functions.
 
-If an extension has *only* an async loader but you try to use [`searchSync()`] or [`loadSync()`], an error will be thrown.
+A few things to note:
 
-Note that **special JS syntax can also be handled by using a `require` hook**, because `cosmiconfig.loadJs` just uses `require`.
-Whether you use custom loaders or a `require` hook is up to you.
+- If you use a custom loader, be aware of whether it's sync or async and how that aligned with your usage of sync or async search and load functions.
+- **Special JS syntax can also be handled by using a `require` hook**, because `cosmiconfig.loadJs` just uses `require`.
+  Whether you use custom loaders or a `require` hook is up to you.
 
 Examples:
 
