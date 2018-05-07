@@ -1,6 +1,6 @@
 # Changelog
 
-## HEAD
+## 5.0.2
 
 - Fixed: Allow `searchSync` and `loadSync` to load JS configuration files whose export is a Promise.
 
