@@ -262,7 +262,7 @@ class Explorer {
 
   validateFilePath(filepath?: string) {
     if (!filepath) {
-      throw new Error('load and loadSync must be pass a non-empty string');
+      throw new Error('load and loadSync must pass a non-empty string');
     }
   }
 
