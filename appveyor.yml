@@ -10,6 +10,7 @@ branches:
     - master
     - v5
 
+clone_depth: 5
 version: "{build}"
 build: off
 deploy: off
