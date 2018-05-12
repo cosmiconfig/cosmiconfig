@@ -6,6 +6,7 @@ node_js:
   - "10"
 git:
   depth: 5
+cache: yarn
 branches:
   only:
     - master
