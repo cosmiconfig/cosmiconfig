@@ -165,7 +165,7 @@ If it's a file, the search starts in that file's directory.
 ## explorer.searchSync()
 
 ```js
-const result = explorer.search([searchFrom]);
+const result = explorer.searchSync([searchFrom]);
 ```
 
 Synchronous version of [`search()`].
@@ -175,7 +175,7 @@ Returns a [result] or `null`.
 ## explorer.load()
 
 ```js
-explorer.load([loadPath]).then(result => {..})
+explorer.load(loadPath).then(result => {..})
 ```
 
 Loads a configuration file. Returns a Promise that resolves with a [result] or rejects with an error (if the file does not exist or cannot be loaded).
@@ -191,7 +191,7 @@ If you load a `package.json` file, the result will be derived from whatever prop
 ## explorer.loadSync()
 
 ```js
-const result = explorer.load([loadPath]);
+const result = explorer.loadSync(loadPath);
 ```
 
 Synchronous version of [`load()`].
