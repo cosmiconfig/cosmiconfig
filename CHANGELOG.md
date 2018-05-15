@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.3
+
+- Docs: Minor corrections to documentation. *Released to update package documentation on npm*.
+
 ## 5.0.2
 
 - Fixed: Allow `searchSync` and `loadSync` to load JS configuration files whose export is a Promise.
