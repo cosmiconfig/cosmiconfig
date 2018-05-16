@@ -53,6 +53,7 @@ If you are still using v4, those v4 docs are available [in the `4.0.0` tag](http
   - [cache](#cache)
   - [transform](#transform)
   - [ignoreEmptySearchPlaces](#ignoreemptysearchplaces)
+  - [fs](#fs)
 - [Caching](#caching)
 - [Differences from rc](#differences-from-rc)
 - [Contributing & Development](#contributing--development)
@@ -438,6 +439,37 @@ If you'd like to load empty configuration files, instead, set this option to `fa
 
 Why might you want to load empty configuration files?
 If you want to throw an error, or if an empty configuration file means something to your program.
+
+### fs
+
+Type:
+
+```js
+interface ErrnoError extends Error {
+  code?: string;
+};
+
+interface Stats {
+  isDirectory(): boolean;
+};
+
+interface FS {
+  stat(path: string, callback?: (err: ?ErrnoError, stats: Stats) => any): void;
+  statSync(path: string): Stats;
+  readFile(
+    path: string,
+    encoding: string,
+    callback: (err: ?ErrnoError, data: string) => void
+  ): void;
+  readFileSync(path: string, encoding: string): string;
+};
+```
+
+Default: `require('fs')`.
+
+If for some reason, the file system is not available but you wish to leverage Cosmiconfig for it's search and parsing capabilities, you can do so by passing a virtual file system instance(ex: [`memory-fs`](https://github.com/webpack/memory-fs), [memfs](https://github.com/streamich/memfs)). See [#105](https://github.com/davidtheclark/cosmiconfig/issues/105) for more details.
+
+By default, Cosmiconfig uses the native [`fs`](https://nodejs.org/api/fs.html) module to search and load configuration files.
 
 ## Caching
 

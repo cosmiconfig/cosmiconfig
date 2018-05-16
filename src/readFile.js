@@ -1,13 +1,15 @@
 // @flow
 'use strict';
 
-const fs = require('fs');
-
 type Options = {
   throwNotFound?: boolean,
 };
 
-function readFile(filepath: string, options?: Options): Promise<string | null> {
+function readFile(
+  fs: FS,
+  filepath: string,
+  options?: Options
+): Promise<string | null> {
   options = options || {};
   const throwNotFound = options.throwNotFound || false;
 
@@ -23,6 +25,7 @@ function readFile(filepath: string, options?: Options): Promise<string | null> {
 }
 
 readFile.sync = function readFileSync(
+  fs: FS,
   filepath: string,
   options?: Options
 ): string | null {

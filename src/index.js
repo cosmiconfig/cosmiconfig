@@ -1,6 +1,7 @@
 // @flow
 'use strict';
 
+const fs = require('fs');
 const os = require('os');
 const createExplorer = require('./createExplorer');
 const loaders = require('./loaders');
@@ -35,6 +36,7 @@ function cosmiconfig(
     stopDir: os.homedir(),
     cache: true,
     transform: identity,
+    fs,
   };
   const normalizedOptions: ExplorerOptions = Object.assign(
     {},

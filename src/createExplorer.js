@@ -16,6 +16,7 @@ const MODE_SYNC = 'sync';
 type LoadedFileContent = Object | null | void;
 
 class Explorer {
+  fs: FS;
   loadCache: ?Map<string, Promise<CosmiconfigResult>>;
   loadSyncCache: ?Map<string, CosmiconfigResult>;
   searchCache: ?Map<string, Promise<CosmiconfigResult>>;
@@ -23,6 +24,7 @@ class Explorer {
   config: ExplorerOptions;
 
   constructor(options: ExplorerOptions) {
+    this.fs = options.fs;
     this.loadCache = options.cache ? new Map() : null;
     this.loadSyncCache = options.cache ? new Map() : null;
     this.searchCache = options.cache ? new Map() : null;
@@ -72,7 +74,7 @@ class Explorer {
 
   search(searchFrom?: string): Promise<CosmiconfigResult> {
     searchFrom = searchFrom || process.cwd();
-    return getDirectory(searchFrom).then(dir => {
+    return getDirectory(this.fs, searchFrom).then(dir => {
       return this.searchFromDirectory(dir);
     });
   }
@@ -97,7 +99,7 @@ class Explorer {
 
   searchSync(searchFrom?: string): CosmiconfigResult {
     searchFrom = searchFrom || process.cwd();
-    const dir = getDirectory.sync(searchFrom);
+    const dir = getDirectory.sync(this.fs, searchFrom);
     return this.searchFromDirectorySync(dir);
   }
 
@@ -146,14 +148,14 @@ class Explorer {
 
   loadSearchPlace(dir: string, place: string): Promise<CosmiconfigResult> {
     const filepath = path.join(dir, place);
-    return readFile(filepath).then(content => {
+    return readFile(this.fs, filepath).then(content => {
       return this.createCosmiconfigResult(filepath, content);
     });
   }
 
   loadSearchPlaceSync(dir: string, place: string): CosmiconfigResult {
     const filepath = path.join(dir, place);
-    const content = readFile.sync(filepath);
+    const content = readFile.sync(this.fs, filepath);
     return this.createCosmiconfigResultSync(filepath, content);
   }
 
@@ -271,7 +273,7 @@ class Explorer {
       this.validateFilePath(filepath);
       const absoluteFilePath = path.resolve(process.cwd(), filepath);
       return cacheWrapper(this.loadCache, absoluteFilePath, () => {
-        return readFile(absoluteFilePath, { throwNotFound: true })
+        return readFile(this.fs, absoluteFilePath, { throwNotFound: true })
           .then(content => {
             return this.createCosmiconfigResult(absoluteFilePath, content);
           })
@@ -284,7 +286,9 @@ class Explorer {
     this.validateFilePath(filepath);
     const absoluteFilePath = path.resolve(process.cwd(), filepath);
     return cacheWrapper(this.loadSyncCache, absoluteFilePath, () => {
-      const content = readFile.sync(absoluteFilePath, { throwNotFound: true });
+      const content = readFile.sync(this.fs, absoluteFilePath, {
+        throwNotFound: true,
+      });
       const result = this.createCosmiconfigResultSync(
         absoluteFilePath,
         content
