@@ -1,13 +1,15 @@
 language: node_js
-node_js:
-  - "4"	
-  - "6"	
-  - "8"
-  - "10"
 git:
   depth: 5
 cache: yarn
 branches:
   only:
     - master
-    - v5
+matrix:
+  include:
+    - node_js: "4"
+    - node_js: "6"
+    - node_js: "8"
+    - node_js: "10"
+    - node_js: "8"
+      script: npm run report-coverage
