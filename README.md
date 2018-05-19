@@ -19,8 +19,7 @@ For example, if your module's name is "soursocks", cosmiconfig will search up th
 - a `soursocks` property in `package.json`
 - a `.soursocksrc` file in JSON or YAML format
 - a `.soursocksrc.json` file
-- a `.soursocksrc.yaml` or `.soursocksrc.yml` file
-- a `.soursocksrc.js` file
+- a `.soursocksrc.yaml`, `.soursocksrc.yml`, or `.soursocksrc.js` file
 - a `soursocks.config.js` file exporting a JS object
 
 Cosmiconfig continues to search up the directory tree, checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
@@ -138,9 +137,8 @@ Here's how your default [`search()`] will work:
   1. A `goldengrahams` property in a `package.json` file.
   2. A `.goldengrahamsrc` file with JSON or YAML syntax.
   3. A `.goldengrahamsrc.json` file.
-  4. A `.goldengrahamsrc.yaml` or `.goldengrahamsrc.yml` file.
-  5. A `.goldengrahamsrc.js` file.
-  6. A `goldengrahams.config.js` JS file exporting the object.
+  4. A `.goldengrahamsrc.yaml`, `.goldengrahamsrc.yml`, or `.goldengrahamsrc.js` file.
+  5. A `goldengrahams.config.js` JS file exporting the object.
 - If none of those searches reveal a configuration object, move up one directory level and try again.
   So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking the same places in each directory.
 - Continue searching until arriving at your home directory (or some other directory defined by the cosmiconfig option [`stopDir`]).

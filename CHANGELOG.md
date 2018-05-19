@@ -1,5 +1,9 @@
 # Changelog
 
+## HEAD
+
+- Fixed: `rc` files with `.js` extensions included in default `searchPlaces`.
+
 ## 5.0.3
 
 - Docs: Minor corrections to documentation. *Released to update package documentation on npm*.
