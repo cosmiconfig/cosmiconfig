@@ -1,6 +1,6 @@
 # Changelog
 
-## HEAD
+## 5.0.4
 
 - Fixed: `rc` files with `.js` extensions included in default `searchPlaces`.
 
