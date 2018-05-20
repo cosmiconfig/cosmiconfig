@@ -10,6 +10,5 @@ matrix:
     - node_js: "4"
     - node_js: "6"
     - node_js: "8"
+      after_success: "npm run report-coverage"
     - node_js: "10"
-    - node_js: "8"
-      script: npm run report-coverage

@@ -17,7 +17,7 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "coverage": "jest --coverage --coverageReporters=html --coverageReporters=text",
-    "report-coverage": "jest --coverage --coverageReporters=lcov && codecov -t d6ade9c1-c2b4-4ab1-82f4-b2feed929ca4",
+    "report-coverage": "codecov -t d6ade9c1-c2b4-4ab1-82f4-b2feed929ca4",
     "build": "flow-remove-types src --out-dir dist --quiet",
     "prepublishOnly": "npm run build"
   },
