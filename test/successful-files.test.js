@@ -389,3 +389,31 @@ describe('works fine if sync loader returns a Promise from a JS file', () => {
     });
   });
 });
+
+describe('loads defined JS config relative path', () => {
+  const currentDir = process.cwd();
+  beforeEach(() => {
+    temp.createFile('config/bar.js', 'module.exports = { bar: true };');
+    process.chdir(temp.dir);
+  });
+  afterEach(() => {
+    process.chdir(currentDir);
+  });
+
+  const file = './config/bar.js';
+  const checkResult = result => {
+    expect(result.config).toEqual({ bar: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', () => {
+    return cosmiconfig()
+      .load(file)
+      .then(checkResult);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfig().loadSync(file);
+    checkResult(result);
+  });
+});
