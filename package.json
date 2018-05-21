@@ -17,7 +17,6 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "coverage": "jest --coverage --coverageReporters=html --coverageReporters=text",
-    "report-coverage": "codecov -t d6ade9c1-c2b4-4ab1-82f4-b2feed929ca4",
     "build": "flow-remove-types src --out-dir dist --quiet",
     "prepublishOnly": "npm run build"
   },
@@ -91,7 +90,6 @@
   "devDependencies": {
     "babel-eslint": "^8.0.3",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
-    "codecov": "^3.0.2",
     "del": "^3.0.0",
     "eslint": "^4.12.1",
     "eslint-config-davidtheclark-node": "^0.2.2",
