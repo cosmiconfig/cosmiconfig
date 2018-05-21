@@ -400,20 +400,21 @@ describe('loads defined JS config relative path', () => {
     process.chdir(currentDir);
   });
 
-  const file = './config/bar.js';
+  const relativeFile = './config/bar.js';
+  const absoluteFile = temp.absolutePath(relativeFile);
   const checkResult = result => {
     expect(result.config).toEqual({ bar: true });
-    expect(result.filepath).toBe(file);
+    expect(result.filepath).toBe(absoluteFile);
   };
 
   test('async', () => {
     return cosmiconfig()
-      .load(file)
+      .load(relativeFile)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig().loadSync(file);
+    const result = cosmiconfig().loadSync(relativeFile);
     checkResult(result);
   });
 });

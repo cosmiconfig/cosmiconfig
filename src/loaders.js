@@ -1,12 +1,11 @@
 // @flow
 'use strict';
 
-const path = require('path');
 const parseJson = require('parse-json');
 const yaml = require('js-yaml');
 
 function loadJs(filepath: string): Object {
-  const result = require(path.resolve(filepath));
+  const result = require(filepath);
   return result;
 }
 
