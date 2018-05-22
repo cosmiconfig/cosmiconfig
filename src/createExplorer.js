@@ -273,7 +273,7 @@ class Explorer {
       return cacheWrapper(this.loadCache, absoluteFilePath, () => {
         return readFile(absoluteFilePath, { throwNotFound: true })
           .then(content => {
-            return this.createCosmiconfigResult(filepath, content);
+            return this.createCosmiconfigResult(absoluteFilePath, content);
           })
           .then(this.config.transform);
       });
@@ -285,7 +285,10 @@ class Explorer {
     const absoluteFilePath = path.resolve(process.cwd(), filepath);
     return cacheWrapper(this.loadSyncCache, absoluteFilePath, () => {
       const content = readFile.sync(absoluteFilePath, { throwNotFound: true });
-      const result = this.createCosmiconfigResultSync(filepath, content);
+      const result = this.createCosmiconfigResultSync(
+        absoluteFilePath,
+        content
+      );
       return this.config.transform(result);
     });
   }
