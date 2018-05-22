@@ -1,6 +1,6 @@
 # Changelog
 
-## HEAD
+## 5.0.5
 
 - Fixed: `load` and `loadSync` work with paths relative to `process.cwd()`.
 
