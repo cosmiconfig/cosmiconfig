@@ -1,5 +1,9 @@
 # Changelog
 
+## HEAD
+
+- Fixed: `load` and `loadSync` work with paths relative to `process.cwd()`.
+
 ## 5.0.4
 
 - Fixed: `rc` files with `.js` extensions included in default `searchPlaces`.
