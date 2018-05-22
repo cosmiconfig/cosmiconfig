@@ -40,16 +40,3 @@ test('returns a promise if sync is not true', () => {
   const res = getDirectory(fs, __dirname, false);
   expect(res).toBeInstanceOf(Promise);
 });
-
-test('propagates error thrown by is-directory in sync', () => {
-  expect(() => getDirectory.sync(fs, null, true)).toThrowError(
-    'expected filepath to be a string'
-  );
-});
-
-test('rejects with the error thrown by is-directory in async', () => {
-  expect.hasAssertions();
-  return getDirectory(fs, null, false).catch(err => {
-    expect(err.message).toBe('expected filepath to be a string');
-  });
-});

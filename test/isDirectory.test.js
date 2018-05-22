@@ -20,13 +20,3 @@ test('returns false if the filepath does not exist', () => {
   expect(isDirectory.sync(fs, 'missing.filepath')).toBe(false);
   return expect(isDirectory(fs, 'missing.filepath')).resolves.toBe(false);
 });
-
-test('throws an error if the filepath is not a string', () => {
-  expect.assertions(2);
-  expect(() => isDirectory.sync(fs)).toThrow(
-    'expected filepath to be a string'
-  );
-  return isDirectory(fs).catch(err => {
-    expect(err.message).toBe('expected filepath to be a string');
-  });
-});
