@@ -7,6 +7,27 @@ const parentModule = require('parent-module');
 const os = require('os');
 const fs = require.requireActual('fs');
 
+// Extract and return file paths from the spy calls. The filepaths returned
+// are relative to the given directory. They are also normalized to be
+// consistent across platforms.
+function getSpyPathCalls(dir, spy) {
+  const calls = spy.mock.calls;
+
+  const result = calls.map(call => {
+    const filePath = call[0];
+    const relativePath = path.relative(dir, filePath);
+
+    /**
+     * Replace Windows backslash directory separators with forward slashes
+     * so expected paths will be consistent cross platform
+     */
+    const normalized = relativePath.replace(/\\/g, '/');
+    return normalized;
+  });
+
+  return result;
+}
+
 class TempDir {
   dir: string;
 
@@ -60,25 +81,6 @@ class TempDir {
     fs.writeFileSync(filePath, `${contents}\n`);
   }
 
-  getSpyPathCalls(spy) {
-    const calls = spy.mock.calls;
-
-    const result = calls.map(call => {
-      const filePath = call[0];
-      const relativePath = path.relative(this.dir, filePath);
-
-      /**
-       * Replace Windows backslash directory separators with forward slashes
-       * so expected paths will be consistent cross platform
-       */
-      const normalizeCrossPlatform = relativePath.replace(/\\/g, '/');
-
-      return normalizeCrossPlatform;
-    });
-
-    return result;
-  }
-
   clean() {
     const cleanPattern = this.absolutePath('**/*');
     const removed = del.sync(cleanPattern, {
@@ -98,4 +100,5 @@ class TempDir {
 
 module.exports = {
   TempDir,
+  getSpyPathCalls,
 };

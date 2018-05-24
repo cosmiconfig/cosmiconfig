@@ -25,10 +25,10 @@ describe('gives up if it cannot find the file', () => {
   const explorerOptions = { stopDir: temp.absolutePath('.') };
 
   const checkResult = (statSpy, readFileSpy, result) => {
-    const statPath = temp.getSpyPathCalls(statSpy);
+    const statPath = util.getSpyPathCalls(temp.dir, statSpy);
     expect(statPath).toEqual(['a/b']);
 
-    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    const filesChecked = util.getSpyPathCalls(temp.dir, readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/package.json',
       'a/b/.foorc',
@@ -79,7 +79,7 @@ describe('stops at stopDir and gives up', () => {
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
   const checkResult = (readFileSpy, result) => {
-    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    const filesChecked = util.getSpyPathCalls(temp.dir, readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/package.json',
       'a/b/.foorc',

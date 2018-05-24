@@ -3,11 +3,12 @@
 const path = require('path');
 const MemoryFileSystem = require('memory-fs');
 const cosmiconfig = require('../src');
+const util = require('./util');
 
 const fs = new MemoryFileSystem();
 
-const root = path.parse(process.cwd()).root;
-const absolutePath = (filename: string) => path.join(root, filename);
+const virtualRoot = path.join(path.parse(process.cwd()).root, 'virtual-fs');
+const absolutePath = (filename: string) => path.join(virtualRoot, filename);
 
 function createDir(dir: string) {
   fs.mkdirpSync(absolutePath(dir));
@@ -18,18 +19,6 @@ function createFile(filename: string, contents: string) {
   const fileDir = path.parse(filePath).dir;
   fs.mkdirpSync(fileDir);
   fs.writeFileSync(filePath, `${contents}\n`);
-}
-
-function getSpyPathCalls(spy) {
-  return spy.mock.calls.map(call => {
-    const filePath = call[0];
-    const relativePath = path.relative(root, filePath);
-    /**
-     * Replace Windows backslash directory separators with forward slashes
-     * so expected paths will be consistent cross platform
-     */
-    return relativePath.replace(/\\/g, '/');
-  });
 }
 
 afterEach(() => {
@@ -76,7 +65,7 @@ describe('with virtual file system', () => {
     const explorer = cosmiconfig('foo', { fs, stopDir: absolutePath('.') });
 
     const checkResult = (readFileSpy, result) => {
-      const filesChecked = getSpyPathCalls(readFileSpy);
+      const filesChecked = util.getSpyPathCalls(virtualRoot, readFileSpy);
       expect(filesChecked).toEqual([
         'a/b/c/d/e/f/package.json',
         'a/b/c/d/e/f/.foorc',
@@ -175,10 +164,10 @@ describe('with virtual file system', () => {
     const explorer = cosmiconfig('foo', { fs, stopDir: absolutePath('.') });
 
     const checkResult = (statSpy, readFileSpy, result) => {
-      const statPath = getSpyPathCalls(statSpy);
+      const statPath = util.getSpyPathCalls(virtualRoot, statSpy);
       expect(statPath).toEqual(['a/b']);
 
-      const filesChecked = getSpyPathCalls(readFileSpy);
+      const filesChecked = util.getSpyPathCalls(virtualRoot, readFileSpy);
       expect(filesChecked).toEqual([
         'a/b/package.json',
         'a/b/.foorc',

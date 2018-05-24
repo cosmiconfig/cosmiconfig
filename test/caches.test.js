@@ -26,7 +26,7 @@ afterAll(() => {
 describe('cache is not used initially', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
   const checkResult = (readFileSpy, result) => {
-    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    const filesChecked = util.getSpyPathCalls(temp.dir, readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
@@ -144,7 +144,7 @@ describe('cache is used when some directories in search are already visted', () 
   const firstSearchPath = temp.absolutePath('a/b/c/d/e');
   const secondSearchPath = temp.absolutePath('a/b/c/d/e/f');
   const checkResult = (readFileSpy, result) => {
-    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    const filesChecked = util.getSpyPathCalls(temp.dir, readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc',
@@ -232,7 +232,7 @@ describe('cache is not used when directly loading an unvisited file', () => {
 describe('cache is not used in a new cosmiconfig instance', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
   const checkResult = (readFileSpy, result) => {
-    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    const filesChecked = util.getSpyPathCalls(temp.dir, readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
@@ -278,7 +278,7 @@ describe('cache is not used in a new cosmiconfig instance', () => {
 describe('clears file cache on calling clearLoadCache', () => {
   const loadPath = temp.absolutePath('a/b/c/d/.foorc');
   const checkResult = (readFileSpy, result) => {
-    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    const filesChecked = util.getSpyPathCalls(temp.dir, readFileSpy);
     expect(filesChecked).toEqual(['a/b/c/d/.foorc']);
 
     expect(result).toEqual({
@@ -318,7 +318,7 @@ describe('clears file cache on calling clearLoadCache', () => {
 describe('clears file cache on calling clearCaches', () => {
   const loadPath = temp.absolutePath('a/b/c/d/.foorc');
   const checkResult = (readFileSpy, result) => {
-    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    const filesChecked = util.getSpyPathCalls(temp.dir, readFileSpy);
     expect(filesChecked).toEqual(['a/b/c/d/.foorc']);
 
     expect(result).toEqual({
@@ -358,7 +358,7 @@ describe('clears file cache on calling clearCaches', () => {
 describe('clears directory cache on calling clearSearchCache', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
   const checkResult = (readFileSpy, result) => {
-    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    const filesChecked = util.getSpyPathCalls(temp.dir, readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
@@ -408,7 +408,7 @@ describe('clears directory cache on calling clearSearchCache', () => {
 describe('clears directory cache on calling clearCaches', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
   const checkResult = (readFileSpy, result) => {
-    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    const filesChecked = util.getSpyPathCalls(temp.dir, readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
@@ -474,7 +474,7 @@ describe('with cache disabled', () => {
 describe('with cache disabled, does not cache directory results', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
   const checkResult = (readFileSpy, result) => {
-    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    const filesChecked = util.getSpyPathCalls(temp.dir, readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
@@ -522,7 +522,7 @@ describe('with cache disabled, does not cache directory results', () => {
 describe('with cache disabled, does not cache file results', () => {
   const loadPath = temp.absolutePath('a/b/c/d/.foorc');
   const checkResult = (readFileSpy, result) => {
-    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    const filesChecked = util.getSpyPathCalls(temp.dir, readFileSpy);
     expect(filesChecked).toEqual(['a/b/c/d/.foorc']);
 
     expect(result).toEqual({
