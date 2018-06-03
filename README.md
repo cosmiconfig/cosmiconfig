@@ -442,7 +442,7 @@ If you want to throw an error, or if an empty configuration file means something
 
 ### fs
 
-Type:
+Type: Any object that's compatible with node's fs module. Specifically the following must be implemented:
 
 ```js
 interface ErrnoError extends Error {
@@ -464,6 +464,9 @@ interface FS {
   readFileSync(path: string, encoding: string): string;
 };
 ```
+
+Note that only a subset of the [fs API](https://nodejs.org/api/fs.html) is used.
+Also, use of flow is not required for using this config option.
 
 Default: `require('fs')`.
 
