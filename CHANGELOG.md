@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.6
+
+- Fixed: Better error message if the end user tries an extension Cosmiconfig is not configured to understand.
+
 ## 5.0.5
 
 - Fixed: `load` and `loadSync` work with paths relative to `process.cwd()`.
