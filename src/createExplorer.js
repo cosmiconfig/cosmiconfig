@@ -184,7 +184,7 @@ class Explorer {
     }
 
     const loaderKey = path.extname(filepath) || 'noExt';
-    return this.config.loaders[loaderKey];
+    return this.config.loaders[loaderKey] || {};
   }
 
   getSyncLoaderForFile(filepath: string): SyncLoader {
