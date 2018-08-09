@@ -314,3 +314,29 @@ describe('errors if only async loader is set but you call sync search', () => {
     }
   });
 });
+
+describe('errors if no loader is set but you call sync load', () => {
+  const file = temp.absolutePath('.foorc.things');
+  beforeEach(() => {
+    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
+  });
+
+  const explorerOptions = {
+    loaders: {},
+  };
+
+  const checkError = error => {
+    expect(error.message).toMatch(
+      /No sync loader specified for extension "\.things"/
+    );
+  };
+
+  test('sync', () => {
+    expect.hasAssertions();
+    try {
+      cosmiconfig('not_exist_rc_name', explorerOptions).loadSync(file);
+    } catch (error) {
+      checkError(error);
+    }
+  });
+});
