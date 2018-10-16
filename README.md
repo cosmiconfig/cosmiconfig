@@ -329,7 +329,11 @@ To accomplish that, provide the following `loaders` value:
 }
 ```
 
-If you want to load files that are not handled by the loader functions Cosmiconfig exposes, you can write a custom loader function.
+If you want to load files that are not handled by the loader functions Cosmiconfig exposes, you can write a custom loader function or use one from NPM if it exists.
+
+**Third-party loaders:**
+
+- [@endemolshinegroup/cosmiconfig-typescript-loader](https://github.com/EndemolShineGroup/cosmiconfig-typescript-loader)
 
 **Use cases for custom loader function:**
 
