@@ -33,19 +33,19 @@ class Explorer {
 
   clearLoadCache() {
     if (this.loadCache) {
-      this.loadCache.clear();
+      clearCache(this.loadCache);
     }
     if (this.loadSyncCache) {
-      this.loadSyncCache.clear();
+      clearCache(this.loadSyncCache);
     }
   }
 
   clearSearchCache() {
     if (this.searchCache) {
-      this.searchCache.clear();
+      clearCache(this.searchCache);
     }
     if (this.searchSyncCache) {
-      this.searchSyncCache.clear();
+      clearCache(this.searchSyncCache);
     }
   }
 
@@ -315,4 +315,27 @@ function nextDirUp(dir: string): string {
 function getExtensionDescription(filepath: string): string {
   const ext = path.extname(filepath);
   return ext ? `extension "${ext}"` : 'files without extensions';
+}
+
+function clearCache(cache: Map<string, any>) {
+  for (const filePath of cache.keys()) {
+    removeCachedModuleFromParent();
+    delete require.cache[filePath];
+  }
+
+  cache.clear();
+}
+
+// this prevents a memory leak
+// see https://github.com/sindresorhus/import-fresh/issues/2
+function removeCachedModuleFromParent(filePath) {
+  if (require.cache[filePath] && require.cache[filePath].parent) {
+    let i = require.cache[filePath].parent.children.length;
+
+    while (i--) {
+      if (require.cache[filePath].parent.children[i].id === filePath) {
+        require.cache[filePath].parent.children.splice(i, 1);
+      }
+    }
+  }
 }

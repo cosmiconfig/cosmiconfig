@@ -556,3 +556,59 @@ describe('with cache disabled, does not cache file results', () => {
     checkResult(readFileSpy, result);
   });
 });
+
+describe('ensure require cache entries are removed', () => {
+  const tempFileName = 'a/b/c/d/.foorc.js';
+  const loadPath = temp.absolutePath(tempFileName);
+
+  test('async', () => {
+    const explorer = cosmiconfig('foo');
+    temp.createFile(tempFileName, "module.exports = { foundJs: true };");
+
+    return explorer
+      .load(loadPath)
+      .then(result => {
+        expect(result.config).toEqual({ foundJs: true });
+
+        temp.createFile(
+          tempFileName,
+          "module.exports = { foundJs: true, modified: true };"
+        );
+
+        return explorer.load(loadPath);
+      })
+      .then(result => {
+        expect(result.config).toEqual({ foundJs: true });
+
+        explorer.clearCaches();
+        jest.resetModules();
+
+        return explorer.load(loadPath);
+      })
+      .then(result => {
+        expect(result.config).toEqual({ foundJs: true, modified: true });
+      })
+  });
+
+  test('sync', () => {
+    const explorer = cosmiconfig('foo');
+    temp.createFile(tempFileName, "module.exports = { foundJs: true };");
+
+    let result = explorer.loadSync(loadPath);
+    expect(result.config).toEqual({ foundJs: true });
+
+    temp.createFile(
+      tempFileName,
+      "module.exports = { foundJs: true, modified: true };"
+    );
+
+    result = explorer.loadSync(loadPath);
+    expect(result.config).toEqual({ foundJs: true });
+
+    explorer.clearCaches();
+    jest.resetModules();
+
+    result = explorer.loadSync(loadPath);
+    expect(result.config).toEqual({ foundJs: true, modified: true });
+  });
+});
