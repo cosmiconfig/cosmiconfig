@@ -1,8 +1,10 @@
 'use strict';
 
 const fs = require('fs');
+
 const util = require('./util');
 const cosmiconfig = require('../src');
+const wrapper = require('../src/importFreshWrapper');
 
 const temp = new util.TempDir();
 
@@ -557,58 +559,32 @@ describe('with cache disabled, does not cache file results', () => {
   });
 });
 
-describe('ensure require cache entries are removed', () => {
+describe('ensure import-fresh is called when loading a js file', () => {
   const tempFileName = 'a/b/c/d/.foorc.js';
   const loadPath = temp.absolutePath(tempFileName);
 
+  const checkResult = (importFreshSpy, result) => {
+    expect(importFreshSpy).toHaveBeenCalledTimes(1);
+
+    expect(result.config).toEqual({ foundJs: true });
+  };
+
   test('async', () => {
+    const importFreshSpy = jest.spyOn(wrapper, 'importFresh');
     const explorer = cosmiconfig('foo');
-    temp.createFile(tempFileName, "module.exports = { foundJs: true };");
+    temp.createFile(tempFileName, 'module.exports = { foundJs: true };');
 
-    return explorer
-      .load(loadPath)
-      .then(result => {
-        expect(result.config).toEqual({ foundJs: true });
-
-        temp.createFile(
-          tempFileName,
-          "module.exports = { foundJs: true, modified: true };"
-        );
-
-        return explorer.load(loadPath);
-      })
-      .then(result => {
-        expect(result.config).toEqual({ foundJs: true });
-
-        explorer.clearCaches();
-        jest.resetModules();
-
-        return explorer.load(loadPath);
-      })
-      .then(result => {
-        expect(result.config).toEqual({ foundJs: true, modified: true });
-      })
+    return explorer.load(loadPath).then(result => {
+      checkResult(importFreshSpy, result);
+    });
   });
 
   test('sync', () => {
+    const importFreshSpy = jest.spyOn(wrapper, 'importFresh');
     const explorer = cosmiconfig('foo');
-    temp.createFile(tempFileName, "module.exports = { foundJs: true };");
+    temp.createFile(tempFileName, 'module.exports = { foundJs: true };');
 
-    let result = explorer.loadSync(loadPath);
-    expect(result.config).toEqual({ foundJs: true });
-
-    temp.createFile(
-      tempFileName,
-      "module.exports = { foundJs: true, modified: true };"
-    );
-
-    result = explorer.loadSync(loadPath);
-    expect(result.config).toEqual({ foundJs: true });
-
-    explorer.clearCaches();
-    jest.resetModules();
-
-    result = explorer.loadSync(loadPath);
-    expect(result.config).toEqual({ foundJs: true, modified: true });
+    const result = explorer.loadSync(loadPath);
+    checkResult(importFreshSpy, result);
   });
 });
