@@ -1,9 +1,12 @@
 'use strict';
 
 const fs = require('fs');
+const importFreshMock = require('import-fresh');
 const util = require('./util');
 const cosmiconfig = require('../src');
-const wrapper = require('../src/importFreshWrapper');
+
+// mocks are hoisted
+jest.mock('import-fresh');
 
 const temp = new util.TempDir();
 
@@ -562,29 +565,31 @@ describe('ensure import-fresh is called when loading a js file', () => {
   const tempFileName = 'a/b/c/d/.foorc.js';
   const loadPath = temp.absolutePath(tempFileName);
 
-  const checkResult = (importFreshSpy, result) => {
-    expect(importFreshSpy).toHaveBeenCalledTimes(1);
-    expect(importFreshSpy).toHaveBeenCalledWith(loadPath);
+  beforeEach(() => {
+    importFreshMock.mockReturnValue({ foundJs: true });
+  });
+
+  const checkResult = result => {
+    expect(importFreshMock).toHaveBeenCalledTimes(1);
+    expect(importFreshMock).toHaveBeenCalledWith(loadPath);
 
     expect(result.config).toEqual({ foundJs: true });
   };
 
   test('async', () => {
-    const importFreshSpy = jest.spyOn(wrapper, 'importFresh');
     const explorer = cosmiconfig('foo');
     temp.createFile(tempFileName, 'module.exports = { foundJs: true };');
 
     return explorer.load(loadPath).then(result => {
-      checkResult(importFreshSpy, result);
+      checkResult(result);
     });
   });
 
   test('sync', () => {
-    const importFreshSpy = jest.spyOn(wrapper, 'importFresh');
     const explorer = cosmiconfig('foo');
     temp.createFile(tempFileName, 'module.exports = { foundJs: true };');
 
     const result = explorer.loadSync(loadPath);
-    checkResult(importFreshSpy, result);
+    checkResult(result);
   });
 });
