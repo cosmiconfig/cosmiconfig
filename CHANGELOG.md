@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.7
+
+- Fixed: JS loader bypasses Node's `require` cache, fixing a bug where updates to `.js` config files would not load even when Cosmiconfig was told not to cache.
+
 ## 5.0.6
 
 - Fixed: Better error message if the end user tries an extension Cosmiconfig is not configured to understand.
