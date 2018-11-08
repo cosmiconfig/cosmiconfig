@@ -3,9 +3,10 @@
 
 const parseJson = require('parse-json');
 const yaml = require('js-yaml');
+const importFresh = require('import-fresh');
 
 function loadJs(filepath: string): Object {
-  const result = require(filepath);
+  const result = importFresh(filepath);
   return result;
 }
 
