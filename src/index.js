@@ -48,6 +48,7 @@ function cosmiconfig(
   return createExplorer(normalizedOptions);
 }
 
+cosmiconfig.cosmiconfig = cosmiconfig;
 cosmiconfig.loadJs = loaders.loadJs;
 cosmiconfig.loadJson = loaders.loadJson;
 cosmiconfig.loadYaml = loaders.loadYaml;
