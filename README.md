@@ -118,10 +118,6 @@ Type: `string`. **Required.**
 
 Your module name. This is used to create the default [`searchPlaces`] and [`packageProp`].
 
-### cosmiconfigOptions
-
-Type: `Object`.
-
 **[`cosmiconfigOptions`] are documented below.**
 You may not need them, and should first read about the functions you'll use.
 
