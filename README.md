@@ -213,6 +213,10 @@ Performs both [`clearLoadCache()`] and [`clearSearchCache()`].
 
 ## cosmiconfigOptions
 
+Type: `Object`.
+
+Possible options are documented below.
+
 ### searchPlaces
 
 Type: `Array<string>`.
