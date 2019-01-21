@@ -2,6 +2,7 @@
 'use strict';
 
 const path = require('path');
+const get = require('lodash.get');
 const loaders = require('./loaders');
 const readFile = require('./readFile');
 const cacheWrapper = require('./cacheWrapper');
@@ -173,7 +174,7 @@ class Explorer {
 
   loadPackageProp(filepath: string, content: string) {
     const parsedContent = loaders.loadJson(filepath, content);
-    const packagePropValue = parsedContent[this.config.packageProp];
+    const packagePropValue = get(parsedContent, this.config.packageProp);
     return packagePropValue || null;
   }
 
