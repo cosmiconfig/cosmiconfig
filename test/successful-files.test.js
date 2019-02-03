@@ -140,22 +140,40 @@ describe('loads package prop when configPath is package.json', () => {
   });
 
   const configPath = temp.absolutePath('package.json');
-  const checkResult = result => {
-    expect(result.config).toEqual({
-      bar: 'baz',
-    });
+  const checkResult = (result, expectedConfig) => {
+    expect(result.config).toEqual(expectedConfig);
     expect(result.filepath).toBe(configPath);
   };
 
-  test('async', () => {
-    return cosmiconfig('foo')
-      .load(configPath)
-      .then(checkResult);
+  describe('simple package prop', () => {
+    const expectedConfig = { bar: 'baz' };
+
+    test('async', () => {
+      return cosmiconfig('foo')
+        .load(configPath)
+        .then(result => checkResult(result, expectedConfig));
+    });
+
+    test('sync', () => {
+      const result = cosmiconfig('foo').loadSync(configPath);
+      checkResult(result, expectedConfig);
+    });
   });
 
-  test('sync', () => {
-    const result = cosmiconfig('foo').loadSync(configPath);
-    checkResult(result);
+  describe('nested package prop', () => {
+    const explorer = cosmiconfig('foo', { packageProp: 'foo.bar' });
+    const expectedConfig = 'baz';
+
+    test('async', () => {
+      return explorer
+        .load(configPath)
+        .then(result => checkResult(result, expectedConfig));
+    });
+
+    test('sync', () => {
+      const result = explorer.loadSync(configPath);
+      checkResult(result, expectedConfig);
+    });
   });
 });
 
