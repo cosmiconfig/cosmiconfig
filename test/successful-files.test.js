@@ -145,17 +145,18 @@ describe('loads package prop when configPath is package.json', () => {
     expect(result.filepath).toBe(configPath);
   };
 
-  describe('simple package prop', () => {
+  describe('default package prop', () => {
+    const explorer = cosmiconfig('foo');
     const expectedConfig = { bar: 'baz' };
 
     test('async', () => {
-      return cosmiconfig('foo')
+      return explorer
         .load(configPath)
         .then(result => checkResult(result, expectedConfig));
     });
 
     test('sync', () => {
-      const result = cosmiconfig('foo').loadSync(configPath);
+      const result = explorer.loadSync(configPath);
       checkResult(result, expectedConfig);
     });
   });
