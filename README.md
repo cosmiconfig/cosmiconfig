@@ -410,6 +410,26 @@ Default: `` `${moduleName}` ``.
 
 Name of the property in `package.json` to look for.
 
+Use periods to access nested properties.
+
+Example:
+
+```js
+{
+  packageProp: 'engines.node'
+}
+```
+
+to access the value specified in the `package.json`
+
+```json
+{
+  "engines": {
+    "node": ">=4"
+  }
+}
+```
+
 ### stopDir
 
 Type: `string`.
