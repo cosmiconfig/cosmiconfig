@@ -119,6 +119,60 @@ describe('finds package.json prop in second searched dir', () => {
   });
 });
 
+describe('finds package.json with nested packageProp in second searched dir', () => {
+  beforeEach(() => {
+    // First package.json exists but does not include the nested packageProp.
+    temp.createFile(
+      'a/b/c/d/e/f/package.json',
+      '{ "author": "Todd", "configs": { "notYourPkg": { "yes": "ofcourse" } } }'
+    );
+    temp.createFile(
+      'a/b/c/d/e/package.json',
+      '{ "author": "Todd", "configs": { "pkg": { "please": "no" } } }'
+    );
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    packageProp: 'configs.pkg',
+  };
+
+  const checkResult = (readFileSpy, result) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/.foorc.json',
+      'a/b/c/d/e/f/.foorc.yaml',
+      'a/b/c/d/e/f/.foorc.yml',
+      'a/b/c/d/e/f/.foorc.js',
+      'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/package.json',
+    ]);
+
+    expect(result).toEqual({
+      config: { please: 'no' },
+      filepath: temp.absolutePath('a/b/c/d/e/package.json'),
+    });
+  };
+
+  test('async', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    return cosmiconfig('foo', explorerOptions)
+      .search(startDir)
+      .then(result => {
+        checkResult(readFileSpy, result);
+      });
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
 describe('finds JS file in first searched dir', () => {
   beforeEach(() => {
     temp.createFile(

@@ -136,7 +136,17 @@ describe('loads yaml-like JS config path', () => {
 
 describe('loads package prop when configPath is package.json', () => {
   beforeEach(() => {
-    temp.createFile('package.json', '{ "foo": { "bar": "baz" } }');
+    temp.createFile(
+      'package.json',
+      `{
+      "foo": {
+        "bar": "baz"
+      },
+      "otherPackage": {
+        "please": "no"
+      }
+    }`
+    );
   });
 
   const configPath = temp.absolutePath('package.json');
@@ -161,7 +171,23 @@ describe('loads package prop when configPath is package.json', () => {
     });
   });
 
-  describe('nested package prop', () => {
+  describe('specified packageProp', () => {
+    const explorer = cosmiconfig('foo', { packageProp: 'otherPackage' });
+    const expectedConfig = { please: 'no' };
+
+    test('async', () => {
+      return explorer
+        .load(configPath)
+        .then(result => checkResult(result, expectedConfig));
+    });
+
+    test('sync', () => {
+      const result = explorer.loadSync(configPath);
+      checkResult(result, expectedConfig);
+    });
+  });
+
+  describe('nested packageProp', () => {
     const explorer = cosmiconfig('foo', { packageProp: 'foo.bar' });
     const expectedConfig = 'baz';
 
@@ -174,6 +200,36 @@ describe('loads package prop when configPath is package.json', () => {
     test('sync', () => {
       const result = explorer.loadSync(configPath);
       checkResult(result, expectedConfig);
+    });
+  });
+
+  describe('inaccurate packageProp returns undefined, does not error', () => {
+    const explorer = cosmiconfig('foo', { packageProp: 'otherrrPackage' });
+
+    test('async', () => {
+      return explorer
+        .load(configPath)
+        .then(result => expect(result).toBeNull());
+    });
+
+    test('sync', () => {
+      const result = explorer.loadSync(configPath);
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('inaccurate nested packageProp returns undefined, does not error', () => {
+    const explorer = cosmiconfig('foo', { packageProp: 'foo.baz' });
+
+    test('async', () => {
+      return explorer
+        .load(configPath)
+        .then(result => expect(result).toBeNull());
+    });
+
+    test('sync', () => {
+      const result = explorer.loadSync(configPath);
+      expect(result).toBeNull();
     });
   });
 });
