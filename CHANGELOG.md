@@ -1,6 +1,6 @@
 # Changelog
 
-## HEAD
+## 5.1.0
 
 - Added: `packageProp` values can include periods to describe paths to nested objects within `package.json`.
 
