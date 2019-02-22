@@ -147,12 +147,26 @@ describe('loads package prop when configPath is package.json', () => {
       }
     }`
     );
+    temp.createFile(
+      'manifest.json',
+      `{
+      "foo": {
+        "bar": "baz"
+      },
+      "isManifest": {"very": "yes"},
+      "otherPackage": {
+        "please": "no"
+      }
+    }`
+    );
   });
 
   const configPath = temp.absolutePath('package.json');
-  const checkResult = (result, expectedConfig) => {
+  const manifestPath = temp.absolutePath('manifest.json');
+  const checkResult = (result, expectedConfig, filepath) => {
+    if(filepath === undefined) filepath = configPath;
     expect(result.config).toEqual(expectedConfig);
-    expect(result.filepath).toBe(configPath);
+    expect(result.filepath).toBe(filepath);
   };
 
   describe('default package prop', () => {
@@ -230,6 +244,45 @@ describe('loads package prop when configPath is package.json', () => {
     test('sync', () => {
       const result = explorer.loadSync(configPath);
       expect(result).toBeNull();
+    });
+  });
+  
+  describe('load packageProp from alternative packageNames', () => {
+    const explorer = cosmiconfig('foo', { packageFilenames: ['manifest.json'], packageProp: 'isManifest' });
+    const expectedConfig = { very: 'yes' };
+
+    test('async', () => {
+      return explorer
+        .load(manifestPath)
+        .then(result => checkResult(result, expectedConfig, manifestPath));
+    });
+
+    test('sync', () => {
+      const result = explorer.loadSync(manifestPath);
+      checkResult(result, expectedConfig, manifestPath);
+    });
+  });
+  
+  describe('do not load packageProp when package.json is not in packageNames', () => {
+    const explorer = cosmiconfig('foo', { packageFilenames: ['manifest.json'], packageProp: 'foo' });
+    const expectedConfig = {
+      foo: {
+        bar: "baz"
+      },
+      otherPackage: {
+        please: "no"
+      }
+    };
+
+    test('async', () => {
+      return explorer
+        .load(configPath)
+        .then(result => checkResult(result, expectedConfig));
+    });
+
+    test('sync', () => {
+      const result = explorer.loadSync(configPath);
+      checkResult(result, expectedConfig);
     });
   });
 });

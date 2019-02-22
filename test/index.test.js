@@ -35,6 +35,7 @@ describe('cosmiconfig', () => {
     expect(createExplorerMock).toHaveBeenCalledTimes(1);
     const explorerOptions = createExplorerMock.mock.calls[0][0];
     expect(explorerOptions).toMatchObject({
+      packageFilenames: ['package.json'],
       packageProp: moduleName,
       searchPlaces: [
         'package.json',
@@ -79,6 +80,7 @@ describe('cosmiconfig', () => {
       stopDir: __dirname,
       cache: false,
       searchPlaces: ['.foorc.json', 'wildandfree.js'],
+      packageFilenames: ['manifest.json'],
       packageProp: 'wildandfree',
       ignoreEmptySearchPlaces: false,
       loaders: {
@@ -91,6 +93,7 @@ describe('cosmiconfig', () => {
 
     const explorerOptions = createExplorerMock.mock.calls[0][0];
     expect(explorerOptions).toMatchObject({
+      packageFilenames: ['manifest.json'],
       packageProp: 'wildandfree',
       searchPlaces: ['.foorc.json', 'wildandfree.js'],
       ignoreEmptySearchPlaces: false,

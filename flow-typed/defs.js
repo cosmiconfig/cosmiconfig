@@ -14,13 +14,14 @@ type ExplorerOptions = {
   stopDir: string,
   cache: boolean,
   transform: CosmiconfigResult => CosmiconfigResult,
+  packageFilenames: Array<string>,
   packageProp: string,
   loaders: Loaders,
   searchPlaces: Array<string>,
   ignoreEmptySearchPlaces: boolean,
 };
 
-type ExplorerContext = ExplorerOptions & {
+type ExplorerContext =   & {
   loadCache: ?Map<string, Promise<CosmiconfigResult>>,
   loadSyncCache: ?Map<string, CosmiconfigResult>,
   searchCache: ?Map<string, Promise<CosmiconfigResult>>,

@@ -10,6 +10,7 @@ module.exports = cosmiconfig;
 function cosmiconfig(
   moduleName: string,
   options: {
+    packageFilenames?: Array<string>,
     packageProp?: string,
     loaders?: Object,
     searchPlaces?: Array<string>,
@@ -21,6 +22,7 @@ function cosmiconfig(
 ) {
   options = options || {};
   const defaults = {
+    packageFilenames: ['package.json'],
     packageProp: moduleName,
     searchPlaces: [
       'package.json',
