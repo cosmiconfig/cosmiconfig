@@ -179,7 +179,7 @@ class Explorer {
   }
 
   getLoaderEntryForFile(filepath: string): LoaderEntry {
-    if (this.config.packageFilenames.includes(path.basename(filepath))) {
+    if (this.config.packageFilenames.indexOf(path.basename(filepath)) >= 0) {
       const loader = this.loadPackageProp.bind(this);
       return { sync: loader, async: loader };
     }
