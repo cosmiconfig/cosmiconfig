@@ -2,7 +2,7 @@
 'use strict';
 
 const path = require('path');
-const get = require('lodash.get');
+const get = require('lodash/get');
 const loaders = require('./loaders');
 const readFile = require('./readFile');
 const cacheWrapper = require('./cacheWrapper');

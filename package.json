@@ -86,7 +86,7 @@
     "import-fresh": "^2.0.0",
     "is-directory": "^0.3.1",
     "js-yaml": "^3.9.0",
-    "lodash.get": "^4.4.2",
+    "lodash": "^4.17.11",
     "parse-json": "^4.0.0"
   },
   "devDependencies": {
