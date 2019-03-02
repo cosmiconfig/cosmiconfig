@@ -1,5 +1,10 @@
 # Changelog
 
+## HEAD
+
+- Added: `packageProp` values can be arrays of strings, to allow for property names that include periods. (This was possible before, but not documented or deliberately supported.)
+- Chore: Replaced the `lodash.get` dependency with a locally defined function.
+
 ## 5.1.0
 
 - Added: `packageProp` values can include periods to describe paths to nested objects within `package.json`.
