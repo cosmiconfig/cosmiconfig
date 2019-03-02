@@ -1,12 +1,12 @@
 // @flow
 'use strict';
 
-const path = require('path');
-const get = require('lodash.get');
-const loaders = require('./loaders');
-const readFile = require('./readFile');
-const cacheWrapper = require('./cacheWrapper');
-const getDirectory = require('./getDirectory');
+import path = require('path');
+import get = require('lodash.get');
+import loaders = require('./loaders');
+import readFile = require('./readFile');
+import cacheWrapper = require('./cacheWrapper');
+import getDirectory = require('./getDirectory');
 
 const MODE_SYNC = 'sync';
 
@@ -17,10 +17,10 @@ const MODE_SYNC = 'sync';
 type LoadedFileContent = Object | null | void;
 
 class Explorer {
-  loadCache: ?Map<string, Promise<CosmiconfigResult>>;
-  loadSyncCache: ?Map<string, CosmiconfigResult>;
-  searchCache: ?Map<string, Promise<CosmiconfigResult>>;
-  searchSyncCache: ?Map<string, CosmiconfigResult>;
+  loadCache: Map<string, Promise<CosmiconfigResult>> | null;
+  loadSyncCache: Map<string, CosmiconfigResult> | null;
+  searchCache: Map<string, Promise<CosmiconfigResult>> | null;
+  searchSyncCache: Map<string, CosmiconfigResult> | null;
   config: ExplorerOptions;
 
   constructor(options: ExplorerOptions) {
@@ -120,7 +120,7 @@ class Explorer {
   }
 
   searchDirectory(dir: string): Promise<CosmiconfigResult> {
-    return this.config.searchPlaces.reduce((prevResultPromise, place) => {
+    return this.config.searchPlaces.reduce((prevResultPromise: Promise<CosmiconfigResult | null>, place) => {
       return prevResultPromise.then(prevResult => {
         if (this.shouldSearchStopWithResult(prevResult)) {
           return prevResult;
@@ -131,7 +131,7 @@ class Explorer {
   }
 
   searchDirectorySync(dir: string): CosmiconfigResult {
-    let result = null;
+    let result: CosmiconfigResult | null = null;
     for (const place of this.config.searchPlaces) {
       result = this.loadSearchPlaceSync(dir, place);
       if (this.shouldSearchStopWithResult(result)) break;
@@ -161,7 +161,7 @@ class Explorer {
   nextDirectoryToSearch(
     currentDir: string,
     currentResult: CosmiconfigResult
-  ): ?string {
+  ): string | null {
     if (this.shouldSearchStopWithResult(currentResult)) {
       return null;
     }
@@ -295,7 +295,7 @@ class Explorer {
   }
 }
 
-module.exports = function createExplorer(options: ExplorerOptions) {
+export = function createExplorer(options: ExplorerOptions) {
   const explorer = new Explorer(options);
 
   return {

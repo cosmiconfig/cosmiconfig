@@ -1,8 +1,4 @@
-type CosmiconfigResult = {
-  config: any,
-  filepath: string,
-  isEmpty?: boolean,
-} | null;
+type CosmiconfigResult = import('../src').CosmiconfigResult;
 
 type LoaderResult = {
   config: Object | null,
@@ -13,7 +9,7 @@ type LoaderResult = {
 type ExplorerOptions = {
   stopDir: string,
   cache: boolean,
-  transform: CosmiconfigResult => CosmiconfigResult,
+  transform: (result: CosmiconfigResult) => CosmiconfigResult,
   packageProp: string,
   loaders: Loaders,
   searchPlaces: Array<string>,
@@ -21,10 +17,10 @@ type ExplorerOptions = {
 };
 
 type ExplorerContext = ExplorerOptions & {
-  loadCache: ?Map<string, Promise<CosmiconfigResult>>,
-  loadSyncCache: ?Map<string, CosmiconfigResult>,
-  searchCache: ?Map<string, Promise<CosmiconfigResult>>,
-  searchSyncCache: ?Map<string, CosmiconfigResult>,
+  loadCache?: Map<string, Promise<CosmiconfigResult>>,
+  loadSyncCache?: Map<string, CosmiconfigResult>,
+  searchCache?: Map<string, Promise<CosmiconfigResult>>,
+  searchSyncCache?: Map<string, CosmiconfigResult>,
 };
 
 type SyncLoader = (filepath: string, content: string) => Object | null;
@@ -37,5 +33,5 @@ type LoaderEntry = {
   async?: AsyncLoader,
 };
 type Loaders = {
-  [string]: LoaderEntry,
+  [s: string]: LoaderEntry,
 };

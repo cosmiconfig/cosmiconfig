@@ -1,5 +1,5 @@
 {
-  "parser": "babel-eslint",
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "sourceType": "script"
   },
@@ -8,20 +8,25 @@
     "prettier"
   ],
   "plugins": [
-    "flowtype"
+    "@typescript-eslint"
   ],
   "rules": {
     "no-var": "off",
     "prefer-const": "off",
     "prefer-arrow-callback": "off",
-    "node/no-unsupported-features": ["error", {"version": 4}],
+    "node/no-unsupported-features": ["error", {
+      "version": 4,
+      "ignores": ["modules", "defaultParameters"]
+    }],
+    "node/no-missing-require": ["error", {
+      "tryExtensions": [".ts", ".js", ".json", ".node"]
+    }],
     "func-names": ["error", "always"],
     "prefer-template": "error",
     "object-shorthand": [
         "error",
         "always",
         { "avoidExplicitReturnArrows": true }
-    ],
-    "flowtype/define-flow-type": "error"
+    ]
   }
 }

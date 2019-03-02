@@ -1,24 +1,25 @@
 // @flow
 'use strict';
 
-const os = require('os');
-const createExplorer = require('./createExplorer');
-const loaders = require('./loaders');
+import os = require('os');
+import createExplorer = require('./createExplorer');
+import loaders = require('./loaders');
 
-module.exports = cosmiconfig;
+export = cosmiconfig;
 
 function cosmiconfig(
-  moduleName: string,
-  options: {
+  moduleName?: string | null,
+  options?: {
     packageProp?: string,
     loaders?: Object,
     searchPlaces?: Array<string>,
     ignoreEmptySearchPlaces?: boolean,
     stopDir?: string,
     cache?: boolean,
-    transform?: CosmiconfigResult => CosmiconfigResult,
+    transform?: (result: CosmiconfigResult) => CosmiconfigResult,
   }
 ) {
+  moduleName = typeof moduleName === 'string' ? moduleName : '';
   options = options || {};
   const defaults = {
     packageProp: moduleName,
@@ -46,6 +47,15 @@ function cosmiconfig(
   );
 
   return createExplorer(normalizedOptions);
+}
+
+// eslint-disable-next-line no-redeclare
+namespace cosmiconfig {
+  export type CosmiconfigResult = {
+    config: any,
+    filepath: string,
+    isEmpty?: boolean,
+  } | null;
 }
 
 cosmiconfig.loadJs = loaders.loadJs;

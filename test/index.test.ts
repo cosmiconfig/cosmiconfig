@@ -3,11 +3,11 @@
 // Mock `createExplorer` because we want to check what it is called with.
 jest.mock('../src/createExplorer');
 
-const os = require('os');
-const cosmiconfig = require('../src');
-const util = require('./util');
-const createExplorerMock = require('../src/createExplorer');
-const loaders = require('../src/loaders');
+import os = require('os');
+import cosmiconfig = require('../src');
+import util = require('./util');
+const createExplorerMock: typeof import('../src/createExplorer') & {mock: any} = require('../src/createExplorer');
+import loaders = require('../src/loaders');
 
 const temp = new util.TempDir();
 

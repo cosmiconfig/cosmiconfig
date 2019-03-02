@@ -1,8 +1,8 @@
 'use strict';
 
-const fs = require('fs');
-const cosmiconfig = require('../src');
-const util = require('./util');
+import fs = require('fs');
+import cosmiconfig = require('../src');
+import util = require('./util');
 
 const temp = new util.TempDir();
 

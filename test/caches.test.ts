@@ -1,9 +1,9 @@
 'use strict';
 
-const fs = require('fs');
-const importFreshMock = require('import-fresh');
-const util = require('./util');
-const cosmiconfig = require('../src');
+import fs = require('fs');
+import importFreshMock = require('import-fresh');
+import util = require('./util');
+import cosmiconfig = require('../src');
 
 // mocks are hoisted
 jest.mock('import-fresh');

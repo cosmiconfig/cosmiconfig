@@ -1,10 +1,11 @@
 // @flow
 'use strict';
 
-const path = require('path');
-const isDirectory = require('is-directory');
+import path = require('path');
+import isDirectory = require('is-directory');
 
-function getDirectory(filepath: string): Promise<string> {
+// eslint-disable-next-line no-unused-vars
+function getDirectory(filepath: string, _bool?: boolean): Promise<string> {
   return new Promise((resolve, reject) => {
     return isDirectory(filepath, (err, filepathIsDirectory) => {
       if (err) {
@@ -15,8 +16,9 @@ function getDirectory(filepath: string): Promise<string> {
   });
 }
 
-getDirectory.sync = function getDirectorySync(filepath: string): string {
+// eslint-disable-next-line no-unused-vars
+getDirectory.sync = function getDirectorySync(filepath: string, _bool?: boolean): string {
   return isDirectory.sync(filepath) ? filepath : path.dirname(filepath);
 };
 
-module.exports = getDirectory;
+export = getDirectory;

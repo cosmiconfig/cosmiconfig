@@ -1,8 +1,8 @@
 'use strict';
 
-const fs = require('fs');
-const util = require('./util');
-const cosmiconfig = require('../src');
+import fs = require('fs');
+import util = require('./util');
+import cosmiconfig = require('../src');
 
 const temp = new util.TempDir();
 
@@ -1097,7 +1097,7 @@ describe('works fine if sync loader returns a Promise from a JS file', () => {
       filepath: temp.absolutePath('a/b/c/d/e/f/bar.config.js'),
       config: expect.any(Promise),
     });
-    return result.config.then(resolved => {
+    return result!.config.then(resolved => {
       expect(resolved).toEqual({ a: 1 });
     });
   });

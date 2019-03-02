@@ -1,11 +1,11 @@
 'use strict';
 
-const path = require('path');
-const del = require('del');
-const makeDir = require('make-dir');
-const parentModule = require('parent-module');
-const os = require('os');
-const fs = require.requireActual('fs');
+import path = require('path');
+import del = require('del');
+import makeDir = require('make-dir');
+import parentModule = require('parent-module');
+import os = require('os');
+const fs: typeof import('fs') = require.requireActual('fs');
 
 class TempDir {
   dir: string;
@@ -33,11 +33,11 @@ class TempDir {
     // create directory
     makeDir.sync(this.dir);
 
-    (this: any).absolutePath = this.absolutePath.bind(this);
-    (this: any).createDir = this.createDir.bind(this);
-    (this: any).createFile = this.createFile.bind(this);
-    (this: any).clean = this.clean.bind(this);
-    (this: any).deleteTempDir = this.deleteTempDir.bind(this);
+    (this as any).absolutePath = this.absolutePath.bind(this);
+    (this as any).createDir = this.createDir.bind(this);
+    (this as any).createFile = this.createFile.bind(this);
+    (this as any).clean = this.clean.bind(this);
+    (this as any).deleteTempDir = this.deleteTempDir.bind(this);
   }
 
   absolutePath(dir: string) {
@@ -96,6 +96,6 @@ class TempDir {
   }
 }
 
-module.exports = {
+export = {
   TempDir,
 };

@@ -1,9 +1,9 @@
 // @flow
 'use strict';
 
-const parseJson = require('parse-json');
-const yaml = require('js-yaml');
-const importFresh = require('import-fresh');
+import parseJson = require('parse-json');
+import yaml = require('js-yaml');
+import importFresh = require('import-fresh');
 
 function loadJs(filepath: string): Object {
   const result = importFresh(filepath);
@@ -23,7 +23,7 @@ function loadYaml(filepath: string, content: string): Object {
   return yaml.safeLoad(content, { filename: filepath });
 }
 
-module.exports = {
+export = {
   loadJs,
   loadJson,
   loadYaml,

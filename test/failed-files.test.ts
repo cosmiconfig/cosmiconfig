@@ -1,7 +1,7 @@
 'use strict';
 
-const util = require('./util');
-const cosmiconfig = require('../src');
+import util = require('./util');
+import cosmiconfig = require('../src');
 
 const temp = new util.TempDir();
 
@@ -210,6 +210,7 @@ describe('throws an error if no configPath was specified and load is called with
 
   test('async', () => {
     expect.hasAssertions();
+    // @ts-ignore
     return cosmiconfig('not_exist_rc_name')
       .load()
       .catch(checkError);
@@ -218,6 +219,7 @@ describe('throws an error if no configPath was specified and load is called with
   test('sync', () => {
     expect.hasAssertions();
     try {
+      // @ts-ignore
       cosmiconfig('not_exist_rc_name').loadSync();
     } catch (error) {
       checkError(error);

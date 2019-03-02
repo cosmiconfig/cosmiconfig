@@ -7,21 +7,21 @@
     "dist"
   ],
   "scripts": {
-    "precommit": "lint-staged && jest && flow check",
+    "precommit": "lint-staged && jest && tsc --noEmit",
     "lint:md-partial": "remark -u remark-preset-davidtheclark --frail --quiet --no-stdout --output --",
     "lint:md": "npm run lint:md-partial -- *.md",
-    "lint:fix": "eslint . --fix",
-    "lint": "eslint . && npm run lint:md",
-    "format": "prettier --write \"{src/*.js,test/*.js}\"",
-    "pretest": "npm run lint && flow check",
+    "lint:fix": "eslint . --ext .js,.ts --fix",
+    "lint": "eslint . --ext .js,.ts && npm run lint:md",
+    "format": "prettier --write \"{src/*.ts,test/*.ts}\"",
+    "pretest": "npm run lint && tsc -p . --noEmit",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "coverage": "jest --coverage --coverageReporters=html --coverageReporters=text",
-    "build": "flow-remove-types src --out-dir dist --quiet",
+    "build": "tsc -p ./tsconfig.build.json",
     "prepublishOnly": "npm run build"
   },
   "lint-staged": {
-    "*.js": [
+    "*.ts": [
       "eslint --fix",
       "prettier --write",
       "git add"
@@ -59,7 +59,7 @@
   "jest": {
     "testEnvironment": "node",
     "collectCoverageFrom": [
-      "src/*.js"
+      "src/*.ts"
     ],
     "coverageReporters": [
       "text",
@@ -77,11 +77,7 @@
     "resetModules": true,
     "resetMocks": true
   },
-  "babel": {
-    "plugins": [
-      "transform-flow-strip-types"
-    ]
-  },
+  "setupFiles": "ts-node/register",
   "dependencies": {
     "import-fresh": "^2.0.0",
     "is-directory": "^0.3.1",
@@ -90,16 +86,16 @@
     "parse-json": "^4.0.0"
   },
   "devDependencies": {
-    "babel-eslint": "^8.0.3",
-    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "@types/jest": "^24.0.9",
+    "@types/node": "^11.10.4",
+    "@types/parse-json": "^4.0.0",
+    "@typescript-eslint/eslint-plugin": "^1.4.2",
+    "@typescript-eslint/parser": "^1.4.2",
     "del": "^3.0.0",
-    "eslint": "^4.12.1",
+    "eslint": "^5.15.0",
     "eslint-config-davidtheclark-node": "^0.2.2",
     "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-flowtype": "^2.39.1",
     "eslint-plugin-node": "^5.2.1",
-    "flow-bin": "^0.68.0",
-    "flow-remove-types": "^1.2.3",
     "husky": "^0.14.3",
     "jest": "^21.2.1",
     "lint-staged": "^6.0.0",
@@ -107,7 +103,9 @@
     "parent-module": "^0.1.0",
     "prettier": "^1.8.2",
     "remark-cli": "^5.0.0",
-    "remark-preset-davidtheclark": "^0.7.0"
+    "remark-preset-davidtheclark": "^0.7.0",
+    "ts-node": "^8.0.2",
+    "typescript": "3.3.3"
   },
   "engines": {
     "node": ">=4"

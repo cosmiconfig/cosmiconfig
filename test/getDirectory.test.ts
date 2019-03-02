@@ -1,6 +1,6 @@
 'use strict';
 
-const getDirectory = require('../src/getDirectory');
+import getDirectory = require('../src/getDirectory');
 
 describe('returns the searchPath if it is a directory', () => {
   const subject = __dirname;
@@ -41,6 +41,7 @@ test('returns a promise if sync is not true', () => {
 });
 
 test('propagates error thrown by is-directory in sync', () => {
+  // @ts-ignore
   expect(() => getDirectory.sync(null, true)).toThrowError(
     'expected filepath to be a string'
   );
@@ -48,7 +49,7 @@ test('propagates error thrown by is-directory in sync', () => {
 
 test('rejects with the error thrown by is-directory in async', () => {
   expect.hasAssertions();
-  return getDirectory(null, false).catch(err => {
+  return getDirectory(null as any, false).catch(err => {
     expect(err.message).toBe('expected filepath to be a string');
   });
 });
