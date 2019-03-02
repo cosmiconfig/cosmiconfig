@@ -21,7 +21,7 @@ type ExplorerOptions = {
   ignoreEmptySearchPlaces: boolean,
 };
 
-type ExplorerContext =   & {
+type ExplorerContext = ExplorerOptions & {
   loadCache: ?Map<string, Promise<CosmiconfigResult>>,
   loadSyncCache: ?Map<string, CosmiconfigResult>,
   searchCache: ?Map<string, Promise<CosmiconfigResult>>,
