@@ -422,7 +422,7 @@ For example, the value `'configs.myPackage'` or `['configs', 'myPackage']` will 
 }
 ```
 
-If property names within the path include periods, you need to use an array of strings. For example, the value `['configs', 'foo.bar', 'baz']` will get you the `"baz"` value in a \`package.json like this:
+If nested property names within the path include periods, you need to use an array of strings. For example, the value `['configs', 'foo.bar', 'baz']` will get you the `"baz"` value in a `package.json` like this:
 
 ```json
 {
@@ -430,6 +430,17 @@ If property names within the path include periods, you need to use an array of s
     "foo.bar": {
       "baz": {..}
     }
+  }
+}
+```
+
+If a string includes period but corresponds to a top-level property name, it will not be interpreted as a period-delimited path. For example, the value `'one.two'` will get you the `"three"` value in a `package.json` like this:
+
+```json
+{
+  "one.two": "three",
+  "one": {
+    "two": "four"
   }
 }
 ```
