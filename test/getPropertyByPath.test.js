@@ -16,7 +16,14 @@ const source = {
       'another.fancy.name': 9,
     },
   },
+  'ant.beetle.cootie': 333,
 };
+
+describe('with a property name that includes a period', () => {
+  test('does not treat it as a period-delimited path', () => {
+    expect(getPropertyPath(source, 'ant.beetle.cootie')).toBe(333);
+  });
+});
 
 describe('with period-delimited string path', () => {
   test('returns a defined value', () => {
