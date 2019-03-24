@@ -1,9 +1,10 @@
 # Changelog
 
-## HEAD
+## 5.2.0
 
 - Added: `packageProp` values can be arrays of strings, to allow for property names that include periods. (This was possible before, but not documented or deliberately supported.)
 - Chore: Replaced the `lodash.get` dependency with a locally defined function.
+- Chore: Upgrade `js-yaml` to avoid npm audit warning.
 
 ## 5.1.0
 
