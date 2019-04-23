@@ -21,7 +21,7 @@ cache:
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
-  - yarn install
+  - yarn install --frozen-lockfile
 
 test_script:
   - node --version
