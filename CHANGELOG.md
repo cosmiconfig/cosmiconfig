@@ -1,6 +1,6 @@
 # Changelog
 
-## HEAD
+## 5.2.1
 
 - Chore: Upgrade `js-yaml` to avoid npm audit warning.
 
