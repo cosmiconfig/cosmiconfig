@@ -118,6 +118,8 @@ Type: `string`. **Required.**
 
 Your module name. This is used to create the default [`searchPlaces`] and [`packageProp`].
 
+If your [`searchPlaces`] value will include files, as it does by default (e.g. `${moduleName}rc`), your `moduleName` must consist of characters allowed in filenames. That means you should not copy scoped package names, such as `@my-org/my-package`, directly into `moduleName`.
+
 **[`cosmiconfigOptions`] are documented below.**
 You may not need them, and should first read about the functions you'll use.
 
