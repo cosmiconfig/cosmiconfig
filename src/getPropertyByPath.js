@@ -6,10 +6,17 @@
 // object are used directly (even if they include a period).
 // Nested property names that include periods, within a path, are only
 // understood in array paths.
-function getPropertyByPath(source: Object, path: string | Array<string>): any {
+function getPropertyByPath(
+  source: Object,
+  path: ?(string | Array<string>)
+): any {
+  if (path === undefined || path === null) return undefined;
+
   if (typeof path === 'string' && source.hasOwnProperty(path)) {
     return source[path];
   }
+
+  if (path.length === 0) return undefined;
 
   const parsedPath = typeof path === 'string' ? path.split('.') : path;
   return parsedPath.reduce((previous, key) => {

@@ -37,6 +37,12 @@ describe('with period-delimited string path', () => {
   });
 
   test('returns undefined', () => {
+    expect(getPropertyPath(source, undefined)).toBeUndefined();
+
+    expect(getPropertyPath(source, null)).toBeUndefined();
+
+    expect(getPropertyPath(source, [])).toBeUndefined();
+
     expect(getPropertyPath(source, 'beetle')).toBeUndefined();
 
     expect(getPropertyPath(source, 'ant.beetle.cootie.fleeee')).toBeUndefined();
