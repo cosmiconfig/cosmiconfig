@@ -1,12 +1,5 @@
 # http://www.appveyor.com/docs/appveyor-yml
 
-environment:
-  matrix:
-    - nodejs_version: 6
-    - nodejs_version: 8
-    - nodejs_version: 10
-    - nodejs_version: 12
-
 branches:
   only:
     - master
@@ -19,8 +12,21 @@ deploy: off
 cache:
  - "%LOCALAPPDATA%\\Yarn"
 
+environment:
+  matrix:
+  - nodejs_version: 6
+  - nodejs_version: 8
+  - nodejs_version: 10
+  - nodejs_version: 12
+
+platform:
+  - x86
+  - x64
+
+
 install:
-  - ps: Install-Product node $env:nodejs_version x64
+  # https://www.appveyor.com/docs/lang/nodejs-iojs/#installing-any-version-of-nodejs-or-iojs
+  - ps: Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version) $env:PLATFORM
   - yarn install --frozen-lockfile
 
 test_script:
