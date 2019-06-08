@@ -109,6 +109,6 @@
     "remark-preset-davidtheclark": "^0.7.0"
   },
   "engines": {
-    "node": ">=4"
+    "node": ">=6"
   }
 }

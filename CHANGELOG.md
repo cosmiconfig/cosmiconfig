@@ -1,5 +1,9 @@
 # Changelog
 
+## HEAD
+
+- **Breaking change:** Remove support for Node 4.
+
 ## 5.2.1
 
 - Chore: Upgrade `js-yaml` to avoid npm audit warning.
