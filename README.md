@@ -63,7 +63,7 @@ If you are still using v4, those v4 docs are available [in the `4.0.0` tag](http
 npm install cosmiconfig
 ```
 
-Tested in Node 6+.
+Tested in Node 8+.
 
 ## Usage
 
