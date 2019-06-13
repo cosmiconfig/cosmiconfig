@@ -84,8 +84,8 @@ describe('with array path', () => {
         'another.fancy.name',
         'foo',
       ])
-    ).toBeUndefined;
+    ).toBeUndefined();
 
-    expect(getPropertyPath(source, ['ant', 'fancy.namez'])).toBeUndefined;
+    expect(getPropertyPath(source, ['ant', 'fancy.namez'])).toBeUndefined();
   });
 });
