@@ -35,7 +35,7 @@ If you are still using v4, those v4 docs are available [in the `4.0.0` tag](http
 - [Installation](#installation)
 - [Usage](#usage)
 - [Result](#result)
-- [cosmiconfig()](#cosmiconfig-1)
+- [cosmiconfig()](#cosmiconfig)
   - [moduleName](#modulename)
 - [explorer.search()](#explorersearch)
   - [searchFrom](#searchfrom)
