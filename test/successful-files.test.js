@@ -145,7 +145,7 @@ describe('loads package prop when configPath is package.json', () => {
       "otherPackage": {
         "please": "no"
       }
-    }`
+    }`,
     );
   });
 
@@ -443,7 +443,7 @@ describe('works fine if sync loader returns a Promise from a JS file', () => {
   beforeEach(() => {
     temp.createFile(
       'foo.config.js',
-      'module.exports = Promise.resolve({ a: 1 });'
+      'module.exports = Promise.resolve({ a: 1 });',
     );
   });
 

@@ -212,7 +212,7 @@ describe('throws error for invalid JS in .config.js file', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/foo.config.js',
-      'module.exports = { found: true: false,'
+      'module.exports = { found: true: false,',
     );
   });
 
@@ -560,7 +560,7 @@ describe('throws error if a file in searchPlaces does not have a corresponding l
 
   const checkError = error => {
     expect(error.message).toMatch(
-      /No loader specified for extension "\.things"/
+      /No loader specified for extension "\.things"/,
     );
   };
 
@@ -589,7 +589,7 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
 
   const checkError = error => {
     expect(error.message).toMatch(
-      /No loader specified for files without extensions/
+      /No loader specified for files without extensions/,
     );
   };
 
@@ -648,7 +648,7 @@ describe('errors not swallowed when async custom loader throws them', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/.foorc.things',
-      'one\ntwo\nthree\t\t\n  four\n'
+      'one\ntwo\nthree\t\t\n  four\n',
     );
   });
 
@@ -683,7 +683,7 @@ describe('errors not swallowed when async custom loader rejects', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/.foorc.things',
-      'one\ntwo\nthree\t\t\n  four\n'
+      'one\ntwo\nthree\t\t\n  four\n',
     );
   });
 
@@ -718,7 +718,7 @@ describe('errors if only async loader is set but you call sync search', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/.foorc.things',
-      'one\ntwo\nthree\t\t\n  four\n'
+      'one\ntwo\nthree\t\t\n  four\n',
     );
   });
 
@@ -736,7 +736,7 @@ describe('errors if only async loader is set but you call sync search', () => {
 
   const checkError = error => {
     expect(error.message).toMatch(
-      /No sync loader specified for extension "\.things"/
+      /No sync loader specified for extension "\.things"/,
     );
   };
 
@@ -756,7 +756,7 @@ describe('errors if it cannot figure out an async loader', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/.foorc.things',
-      'one\ntwo\nthree\t\t\n  four\n'
+      'one\ntwo\nthree\t\t\n  four\n',
     );
   });
 
@@ -774,7 +774,7 @@ describe('errors if it cannot figure out an async loader', () => {
 
   const checkError = error => {
     expect(error.message).toMatch(
-      /No async loader specified for extension "\.things"/
+      /No async loader specified for extension "\.things"/,
     );
   };
 

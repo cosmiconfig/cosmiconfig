@@ -32,7 +32,7 @@ describe('with period-delimited string path', () => {
     expect(getPropertyPath(source, 'ant.beetle.cootie.flea')).toBe('foo');
 
     expect(getPropertyPath(source, 'ant.beetle.louse')).toBe(
-      source.ant.beetle.louse
+      source.ant.beetle.louse,
     );
   });
 
@@ -52,11 +52,11 @@ describe('with array path', () => {
     expect(getPropertyPath(source, ['ant'])).toBe(source.ant);
 
     expect(getPropertyPath(source, ['ant', 'beetle', 'cootie', 'flea'])).toBe(
-      'foo'
+      'foo',
     );
 
     expect(getPropertyPath(source, ['ant', 'beetle', 'louse'])).toBe(
-      source.ant.beetle.louse
+      source.ant.beetle.louse,
     );
   });
 
@@ -64,17 +64,17 @@ describe('with array path', () => {
     expect(getPropertyPath(source, ['beetle'])).toBeUndefined();
 
     expect(
-      getPropertyPath(source, ['ant', 'beetle', 'cootie', 'fleeee'])
+      getPropertyPath(source, ['ant', 'beetle', 'cootie', 'fleeee']),
     ).toBeUndefined();
 
     expect(
-      getPropertyPath(source, ['ant', 'beetle', 'vermin'])
+      getPropertyPath(source, ['ant', 'beetle', 'vermin']),
     ).toBeUndefined();
   });
 
   test('handles property names with periods', () => {
     expect(
-      getPropertyPath(source, ['ant', 'fancy.name', 'another.fancy.name'])
+      getPropertyPath(source, ['ant', 'fancy.name', 'another.fancy.name']),
     ).toBe(9);
 
     expect(
@@ -83,7 +83,7 @@ describe('with array path', () => {
         'fancy.name',
         'another.fancy.name',
         'foo',
-      ])
+      ]),
     ).toBeUndefined();
 
     expect(getPropertyPath(source, ['ant', 'fancy.namez'])).toBeUndefined();

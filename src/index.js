@@ -17,7 +17,7 @@ function cosmiconfig(
     stopDir?: string,
     cache?: boolean,
     transform?: CosmiconfigResult => CosmiconfigResult,
-  }
+  },
 ) {
   options = options || {};
   const defaults = {
@@ -42,7 +42,7 @@ function cosmiconfig(
     options,
     {
       loaders: normalizeLoaders(options.loaders),
-    }
+    },
   );
 
   return createExplorer(normalizedOptions);

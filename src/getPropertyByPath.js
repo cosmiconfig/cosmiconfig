@@ -8,7 +8,7 @@
 // understood in array paths.
 function getPropertyByPath(
   source: { [key: string]: any },
-  path: string | Array<string>
+  path: string | Array<string>,
 ): any {
   if (typeof path === 'string' && source.hasOwnProperty(path)) {
     return source[path];
