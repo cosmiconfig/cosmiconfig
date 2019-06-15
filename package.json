@@ -11,7 +11,7 @@
     "lint:md": "npm run lint:md-partial -- *.md",
     "lint:fix": "eslint . --fix",
     "lint": "eslint . && npm run lint:md",
-    "format": "prettier --write \"{src/*.js,test/*.js}\"",
+    "format": "prettier \"**/*.{js,json,yml,yaml}\" --write",
     "pretest": "npm run lint && flow check",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
@@ -27,6 +27,10 @@
   "lint-staged": {
     "*.js": [
       "eslint --fix",
+      "prettier --write",
+      "git add"
+    ],
+    "*.{json,yml,yaml}": [
       "prettier --write",
       "git add"
     ],

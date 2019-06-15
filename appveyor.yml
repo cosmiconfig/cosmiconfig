@@ -6,17 +6,17 @@ branches:
     - v5
 
 clone_depth: 5
-version: "{build}"
+version: '{build}'
 build: off
 deploy: off
 cache:
- - "%LOCALAPPDATA%\\Yarn"
+  - "%LOCALAPPDATA%\\Yarn"
 
 environment:
   matrix:
-  - nodejs_version: 8
-  - nodejs_version: 10
-  - nodejs_version: 12
+    - nodejs_version: '8'
+    - nodejs_version: '10'
+    - nodejs_version: '12'
 
 install:
   # https://www.appveyor.com/docs/lang/nodejs-iojs/#installing-any-version-of-nodejs-or-iojs
@@ -26,4 +26,4 @@ install:
 test_script:
   - node --version
   - yarn --version
-  - cmd: "yarn test"
+  - cmd: 'yarn test'

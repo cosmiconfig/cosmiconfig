@@ -3,24 +3,19 @@
   "parserOptions": {
     "sourceType": "script"
   },
-  "extends": [
-    "eslint-config-davidtheclark-node",
-    "prettier"
-  ],
-  "plugins": [
-    "flowtype"
-  ],
+  "extends": ["eslint-config-davidtheclark-node", "prettier"],
+  "plugins": ["flowtype"],
   "rules": {
     "no-var": "off",
     "prefer-const": "off",
     "prefer-arrow-callback": "off",
-    "node/no-unsupported-features": ["error", {"version": "8.9"}], // first LTS 8 release
+    "node/no-unsupported-features": ["error", { "version": "8.9" }], // first LTS 8 release
     "func-names": ["error", "always"],
     "prefer-template": "error",
     "object-shorthand": [
-        "error",
-        "always",
-        { "avoidExplicitReturnArrows": true }
+      "error",
+      "always",
+      { "avoidExplicitReturnArrows": true }
     ],
     "flowtype/define-flow-type": "error"
   }
