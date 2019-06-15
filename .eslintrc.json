@@ -3,8 +3,12 @@
   "parserOptions": {
     "sourceType": "script"
   },
-  "extends": ["eslint-config-davidtheclark-node", "prettier"],
-  "plugins": ["flowtype"],
+  "extends": [
+    "eslint-config-davidtheclark-node",
+    "plugin:jest/recommended",
+    "prettier"
+  ],
+  "plugins": ["jest", "flowtype"],
   "rules": {
     "no-var": "off",
     "prefer-const": "off",
@@ -17,6 +21,11 @@
       "always",
       { "avoidExplicitReturnArrows": true }
     ],
-    "flowtype/define-flow-type": "error"
+    "flowtype/define-flow-type": "error",
+
+    "jest/consistent-test-it": ["error", { "fn": "test" }],
+    "jest/no-empty-title": "error",
+    "jest/no-test-callback": "error",
+    "jest/prefer-todo": "error"
   }
 }
