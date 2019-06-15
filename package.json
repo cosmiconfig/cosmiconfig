@@ -7,11 +7,10 @@
     "dist"
   ],
   "scripts": {
-    "lint:md-partial": "remark -u remark-preset-davidtheclark --frail --quiet --no-stdout --output --",
-    "lint:md": "npm run lint:md-partial -- *.md",
+    "lint:md": "remark-preset-davidtheclark --format",
     "lint:fix": "eslint . --fix",
     "lint": "eslint . && npm run lint:md",
-    "format": "prettier --write \"{src/*.js,test/*.js}\"",
+    "format": "prettier \"**/*.{js,json,yml,yaml}\" --write",
     "pretest": "npm run lint && flow check",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
@@ -30,8 +29,12 @@
       "prettier --write",
       "git add"
     ],
+    "*.{json,yml,yaml}": [
+      "prettier --write",
+      "git add"
+    ],
     "*.md": [
-      "npm run lint:md-partial",
+      "remark-preset-davidtheclark --format",
       "git add"
     ]
   },
@@ -110,7 +113,6 @@
     "make-dir": "^3.0.0",
     "parent-module": "^2.0.0",
     "prettier": "^1.18.2",
-    "remark-cli": "^6.0.1",
     "remark-preset-davidtheclark": "^0.10.0"
   },
   "engines": {
