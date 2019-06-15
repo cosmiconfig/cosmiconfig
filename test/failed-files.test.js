@@ -301,7 +301,7 @@ describe('errors if only async loader is set but you call sync search', () => {
 
   const checkError = error => {
     expect(error.message).toMatch(
-      /No sync loader specified for extension "\.things"/
+      /No sync loader specified for extension "\.things"/,
     );
   };
 
@@ -327,7 +327,7 @@ describe('errors if no loader is set but you call sync load', () => {
 
   const checkError = error => {
     expect(error.message).toMatch(
-      /No sync loader specified for extension "\.things"/
+      /No sync loader specified for extension "\.things"/,
     );
   };
 

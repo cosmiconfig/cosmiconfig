@@ -77,7 +77,7 @@ describe('finds package.json prop in second searched dir', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/package.json',
-      '{ "author": "Todd", "foo": { "found": true } }'
+      '{ "author": "Todd", "foo": { "found": true } }',
     );
   });
 
@@ -124,11 +124,11 @@ describe('finds package.json with nested packageProp in second searched dir', ()
     // First package.json exists but does not include the nested packageProp.
     temp.createFile(
       'a/b/c/d/e/f/package.json',
-      '{ "author": "Todd", "configs": { "notYourPkg": { "yes": "ofcourse" } } }'
+      '{ "author": "Todd", "configs": { "notYourPkg": { "yes": "ofcourse" } } }',
     );
     temp.createFile(
       'a/b/c/d/e/package.json',
-      '{ "author": "Todd", "configs": { "pkg": { "please": "no" } } }'
+      '{ "author": "Todd", "configs": { "pkg": { "please": "no" } } }',
     );
   });
 
@@ -177,7 +177,7 @@ describe('finds JS file in first searched dir', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/foo.config.js',
-      'module.exports = { found: true };'
+      'module.exports = { found: true };',
     );
   });
 
@@ -223,7 +223,7 @@ describe('finds .foorc.js file in first searched dir', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/.foorc.js',
-      'module.exports = { found: true };'
+      'module.exports = { found: true };',
     );
   });
 
@@ -268,7 +268,7 @@ describe('skips over empty file to find JS file in first searched dir', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/foo.config.js',
-      'module.exports = { found: true };'
+      'module.exports = { found: true };',
     );
     temp.createFile('a/b/c/d/e/f/.foorc', '');
   });
@@ -404,7 +404,7 @@ describe('finds package.json file in second searched dir, skipping JS and RC fil
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/package.json',
-      '{ "author": "Todd", "foo": { "found": true } }'
+      '{ "author": "Todd", "foo": { "found": true } }',
     );
   });
 
@@ -576,7 +576,7 @@ describe('adding myfooconfig.js to searchPlaces, finds it in first searched dir'
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/myfooconfig.js',
-      'module.exports = { found: true };'
+      'module.exports = { found: true };',
     );
   });
 
@@ -635,7 +635,7 @@ describe('finds JS file traversing from cwd', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/foo.config.js',
-      'module.exports = { found: true };'
+      'module.exports = { found: true };',
     );
 
     process.chdir(temp.absolutePath('a/b/c/d/e/f'));
@@ -940,7 +940,7 @@ describe('custom loaders can be async', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/.foorc.things',
-      'one\ntwo\nthree\t\t\n  four\n'
+      'one\ntwo\nthree\t\t\n  four\n',
     );
     loadThingsSync = jest.fn(() => {
       return { things: true };
@@ -993,7 +993,7 @@ describe('a custom loader entry can include just an async loader', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/.foorc.things',
-      'one\ntwo\nthree\t\t\n  four\n'
+      'one\ntwo\nthree\t\t\n  four\n',
     );
   });
 
@@ -1035,7 +1035,7 @@ describe('a custom loader entry can include only a sync loader and work for both
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/.foorc.things',
-      'one\ntwo\nthree\t\t\n  four\n'
+      'one\ntwo\nthree\t\t\n  four\n',
     );
   });
 
@@ -1082,7 +1082,7 @@ describe('works fine if sync loader returns a Promise from a JS file', () => {
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/bar.config.js',
-      'module.exports = Promise.resolve({ a: 1 });'
+      'module.exports = Promise.resolve({ a: 1 });',
     );
   });
 

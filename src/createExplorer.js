@@ -64,8 +64,8 @@ class Explorer {
       if (!loader) {
         throw new Error(
           `No loader specified for ${getExtensionDescription(
-            place
-          )}, so searchPlaces item "${place}" is invalid`
+            place,
+          )}, so searchPlaces item "${place}" is invalid`,
         );
       }
     });
@@ -160,7 +160,7 @@ class Explorer {
 
   nextDirectoryToSearch(
     currentDir: string,
-    currentResult: CosmiconfigResult
+    currentResult: CosmiconfigResult,
   ): ?string {
     if (this.shouldSearchStopWithResult(currentResult)) {
       return null;
@@ -176,7 +176,7 @@ class Explorer {
     const parsedContent = loaders.loadJson(filepath, content);
     const packagePropValue = getPropertyByPath(
       parsedContent,
-      this.config.packageProp
+      this.config.packageProp,
     );
     return packagePropValue || null;
   }
@@ -195,7 +195,7 @@ class Explorer {
     const entry = this.getLoaderEntryForFile(filepath);
     if (!entry.sync) {
       throw new Error(
-        `No sync loader specified for ${getExtensionDescription(filepath)}`
+        `No sync loader specified for ${getExtensionDescription(filepath)}`,
       );
     }
     return entry.sync;
@@ -206,7 +206,7 @@ class Explorer {
     const loader = entry.async || entry.sync;
     if (!loader) {
       throw new Error(
-        `No async loader specified for ${getExtensionDescription(filepath)}`
+        `No async loader specified for ${getExtensionDescription(filepath)}`,
       );
     }
     return loader;
@@ -215,7 +215,7 @@ class Explorer {
   loadFileContent(
     mode: 'sync' | 'async',
     filepath: string,
-    content: string | null
+    content: string | null,
   ): Promise<LoadedFileContent> | LoadedFileContent {
     if (content === null) {
       return null;
@@ -232,7 +232,7 @@ class Explorer {
 
   loadedContentToCosmiconfigResult(
     filepath: string,
-    loadedContent: LoadedFileContent
+    loadedContent: LoadedFileContent,
   ): CosmiconfigResult {
     if (loadedContent === null) {
       return null;
@@ -245,7 +245,7 @@ class Explorer {
 
   createCosmiconfigResult(
     filepath: string,
-    content: string | null
+    content: string | null,
   ): Promise<CosmiconfigResult> {
     return Promise.resolve()
       .then(() => {
@@ -258,7 +258,7 @@ class Explorer {
 
   createCosmiconfigResultSync(
     filepath: string,
-    content: string | null
+    content: string | null,
   ): CosmiconfigResult {
     const loaderResult = this.loadFileContent('sync', filepath, content);
     return this.loadedContentToCosmiconfigResult(filepath, loaderResult);
@@ -291,7 +291,7 @@ class Explorer {
       const content = readFile.sync(absoluteFilePath, { throwNotFound: true });
       const result = this.createCosmiconfigResultSync(
         absoluteFilePath,
-        content
+        content,
       );
       return this.config.transform(result);
     });

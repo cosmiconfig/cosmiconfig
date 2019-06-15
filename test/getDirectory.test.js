@@ -42,7 +42,7 @@ test('returns a promise if sync is not true', () => {
 
 test('propagates error thrown by is-directory in sync', () => {
   expect(() => getDirectory.sync(null, true)).toThrowError(
-    'expected filepath to be a string'
+    'expected filepath to be a string',
   );
 });
 

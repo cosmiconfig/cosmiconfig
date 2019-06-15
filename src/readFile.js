@@ -24,7 +24,7 @@ function readFile(filepath: string, options?: Options): Promise<string | null> {
 
 readFile.sync = function readFileSync(
   filepath: string,
-  options?: Options
+  options?: Options,
 ): string | null {
   options = options || {};
   const throwNotFound = options.throwNotFound || false;
