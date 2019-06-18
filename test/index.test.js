@@ -29,7 +29,7 @@ describe('cosmiconfig', () => {
     temp.deleteTempDir();
   });
 
-  it('creates explorer with default options if not specified', () => {
+  test('creates explorer with default options if not specified', () => {
     cosmiconfig(moduleName);
 
     expect(createExplorerMock).toHaveBeenCalledTimes(1);
@@ -59,7 +59,7 @@ describe('cosmiconfig', () => {
     });
   });
 
-  it('defaults transform to identity function', () => {
+  test('defaults transform to identity function', () => {
     cosmiconfig(moduleName);
     const explorerOptions = createExplorerMock.mock.calls[0][0];
 
@@ -67,7 +67,7 @@ describe('cosmiconfig', () => {
     expect(explorerOptions.transform(x)).toBe(x);
   });
 
-  it('creates explorer with preference for given options over defaults', () => {
+  test('creates explorer with preference for given options over defaults', () => {
     temp.createFile('foo.json', '{ "foo": true }');
 
     const noExtLoader = () => {};

@@ -104,6 +104,7 @@
     "eslint-config-davidtheclark-node": "^0.2.2",
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-flowtype": "^3.10.3",
+    "eslint-plugin-jest": "22.6.4",
     "eslint-plugin-node": "^9.1.0",
     "flow-bin": "^0.101.0",
     "flow-remove-types": "^2.101.0",
