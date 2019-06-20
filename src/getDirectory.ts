@@ -1,22 +1,28 @@
 import path from 'path';
-import isDirectory from 'is-directory';
+import { isDirectory, isDirectorySync } from 'path-type';
 
-function getDirectoryAsync(filepath: string): Promise<string> {
-  return new Promise((resolve, reject): void => {
-    isDirectory(filepath, (error, filepathIsDirectory): void => {
-      if (error) {
-        reject(error);
+async function getDirectoryAsync(filepath: string): Promise<string> {
+  const filePathIsDirectory = await isDirectory(filepath);
 
-        return;
-      }
+  if (filePathIsDirectory === true) {
+    return filepath;
+  }
 
-      resolve(filepathIsDirectory ? filepath : path.dirname(filepath));
-    });
-  });
+  const directory = path.dirname(filepath);
+
+  return directory;
 }
 
 function getDirectorySync(filepath: string): string {
-  return isDirectory.sync(filepath) ? filepath : path.dirname(filepath);
+  const filePathIsDirectory = isDirectorySync(filepath);
+
+  if (filePathIsDirectory === true) {
+    return filepath;
+  }
+
+  const directory = path.dirname(filepath);
+
+  return directory;
 }
 
 export { getDirectoryAsync, getDirectorySync };
