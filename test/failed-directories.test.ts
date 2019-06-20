@@ -1,10 +1,17 @@
-'use strict';
+import fs from 'fs';
+import { cosmiconfig as cosmiconfigActual, Options } from '../src';
+import { TempDir } from './util';
+import { CosmiconfigResult } from '../src/types';
+import * as loaders from '../src/loaders';
 
-const fs = require('fs');
-const cosmiconfig = require('../src');
-const util = require('./util');
+const cosmiconfig: typeof cosmiconfigActual = (...params) =>
+  require('../src').cosmiconfig(...params);
 
-const temp = new util.TempDir();
+cosmiconfig.loadJs = loaders.loadJs;
+cosmiconfig.loadJson = loaders.loadJson;
+cosmiconfig.loadYaml = loaders.loadYaml;
+
+const temp = new TempDir();
 
 beforeEach(() => {
   temp.clean();
@@ -24,7 +31,11 @@ describe('gives up if it cannot find the file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('.') };
 
-  const checkResult = (statSpy, readFileSpy, result) => {
+  const checkResult = (
+    statSpy: jest.SpyInstance,
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     const statPath = temp.getSpyPathCalls(statSpy);
     expect(statPath).toEqual(['a/b']);
 
@@ -61,7 +72,7 @@ describe('gives up if it cannot find the file', () => {
     const statSpy = jest.spyOn(fs, 'stat');
     return cosmiconfig('foo', explorerOptions)
       .search(startDir)
-      .then(result => {
+      .then((result) => {
         checkResult(statSpy, readFileSpy, result);
       });
   });
@@ -78,7 +89,10 @@ describe('stops at stopDir and gives up', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/package.json',
@@ -104,7 +118,7 @@ describe('stops at stopDir and gives up', () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
     return cosmiconfig('foo', explorerOptions)
       .search(startDir)
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -124,7 +138,7 @@ describe('throws error for invalid YAML in rc file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error.name).toBe('YAMLException');
   };
 
@@ -158,7 +172,7 @@ describe('throws error for invalid JSON in extensionless rc file loaded as JSON'
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error.name).toMatch(/JSONError/);
   };
 
@@ -187,7 +201,7 @@ describe('throws error for invalid package.json', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error.name).toMatch(/JSONError/);
   };
 
@@ -219,7 +233,7 @@ describe('throws error for invalid JS in .config.js file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error.name).toBe('SyntaxError');
   };
 
@@ -250,7 +264,7 @@ describe('throws error for invalid JSON in .foorc.json', () => {
     stopDir: temp.absolutePath('.'),
   };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error.message).toMatch(/JSON Error/);
   };
 
@@ -281,7 +295,7 @@ describe('throws error for invalid YAML in .foorc.yml', () => {
     stopDir: temp.absolutePath('.'),
   };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error.name).toBe('YAMLException');
   };
 
@@ -321,7 +335,7 @@ describe('searching for rc files with specified extensions, throws error for inv
     ],
   };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error.name).toBe('SyntaxError');
   };
 
@@ -353,7 +367,7 @@ describe('without ignoring empty files, returns an empty config result for an em
     ignoreEmptySearchPlaces: false,
   };
 
-  const checkResult = result => {
+  const checkResult = (result: CosmiconfigResult) => {
     expect(result).toEqual({
       config: undefined,
       filepath: temp.absolutePath('a/b/.foorc'),
@@ -384,7 +398,7 @@ describe('without ignoring empty files, returns an empty config result for an em
     ignoreEmptySearchPlaces: false,
   };
 
-  const checkResult = result => {
+  const checkResult = (result: CosmiconfigResult) => {
     expect(result).toEqual({
       config: undefined,
       filepath: temp.absolutePath('a/b/foo.config.js'),
@@ -415,7 +429,7 @@ describe('without ignoring empty files, returns an empty config result for an em
     ignoreEmptySearchPlaces: false,
   };
 
-  const checkResult = result => {
+  const checkResult = (result: CosmiconfigResult) => {
     expect(result).toEqual({
       config: undefined,
       filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.json'),
@@ -446,7 +460,7 @@ describe('returns an empty config result for an empty .yaml rc file', () => {
     ignoreEmptySearchPlaces: false,
   };
 
-  const checkResult = result => {
+  const checkResult = (result: CosmiconfigResult) => {
     expect(result).toEqual({
       config: undefined,
       filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.yaml'),
@@ -486,7 +500,7 @@ describe('without ignoring empty configs and searching for rc files with specifi
     ],
   };
 
-  const checkResult = result => {
+  const checkResult = (result: CosmiconfigResult) => {
     expect(result).toEqual({
       config: undefined,
       filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.js'),
@@ -526,7 +540,7 @@ describe('without ignoring empty configs and searching for rc files with specifi
     ],
   };
 
-  const checkResult = result => {
+  const checkResult = (result: CosmiconfigResult) => {
     expect(result).toEqual({
       config: undefined,
       filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.js'),
@@ -558,7 +572,7 @@ describe('throws error if a file in searchPlaces does not have a corresponding l
     ],
   };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error.message).toMatch(
       /No loader specified for extension "\.things"/,
     );
@@ -579,15 +593,16 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
     temp.createFile('a/b/c/d/e/f/.foorc', '{ "foo": "bar" }');
   });
 
-  const explorerOptions = {
+  const explorerOptions: Options = {
     stopDir: temp.absolutePath('.'),
     searchPlaces: ['package.json', '.foorc'],
+    // @ts-ignore
     loaders: {
       noExt: undefined,
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error.message).toMatch(
       /No loader specified for files without extensions/,
     );
@@ -621,7 +636,7 @@ describe('does not swallow errors from custom loaders', () => {
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error.message).toBe('Failed to load JS');
   };
 
@@ -665,7 +680,7 @@ describe('errors not swallowed when async custom loader throws them', () => {
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error).toBe(expectedError);
   };
 
@@ -700,7 +715,7 @@ describe('errors not swallowed when async custom loader rejects', () => {
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error).toBe(expectedError);
   };
 
@@ -734,7 +749,7 @@ describe('errors if only async loader is set but you call sync search', () => {
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error.message).toMatch(
       /No sync loader specified for extension "\.things"/,
     );
@@ -764,15 +779,16 @@ describe('errors if it cannot figure out an async loader', () => {
     return Promise.resolve({ things: true });
   };
 
-  const explorerOptions = {
+  const explorerOptions: Options = {
     stopDir: temp.absolutePath('.'),
     searchPlaces: ['.foorc.things'],
     loaders: {
+      // @ts-ignore
       '.things': { wawa: loadThings },
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error.message).toMatch(
       /No async loader specified for extension "\.things"/,
     );

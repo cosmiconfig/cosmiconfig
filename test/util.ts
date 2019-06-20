@@ -1,16 +1,15 @@
-'use strict';
+import path from 'path';
+import del from 'del';
+import makeDir from 'make-dir';
+import parentModule from 'parent-module';
+import os from 'os';
 
-const path = require('path');
-const del = require('del');
-const makeDir = require('make-dir');
-const parentModule = require('parent-module');
-const os = require('os');
-const fs = require.requireActual('fs');
+const fs = jest.requireActual('fs');
 
 class TempDir {
-  dir: string;
+  public readonly dir: string;
 
-  constructor() {
+  public constructor() {
     /**
      * Get the actual path for temp directories that are symlinks (MacOS).
      * Without the actual path, tests that use process.chdir will unexpectedly
@@ -21,7 +20,7 @@ class TempDir {
      * Get the pathname of the file that imported util.js.
      * Used to create a unique directory name for each test suite.
      */
-    const parent = parentModule();
+    const parent = parentModule() || 'cosmiconfig';
     const relativeParent = path.relative(process.cwd(), parent);
 
     /**
@@ -33,26 +32,26 @@ class TempDir {
     // create directory
     makeDir.sync(this.dir);
 
-    (this: any).absolutePath = this.absolutePath.bind(this);
-    (this: any).createDir = this.createDir.bind(this);
-    (this: any).createFile = this.createFile.bind(this);
-    (this: any).clean = this.clean.bind(this);
-    (this: any).deleteTempDir = this.deleteTempDir.bind(this);
+    this.absolutePath = this.absolutePath.bind(this);
+    this.createDir = this.createDir.bind(this);
+    this.createFile = this.createFile.bind(this);
+    this.clean = this.clean.bind(this);
+    this.deleteTempDir = this.deleteTempDir.bind(this);
   }
 
-  absolutePath(dir: string) {
+  public absolutePath(dir: string): string {
     // Use path.join to ensure dir is always inside the working temp directory
     const absolutePath = path.join(this.dir, dir);
 
     return absolutePath;
   }
 
-  createDir(dir: string) {
+  public createDir(dir: string): void {
     const dirname = this.absolutePath(dir);
     makeDir.sync(dirname);
   }
 
-  createFile(file: string, contents: string) {
+  public createFile(file: string, contents: string): void {
     const filePath = this.absolutePath(file);
     const fileDir = path.parse(filePath).dir;
     makeDir.sync(fileDir);
@@ -60,10 +59,10 @@ class TempDir {
     fs.writeFileSync(filePath, `${contents}\n`);
   }
 
-  getSpyPathCalls(spy) {
+  public getSpyPathCalls(spy: jest.Mock | jest.SpyInstance): string[] {
     const calls = spy.mock.calls;
 
-    const result = calls.map(call => {
+    const result = calls.map((call): string => {
       const filePath = call[0];
       const relativePath = path.relative(this.dir, filePath);
 
@@ -79,7 +78,7 @@ class TempDir {
     return result;
   }
 
-  clean() {
+  public clean(): string[] {
     const cleanPattern = this.absolutePath('**/*');
     const removed = del.sync(cleanPattern, {
       dot: true,
@@ -89,13 +88,11 @@ class TempDir {
     return removed;
   }
 
-  deleteTempDir() {
+  public deleteTempDir(): string[] {
     const removed = del.sync(this.dir, { force: true, dot: true });
 
     return removed;
   }
 }
 
-module.exports = {
-  TempDir,
-};
+export { TempDir };

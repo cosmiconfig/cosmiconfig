@@ -1,22 +1,22 @@
-// @flow
-'use strict';
+import path from 'path';
+import isDirectory from 'is-directory';
 
-const path = require('path');
-const isDirectory = require('is-directory');
+function getDirectoryAsync(filepath: string): Promise<string> {
+  return new Promise((resolve, reject): void => {
+    isDirectory(filepath, (error, filepathIsDirectory): void => {
+      if (error) {
+        reject(error);
 
-function getDirectory(filepath: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    return isDirectory(filepath, (err, filepathIsDirectory) => {
-      if (err) {
-        return reject(err);
+        return;
       }
-      return resolve(filepathIsDirectory ? filepath : path.dirname(filepath));
+
+      resolve(filepathIsDirectory ? filepath : path.dirname(filepath));
     });
   });
 }
 
-getDirectory.sync = function getDirectorySync(filepath: string): string {
+function getDirectorySync(filepath: string): string {
   return isDirectory.sync(filepath) ? filepath : path.dirname(filepath);
-};
+}
 
-module.exports = getDirectory;
+export { getDirectoryAsync, getDirectorySync };

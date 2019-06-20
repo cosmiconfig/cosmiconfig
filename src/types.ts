@@ -1,41 +1,46 @@
-type CosmiconfigResult = {
-  config: any,
-  filepath: string,
-  isEmpty?: boolean,
+import { Options } from './index';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// TODO: define what a config is ?
+// interface ResolvedConfig {
+//   [key: string]: unknown;
+// }
+// type ConfigFn = (...params: any[]) => ResolvedConfig;
+// type ConfigFnPromise = (...params: any[]) => Promise<ResolvedConfig>;
+// type ConfigPromise = Promise<ResolvedConfig>;
+
+// https://github.com/davidtheclark/cosmiconfig/issues/134
+export type Config = any;
+// | ResolvedConfig
+// | ConfigFn
+// | ConfigPromise
+// | ConfigFnPromise;
+/* eslint-enable */
+
+type LoaderResult = Config | void;
+export type SyncLoader = (filepath: string, content: string) => LoaderResult;
+export type AsyncLoader =
+  | ((filepath: string, content: string) => Promise<LoaderResult>)
+  | SyncLoader;
+
+export interface LoaderEntry {
+  sync?: SyncLoader;
+  async?: AsyncLoader;
+}
+
+export interface Loaders {
+  [key: string]: LoaderEntry;
+}
+
+export type CosmiconfigResult = {
+  config: Config;
+  filepath: string;
+  isEmpty?: boolean;
 } | null;
 
-type LoaderResult = {
-  config: Object | null,
-  filepath: string,
-};
-
 // These are the user options with defaults applied.
-type ExplorerOptions = {
-  stopDir: string,
-  cache: boolean,
-  transform: CosmiconfigResult => CosmiconfigResult,
-  packageProp: string,
-  loaders: Loaders,
-  searchPlaces: Array<string>,
-  ignoreEmptySearchPlaces: boolean,
-};
+export interface ExplorerOptions extends Required<Options> {
+  loaders: Loaders;
+}
 
-type ExplorerContext = ExplorerOptions & {
-  loadCache: ?Map<string, Promise<CosmiconfigResult>>,
-  loadSyncCache: ?Map<string, CosmiconfigResult>,
-  searchCache: ?Map<string, Promise<CosmiconfigResult>>,
-  searchSyncCache: ?Map<string, CosmiconfigResult>,
-};
-
-type SyncLoader = (filepath: string, content: string) => Object | null;
-type AsyncLoader = (
-  filepath: string,
-  content: string
-) => Object | null | Promise<Object | null>;
-type LoaderEntry = {
-  sync?: SyncLoader,
-  async?: AsyncLoader,
-};
-type Loaders = {
-  [string]: LoaderEntry,
-};
+export type Cache = Map<string, CosmiconfigResult>;

@@ -1,9 +1,15 @@
-'use strict';
+import { cosmiconfig as cosmiconfigActual } from '../src';
+import { TempDir } from './util';
+import * as loaders from '../src/loaders';
 
-const util = require('./util');
-const cosmiconfig = require('../src');
+const cosmiconfig: typeof cosmiconfigActual = (...params) =>
+  require('../src').cosmiconfig(...params);
 
-const temp = new util.TempDir();
+cosmiconfig.loadJs = loaders.loadJs;
+cosmiconfig.loadJson = loaders.loadJson;
+cosmiconfig.loadYaml = loaders.loadYaml;
+
+const temp = new TempDir();
 
 beforeEach(() => {
   temp.clean();
@@ -24,19 +30,19 @@ describe('loads defined JSON config path', () => {
   });
 
   const file = temp.absolutePath('foo.json');
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result.config).toEqual({ foo: true });
     expect(result.filepath).toBe(file);
   };
 
   test('async', () => {
-    return cosmiconfig()
+    return cosmiconfig('cosmiconfig-tests')
       .load(file)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig().loadSync(file);
+    const result = cosmiconfig('cosmiconfig-tests').loadSync(file);
     checkResult(result);
   });
 });
@@ -47,19 +53,19 @@ describe('loads defined YAML config path', () => {
   });
 
   const file = temp.absolutePath('foo.yaml');
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result.config).toEqual({ foo: true });
     expect(result.filepath).toBe(file);
   };
 
   test('async', () => {
-    return cosmiconfig()
+    return cosmiconfig('cosmiconfig-tests')
       .load(file)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig().loadSync(file);
+    const result = cosmiconfig('cosmiconfig-tests').loadSync(file);
     checkResult(result);
   });
 });
@@ -70,19 +76,19 @@ describe('loads defined JS config path', () => {
   });
 
   const file = temp.absolutePath('foo.js');
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result.config).toEqual({ foo: true });
     expect(result.filepath).toBe(file);
   };
 
   test('async', () => {
-    return cosmiconfig()
+    return cosmiconfig('cosmiconfig-tests')
       .load(file)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig().loadSync(file);
+    const result = cosmiconfig('cosmiconfig-tests').loadSync(file);
     checkResult(result);
   });
 });
@@ -94,19 +100,19 @@ describe('loads modularized JS config path', () => {
   });
 
   const file = temp.absolutePath('foo-module.js');
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result.config).toEqual({ foo: true });
     expect(result.filepath).toBe(file);
   };
 
   test('async', () => {
-    return cosmiconfig()
+    return cosmiconfig('cosmiconfig-tests')
       .load(file)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig().loadSync(file);
+    const result = cosmiconfig('cosmiconfig-tests').loadSync(file);
     checkResult(result);
   });
 });
@@ -117,19 +123,19 @@ describe('loads yaml-like JS config path', () => {
   });
 
   const file = temp.absolutePath('foo-yaml-like.js');
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result.config).toEqual({ foo: true });
     expect(result.filepath).toBe(file);
   };
 
   test('async', () => {
-    return cosmiconfig()
+    return cosmiconfig('cosmiconfig-tests')
       .load(file)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig().loadSync(file);
+    const result = cosmiconfig('cosmiconfig-tests').loadSync(file);
     checkResult(result);
   });
 });
@@ -150,7 +156,7 @@ describe('loads package prop when configPath is package.json', () => {
   });
 
   const configPath = temp.absolutePath('package.json');
-  const checkResult = (result, expectedConfig) => {
+  const checkResult = (result: any, expectedConfig: any) => {
     expect(result.config).toEqual(expectedConfig);
     expect(result.filepath).toBe(configPath);
   };
@@ -162,7 +168,7 @@ describe('loads package prop when configPath is package.json', () => {
     test('async', () => {
       return explorer
         .load(configPath)
-        .then(result => checkResult(result, expectedConfig));
+        .then((result) => checkResult(result, expectedConfig));
     });
 
     test('sync', () => {
@@ -178,7 +184,7 @@ describe('loads package prop when configPath is package.json', () => {
     test('async', () => {
       return explorer
         .load(configPath)
-        .then(result => checkResult(result, expectedConfig));
+        .then((result) => checkResult(result, expectedConfig));
     });
 
     test('sync', () => {
@@ -194,7 +200,7 @@ describe('loads package prop when configPath is package.json', () => {
     test('async', () => {
       return explorer
         .load(configPath)
-        .then(result => checkResult(result, expectedConfig));
+        .then((result) => checkResult(result, expectedConfig));
     });
 
     test('sync', () => {
@@ -209,7 +215,7 @@ describe('loads package prop when configPath is package.json', () => {
     test('async', () => {
       return explorer
         .load(configPath)
-        .then(result => expect(result).toBeNull());
+        .then((result) => expect(result).toBeNull());
     });
 
     test('sync', () => {
@@ -224,7 +230,7 @@ describe('loads package prop when configPath is package.json', () => {
     test('async', () => {
       return explorer
         .load(configPath)
-        .then(result => expect(result).toBeNull());
+        .then((result) => expect(result).toBeNull());
     });
 
     test('sync', () => {
@@ -240,22 +246,24 @@ describe('runs transform', () => {
   });
 
   const configPath = temp.absolutePath('foo.json');
-  const transform = result => {
+  const transform = (result: any) => {
     result.config.foo = [result.config.foo];
     return result;
   };
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result.config).toEqual({ foo: [true] });
   };
 
   test('async', () => {
-    return cosmiconfig(null, { transform })
+    return cosmiconfig('cosmiconfig-tests', { transform })
       .load(configPath)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig(null, { transform }).loadSync(configPath);
+    const result = cosmiconfig('cosmiconfig-tests', { transform }).loadSync(
+      configPath,
+    );
     checkResult(result);
   });
 });
@@ -270,13 +278,13 @@ describe('does not swallow transform errors', () => {
     throw new Error('These pretzels are making me thirsty!');
   };
 
-  const checkError = error => {
+  const checkError = (error: Error) => {
     expect(error.message).toBe('These pretzels are making me thirsty!');
   };
 
   test('async', () => {
     expect.hasAssertions();
-    return cosmiconfig(null, { transform })
+    return cosmiconfig('cosmiconfig-tests', { transform })
       .load(configPath)
       .catch(checkError);
   });
@@ -284,7 +292,7 @@ describe('does not swallow transform errors', () => {
   test('sync', () => {
     expect.hasAssertions();
     try {
-      cosmiconfig(null, { transform }).loadSync(configPath);
+      cosmiconfig('cosmiconfig-tests', { transform }).loadSync(configPath);
     } catch (error) {
       checkError(error);
     }
@@ -297,21 +305,21 @@ describe('loads defined JSON file with no extension', () => {
   });
 
   const file = temp.absolutePath('foo-valid-json');
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result.config).toEqual({ json: true });
     expect(result.filepath).toBe(file);
   };
 
   test('async', () => {
-    return cosmiconfig()
+    return cosmiconfig('cosmiconfig-tests')
       .load(file)
-      .then(result => {
+      .then((result) => {
         checkResult(result);
       });
   });
 
   test('sync', () => {
-    const result = cosmiconfig().loadSync(file);
+    const result = cosmiconfig('cosmiconfig-tests').loadSync(file);
     checkResult(result);
   });
 });
@@ -322,29 +330,30 @@ describe('loads defined YAML file with no extension', () => {
   });
 
   const file = temp.absolutePath('foo-valid-yaml');
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result.config).toEqual({ yaml: true });
     expect(result.filepath).toBe(file);
   };
 
   test('async', () => {
-    return cosmiconfig()
+    return cosmiconfig('cosmiconfig-tests')
       .load(file)
-      .then(result => {
+      .then((result) => {
         checkResult(result);
       });
   });
 
   test('sync', () => {
-    const result = cosmiconfig().loadSync(file);
+    const result = cosmiconfig('cosmiconfig-tests').loadSync(file);
     checkResult(result);
   });
 });
 
 describe('custom loaders can be async', () => {
-  let loadThingsSync;
-  let loadThingsAsync;
-  let explorerOptions;
+  let loadThingsSync: any;
+  let loadThingsAsync: any;
+  let explorerOptions: any;
+
   beforeEach(() => {
     temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
     loadThingsSync = jest.fn(() => {
@@ -361,7 +370,7 @@ describe('custom loaders can be async', () => {
   });
 
   const file = temp.absolutePath('.foorc.things');
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result.config).toEqual({ things: true });
     expect(result.filepath).toBe(file);
   };
@@ -394,7 +403,7 @@ describe('a custom loader entry can include just an async loader', () => {
   };
 
   const file = temp.absolutePath('.foorc.things');
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result.config).toEqual({ things: true });
     expect(result.filepath).toBe(file);
   };
@@ -422,7 +431,7 @@ describe('a custom loader entry can include only a sync loader and work for both
   };
 
   const file = temp.absolutePath('.foorc.things');
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result.config).toEqual({ things: true });
     expect(result.filepath).toBe(file);
   };
@@ -459,7 +468,12 @@ describe('works fine if sync loader returns a Promise from a JS file', () => {
       filepath: file,
       config: expect.any(Promise),
     });
-    return result.config.then(resolved => {
+
+    if (result === null) {
+      throw new Error('test is broken');
+    }
+
+    return result.config.then((resolved: any) => {
       expect(resolved).toEqual({ a: 1 });
     });
   });
@@ -477,19 +491,19 @@ describe('loads defined JS config relative path', () => {
 
   const relativeFile = './config/bar.js';
   const absoluteFile = temp.absolutePath(relativeFile);
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result.config).toEqual({ bar: true });
     expect(result.filepath).toBe(absoluteFile);
   };
 
   test('async', () => {
-    return cosmiconfig()
+    return cosmiconfig('cosmiconfig-tests')
       .load(relativeFile)
       .then(checkResult);
   });
 
   test('sync', () => {
-    const result = cosmiconfig().loadSync(relativeFile);
+    const result = cosmiconfig('cosmiconfig-tests').loadSync(relativeFile);
     checkResult(result);
   });
 });

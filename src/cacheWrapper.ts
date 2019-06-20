@@ -1,11 +1,26 @@
-// @flow
-'use strict';
+import { Cache, CosmiconfigResult } from './types';
 
-function cacheWrapper<T>(cache: ?Map<string, T>, key: string, fn: () => T): T {
-  if (!cache) {
-    return fn();
+async function cacheWrapperAsync(
+  cache: Cache,
+  key: string,
+  fn: () => Promise<CosmiconfigResult>,
+): Promise<CosmiconfigResult> {
+  const cached = cache.get(key);
+  if (cached !== undefined) {
+    return cached;
   }
 
+  const result = await fn();
+
+  cache.set(key, result);
+  return result;
+}
+
+function cacheWrapperSync(
+  cache: Cache,
+  key: string,
+  fn: () => CosmiconfigResult,
+): CosmiconfigResult {
   const cached = cache.get(key);
   if (cached !== undefined) {
     return cached;
@@ -16,4 +31,4 @@ function cacheWrapper<T>(cache: ?Map<string, T>, key: string, fn: () => T): T {
   return result;
 }
 
-module.exports = cacheWrapper;
+export { cacheWrapperAsync, cacheWrapperSync };

@@ -3,28 +3,34 @@
   "version": "5.2.1",
   "description": "Find and load configuration from a package.json property, rc file, or CommonJS module",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
+    "clean": "del-cli --dot=true \"./dist/**/*\"",
+    "build": "npm run clean && npm run build:compile && npm run build:types",
+    "build:compile": "cross-env NODE_ENV=production babel src -d dist --verbose --extensions .js,.ts --ignore **/**/*.test.ts --source-maps",
+    "build:types": "cross-env NODE_ENV=production tsc --project tsconfig.types.json",
     "lint:md": "remark-preset-davidtheclark --format",
-    "lint:fix": "eslint . --fix",
-    "lint": "eslint . && npm run lint:md",
-    "format": "prettier \"**/*.{js,json,yml,yaml}\" --write",
-    "pretest": "npm run lint && flow check",
+    "lint:fix": "eslint --ext .js,.ts --fix .",
+    "lint": "eslint --ext .js,.ts . && npm run lint:md",
+    "format": "prettier \"**/*.{js,ts,json,yml,yaml}\" --write",
+    "pretest": "npm run lint && npm run typescript",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "coverage": "jest --coverage --coverageReporters=html --coverageReporters=text",
-    "build": "flow-remove-types src --out-dir dist --quiet",
-    "prepublishOnly": "npm run build"
+    "typescript": "tsc",
+    "prepublishOnly": "npm run test && npm run build"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && jest && flow check"
+      "pre-commit": "lint-staged && npm run test",
+      "pre-push": "npm run test"
     }
   },
   "lint-staged": {
-    "*.js": [
+    "*.{js,ts}": [
       "eslint --fix",
       "prettier --write",
       "git add"
@@ -61,12 +67,13 @@
     "trailingComma": "all",
     "singleQuote": true,
     "printWidth": 80,
+    "arrowParens": "always",
     "tabWidth": 2
   },
   "jest": {
     "testEnvironment": "node",
     "collectCoverageFrom": [
-      "src/*.js"
+      "src/**/*.{js,ts}"
     ],
     "coverageReporters": [
       "text",
@@ -86,35 +93,55 @@
     "restoreMocks": true
   },
   "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "node": "8.9"
+          }
+        }
+      ],
+      "@babel/preset-typescript"
+    ],
     "plugins": [
-      "transform-flow-strip-types"
+      "@babel/plugin-proposal-class-properties"
     ]
   },
   "dependencies": {
+    "@types/js-yaml": "3.12.1",
+    "@types/parse-json": "4.0.0",
     "import-fresh": "^3.0.0",
     "is-directory": "^0.3.1",
     "js-yaml": "^3.13.1",
     "parse-json": "^4.0.0"
   },
   "devDependencies": {
-    "babel-eslint": "^10.0.1",
-    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "@babel/cli": "7.4.4",
+    "@babel/core": "7.4.5",
+    "@babel/plugin-proposal-class-properties": "7.4.4",
+    "@babel/preset-env": "7.4.5",
+    "@babel/preset-typescript": "7.3.3",
+    "@types/jest": "24.0.15",
+    "@types/node": "12.0.8",
+    "@typescript-eslint/eslint-plugin": "1.10.2",
+    "@typescript-eslint/parser": "1.10.2",
+    "cross-env": "5.2.0",
     "del": "^4.1.1",
+    "del-cli": "2.0.0",
     "eslint": "^5.16.0",
     "eslint-config-davidtheclark-node": "^0.2.2",
     "eslint-config-prettier": "^4.3.0",
-    "eslint-plugin-flowtype": "^3.10.3",
     "eslint-plugin-jest": "22.6.4",
     "eslint-plugin-node": "^9.1.0",
-    "flow-bin": "^0.101.0",
-    "flow-remove-types": "^2.101.0",
     "husky": "^2.4.1",
     "jest": "^24.8.0",
     "lint-staged": "^8.2.0",
     "make-dir": "^3.0.0",
     "parent-module": "^2.0.0",
     "prettier": "^1.18.2",
-    "remark-preset-davidtheclark": "^0.10.0"
+    "remark-preset-davidtheclark": "^0.10.0",
+    "typescript": "3.5.2"
   },
   "engines": {
     "node": ">=8"

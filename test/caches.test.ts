@@ -1,16 +1,24 @@
-'use strict';
+import fs from 'fs';
+import importFreshActual from 'import-fresh';
+import { cosmiconfig as cosmiconfigActual } from '../src';
+import { TempDir } from './util';
+import { CosmiconfigResult } from '../src/types';
+import * as loaders from '../src/loaders';
 
-const fs = require('fs');
-const importFreshMock = require('import-fresh');
-const util = require('./util');
-const cosmiconfig = require('../src');
+const cosmiconfig: typeof cosmiconfigActual = (...params) =>
+  require('../src').cosmiconfig(...params);
 
-// mocks are hoisted
-jest.mock('import-fresh');
+cosmiconfig.loadJs = loaders.loadJs;
+cosmiconfig.loadJson = loaders.loadJson;
+cosmiconfig.loadYaml = loaders.loadYaml;
 
-const temp = new util.TempDir();
+const temp = new TempDir();
 
+let importFreshMock: typeof importFreshActual;
 beforeEach(() => {
+  jest.doMock('import-fresh');
+  importFreshMock = require('import-fresh');
+
   temp.clean();
   temp.createDir('a/b/c/d/e/f/');
   temp.createFile('a/b/c/d/package.json', '{ "false": "hope" }');
@@ -29,7 +37,10 @@ afterAll(() => {
 
 describe('cache is not used initially', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
@@ -53,7 +64,7 @@ describe('cache is not used initially', () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
 
     const cachedSearch = cosmiconfig('foo').search;
-    return cachedSearch(searchPath).then(result => {
+    return cachedSearch(searchPath).then((result) => {
       checkResult(readFileSpy, result);
     });
   });
@@ -68,7 +79,10 @@ describe('cache is not used initially', () => {
 
 describe('cache is used for already-visited directories', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     expect(readFileSpy).toHaveBeenCalledTimes(0);
 
     expect(result).toEqual({
@@ -88,7 +102,7 @@ describe('cache is used for already-visited directories', () => {
         readFileSpy.mockClear();
         return cachedSearch(searchPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -107,7 +121,10 @@ describe('cache is used for already-visited directories', () => {
 
 describe('cache is used for already-loaded file', () => {
   const loadPath = temp.absolutePath('a/b/c/d/.foorc');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     expect(readFileSpy).toHaveBeenCalledTimes(0);
 
     expect(result).toEqual({
@@ -127,7 +144,7 @@ describe('cache is used for already-loaded file', () => {
         readFileSpy.mockClear();
         return cachedLoad(loadPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -147,7 +164,10 @@ describe('cache is used for already-loaded file', () => {
 describe('cache is used when some directories in search are already visted', () => {
   const firstSearchPath = temp.absolutePath('a/b/c/d/e');
   const secondSearchPath = temp.absolutePath('a/b/c/d/e/f');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -176,7 +196,7 @@ describe('cache is used when some directories in search are already visted', () 
         readFileSpy.mockClear();
         return cachedSearch(secondSearchPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -196,7 +216,10 @@ describe('cache is used when some directories in search are already visted', () 
 describe('cache is not used when directly loading an unvisited file', () => {
   const firstSearchPath = temp.absolutePath('a/b/c/d/e');
   const loadPath = temp.absolutePath('a/b/package.json');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     expect(readFileSpy).toHaveBeenCalledTimes(1);
 
     expect(result).toEqual({
@@ -216,7 +239,7 @@ describe('cache is not used when directly loading an unvisited file', () => {
         readFileSpy.mockClear();
         return explorer.load(loadPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -235,7 +258,10 @@ describe('cache is not used when directly loading an unvisited file', () => {
 
 describe('cache is not used in a new cosmiconfig instance', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
@@ -264,7 +290,7 @@ describe('cache is not used in a new cosmiconfig instance', () => {
         readFileSpy.mockClear();
         return cosmiconfig('foo').search(searchPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -281,7 +307,10 @@ describe('cache is not used in a new cosmiconfig instance', () => {
 
 describe('clears file cache on calling clearLoadCache', () => {
   const loadPath = temp.absolutePath('a/b/c/d/.foorc');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(['a/b/c/d/.foorc']);
 
@@ -302,7 +331,7 @@ describe('clears file cache on calling clearLoadCache', () => {
         explorer.clearLoadCache();
         return explorer.load(loadPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -321,7 +350,10 @@ describe('clears file cache on calling clearLoadCache', () => {
 
 describe('clears file cache on calling clearCaches', () => {
   const loadPath = temp.absolutePath('a/b/c/d/.foorc');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(['a/b/c/d/.foorc']);
 
@@ -342,7 +374,7 @@ describe('clears file cache on calling clearCaches', () => {
         explorer.clearCaches();
         return explorer.load(loadPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -361,7 +393,10 @@ describe('clears file cache on calling clearCaches', () => {
 
 describe('clears directory cache on calling clearSearchCache', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
@@ -392,7 +427,7 @@ describe('clears directory cache on calling clearSearchCache', () => {
         explorer.clearSearchCache();
         return explorer.search(searchPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -411,7 +446,10 @@ describe('clears directory cache on calling clearSearchCache', () => {
 
 describe('clears directory cache on calling clearCaches', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
@@ -442,7 +480,7 @@ describe('clears directory cache on calling clearCaches', () => {
         explorer.clearCaches();
         return explorer.search(searchPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -477,7 +515,10 @@ describe('with cache disabled', () => {
 
 describe('with cache disabled, does not cache directory results', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
@@ -507,7 +548,7 @@ describe('with cache disabled, does not cache directory results', () => {
         readFileSpy.mockClear();
         return explorer.search(searchPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -525,7 +566,10 @@ describe('with cache disabled, does not cache directory results', () => {
 
 describe('with cache disabled, does not cache file results', () => {
   const loadPath = temp.absolutePath('a/b/c/d/.foorc');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (
+    readFileSpy: jest.SpyInstance,
+    result: CosmiconfigResult,
+  ) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(['a/b/c/d/.foorc']);
 
@@ -545,7 +589,7 @@ describe('with cache disabled, does not cache file results', () => {
         readFileSpy.mockClear();
         return explorer.load(loadPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -569,9 +613,13 @@ describe('ensure import-fresh is called when loading a js file', () => {
     importFreshMock.mockReturnValue({ foundJs: true });
   });
 
-  const checkResult = result => {
+  const checkResult = (result: CosmiconfigResult) => {
     expect(importFreshMock).toHaveBeenCalledTimes(1);
     expect(importFreshMock).toHaveBeenCalledWith(loadPath);
+
+    if (result === null) {
+      throw new Error('test is broken');
+    }
 
     expect(result.config).toEqual({ foundJs: true });
   };
@@ -580,7 +628,7 @@ describe('ensure import-fresh is called when loading a js file', () => {
     const explorer = cosmiconfig('foo');
     temp.createFile(tempFileName, 'module.exports = { foundJs: true };');
 
-    return explorer.load(loadPath).then(result => {
+    return explorer.load(loadPath).then((result) => {
       checkResult(result);
     });
   });

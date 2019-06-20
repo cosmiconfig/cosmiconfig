@@ -1,32 +1,35 @@
-// @flow
-'use strict';
+import fs from 'fs';
 
-const fs = require('fs');
+interface Options {
+  throwNotFound?: boolean;
+}
 
-type Options = {
-  throwNotFound?: boolean,
-};
-
-function readFile(filepath: string, options?: Options): Promise<string | null> {
-  options = options || {};
+function readFileAsync(
+  filepath: string,
+  options: Options = {},
+): Promise<string | null> {
   const throwNotFound = options.throwNotFound || false;
 
-  return new Promise((resolve, reject) => {
-    fs.readFile(filepath, 'utf8', (err, content) => {
+  return new Promise((resolve, reject): void => {
+    fs.readFile(filepath, 'utf8', (err, content): void => {
       if (err && err.code === 'ENOENT' && !throwNotFound) {
-        return resolve(null);
+        resolve(null);
+
+        return;
       }
-      if (err) return reject(err);
+
+      if (err) {
+        reject(err);
+
+        return;
+      }
+
       resolve(content);
     });
   });
 }
 
-readFile.sync = function readFileSync(
-  filepath: string,
-  options?: Options,
-): string | null {
-  options = options || {};
+function readFileSync(filepath: string, options: Options = {}): string | null {
   const throwNotFound = options.throwNotFound || false;
 
   try {
@@ -35,8 +38,9 @@ readFile.sync = function readFileSync(
     if (err.code === 'ENOENT' && !throwNotFound) {
       return null;
     }
+
     throw err;
   }
-};
+}
 
-module.exports = readFile;
+export { readFileAsync, readFileSync };
