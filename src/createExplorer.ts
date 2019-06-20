@@ -87,84 +87,100 @@ class Explorer {
     });
   }
 
-  public search(
+  public async search(
     searchFrom: string = process.cwd(),
   ): Promise<CosmiconfigResult> {
-    return getDirectoryAsync(searchFrom).then(
-      (dir): Promise<CosmiconfigResult> => {
-        return this.searchFromDirectory(dir);
-      },
-    );
+    const startDirectory = await getDirectoryAsync(searchFrom);
+    const result = await this.searchFromDirectory(startDirectory);
+
+    return result;
   }
 
-  private searchFromDirectory(dir: string): Promise<CosmiconfigResult> {
+  private async searchFromDirectory(dir: string): Promise<CosmiconfigResult> {
     const absoluteDir = path.resolve(process.cwd(), dir);
-    const run = (): Promise<CosmiconfigResult> => {
-      return this.searchDirectory(absoluteDir).then(
-        async (result): Promise<CosmiconfigResult> => {
-          const nextDir = this.nextDirectoryToSearch(absoluteDir, result);
-          if (nextDir) {
-            return this.searchFromDirectory(nextDir);
-          }
-          return this.config.transform(result);
-        },
+
+    const run = async (): Promise<CosmiconfigResult> => {
+      const cosmiconfigResult = await this.searchDirectory(absoluteDir);
+
+      const nextDir = this.nextDirectoryToSearch(
+        absoluteDir,
+        cosmiconfigResult,
       );
+
+      if (nextDir) {
+        const tryNextDirectory = await this.searchFromDirectory(nextDir);
+
+        return tryNextDirectory;
+      }
+
+      const transformResult = await this.config.transform(cosmiconfigResult);
+
+      return transformResult;
     };
 
     if (this.searchCache) {
       return cacheWrapperAsync(this.searchCache, absoluteDir, run);
     }
+
     return run();
   }
 
   public searchSync(searchFrom: string = process.cwd()): CosmiconfigResult {
     const dir = getDirectorySync(searchFrom);
-    return this.searchFromDirectorySync(dir);
+    const result = this.searchFromDirectorySync(dir);
+
+    return result;
   }
 
   private searchFromDirectorySync(dir: string): CosmiconfigResult {
     const absoluteDir = path.resolve(process.cwd(), dir);
     const run = (): CosmiconfigResult => {
-      const result = this.searchDirectorySync(absoluteDir);
-      const nextDir = this.nextDirectoryToSearch(absoluteDir, result);
+      const cosmiconfigResult = this.searchDirectorySync(absoluteDir);
+      const nextDir = this.nextDirectoryToSearch(
+        absoluteDir,
+        cosmiconfigResult,
+      );
+
       if (nextDir) {
         return this.searchFromDirectorySync(nextDir);
       }
-      return this.config.transform(result);
+
+      const transformResult = this.config.transform(cosmiconfigResult);
+
+      return transformResult;
     };
 
     if (this.searchSyncCache) {
       return cacheWrapperSync(this.searchSyncCache, absoluteDir, run);
     }
+
     return run();
   }
 
-  private searchDirectory(dir: string): Promise<CosmiconfigResult> {
-    return this.config.searchPlaces.reduce(
-      (
-        prevResultPromise: Promise<CosmiconfigResult>,
-        place: string,
-      ): Promise<CosmiconfigResult> => {
-        return prevResultPromise.then(
-          async (prevResult): Promise<CosmiconfigResult> => {
-            if (this.shouldSearchStopWithResult(prevResult)) {
-              return prevResult;
-            }
-            return this.loadSearchPlace(dir, place);
-          },
-        );
-      },
-      Promise.resolve(null),
-    );
+  private async searchDirectory(dir: string): Promise<CosmiconfigResult> {
+    for await (const place of this.config.searchPlaces) {
+      const tryToLoadConfig = await this.loadSearchPlace(dir, place);
+
+      if (this.shouldSearchStopWithResult(tryToLoadConfig) === true) {
+        return tryToLoadConfig;
+      }
+    }
+
+    // config not found
+    return null;
   }
 
   private searchDirectorySync(dir: string): CosmiconfigResult {
-    let result = null;
     for (const place of this.config.searchPlaces) {
-      result = this.loadSearchPlaceSync(dir, place);
-      if (this.shouldSearchStopWithResult(result)) break;
+      const tryToLoadConfig = this.loadSearchPlaceSync(dir, place);
+
+      if (this.shouldSearchStopWithResult(tryToLoadConfig) === true) {
+        return tryToLoadConfig;
+      }
     }
-    return result;
+
+    // config not found
+    return null;
   }
 
   private shouldSearchStopWithResult(result: CosmiconfigResult): boolean {
@@ -173,22 +189,31 @@ class Explorer {
     return true;
   }
 
-  private loadSearchPlace(
+  private async loadSearchPlace(
     dir: string,
     place: string,
   ): Promise<CosmiconfigResult> {
     const filepath = path.join(dir, place);
-    return readFileAsync(filepath).then(
-      (content): Promise<CosmiconfigResult> => {
-        return this.createCosmiconfigResult(filepath, content);
-      },
+    const fileContents = await readFileAsync(filepath);
+
+    const cosmiconfigResult = await this.createCosmiconfigResult(
+      filepath,
+      fileContents,
     );
+
+    return cosmiconfigResult;
   }
 
   private loadSearchPlaceSync(dir: string, place: string): CosmiconfigResult {
     const filepath = path.join(dir, place);
     const content = readFileSync(filepath);
-    return this.createCosmiconfigResultSync(filepath, content);
+
+    const cosmiconfigResult = this.createCosmiconfigResultSync(
+      filepath,
+      content,
+    );
+
+    return cosmiconfigResult;
   }
 
   private nextDirectoryToSearch(
@@ -256,7 +281,8 @@ class Explorer {
       return undefined;
     }
     const loader = this.getAsyncLoaderForFile(filepath);
-    return loader(filepath, content);
+    const loaderResult = await loader(filepath, content);
+    return loaderResult;
   }
 
   private loadFileContentSync(
@@ -270,7 +296,8 @@ class Explorer {
       return undefined;
     }
     const loader = this.getSyncLoaderForFile(filepath);
-    return loader(filepath, content);
+    const loaderResult = loader(filepath, content);
+    return loaderResult;
   }
 
   private loadedContentToCosmiconfigResult(
@@ -286,29 +313,32 @@ class Explorer {
     return { config: loadedContent, filepath };
   }
 
-  private createCosmiconfigResult(
+  private async createCosmiconfigResult(
     filepath: string,
     content: string | null,
   ): Promise<CosmiconfigResult> {
-    return Promise.resolve()
-      .then(
-        (): Promise<CosmiconfigResult> => {
-          return this.loadFileContent(filepath, content);
-        },
-      )
-      .then(
-        async (loaderResult): Promise<CosmiconfigResult> => {
-          return this.loadedContentToCosmiconfigResult(filepath, loaderResult);
-        },
-      );
+    const fileContent = await this.loadFileContent(filepath, content);
+
+    const cosmiconfigResult = this.loadedContentToCosmiconfigResult(
+      filepath,
+      fileContent,
+    );
+
+    return cosmiconfigResult;
   }
 
   private createCosmiconfigResultSync(
     filepath: string,
     content: string | null,
   ): CosmiconfigResult {
-    const loaderResult = this.loadFileContentSync(filepath, content);
-    return this.loadedContentToCosmiconfigResult(filepath, loaderResult);
+    const fileContent = this.loadFileContentSync(filepath, content);
+
+    const cosmiconfigResult = this.loadedContentToCosmiconfigResult(
+      filepath,
+      fileContent,
+    );
+
+    return cosmiconfigResult;
   }
 
   private validateFilePath(filepath: string): void {
@@ -317,29 +347,30 @@ class Explorer {
     }
   }
 
-  public load(filepath: string): Promise<CosmiconfigResult> {
-    return Promise.resolve().then(
-      (): Promise<CosmiconfigResult> => {
-        this.validateFilePath(filepath);
-        const absoluteFilePath = path.resolve(process.cwd(), filepath);
+  public async load(filepath: string): Promise<CosmiconfigResult> {
+    this.validateFilePath(filepath);
+    const absoluteFilePath = path.resolve(process.cwd(), filepath);
 
-        const runLoad = (): Promise<CosmiconfigResult> => {
-          return readFileAsync(absoluteFilePath, { throwNotFound: true })
-            .then(
-              (content): Promise<CosmiconfigResult> => {
-                return this.createCosmiconfigResult(absoluteFilePath, content);
-              },
-            )
-            .then(this.config.transform);
-        };
+    const runLoad = async (): Promise<CosmiconfigResult> => {
+      const fileContents = await readFileAsync(absoluteFilePath, {
+        throwNotFound: true,
+      });
 
-        if (this.loadCache) {
-          return cacheWrapperAsync(this.loadCache, absoluteFilePath, runLoad);
-        }
+      const cosmiconfigResult = await this.createCosmiconfigResult(
+        absoluteFilePath,
+        fileContents,
+      );
 
-        return runLoad();
-      },
-    );
+      const transformResult = await this.config.transform(cosmiconfigResult);
+
+      return transformResult;
+    };
+
+    if (this.loadCache) {
+      return cacheWrapperAsync(this.loadCache, absoluteFilePath, runLoad);
+    }
+
+    return runLoad();
   }
 
   public loadSync(filepath: string): CosmiconfigResult {

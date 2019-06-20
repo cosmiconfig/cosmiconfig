@@ -16,12 +16,14 @@ describe('returns the searchPath if it is a directory', () => {
     expect(result).toBe(subject);
   };
 
-  test('async', () => {
-    return getDirectoryAsync(subject).then(checkResult);
+  test('async', async () => {
+    const result = await getDirectoryAsync(subject);
+    checkResult(result);
   });
 
   test('sync', () => {
-    checkResult(getDirectorySync(subject));
+    const result = getDirectorySync(subject);
+    checkResult(result);
   });
 });
 
@@ -31,12 +33,14 @@ describe('returns the parent directory if it is a file', () => {
     expect(result).toBe(__dirname);
   };
 
-  test('async', () => {
-    return getDirectoryAsync(subject).then(checkResult);
+  test('async', async () => {
+    const result = await getDirectoryAsync(subject);
+    checkResult(result);
   });
 
   test('sync', () => {
-    checkResult(getDirectorySync(subject));
+    const result = getDirectorySync(subject);
+    checkResult(result);
   });
 });
 
@@ -47,12 +51,14 @@ describe('handles process.cwd()/stdin', () => {
     expect(result).toBe(process.cwd());
   };
 
-  test('async', () => {
-    return getDirectoryAsync(subject).then(checkResult);
+  test('async', async () => {
+    const result = await getDirectoryAsync(subject);
+    checkResult(result);
   });
 
   test('sync', () => {
-    checkResult(getDirectorySync(subject));
+    const result = getDirectorySync(subject);
+    checkResult(result);
   });
 });
 
@@ -69,11 +75,9 @@ test('propagates error thrown by is-directory in sync', () => {
   expect(() => getDirectorySync(null)).toThrow('Expected a string, got object');
 });
 
-test('rejects with the error thrown by is-directory in async', () => {
-  expect.hasAssertions();
-
+test('rejects with the error thrown by is-directory in async', async () => {
   // @ts-ignore
-  return getDirectoryAsync(null).catch((err) => {
-    expect(err.message).toBe('Expected a string, got object');
-  });
+  expect(getDirectoryAsync(null)).rejects.toThrow(
+    'Expected a string, got object',
+  );
 });

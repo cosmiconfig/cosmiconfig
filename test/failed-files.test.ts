@@ -31,11 +31,13 @@ describe('throws error if defined file does not exist', () => {
     expect(error.code).toBe('ENOENT');
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('cosmiconfig-tests')
-      .load(file)
-      .catch(checkError);
+    try {
+      await cosmiconfig('cosmiconfig-tests').load(file);
+    } catch (error) {
+      checkError(error);
+    }
   });
 
   test('sync', () => {
@@ -58,11 +60,13 @@ describe('throws error if defined JSON file has syntax error', () => {
     expect(error.message).toMatch(/JSON Error/);
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('cosmiconfig-tests')
-      .load(file)
-      .catch(checkError);
+    try {
+      await cosmiconfig('cosmiconfig-tests').load(file);
+    } catch (error) {
+      checkError(error);
+    }
   });
 
   test('sync', () => {
@@ -85,11 +89,13 @@ describe('throws error if defined YAML file has syntax error', () => {
     expect(error.name).toBe('YAMLException');
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('cosmiconfig-tests')
-      .load(file)
-      .catch(checkError);
+    try {
+      await cosmiconfig('cosmiconfig-tests').load(file);
+    } catch (error) {
+      checkError(error);
+    }
   });
 
   test('sync', () => {
@@ -112,11 +118,13 @@ describe('throws error if defined JS file has syntax error', () => {
     expect(error.name).toBe('ReferenceError');
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('cosmiconfig-tests')
-      .load(file)
-      .catch(checkError);
+    try {
+      await cosmiconfig('cosmiconfig-tests').load(file);
+    } catch (error) {
+      checkError(error);
+    }
   });
 
   test('sync', () => {
@@ -143,11 +151,10 @@ describe('returns an empty config result for empty file, format JS', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('cosmiconfig-tests')
-      .load(file)
-      .then(checkResult);
+    const result = await cosmiconfig('cosmiconfig-tests').load(file);
+    checkResult(result);
   });
 
   test('sync', () => {
@@ -170,11 +177,10 @@ describe('returns an empty config result for empty file, format JSON', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('cosmiconfig-tests')
-      .load(file)
-      .then(checkResult);
+    const result = await cosmiconfig('cosmiconfig-tests').load(file);
+    checkResult(result);
   });
 
   test('sync', () => {
@@ -197,11 +203,10 @@ describe('returns an empty config result for empty file, format YAML', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('cosmiconfig-tests')
-      .load(file)
-      .then(checkResult);
+    const result = await cosmiconfig('cosmiconfig-tests').load(file);
+    checkResult(result);
   });
 
   test('sync', () => {
@@ -215,12 +220,14 @@ describe('throws an error if no configPath was specified and load is called with
     expect(error.message).toMatch(/non-empty string/);
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    // @ts-ignore
-    return cosmiconfig('not_exist_rc_name')
-      .load()
-      .catch(checkError);
+    try {
+      // @ts-ignore
+      await cosmiconfig('not_exist_rc_name').load();
+    } catch (error) {
+      checkError(error);
+    }
   });
 
   test('sync', () => {
@@ -241,7 +248,7 @@ describe('errors not swallowed when async custom loader throws them', () => {
   });
 
   const expectedError = new Error();
-  const loadThingsAsync = () => {
+  const loadThingsAsync = async () => {
     throw expectedError;
   };
 
@@ -255,11 +262,13 @@ describe('errors not swallowed when async custom loader throws them', () => {
     expect(error).toBe(expectedError);
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('not_exist_rc_name', explorerOptions)
-      .load(file)
-      .catch(checkError);
+    try {
+      await cosmiconfig('not_exist_rc_name', explorerOptions).load(file);
+    } catch (error) {
+      checkError(error);
+    }
   });
 });
 
@@ -270,8 +279,8 @@ describe('errors not swallowed when async custom loader rejects', () => {
   });
 
   const expectedError = new Error();
-  const loadThingsAsync = () => {
-    return Promise.reject(expectedError);
+  const loadThingsAsync = async () => {
+    throw expectedError;
   };
 
   const explorerOptions = {
@@ -284,11 +293,13 @@ describe('errors not swallowed when async custom loader rejects', () => {
     expect(error).toBe(expectedError);
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('not_exist_rc_name', explorerOptions)
-      .load(file)
-      .catch(checkError);
+    try {
+      await cosmiconfig('not_exist_rc_name', explorerOptions).load(file);
+    } catch (error) {
+      checkError(error);
+    }
   });
 });
 
@@ -298,8 +309,8 @@ describe('errors if only async loader is set but you call sync search', () => {
     temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
   });
 
-  const loadThingsAsync = () => {
-    return Promise.resolve({ things: true });
+  const loadThingsAsync = async () => {
+    return { things: true };
   };
 
   const explorerOptions = {

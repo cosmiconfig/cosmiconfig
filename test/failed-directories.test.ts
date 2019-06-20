@@ -67,14 +67,11 @@ describe('gives up if it cannot find the file', () => {
     expect(result).toBe(null);
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
     const statSpy = jest.spyOn(fs, 'stat');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(statSpy, readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(statSpy, readFileSpy, result);
   });
 
   test('sync', () => {
@@ -114,13 +111,10 @@ describe('stops at stopDir and gives up', () => {
     expect(result).toBe(null);
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -142,11 +136,13 @@ describe('throws error for invalid YAML in rc file', () => {
     expect(error.name).toBe('YAMLException');
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .catch(checkError);
+    try {
+      await cosmiconfig('foo', explorerOptions).search(startDir);
+    } catch (error) {
+      checkError(error);
+    }
   });
 
   test('sync', () => {
@@ -176,11 +172,13 @@ describe('throws error for invalid JSON in extensionless rc file loaded as JSON'
     expect(error.name).toMatch(/JSONError/);
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .catch(checkError);
+    try {
+      await cosmiconfig('foo', explorerOptions).search(startDir);
+    } catch (error) {
+      checkError(error);
+    }
   });
 
   test('sync', () => {
@@ -205,11 +203,13 @@ describe('throws error for invalid package.json', () => {
     expect(error.name).toMatch(/JSONError/);
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .catch(checkError);
+    try {
+      await cosmiconfig('foo', explorerOptions).search(startDir);
+    } catch (error) {
+      checkError(error);
+    }
   });
 
   test('sync', () => {
@@ -237,11 +237,13 @@ describe('throws error for invalid JS in .config.js file', () => {
     expect(error.name).toBe('SyntaxError');
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .catch(checkError);
+    try {
+      await cosmiconfig('foo', explorerOptions).search(startDir);
+    } catch (error) {
+      checkError(error);
+    }
   });
 
   test('sync', () => {
@@ -268,11 +270,13 @@ describe('throws error for invalid JSON in .foorc.json', () => {
     expect(error.message).toMatch(/JSON Error/);
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .catch(checkError);
+    try {
+      await cosmiconfig('foo', explorerOptions).search(startDir);
+    } catch (error) {
+      checkError(error);
+    }
   });
 
   test('sync', () => {
@@ -299,11 +303,13 @@ describe('throws error for invalid YAML in .foorc.yml', () => {
     expect(error.name).toBe('YAMLException');
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .catch(checkError);
+    try {
+      await cosmiconfig('foo', explorerOptions).search(startDir);
+    } catch (error) {
+      checkError(error);
+    }
   });
 
   test('sync', () => {
@@ -339,11 +345,13 @@ describe('searching for rc files with specified extensions, throws error for inv
     expect(error.name).toBe('SyntaxError');
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .catch(checkError);
+    try {
+      await cosmiconfig('foo', explorerOptions).search(startDir);
+    } catch (error) {
+      checkError(error);
+    }
   });
 
   test('sync', () => {
@@ -375,10 +383,9 @@ describe('without ignoring empty files, returns an empty config result for an em
     });
   };
 
-  test('async', () => {
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then(checkResult);
+  test('async', async () => {
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(result);
   });
 
   test('sync', () => {
@@ -406,10 +413,9 @@ describe('without ignoring empty files, returns an empty config result for an em
     });
   };
 
-  test('async', () => {
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then(checkResult);
+  test('async', async () => {
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(result);
   });
 
   test('sync', () => {
@@ -437,10 +443,9 @@ describe('without ignoring empty files, returns an empty config result for an em
     });
   };
 
-  test('async', () => {
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then(checkResult);
+  test('async', async () => {
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(result);
   });
 
   test('sync', () => {
@@ -468,10 +473,9 @@ describe('returns an empty config result for an empty .yaml rc file', () => {
     });
   };
 
-  test('async', () => {
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then(checkResult);
+  test('async', async () => {
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(result);
   });
 
   test('sync', () => {
@@ -508,10 +512,9 @@ describe('without ignoring empty configs and searching for rc files with specifi
     });
   };
 
-  test('async', () => {
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then(checkResult);
+  test('async', async () => {
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(result);
   });
 
   test('sync', () => {
@@ -548,10 +551,9 @@ describe('without ignoring empty configs and searching for rc files with specifi
     });
   };
 
-  test('async', () => {
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then(checkResult);
+  test('async', async () => {
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(result);
   });
 
   test('sync', () => {
@@ -640,11 +642,13 @@ describe('does not swallow errors from custom loaders', () => {
     expect(error.message).toBe('Failed to load JS');
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .catch(checkError);
+    try {
+      await cosmiconfig('foo', explorerOptions).search(startDir);
+    } catch (error) {
+      checkError(error);
+    }
   });
 
   test('sync', () => {
@@ -668,7 +672,7 @@ describe('errors not swallowed when async custom loader throws them', () => {
   });
 
   const expectedError = new Error();
-  const loadThingsAsync = () => {
+  const loadThingsAsync = async () => {
     throw expectedError;
   };
 
@@ -684,11 +688,13 @@ describe('errors not swallowed when async custom loader throws them', () => {
     expect(error).toBe(expectedError);
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .catch(checkError);
+    try {
+      await cosmiconfig('foo', explorerOptions).search(startDir);
+    } catch (error) {
+      checkError(error);
+    }
   });
 });
 
@@ -703,8 +709,8 @@ describe('errors not swallowed when async custom loader rejects', () => {
   });
 
   const expectedError = new Error();
-  const loadThingsAsync = () => {
-    return Promise.reject(expectedError);
+  const loadThingsAsync = async () => {
+    throw expectedError;
   };
 
   const explorerOptions = {
@@ -719,11 +725,13 @@ describe('errors not swallowed when async custom loader rejects', () => {
     expect(error).toBe(expectedError);
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .catch(checkError);
+    try {
+      await cosmiconfig('foo', explorerOptions).search(startDir);
+    } catch (error) {
+      checkError(error);
+    }
   });
 });
 
@@ -737,8 +745,8 @@ describe('errors if only async loader is set but you call sync search', () => {
     );
   });
 
-  const loadThings = () => {
-    return Promise.resolve({ things: true });
+  const loadThings = async () => {
+    return { things: true };
   };
 
   const explorerOptions = {
@@ -775,8 +783,8 @@ describe('errors if it cannot figure out an async loader', () => {
     );
   });
 
-  const loadThings = () => {
-    return Promise.resolve({ things: true });
+  const loadThings = async () => {
+    return { things: true };
   };
 
   const explorerOptions: Options = {
@@ -794,10 +802,12 @@ describe('errors if it cannot figure out an async loader', () => {
     );
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .catch(checkError);
+    try {
+      await cosmiconfig('foo', explorerOptions).search(startDir);
+    } catch (error) {
+      checkError(error);
+    }
   });
 });

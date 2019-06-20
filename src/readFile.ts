@@ -1,45 +1,44 @@
 import fs from 'fs';
+import { promisify } from 'util';
+
+const fsReadFileAsync = promisify(fs.readFile);
 
 interface Options {
   throwNotFound?: boolean;
 }
 
-function readFileAsync(
+async function readFileAsync(
   filepath: string,
   options: Options = {},
 ): Promise<string | null> {
-  const throwNotFound = options.throwNotFound || false;
-
-  return new Promise((resolve, reject): void => {
-    fs.readFile(filepath, 'utf8', (err, content): void => {
-      if (err && err.code === 'ENOENT' && !throwNotFound) {
-        resolve(null);
-
-        return;
-      }
-
-      if (err) {
-        reject(err);
-
-        return;
-      }
-
-      resolve(content);
-    });
-  });
-}
-
-function readFileSync(filepath: string, options: Options = {}): string | null {
-  const throwNotFound = options.throwNotFound || false;
+  const throwNotFound = options.throwNotFound === true;
 
   try {
-    return fs.readFileSync(filepath, 'utf8');
-  } catch (err) {
-    if (err.code === 'ENOENT' && !throwNotFound) {
+    const content = await fsReadFileAsync(filepath, 'utf8');
+
+    return content;
+  } catch (error) {
+    if (throwNotFound === false && error.code === 'ENOENT') {
       return null;
     }
 
-    throw err;
+    throw error;
+  }
+}
+
+function readFileSync(filepath: string, options: Options = {}): string | null {
+  const throwNotFound = options.throwNotFound === true;
+
+  try {
+    const content = fs.readFileSync(filepath, 'utf8');
+
+    return content;
+  } catch (error) {
+    if (throwNotFound === false && error.code === 'ENOENT') {
+      return null;
+    }
+
+    throw error;
   }
 }
 

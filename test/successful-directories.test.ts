@@ -68,14 +68,11 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
 
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -115,13 +112,10 @@ describe('finds package.json prop in second searched dir', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -169,13 +163,10 @@ describe('finds package.json with nested packageProp in second searched dir', ()
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -215,13 +206,10 @@ describe('finds JS file in first searched dir', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -260,13 +248,10 @@ describe('finds .foorc.js file in first searched dir', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -307,13 +292,10 @@ describe('skips over empty file to find JS file in first searched dir', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -350,13 +332,10 @@ describe('finds package.json in second dir searched, with alternate names', () =
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -396,13 +375,10 @@ describe('finds rc file in third searched dir, skipping packageProp, parsing ext
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -438,13 +414,10 @@ describe('finds package.json file in second searched dir, skipping JS and RC fil
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -485,13 +458,10 @@ describe('finds .foorc.json in second searched dir', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -526,13 +496,10 @@ describe('finds .foorc.yaml in first searched dir', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -568,13 +535,10 @@ describe('finds .foorc.yml in first searched dir', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -626,13 +590,10 @@ describe('adding myfooconfig.js to searchPlaces, finds it in first searched dir'
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -686,13 +647,10 @@ describe('finds JS file traversing from cwd', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search()
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search();
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -736,13 +694,10 @@ describe('searchPlaces can include subdirectories', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -804,13 +759,10 @@ describe('custom loaders allow non-default file types', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -872,13 +824,10 @@ describe('adding custom loaders allows for default and non-default file types', 
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -927,13 +876,10 @@ describe('defaults loaders can be overridden', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -957,8 +903,8 @@ describe('custom loaders can be async', () => {
     loadThingsSync = jest.fn(() => {
       return { things: true };
     });
-    loadThingsAsync = jest.fn(() => {
-      return Promise.resolve({ things: true });
+    loadThingsAsync = jest.fn(async () => {
+      return { things: true };
     });
     explorerOptions = {
       stopDir: temp.absolutePath('.'),
@@ -979,15 +925,12 @@ describe('custom loaders can be async', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        expect(loadThingsSync).not.toHaveBeenCalled();
-        expect(loadThingsAsync).toHaveBeenCalled();
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    expect(loadThingsSync).not.toHaveBeenCalled();
+    expect(loadThingsAsync).toHaveBeenCalled();
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -1009,8 +952,8 @@ describe('a custom loader entry can include just an async loader', () => {
     );
   });
 
-  const loadThingsAsync = () => {
-    return Promise.resolve({ things: true });
+  const loadThingsAsync = async () => {
+    return { things: true };
   };
 
   const explorerOptions = {
@@ -1031,13 +974,10 @@ describe('a custom loader entry can include just an async loader', () => {
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 });
 
@@ -1073,13 +1013,10 @@ describe('a custom loader entry can include only a sync loader and work for both
     });
   };
 
-  test('async', () => {
+  test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo', explorerOptions)
-      .search(startDir)
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {

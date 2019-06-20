@@ -11,7 +11,6 @@ async function cacheWrapperAsync(
   }
 
   const result = await fn();
-
   cache.set(key, result);
   return result;
 }
