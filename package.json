@@ -7,16 +7,20 @@
     "dist"
   ],
   "scripts": {
+    "clean": "del-cli --dot=true \"./dist/**/*\"",
+    "build": "npm run clean && npm run build:compile",
+    "build:compile": "cross-env NODE_ENV=production babel src -d dist --verbose --extensions .js --ignore \"**/**/*.test.js\" --source-maps",
+    "dev": "npm run clean && npm run build:compile -- --watch",
+    "lint": "eslint --ext .js . && npm run lint:md",
+    "lint:fix": "eslint --ext .js . --fix",
     "lint:md": "remark-preset-davidtheclark --format",
-    "lint:fix": "eslint . --fix",
-    "lint": "eslint . && npm run lint:md",
     "format": "prettier \"**/*.{js,json,yml,yaml}\" --write",
+    "flow": "flow",
     "pretest": "npm run lint && flow check",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "coverage": "jest --coverage --coverageReporters=html --coverageReporters=text",
-    "build": "flow-remove-types src --out-dir dist --quiet",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build && npm run test"
   },
   "husky": {
     "hooks": {
@@ -86,8 +90,16 @@
     "restoreMocks": true
   },
   "babel": {
-    "plugins": [
-      "transform-flow-strip-types"
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "node": "8.9"
+          }
+        }
+      ],
+      "@babel/preset-flow"
     ]
   },
   "dependencies": {
@@ -97,9 +109,14 @@
     "parse-json": "^4.0.0"
   },
   "devDependencies": {
+    "@babel/cli": "7.4.4",
+    "@babel/core": "7.4.5",
+    "@babel/preset-env": "7.4.5",
+    "@babel/preset-flow": "7.0.0",
     "babel-eslint": "^10.0.1",
-    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "cross-env": "5.2.0",
     "del": "^4.1.1",
+    "del-cli": "2.0.0",
     "eslint": "^5.16.0",
     "eslint-config-davidtheclark-node": "^0.2.2",
     "eslint-config-prettier": "^4.3.0",
@@ -107,7 +124,6 @@
     "eslint-plugin-jest": "22.6.4",
     "eslint-plugin-node": "^9.1.0",
     "flow-bin": "^0.101.0",
-    "flow-remove-types": "^2.101.0",
     "husky": "^2.4.1",
     "jest": "^24.8.0",
     "lint-staged": "^8.2.0",
