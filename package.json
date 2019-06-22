@@ -19,7 +19,6 @@
     "pretest": "npm run lint && flow check",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
-    "coverage": "jest --coverage --coverageReporters=html --coverageReporters=text",
     "prepublishOnly": "npm run build && npm run test"
   },
   "husky": {
