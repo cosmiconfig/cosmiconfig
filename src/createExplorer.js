@@ -1,12 +1,11 @@
 // @flow
-'use strict';
 
-const path = require('path');
-const loaders = require('./loaders');
-const readFile = require('./readFile');
-const cacheWrapper = require('./cacheWrapper');
-const getDirectory = require('./getDirectory');
-const getPropertyByPath = require('./getPropertyByPath');
+import path from 'path';
+import * as loaders from './loaders';
+import { readFile } from './readFile';
+import { cacheWrapper } from './cacheWrapper';
+import { getDirectory } from './getDirectory';
+import { getPropertyByPath } from './getPropertyByPath';
 
 const MODE_SYNC = 'sync';
 
@@ -298,7 +297,7 @@ class Explorer {
   }
 }
 
-module.exports = function createExplorer(options: ExplorerOptions) {
+function createExplorer(options: ExplorerOptions) {
   const explorer = new Explorer(options);
 
   return {
@@ -310,7 +309,7 @@ module.exports = function createExplorer(options: ExplorerOptions) {
     clearSearchCache: explorer.clearSearchCache.bind(explorer),
     clearCaches: explorer.clearCaches.bind(explorer),
   };
-};
+}
 
 function nextDirUp(dir: string): string {
   return path.dirname(dir);
@@ -320,3 +319,5 @@ function getExtensionDescription(filepath: string): string {
   const ext = path.extname(filepath);
   return ext ? `extension "${ext}"` : 'files without extensions';
 }
+
+export { createExplorer };

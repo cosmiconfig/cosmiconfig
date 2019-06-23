@@ -1,6 +1,4 @@
-'use strict';
-
-const getDirectory = require('../src/getDirectory');
+import { getDirectory } from '../src/getDirectory';
 
 describe('returns the searchPath if it is a directory', () => {
   const subject = __dirname;

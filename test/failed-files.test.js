@@ -1,9 +1,7 @@
-'use strict';
+import { TempDir } from './util';
+import { cosmiconfig } from '../src';
 
-const util = require('./util');
-const cosmiconfig = require('../src');
-
-const temp = new util.TempDir();
+const temp = new TempDir();
 
 beforeEach(() => {
   temp.clean();

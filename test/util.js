@@ -1,10 +1,9 @@
-'use strict';
+import path from 'path';
+import del from 'del';
+import makeDir from 'make-dir';
+import parentModule from 'parent-module';
+import os from 'os';
 
-const path = require('path');
-const del = require('del');
-const makeDir = require('make-dir');
-const parentModule = require('parent-module');
-const os = require('os');
 const fs = require.requireActual('fs');
 
 class TempDir {
@@ -96,6 +95,4 @@ class TempDir {
   }
 }
 
-module.exports = {
-  TempDir,
-};
+export { TempDir };
