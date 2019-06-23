@@ -3,6 +3,15 @@
 ## HEAD
 
 - **Breaking change:** Remove support for Node 4 and 6. Requires Node 8+.
+- **Breaking change:** Use named export `cosmiconfig`. (see example below)
+
+```js
+// es modules
+import { cosmiconfig } from 'cosmiconfig';
+
+// common js
+const { cosmiconfig } = require('cosmiconfig');
+```
 
 ## 5.2.1
 

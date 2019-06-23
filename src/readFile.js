@@ -1,7 +1,6 @@
 // @flow
-'use strict';
 
-const fs = require('fs');
+import fs from 'fs';
 
 type Options = {
   throwNotFound?: boolean,
@@ -39,4 +38,4 @@ readFile.sync = function readFileSync(
   }
 };
 
-module.exports = readFile;
+export { readFile };

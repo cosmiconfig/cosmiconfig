@@ -1,5 +1,4 @@
 // @flow
-'use strict';
 
 function cacheWrapper<T>(cache: ?Map<string, T>, key: string, fn: () => T): T {
   if (!cache) {
@@ -16,4 +15,4 @@ function cacheWrapper<T>(cache: ?Map<string, T>, key: string, fn: () => T): T {
   return result;
 }
 
-module.exports = cacheWrapper;
+export { cacheWrapper };
