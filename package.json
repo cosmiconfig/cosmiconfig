@@ -16,14 +16,15 @@
     "lint:md": "remark-preset-davidtheclark --format",
     "format": "prettier \"**/*.{js,json,yml,yaml}\" --write",
     "flow": "flow",
-    "pretest": "npm run lint && flow check",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
-    "prepublishOnly": "npm run build && npm run test"
+    "check:all": "npm run test && flow check && npm run lint",
+    "prepublishOnly": "npm run check:all && npm run build"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && jest && flow check"
+      "pre-commit": "lint-staged && flow check && npm run test",
+      "pre-push": "npm run check:all"
     }
   },
   "lint-staged": {
