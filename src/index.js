@@ -3,6 +3,7 @@
 import os from 'os';
 import { createExplorer } from './createExplorer';
 import * as loaders from './loaders';
+import type { CosmiconfigResult, ExplorerOptions, Loaders } from './types';
 
 function cosmiconfig(
   moduleName: string,

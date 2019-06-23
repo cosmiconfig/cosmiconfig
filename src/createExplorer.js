@@ -6,6 +6,13 @@ import { readFile } from './readFile';
 import { cacheWrapper } from './cacheWrapper';
 import { getDirectory } from './getDirectory';
 import { getPropertyByPath } from './getPropertyByPath';
+import type {
+  CosmiconfigResult,
+  ExplorerOptions,
+  LoaderEntry,
+  SyncLoader,
+  AsyncLoader,
+} from './types';
 
 const MODE_SYNC = 'sync';
 
