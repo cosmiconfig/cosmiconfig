@@ -13,3 +13,5 @@ matrix:
     - node_js: '12'
 install:
   - yarn install --frozen-lockfile
+script:
+  - yarn run check:all

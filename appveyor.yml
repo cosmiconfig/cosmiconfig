@@ -26,4 +26,4 @@ install:
 test_script:
   - node --version
   - yarn --version
-  - cmd: 'yarn test'
+  - yarn run check:all
