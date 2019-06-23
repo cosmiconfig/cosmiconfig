@@ -1,15 +1,13 @@
-'use strict';
+import os from 'os';
+import { TempDir } from './util';
+import { cosmiconfig } from '../src';
+import { createExplorer as createExplorerMock } from '../src/createExplorer';
+import * as loaders from '../src/loaders';
 
 // Mock `createExplorer` because we want to check what it is called with.
 jest.mock('../src/createExplorer');
 
-const os = require('os');
-const cosmiconfig = require('../src');
-const util = require('./util');
-const createExplorerMock = require('../src/createExplorer');
-const loaders = require('../src/loaders');
-
-const temp = new util.TempDir();
+const temp = new TempDir();
 
 describe('cosmiconfig', () => {
   const moduleName = 'foo';

@@ -1,5 +1,4 @@
 // @flow
-'use strict';
 
 // Resolves property names or property paths defined with period-delimited
 // strings or arrays of strings. Property names that are found on the source
@@ -23,4 +22,4 @@ function getPropertyByPath(
   }, source);
 }
 
-module.exports = getPropertyByPath;
+export { getPropertyByPath };

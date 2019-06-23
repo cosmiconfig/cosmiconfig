@@ -1,11 +1,8 @@
 // @flow
-'use strict';
 
-const os = require('os');
-const createExplorer = require('./createExplorer');
-const loaders = require('./loaders');
-
-module.exports = cosmiconfig;
+import os from 'os';
+import { createExplorer } from './createExplorer';
+import * as loaders from './loaders';
 
 function cosmiconfig(
   moduleName: string,
@@ -79,3 +76,5 @@ function normalizeLoaders(rawLoaders?: Object): Loaders {
 function identity(x) {
   return x;
 }
+
+export { cosmiconfig };

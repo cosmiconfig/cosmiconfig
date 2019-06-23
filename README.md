@@ -70,7 +70,7 @@ Tested in Node 8+.
 Create a Cosmiconfig explorer, then either `search` for or directly `load` a configuration file.
 
 ```js
-const cosmiconfig = require('cosmiconfig');
+const { cosmiconfig } = require('cosmiconfig');
 // ...
 const explorer = cosmiconfig(moduleName);
 
