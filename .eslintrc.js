@@ -4,16 +4,19 @@
 const supportedNodeVersion = '8.9';
 
 module.exports = {
-  parser: 'babel-eslint',
+  parser: '@typescript-eslint/parser',
   parserOptions: {
     sourceType: 'module',
+    project: './tsconfig.json',
   },
   extends: [
     'eslint-config-davidtheclark-node',
+    'plugin:@typescript-eslint/eslint-recommended',
     'plugin:jest/recommended',
     'prettier',
+    'prettier/@typescript-eslint',
   ],
-  plugins: ['jest', 'flowtype'],
+  plugins: ['jest', '@typescript-eslint'],
   rules: {
     'no-var': 'off',
     'prefer-const': 'off',
@@ -27,9 +30,10 @@ module.exports = {
     ],
 
     /**
-     * eslint-plugin-flowtype
+     * eslint-plugin-typescript
      */
-    'flowtype/define-flow-type': 'error',
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': 'error',
 
     /**
      * eslint-plugin-node
