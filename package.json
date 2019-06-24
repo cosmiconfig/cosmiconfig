@@ -3,32 +3,34 @@
   "version": "5.2.1",
   "description": "Find and load configuration from a package.json property, rc file, or CommonJS module",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
     "clean": "del-cli --dot=true \"./dist/**/*\"",
-    "build": "npm run clean && npm run build:compile",
-    "build:compile": "cross-env NODE_ENV=production babel src -d dist --verbose --extensions .js --ignore \"**/**/*.test.js\" --source-maps",
+    "build": "npm run clean && npm run build:compile && npm run build:types",
+    "build:compile": "cross-env NODE_ENV=production babel src -d dist --verbose --extensions .js,.ts --ignore \"**/**/*.test.js\",\"**/**/*.test.ts\" --source-maps",
+    "build:types": "cross-env NODE_ENV=production tsc --project tsconfig.types.json",
     "dev": "npm run clean && npm run build:compile -- --watch",
-    "lint": "eslint --ext .js . && npm run lint:md",
-    "lint:fix": "eslint --ext .js . --fix",
+    "lint": "eslint --ext .js,.ts . && npm run lint:md",
+    "lint:fix": "eslint --ext .js,.ts . --fix",
     "lint:md": "remark-preset-davidtheclark --format",
-    "format": "prettier \"**/*.{js,json,yml,yaml}\" --write",
-    "flow": "flow",
+    "format": "prettier \"**/*.{js,ts,json,yml,yaml}\" --write",
+    "typescript": "tsc",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
-    "check:all": "npm run test && flow check && npm run lint",
+    "check:all": "npm run test && npm run typescript && npm run lint",
     "prepublishOnly": "npm run check:all && npm run build"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && flow check && npm run test",
+      "pre-commit": "lint-staged && npm run typescript && npm run test",
       "pre-push": "npm run check:all"
     }
   },
   "lint-staged": {
-    "*.js": [
+    "*.{js,ts}": [
       "eslint --fix",
       "prettier --write",
       "git add"
@@ -70,7 +72,7 @@
   "jest": {
     "testEnvironment": "node",
     "collectCoverageFrom": [
-      "src/*.js"
+      "src/**/*.{js,ts}"
     ],
     "coverageReporters": [
       "text",
@@ -99,10 +101,12 @@
           }
         }
       ],
-      "@babel/preset-flow"
+      "@babel/preset-typescript"
     ]
   },
   "dependencies": {
+    "@types/js-yaml": "3.12.1",
+    "@types/parse-json": "4.0.0",
     "import-fresh": "^3.0.0",
     "is-directory": "^0.3.1",
     "js-yaml": "^3.13.1",
@@ -112,25 +116,27 @@
     "@babel/cli": "7.4.4",
     "@babel/core": "7.4.5",
     "@babel/preset-env": "7.4.5",
-    "@babel/preset-flow": "7.0.0",
-    "babel-eslint": "^10.0.1",
+    "@babel/preset-typescript": "7.3.3",
+    "@types/jest": "24.0.15",
+    "@types/node": "12.0.10",
+    "@typescript-eslint/eslint-plugin": "^1.11.0",
+    "@typescript-eslint/parser": "^1.11.0",
     "cross-env": "5.2.0",
     "del": "^4.1.1",
     "del-cli": "2.0.0",
     "eslint": "^5.16.0",
     "eslint-config-davidtheclark-node": "^0.2.2",
     "eslint-config-prettier": "^4.3.0",
-    "eslint-plugin-flowtype": "^3.10.3",
     "eslint-plugin-jest": "22.6.4",
     "eslint-plugin-node": "^9.1.0",
-    "flow-bin": "^0.101.0",
     "husky": "^2.4.1",
     "jest": "^24.8.0",
     "lint-staged": "^8.2.0",
     "make-dir": "^3.0.0",
     "parent-module": "^2.0.0",
     "prettier": "^1.18.2",
-    "remark-preset-davidtheclark": "^0.10.0"
+    "remark-preset-davidtheclark": "^0.10.0",
+    "typescript": "^3.5.2"
   },
   "engines": {
     "node": ">=8"
