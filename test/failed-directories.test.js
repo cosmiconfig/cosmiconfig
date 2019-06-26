@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { TempDir } from './util';
 import { cosmiconfig } from '../src';
+import { ExplorerOptions } from '../src/types';
 
 const temp = new TempDir();
 
@@ -22,7 +23,7 @@ describe('gives up if it cannot find the file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('.') };
 
-  const checkResult = (statSpy, readFileSpy, result) => {
+  const checkResult = (statSpy: any, readFileSpy: any , result: any) => {
     const statPath = temp.getSpyPathCalls(statSpy);
     expect(statPath).toEqual(['a/b']);
 
@@ -76,7 +77,7 @@ describe('stops at stopDir and gives up', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/package.json',
@@ -122,7 +123,7 @@ describe('throws error for invalid YAML in rc file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error.name).toBe('YAMLException');
   };
 
@@ -156,7 +157,7 @@ describe('throws error for invalid JSON in extensionless rc file loaded as JSON'
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error.name).toMatch(/JSONError/);
   };
 
@@ -185,7 +186,7 @@ describe('throws error for invalid package.json', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error.name).toMatch(/JSONError/);
   };
 
@@ -217,7 +218,7 @@ describe('throws error for invalid JS in .config.js file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error.name).toBe('SyntaxError');
   };
 
@@ -248,7 +249,7 @@ describe('throws error for invalid JSON in .foorc.json', () => {
     stopDir: temp.absolutePath('.'),
   };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error.message).toMatch(/JSON Error/);
   };
 
@@ -279,7 +280,7 @@ describe('throws error for invalid YAML in .foorc.yml', () => {
     stopDir: temp.absolutePath('.'),
   };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error.name).toBe('YAMLException');
   };
 
@@ -319,7 +320,7 @@ describe('searching for rc files with specified extensions, throws error for inv
     ],
   };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error.name).toBe('SyntaxError');
   };
 
@@ -351,7 +352,7 @@ describe('without ignoring empty files, returns an empty config result for an em
     ignoreEmptySearchPlaces: false,
   };
 
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result).toEqual({
       config: undefined,
       filepath: temp.absolutePath('a/b/.foorc'),
@@ -382,7 +383,7 @@ describe('without ignoring empty files, returns an empty config result for an em
     ignoreEmptySearchPlaces: false,
   };
 
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result).toEqual({
       config: undefined,
       filepath: temp.absolutePath('a/b/foo.config.js'),
@@ -413,7 +414,7 @@ describe('without ignoring empty files, returns an empty config result for an em
     ignoreEmptySearchPlaces: false,
   };
 
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result).toEqual({
       config: undefined,
       filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.json'),
@@ -444,7 +445,7 @@ describe('returns an empty config result for an empty .yaml rc file', () => {
     ignoreEmptySearchPlaces: false,
   };
 
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result).toEqual({
       config: undefined,
       filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.yaml'),
@@ -484,7 +485,7 @@ describe('without ignoring empty configs and searching for rc files with specifi
     ],
   };
 
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result).toEqual({
       config: undefined,
       filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.js'),
@@ -524,7 +525,7 @@ describe('without ignoring empty configs and searching for rc files with specifi
     ],
   };
 
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(result).toEqual({
       config: undefined,
       filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.js'),
@@ -556,7 +557,7 @@ describe('throws error if a file in searchPlaces does not have a corresponding l
     ],
   };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error.message).toMatch(
       /No loader specified for extension "\.things"/,
     );
@@ -577,15 +578,16 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
     temp.createFile('a/b/c/d/e/f/.foorc', '{ "foo": "bar" }');
   });
 
-  const explorerOptions = {
+  const explorerOptions: ExplorerOptions = {
     stopDir: temp.absolutePath('.'),
     searchPlaces: ['package.json', '.foorc'],
     loaders: {
+      // @ts-ignore
       noExt: undefined,
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error.message).toMatch(
       /No loader specified for files without extensions/,
     );
@@ -619,7 +621,7 @@ describe('does not swallow errors from custom loaders', () => {
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error.message).toBe('Failed to load JS');
   };
 
@@ -663,7 +665,7 @@ describe('errors not swallowed when async custom loader throws them', () => {
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error).toBe(expectedError);
   };
 
@@ -698,7 +700,7 @@ describe('errors not swallowed when async custom loader rejects', () => {
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error).toBe(expectedError);
   };
 
@@ -732,7 +734,7 @@ describe('errors if only async loader is set but you call sync search', () => {
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error.message).toMatch(
       /No sync loader specified for extension "\.things"/,
     );
@@ -762,15 +764,16 @@ describe('errors if it cannot figure out an async loader', () => {
     return Promise.resolve({ things: true });
   };
 
-  const explorerOptions = {
+  const explorerOptions: ExplorerOptions = {
     stopDir: temp.absolutePath('.'),
     searchPlaces: ['.foorc.things'],
     loaders: {
+      // @ts-ignore
       '.things': { wawa: loadThings },
     },
   };
 
-  const checkError = error => {
+  const checkError = (error: any) => {
     expect(error.message).toMatch(
       /No async loader specified for extension "\.things"/,
     );
