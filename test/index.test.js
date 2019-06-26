@@ -1,8 +1,12 @@
 import os from 'os';
 import { TempDir } from './util';
 import { cosmiconfig } from '../src';
-import { createExplorer as createExplorerMock } from '../src/createExplorer';
+import { createExplorer } from '../src/createExplorer';
 import * as loaders from '../src/loaders';
+import { ExplorerOptions, SyncLoader } from '../src/types';
+
+// @ts-ignore
+const createExplorerMock: typeof createExplorer & jest.Mock = createExplorer;
 
 // Mock `createExplorer` because we want to check what it is called with.
 jest.mock('../src/createExplorer');
@@ -68,24 +72,28 @@ describe('cosmiconfig', () => {
   test('creates explorer with preference for given options over defaults', () => {
     temp.createFile('foo.json', '{ "foo": true }');
 
-    const noExtLoader = () => {};
-    const jsLoader = () => {};
-    const jsonLoader = () => {};
-    const yamlLoader = () => {};
+    const noExtLoader: SyncLoader = () => {};
+    const jsLoader: SyncLoader = () => {};
+    const jsonLoader: SyncLoader = () => {};
+    const yamlLoader: SyncLoader = () => {};
 
-    cosmiconfig(moduleName, {
-      stopDir: __dirname,
-      cache: false,
-      searchPlaces: ['.foorc.json', 'wildandfree.js'],
-      packageProp: 'wildandfree',
-      ignoreEmptySearchPlaces: false,
-      loaders: {
-        noExt: noExtLoader,
-        '.js': { async: jsLoader },
-        '.json': { sync: jsonLoader },
-        '.yaml': { sync: yamlLoader, async: yamlLoader },
-      },
-    });
+    const options: ExplorerOptions = {
+        stopDir: __dirname,
+        cache: false,
+        searchPlaces: ['.foorc.json', 'wildandfree.js'],
+        packageProp: 'wildandfree',
+        ignoreEmptySearchPlaces: false,
+        loaders: {
+          // TODO: fix ts error
+          // @ts-ignore
+          noExt: noExtLoader,
+          '.js': { async: jsLoader },
+          '.json': { sync: jsonLoader },
+          '.yaml': { sync: yamlLoader, async: yamlLoader },
+        },
+      }
+
+    cosmiconfig(moduleName, options);
 
     const explorerOptions = createExplorerMock.mock.calls[0][0];
     expect(explorerOptions).toMatchObject({

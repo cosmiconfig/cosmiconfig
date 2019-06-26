@@ -27,7 +27,7 @@ afterAll(() => {
 
 describe('cache is not used initially', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
@@ -66,7 +66,7 @@ describe('cache is not used initially', () => {
 
 describe('cache is used for already-visited directories', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     expect(readFileSpy).toHaveBeenCalledTimes(0);
 
     expect(result).toEqual({
@@ -105,7 +105,7 @@ describe('cache is used for already-visited directories', () => {
 
 describe('cache is used for already-loaded file', () => {
   const loadPath = temp.absolutePath('a/b/c/d/.foorc');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     expect(readFileSpy).toHaveBeenCalledTimes(0);
 
     expect(result).toEqual({
@@ -145,7 +145,7 @@ describe('cache is used for already-loaded file', () => {
 describe('cache is used when some directories in search are already visted', () => {
   const firstSearchPath = temp.absolutePath('a/b/c/d/e');
   const secondSearchPath = temp.absolutePath('a/b/c/d/e/f');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -194,7 +194,7 @@ describe('cache is used when some directories in search are already visted', () 
 describe('cache is not used when directly loading an unvisited file', () => {
   const firstSearchPath = temp.absolutePath('a/b/c/d/e');
   const loadPath = temp.absolutePath('a/b/package.json');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     expect(readFileSpy).toHaveBeenCalledTimes(1);
 
     expect(result).toEqual({
@@ -233,7 +233,7 @@ describe('cache is not used when directly loading an unvisited file', () => {
 
 describe('cache is not used in a new cosmiconfig instance', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
@@ -279,7 +279,7 @@ describe('cache is not used in a new cosmiconfig instance', () => {
 
 describe('clears file cache on calling clearLoadCache', () => {
   const loadPath = temp.absolutePath('a/b/c/d/.foorc');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(['a/b/c/d/.foorc']);
 
@@ -319,7 +319,7 @@ describe('clears file cache on calling clearLoadCache', () => {
 
 describe('clears file cache on calling clearCaches', () => {
   const loadPath = temp.absolutePath('a/b/c/d/.foorc');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(['a/b/c/d/.foorc']);
 
@@ -359,7 +359,7 @@ describe('clears file cache on calling clearCaches', () => {
 
 describe('clears directory cache on calling clearSearchCache', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
@@ -409,7 +409,7 @@ describe('clears directory cache on calling clearSearchCache', () => {
 
 describe('clears directory cache on calling clearCaches', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
@@ -475,7 +475,7 @@ describe('with cache disabled', () => {
 
 describe('with cache disabled, does not cache directory results', () => {
   const searchPath = temp.absolutePath('a/b/c/d/e');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/package.json',
@@ -523,7 +523,7 @@ describe('with cache disabled, does not cache directory results', () => {
 
 describe('with cache disabled, does not cache file results', () => {
   const loadPath = temp.absolutePath('a/b/c/d/.foorc');
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(['a/b/c/d/.foorc']);
 
@@ -567,7 +567,7 @@ describe('ensure import-fresh is called when loading a js file', () => {
     importFreshMock.mockReturnValue({ foundJs: true });
   });
 
-  const checkResult = result => {
+  const checkResult = (result: any) => {
     expect(importFreshMock).toHaveBeenCalledTimes(1);
     expect(importFreshMock).toHaveBeenCalledWith(loadPath);
 
