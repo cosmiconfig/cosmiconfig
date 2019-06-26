@@ -4,7 +4,7 @@ import makeDir from 'make-dir';
 import parentModule from 'parent-module';
 import os from 'os';
 
-const fs = require.requireActual('fs');
+const fs = jest.requireActual('fs');
 
 class TempDir {
   dir: string;
@@ -20,7 +20,7 @@ class TempDir {
      * Get the pathname of the file that imported util.js.
      * Used to create a unique directory name for each test suite.
      */
-    const parent = parentModule();
+    const parent = parentModule() || 'cosmiconfig';
     const relativeParent = path.relative(process.cwd(), parent);
 
     /**
@@ -32,11 +32,11 @@ class TempDir {
     // create directory
     makeDir.sync(this.dir);
 
-    (this: any).absolutePath = this.absolutePath.bind(this);
-    (this: any).createDir = this.createDir.bind(this);
-    (this: any).createFile = this.createFile.bind(this);
-    (this: any).clean = this.clean.bind(this);
-    (this: any).deleteTempDir = this.deleteTempDir.bind(this);
+    this.absolutePath = this.absolutePath.bind(this);
+    this.createDir = this.createDir.bind(this);
+    this.createFile = this.createFile.bind(this);
+    this.clean = this.clean.bind(this);
+    this.deleteTempDir = this.deleteTempDir.bind(this);
   }
 
   absolutePath(dir: string) {
@@ -59,7 +59,7 @@ class TempDir {
     fs.writeFileSync(filePath, `${contents}\n`);
   }
 
-  getSpyPathCalls(spy) {
+  getSpyPathCalls(spy: jest.Mock | jest.SpyInstance) {
     const calls = spy.mock.calls;
 
     const result = calls.map(call => {

@@ -27,7 +27,7 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = { stopDir: temp.absolutePath('.') };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -82,7 +82,7 @@ describe('finds package.json prop in second searched dir', () => {
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = { stopDir: temp.absolutePath('.') };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -136,7 +136,7 @@ describe('finds package.json with nested packageProp in second searched dir', ()
     packageProp: 'configs.pkg',
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -182,7 +182,7 @@ describe('finds JS file in first searched dir', () => {
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = { stopDir: temp.absolutePath('.') };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
 
     expect(filesChecked).toEqual([
@@ -228,7 +228,7 @@ describe('finds .foorc.js file in first searched dir', () => {
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = { stopDir: temp.absolutePath('.') };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
 
     expect(filesChecked).toEqual([
@@ -274,7 +274,7 @@ describe('skips over empty file to find JS file in first searched dir', () => {
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = { stopDir: temp.absolutePath('.') };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
 
     expect(filesChecked).toEqual([
@@ -321,7 +321,7 @@ describe('finds package.json in second dir searched, with alternate names', () =
     searchPlaces: ['package.json', '.wowza', 'wowzaConfig.js'],
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -366,7 +366,7 @@ describe('finds rc file in third searched dir, skipping packageProp, parsing ext
     searchPlaces: ['.foorc', 'foo.config.js'],
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/.foorc',
@@ -411,7 +411,7 @@ describe('finds package.json file in second searched dir, skipping JS and RC fil
     searchPlaces: ['package.json'],
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -450,7 +450,7 @@ describe('finds .foorc.json in second searched dir', () => {
     stopDir: temp.absolutePath('.'),
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -497,7 +497,7 @@ describe('finds .foorc.yaml in first searched dir', () => {
     stopDir: temp.absolutePath('.'),
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -538,7 +538,7 @@ describe('finds .foorc.yml in first searched dir', () => {
     stopDir: temp.absolutePath('.'),
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -593,7 +593,7 @@ describe('adding myfooconfig.js to searchPlaces, finds it in first searched dir'
     ],
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -647,7 +647,7 @@ describe('finds JS file traversing from cwd', () => {
     stopDir: temp.absolutePath('.'),
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -704,7 +704,7 @@ describe('searchPlaces can include subdirectories', () => {
     ],
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/.foorc.json',
@@ -739,12 +739,12 @@ describe('searchPlaces can include subdirectories', () => {
 });
 
 describe('custom loaders allow non-default file types', () => {
-  const loadThings = (filepath, content) => {
+  const loadThings = (filepath: any, content: any) => {
     return {
       things: content
         .split('\n')
-        .map(x => x.trim())
-        .filter(x => !!x),
+        .map((x: any) => x.trim())
+        .filter((x: any) => !!x),
     };
   };
 
@@ -770,7 +770,7 @@ describe('custom loaders allow non-default file types', () => {
     },
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -807,12 +807,12 @@ describe('custom loaders allow non-default file types', () => {
 });
 
 describe('adding custom loaders allows for default and non-default file types', () => {
-  const loadThings = (filepath, content) => {
+  const loadThings = (filepath: any, content: any) => {
     return {
       things: content
         .split('\n')
-        .map(x => x.trim())
-        .filter(x => !!x),
+        .map((x: any) => x.trim())
+        .filter((x: any) => !!x),
     };
   };
 
@@ -838,7 +838,7 @@ describe('adding custom loaders allows for default and non-default file types', 
     },
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -895,7 +895,7 @@ describe('defaults loaders can be overridden', () => {
     },
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
@@ -932,9 +932,9 @@ describe('defaults loaders can be overridden', () => {
 describe('custom loaders can be async', () => {
   const startDir = temp.absolutePath('a/b/c/d/e/f');
 
-  let loadThingsSync;
-  let loadThingsAsync;
-  let explorerOptions;
+  let loadThingsSync: any;
+  let loadThingsAsync: any;
+  let explorerOptions: any;
   beforeEach(() => {
     temp.createFile(
       'a/b/c/d/e/f/.foorc.things',
@@ -955,7 +955,7 @@ describe('custom loaders can be async', () => {
     };
   });
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(['a/b/c/d/e/f/.foorc.things']);
 
@@ -1007,7 +1007,7 @@ describe('a custom loader entry can include just an async loader', () => {
     },
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(['a/b/c/d/e/f/.foorc.things']);
 
@@ -1049,7 +1049,7 @@ describe('a custom loader entry can include only a sync loader and work for both
     },
   };
 
-  const checkResult = (readFileSpy, result) => {
+  const checkResult = (readFileSpy: any, result: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(['a/b/c/d/e/f/.foorc.things']);
 
@@ -1095,7 +1095,12 @@ describe('works fine if sync loader returns a Promise from a JS file', () => {
       filepath: temp.absolutePath('a/b/c/d/e/f/bar.config.js'),
       config: expect.any(Promise),
     });
-    return result.config.then(resolved => {
+
+    if (result === null) {
+      throw new Error('is null');
+    }
+
+    return result.config.then((resolved: any) => {
       expect(resolved).toEqual({ a: 1 });
     });
   });
