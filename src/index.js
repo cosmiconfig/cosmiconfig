@@ -1,18 +1,22 @@
 import os from 'os';
 import { createExplorer } from './createExplorer';
 import * as loaders from './loaders';
-import type { CosmiconfigResult, ExplorerOptions, Loaders } from './types';
+import { AsyncLoader, CosmiconfigResult, ExplorerOptions, LoaderEntry, Loaders, SyncLoader } from './types';
+
+interface RawLoaders {
+  [key: string]: LoaderEntry | SyncLoader | AsyncLoader;
+}
 
 function cosmiconfig(
   moduleName: string,
-  options: {
+  options?: {
     packageProp?: string,
-    loaders?: Object,
+    loaders?: RawLoaders,
     searchPlaces?: Array<string>,
     ignoreEmptySearchPlaces?: boolean,
     stopDir?: string,
     cache?: boolean,
-    transform?: CosmiconfigResult => CosmiconfigResult,
+    transform?: (cosmiconfigResult: CosmiconfigResult) => CosmiconfigResult,
   },
 ) {
   options = options || {};
@@ -48,8 +52,8 @@ cosmiconfig.loadJs = loaders.loadJs;
 cosmiconfig.loadJson = loaders.loadJson;
 cosmiconfig.loadYaml = loaders.loadYaml;
 
-function normalizeLoaders(rawLoaders?: Object): Loaders {
-  const defaults = {
+function normalizeLoaders(rawLoaders?: RawLoaders): Loaders {
+  const defaults: Loaders = {
     '.js': { sync: loaders.loadJs, async: loaders.loadJs },
     '.json': { sync: loaders.loadJson, async: loaders.loadJson },
     '.yaml': { sync: loaders.loadYaml, async: loaders.loadYaml },
@@ -61,7 +65,7 @@ function normalizeLoaders(rawLoaders?: Object): Loaders {
     return defaults;
   }
 
-  return Object.keys(rawLoaders).reduce((result, ext) => {
+  return Object.keys(rawLoaders).reduce((result: Loaders, ext) => {
     const entry = rawLoaders && rawLoaders[ext];
     if (typeof entry === 'function') {
       result[ext] = { sync: entry, async: entry };
@@ -72,7 +76,7 @@ function normalizeLoaders(rawLoaders?: Object): Loaders {
   }, defaults);
 }
 
-function identity(x) {
+function identity<T>(x: T): T {
   return x;
 }
 
