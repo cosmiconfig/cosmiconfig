@@ -39,19 +39,19 @@ class TempDir {
     this.deleteTempDir = this.deleteTempDir.bind(this);
   }
 
-  public absolutePath(dir: string) {
+  public absolutePath(dir: string): string {
     // Use path.join to ensure dir is always inside the working temp directory
     const absolutePath = path.join(this.dir, dir);
 
     return absolutePath;
   }
 
-  public createDir(dir: string) {
+  public createDir(dir: string): void {
     const dirname = this.absolutePath(dir);
     makeDir.sync(dirname);
   }
 
-  public createFile(file: string, contents: string) {
+  public createFile(file: string, contents: string): void {
     const filePath = this.absolutePath(file);
     const fileDir = path.parse(filePath).dir;
     makeDir.sync(fileDir);
@@ -59,10 +59,10 @@ class TempDir {
     fs.writeFileSync(filePath, `${contents}\n`);
   }
 
-  public getSpyPathCalls(spy: jest.Mock | jest.SpyInstance) {
+  public getSpyPathCalls(spy: jest.Mock | jest.SpyInstance): string[] {
     const calls = spy.mock.calls;
 
-    const result = calls.map((call) => {
+    const result = calls.map((call): string => {
       const filePath = call[0];
       const relativePath = path.relative(this.dir, filePath);
 
@@ -78,7 +78,7 @@ class TempDir {
     return result;
   }
 
-  public clean() {
+  public clean(): string[] {
     const cleanPattern = this.absolutePath('**/*');
     const removed = del.sync(cleanPattern, {
       dot: true,
@@ -88,7 +88,7 @@ class TempDir {
     return removed;
   }
 
-  public deleteTempDir() {
+  public deleteTempDir(): string[] {
     const removed = del.sync(this.dir, { force: true, dot: true });
 
     return removed;

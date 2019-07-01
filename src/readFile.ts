@@ -8,12 +8,16 @@ function readFile(filepath: string, options?: Options): Promise<string | null> {
   options = options || {};
   const throwNotFound = options.throwNotFound || false;
 
-  return new Promise((resolve, reject) => {
-    fs.readFile(filepath, 'utf8', (err, content) => {
+  return new Promise((resolve, reject): void => {
+    fs.readFile(filepath, 'utf8', (err, content): void => {
       if (err && err.code === 'ENOENT' && !throwNotFound) {
-        return resolve(null);
+        resolve(null);
+        return;
       }
-      if (err) return reject(err);
+      if (err) {
+        reject(err);
+        return;
+      }
       resolve(content);
     });
   });
