@@ -63,6 +63,18 @@ module.exports = {
     // '@typescript-eslint/strict-boolean-expressions': 'error',
     '@typescript-eslint/unbound-method': 'error',
 
+    // rules not in recommended
+    '@typescript-eslint/ban-ts-ignore': 'off', // maybe enable?
+    '@typescript-eslint/member-ordering': 'off', // maybe enable?
+    '@typescript-eslint/no-empty-function': 'error',
+    '@typescript-eslint/no-extraneous-class': 'error',
+    '@typescript-eslint/no-require-imports': 'error',
+    '@typescript-eslint/no-this-alias': 'error',
+    '@typescript-eslint/no-useless-constructor': 'error',
+    '@typescript-eslint/prefer-for-of': 'error',
+    '@typescript-eslint/prefer-function-type': 'error',
+    '@typescript-eslint/unified-signatures': 'error',
+
     /**
      * eslint-plugin-node
      */
@@ -112,6 +124,9 @@ module.exports = {
     {
       files: ['*.test.{js,ts}', '.*.test.{js,ts}'],
       rules: {
+        '@typescript-eslint/ban-ts-ignore': 'off',
+        '@typescript-eslint/no-var-requires': 'off',
+        '@typescript-eslint/no-require-imports': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
       },
