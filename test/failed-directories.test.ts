@@ -60,7 +60,7 @@ describe('gives up if it cannot find the file', () => {
     const statSpy = jest.spyOn(fs, 'stat');
     return cosmiconfig('foo', explorerOptions)
       .search(startDir)
-      .then(result => {
+      .then((result) => {
         checkResult(statSpy, readFileSpy, result);
       });
   });
@@ -103,7 +103,7 @@ describe('stops at stopDir and gives up', () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
     return cosmiconfig('foo', explorerOptions)
       .search(startDir)
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });

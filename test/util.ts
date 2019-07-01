@@ -62,7 +62,7 @@ class TempDir {
   getSpyPathCalls(spy: jest.Mock | jest.SpyInstance) {
     const calls = spy.mock.calls;
 
-    const result = calls.map(call => {
+    const result = calls.map((call) => {
       const filePath = call[0];
       const relativePath = path.relative(this.dir, filePath);
 

@@ -65,6 +65,7 @@
   "homepage": "https://github.com/davidtheclark/cosmiconfig#readme",
   "prettier": {
     "trailingComma": "all",
+    "arrowParens": "always",
     "singleQuote": true,
     "printWidth": 80,
     "tabWidth": 2

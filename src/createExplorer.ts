@@ -62,7 +62,7 @@ class Explorer {
   validateConfig() {
     const config = this.config;
 
-    config.searchPlaces.forEach(place => {
+    config.searchPlaces.forEach((place) => {
       const loaderKey = path.extname(place) || 'noExt';
       const loader = config.loaders[loaderKey];
       if (!loader) {
@@ -77,7 +77,7 @@ class Explorer {
 
   search(searchFrom?: string): Promise<CosmiconfigResult> {
     searchFrom = searchFrom || process.cwd();
-    return getDirectory(searchFrom).then(dir => {
+    return getDirectory(searchFrom).then((dir) => {
       return this.searchFromDirectory(dir);
     });
   }
@@ -85,7 +85,7 @@ class Explorer {
   searchFromDirectory(dir: string): Promise<CosmiconfigResult> {
     const absoluteDir = path.resolve(process.cwd(), dir);
     const run = () => {
-      return this.searchDirectory(absoluteDir).then(result => {
+      return this.searchDirectory(absoluteDir).then((result) => {
         const nextDir = this.nextDirectoryToSearch(absoluteDir, result);
         if (nextDir) {
           return this.searchFromDirectory(nextDir);
@@ -126,7 +126,7 @@ class Explorer {
   searchDirectory(dir: string): Promise<CosmiconfigResult> {
     return this.config.searchPlaces.reduce(
       (prevResultPromise: Promise<CosmiconfigResult>, place) => {
-        return prevResultPromise.then(prevResult => {
+        return prevResultPromise.then((prevResult) => {
           if (this.shouldSearchStopWithResult(prevResult)) {
             return prevResult;
           }
@@ -154,7 +154,7 @@ class Explorer {
 
   loadSearchPlace(dir: string, place: string): Promise<CosmiconfigResult> {
     const filepath = path.join(dir, place);
-    return readFile(filepath).then(content => {
+    return readFile(filepath).then((content) => {
       return this.createCosmiconfigResult(filepath, content);
     });
   }
@@ -258,7 +258,7 @@ class Explorer {
       .then(() => {
         return this.loadFileContent('async', filepath, content);
       })
-      .then(loaderResult => {
+      .then((loaderResult) => {
         return this.loadedContentToCosmiconfigResult(filepath, loaderResult);
       });
   }
@@ -283,7 +283,7 @@ class Explorer {
       const absoluteFilePath = path.resolve(process.cwd(), filepath);
       return cacheWrapper(this.loadCache, absoluteFilePath, () => {
         return readFile(absoluteFilePath, { throwNotFound: true })
-          .then(content => {
+          .then((content) => {
             return this.createCosmiconfigResult(absoluteFilePath, content);
           })
           .then(this.config.transform);

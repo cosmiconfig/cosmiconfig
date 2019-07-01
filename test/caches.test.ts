@@ -51,7 +51,7 @@ describe('cache is not used initially', () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
 
     const cachedSearch = cosmiconfig('foo').search;
-    return cachedSearch(searchPath).then(result => {
+    return cachedSearch(searchPath).then((result) => {
       checkResult(readFileSpy, result);
     });
   });
@@ -86,7 +86,7 @@ describe('cache is used for already-visited directories', () => {
         readFileSpy.mockClear();
         return cachedSearch(searchPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -125,7 +125,7 @@ describe('cache is used for already-loaded file', () => {
         readFileSpy.mockClear();
         return cachedLoad(loadPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -174,7 +174,7 @@ describe('cache is used when some directories in search are already visted', () 
         readFileSpy.mockClear();
         return cachedSearch(secondSearchPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -214,7 +214,7 @@ describe('cache is not used when directly loading an unvisited file', () => {
         readFileSpy.mockClear();
         return explorer.load(loadPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -262,7 +262,7 @@ describe('cache is not used in a new cosmiconfig instance', () => {
         readFileSpy.mockClear();
         return cosmiconfig('foo').search(searchPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -300,7 +300,7 @@ describe('clears file cache on calling clearLoadCache', () => {
         explorer.clearLoadCache();
         return explorer.load(loadPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -340,7 +340,7 @@ describe('clears file cache on calling clearCaches', () => {
         explorer.clearCaches();
         return explorer.load(loadPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -390,7 +390,7 @@ describe('clears directory cache on calling clearSearchCache', () => {
         explorer.clearSearchCache();
         return explorer.search(searchPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -440,7 +440,7 @@ describe('clears directory cache on calling clearCaches', () => {
         explorer.clearCaches();
         return explorer.search(searchPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -505,7 +505,7 @@ describe('with cache disabled, does not cache directory results', () => {
         readFileSpy.mockClear();
         return explorer.search(searchPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -543,7 +543,7 @@ describe('with cache disabled, does not cache file results', () => {
         readFileSpy.mockClear();
         return explorer.load(loadPath);
       })
-      .then(result => {
+      .then((result) => {
         checkResult(readFileSpy, result);
       });
   });
@@ -578,7 +578,7 @@ describe('ensure import-fresh is called when loading a js file', () => {
     const explorer = cosmiconfig('foo');
     temp.createFile(tempFileName, 'module.exports = { foundJs: true };');
 
-    return explorer.load(loadPath).then(result => {
+    return explorer.load(loadPath).then((result) => {
       checkResult(result);
     });
   });

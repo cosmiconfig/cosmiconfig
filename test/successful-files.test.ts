@@ -160,7 +160,7 @@ describe('loads package prop when configPath is package.json', () => {
     test('async', () => {
       return explorer
         .load(configPath)
-        .then(result => checkResult(result, expectedConfig));
+        .then((result) => checkResult(result, expectedConfig));
     });
 
     test('sync', () => {
@@ -176,7 +176,7 @@ describe('loads package prop when configPath is package.json', () => {
     test('async', () => {
       return explorer
         .load(configPath)
-        .then(result => checkResult(result, expectedConfig));
+        .then((result) => checkResult(result, expectedConfig));
     });
 
     test('sync', () => {
@@ -192,7 +192,7 @@ describe('loads package prop when configPath is package.json', () => {
     test('async', () => {
       return explorer
         .load(configPath)
-        .then(result => checkResult(result, expectedConfig));
+        .then((result) => checkResult(result, expectedConfig));
     });
 
     test('sync', () => {
@@ -207,7 +207,7 @@ describe('loads package prop when configPath is package.json', () => {
     test('async', () => {
       return explorer
         .load(configPath)
-        .then(result => expect(result).toBeNull());
+        .then((result) => expect(result).toBeNull());
     });
 
     test('sync', () => {
@@ -222,7 +222,7 @@ describe('loads package prop when configPath is package.json', () => {
     test('async', () => {
       return explorer
         .load(configPath)
-        .then(result => expect(result).toBeNull());
+        .then((result) => expect(result).toBeNull());
     });
 
     test('sync', () => {
@@ -305,7 +305,7 @@ describe('loads defined JSON file with no extension', () => {
   test('async', () => {
     return cosmiconfig('successful-files-tests')
       .load(file)
-      .then(result => {
+      .then((result) => {
         checkResult(result);
       });
   });
@@ -330,7 +330,7 @@ describe('loads defined YAML file with no extension', () => {
   test('async', () => {
     return cosmiconfig('successful-files-tests')
       .load(file)
-      .then(result => {
+      .then((result) => {
         checkResult(result);
       });
   });
