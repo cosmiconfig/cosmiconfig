@@ -78,20 +78,20 @@ describe('cosmiconfig', () => {
     const yamlLoader: SyncLoader = () => {};
 
     const options: ExplorerOptions = {
-        stopDir: __dirname,
-        cache: false,
-        searchPlaces: ['.foorc.json', 'wildandfree.js'],
-        packageProp: 'wildandfree',
-        ignoreEmptySearchPlaces: false,
-        loaders: {
-          // TODO: fix ts error
-          // @ts-ignore
-          noExt: noExtLoader,
-          '.js': { async: jsLoader },
-          '.json': { sync: jsonLoader },
-          '.yaml': { sync: yamlLoader, async: yamlLoader },
-        },
-      }
+      stopDir: __dirname,
+      cache: false,
+      searchPlaces: ['.foorc.json', 'wildandfree.js'],
+      packageProp: 'wildandfree',
+      ignoreEmptySearchPlaces: false,
+      loaders: {
+        // TODO: fix ts error
+        // @ts-ignore
+        noExt: noExtLoader,
+        '.js': { async: jsLoader },
+        '.json': { sync: jsonLoader },
+        '.yaml': { sync: yamlLoader, async: yamlLoader },
+      },
+    };
 
     cosmiconfig(moduleName, options);
 
