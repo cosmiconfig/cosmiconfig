@@ -127,6 +127,7 @@
     "eslint": "^5.16.0",
     "eslint-config-davidtheclark-node": "^0.2.2",
     "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-jest": "22.6.4",
     "eslint-plugin-node": "^9.1.0",
     "husky": "^2.4.1",
