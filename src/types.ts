@@ -13,17 +13,17 @@ export type AsyncLoader =
   | ((filepath: string, content: string) => Promise<LoaderResult>)
   | SyncLoader;
 
-export type LoaderEntry = {
+export interface LoaderEntry {
   sync?: SyncLoader;
   async?: AsyncLoader;
-};
+}
 
-export type Loaders = {
+export interface Loaders {
   [key: string]: LoaderEntry;
-};
+}
 
 // These are the user options with defaults applied.
-export type ExplorerOptions = {
+export interface ExplorerOptions {
   stopDir: string;
   cache: boolean;
   transform: (cosmiconfigResult: CosmiconfigResult) => CosmiconfigResult;
@@ -31,4 +31,4 @@ export type ExplorerOptions = {
   loaders: Loaders;
   searchPlaces: Array<string>;
   ignoreEmptySearchPlaces: boolean;
-};
+}

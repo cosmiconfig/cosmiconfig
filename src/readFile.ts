@@ -1,8 +1,8 @@
 import fs from 'fs';
 
-type Options = {
+interface Options {
   throwNotFound?: boolean;
-};
+}
 
 function readFile(filepath: string, options?: Options): Promise<string | null> {
   options = options || {};
