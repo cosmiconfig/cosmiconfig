@@ -32,11 +32,14 @@ class TempDir {
     // create directory
     makeDir.sync(this.dir);
 
+    // re-enable once: https://github.com/typescript-eslint/typescript-eslint/issues/636
+    /* eslint-disable @typescript-eslint/unbound-method */
     this.absolutePath = this.absolutePath.bind(this);
     this.createDir = this.createDir.bind(this);
     this.createFile = this.createFile.bind(this);
     this.clean = this.clean.bind(this);
     this.deleteTempDir = this.deleteTempDir.bind(this);
+    /* eslint-enable @typescript-eslint/unbound-method */
   }
 
   public absolutePath(dir: string): string {
