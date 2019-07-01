@@ -1,7 +1,7 @@
 import path from 'path';
 import isDirectory from 'is-directory';
 
-function getDirectory(filepath: string): Promise<string> {
+async function getDirectory(filepath: string): Promise<string> {
   return new Promise((resolve, reject): void => {
     isDirectory(filepath, (err, filepathIsDirectory): void => {
       if (err) {
