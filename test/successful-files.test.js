@@ -253,7 +253,9 @@ describe('runs transform', () => {
   });
 
   test('sync', () => {
-    const result = cosmiconfig('successful-files-tests', { transform }).loadSync(configPath);
+    const result = cosmiconfig('successful-files-tests', {
+      transform,
+    }).loadSync(configPath);
     checkResult(result);
   });
 });

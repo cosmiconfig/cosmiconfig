@@ -1,7 +1,7 @@
 import fs from 'fs';
 
 type Options = {
-  throwNotFound?: boolean,
+  throwNotFound?: boolean;
 };
 
 function readFile(filepath: string, options?: Options): Promise<string | null> {

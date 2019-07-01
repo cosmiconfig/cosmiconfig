@@ -1,7 +1,14 @@
 import os from 'os';
 import { createExplorer } from './createExplorer';
 import * as loaders from './loaders';
-import { AsyncLoader, CosmiconfigResult, ExplorerOptions, LoaderEntry, Loaders, SyncLoader } from './types';
+import {
+  AsyncLoader,
+  CosmiconfigResult,
+  ExplorerOptions,
+  LoaderEntry,
+  Loaders,
+  SyncLoader,
+} from './types';
 
 interface RawLoaders {
   [key: string]: LoaderEntry | SyncLoader | AsyncLoader;
@@ -10,13 +17,13 @@ interface RawLoaders {
 function cosmiconfig(
   moduleName: string,
   options?: {
-    packageProp?: string,
-    loaders?: RawLoaders,
-    searchPlaces?: Array<string>,
-    ignoreEmptySearchPlaces?: boolean,
-    stopDir?: string,
-    cache?: boolean,
-    transform?: (cosmiconfigResult: CosmiconfigResult) => CosmiconfigResult,
+    packageProp?: string;
+    loaders?: RawLoaders;
+    searchPlaces?: Array<string>;
+    ignoreEmptySearchPlaces?: boolean;
+    stopDir?: string;
+    cache?: boolean;
+    transform?: (cosmiconfigResult: CosmiconfigResult) => CosmiconfigResult;
   },
 ) {
   options = options || {};

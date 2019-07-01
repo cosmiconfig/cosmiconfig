@@ -23,7 +23,7 @@ describe('gives up if it cannot find the file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('.') };
 
-  const checkResult = (statSpy: any, readFileSpy: any , result: any) => {
+  const checkResult = (statSpy: any, readFileSpy: any, result: any) => {
     const statPath = temp.getSpyPathCalls(statSpy);
     expect(statPath).toEqual(['a/b']);
 
