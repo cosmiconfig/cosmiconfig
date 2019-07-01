@@ -1,5 +1,3 @@
-// @flow
-
 import parseJson from 'parse-json';
 import yaml from 'js-yaml';
 import importFresh from 'import-fresh';
