@@ -1,5 +1,3 @@
-// @flow
-
 // Resolves property names or property paths defined with period-delimited
 // strings or arrays of strings. Property names that are found on the source
 // object are used directly (even if they include a period).
