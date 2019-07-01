@@ -1,5 +1,3 @@
-// @flow
-
 export type CosmiconfigResult = {
   config: any,
   filepath: string,

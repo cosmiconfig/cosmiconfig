@@ -1,5 +1,3 @@
-// @flow
-
 function cacheWrapper<T>(cache: ?Map<string, T>, key: string, fn: () => T): T {
   if (!cache) {
     return fn();

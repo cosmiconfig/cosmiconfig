@@ -1,5 +1,3 @@
-// @flow
-
 import path from 'path';
 import * as loaders from './loaders';
 import { readFile } from './readFile';

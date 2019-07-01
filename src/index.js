@@ -1,5 +1,3 @@
-// @flow
-
 import os from 'os';
 import { createExplorer } from './createExplorer';
 import * as loaders from './loaders';
