@@ -13,6 +13,7 @@ module.exports = {
   extends: [
     'eslint-config-davidtheclark-node',
     'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:import/typescript',
@@ -36,8 +37,14 @@ module.exports = {
     /**
      * eslint-plugin-typescript
      */
-    'no-unused-vars': 'off',
-    '@typescript-eslint/no-unused-vars': 'error',
+    '@typescript-eslint/explicit-function-return-type': [
+      'error',
+      {
+        allowTypedFunctionExpressions: true,
+      },
+    ],
+    '@typescript-eslint/no-use-before-define': 'off',
+    '@typescript-eslint/array-type': ['error', 'generic'],
 
     /**
      * eslint-plugin-node
@@ -69,7 +76,6 @@ module.exports = {
     'jest/no-test-callback': 'error',
     'jest/prefer-todo': 'error',
   },
-
   settings: {
     node: {
       convertPath: {
@@ -86,6 +92,13 @@ module.exports = {
     'import/extensions': allExtensions,
   },
   overrides: [
+    {
+      files: ['*.test.{js,ts}', '.*.test.{js,ts}'],
+      rules: {
+        '@typescript-eslint/explicit-function-return-type': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
+      },
+    },
     {
       files: ['*.js', '.*.js'],
       excludedFiles: ['*/**', '*/.**'],
