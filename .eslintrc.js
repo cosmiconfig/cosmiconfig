@@ -46,6 +46,23 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/array-type': ['error', 'generic'],
 
+    // requires type information rules
+    '@typescript-eslint/await-thenable': 'error',
+    '@typescript-eslint/no-floating-promises': 'error',
+    '@typescript-eslint/no-for-in-array': 'error',
+    '@typescript-eslint/no-unnecessary-qualifier': 'error',
+    '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+    '@typescript-eslint/prefer-includes': 'error',
+    '@typescript-eslint/prefer-namespace-keyword': 'error',
+    // '@typescript-eslint/prefer-readonly': 'error',
+    '@typescript-eslint/prefer-regexp-exec': 'error',
+    '@typescript-eslint/prefer-string-starts-ends-with': 'error',
+    '@typescript-eslint/promise-function-async': ['error', { allowAny: true }],
+    '@typescript-eslint/require-array-sort-compare': 'error',
+    '@typescript-eslint/restrict-plus-operands': 'error',
+    // '@typescript-eslint/strict-boolean-expressions': 'error',
+    '@typescript-eslint/unbound-method': 'error',
+
     /**
      * eslint-plugin-node
      */
