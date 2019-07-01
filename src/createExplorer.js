@@ -124,14 +124,17 @@ class Explorer {
   }
 
   searchDirectory(dir: string): Promise<CosmiconfigResult> {
-    return this.config.searchPlaces.reduce((prevResultPromise: Promise<CosmiconfigResult>, place) => {
-      return prevResultPromise.then(prevResult => {
-        if (this.shouldSearchStopWithResult(prevResult)) {
-          return prevResult;
-        }
-        return this.loadSearchPlace(dir, place);
-      });
-    }, Promise.resolve(null));
+    return this.config.searchPlaces.reduce(
+      (prevResultPromise: Promise<CosmiconfigResult>, place) => {
+        return prevResultPromise.then(prevResult => {
+          if (this.shouldSearchStopWithResult(prevResult)) {
+            return prevResult;
+          }
+          return this.loadSearchPlace(dir, place);
+        });
+      },
+      Promise.resolve(null),
+    );
   }
 
   searchDirectorySync(dir: string): CosmiconfigResult {

@@ -1,4 +1,8 @@
-function cacheWrapper<T>(cache: Map<string, T> | null, key: string, fn: () => T): T {
+function cacheWrapper<T>(
+  cache: Map<string, T> | null,
+  key: string,
+  fn: () => T,
+): T {
   if (!cache) {
     return fn();
   }
