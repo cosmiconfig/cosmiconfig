@@ -35,6 +35,7 @@ test('returns a promise if sync is not true', async () => {
   // if a value was not passed, because it would be falsy and not exactly
   // equal to `true`.
   const res = getDirectory(__dirname);
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   expect(res).toBeInstanceOf(Promise);
 
   return res;
