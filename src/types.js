@@ -1,14 +1,17 @@
+export type Config = any;
+
 export type CosmiconfigResult = {
-  config: any,
+  config: Config,
   filepath: string,
   isEmpty?: boolean,
 } | null;
 
-export type SyncLoader = (filepath: string, content: string) => Object | null;
-export type AsyncLoader = (
+type LoaderResult = Config | null;
+export type SyncLoader = (filepath: string, content: string) => LoaderResult;
+export type AsyncLoader = ((
   filepath: string,
   content: string,
-) => Object | null | Promise<Object | null>;
+) => Promise<LoaderResult>) | SyncLoader;
 
 export type LoaderEntry = {
   sync?: SyncLoader,
@@ -16,14 +19,14 @@ export type LoaderEntry = {
 };
 
 export type Loaders = {
-  [string]: LoaderEntry,
+  [key: string]: LoaderEntry,
 };
 
 // These are the user options with defaults applied.
 export type ExplorerOptions = {
   stopDir: string,
   cache: boolean,
-  transform: CosmiconfigResult => CosmiconfigResult,
+  transform: (cosmiconfigResult: CosmiconfigResult) => CosmiconfigResult,
   packageProp: string,
   loaders: Loaders,
   searchPlaces: Array<string>,
