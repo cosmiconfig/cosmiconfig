@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Config = any;
 
 export type CosmiconfigResult = {
