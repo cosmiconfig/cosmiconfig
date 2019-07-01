@@ -7,9 +7,9 @@ import os from 'os';
 const fs = jest.requireActual('fs');
 
 class TempDir {
-  dir: string;
+  public dir: string;
 
-  constructor() {
+  public constructor() {
     /**
      * Get the actual path for temp directories that are symlinks (MacOS).
      * Without the actual path, tests that use process.chdir will unexpectedly
@@ -39,19 +39,19 @@ class TempDir {
     this.deleteTempDir = this.deleteTempDir.bind(this);
   }
 
-  absolutePath(dir: string) {
+  public absolutePath(dir: string) {
     // Use path.join to ensure dir is always inside the working temp directory
     const absolutePath = path.join(this.dir, dir);
 
     return absolutePath;
   }
 
-  createDir(dir: string) {
+  public createDir(dir: string) {
     const dirname = this.absolutePath(dir);
     makeDir.sync(dirname);
   }
 
-  createFile(file: string, contents: string) {
+  public createFile(file: string, contents: string) {
     const filePath = this.absolutePath(file);
     const fileDir = path.parse(filePath).dir;
     makeDir.sync(fileDir);
@@ -59,7 +59,7 @@ class TempDir {
     fs.writeFileSync(filePath, `${contents}\n`);
   }
 
-  getSpyPathCalls(spy: jest.Mock | jest.SpyInstance) {
+  public getSpyPathCalls(spy: jest.Mock | jest.SpyInstance) {
     const calls = spy.mock.calls;
 
     const result = calls.map((call) => {
@@ -78,7 +78,7 @@ class TempDir {
     return result;
   }
 
-  clean() {
+  public clean() {
     const cleanPattern = this.absolutePath('**/*');
     const removed = del.sync(cleanPattern, {
       dot: true,
@@ -88,7 +88,7 @@ class TempDir {
     return removed;
   }
 
-  deleteTempDir() {
+  public deleteTempDir() {
     const removed = del.sync(this.dir, { force: true, dot: true });
 
     return removed;
