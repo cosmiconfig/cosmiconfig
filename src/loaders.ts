@@ -6,7 +6,7 @@ import { SyncLoader } from './types';
 const loadJs: SyncLoader = function loadJs(filepath) {
   const result = importFresh(filepath);
   return result;
-}
+};
 
 const loadJson: SyncLoader = function loadJson(filepath, content) {
   try {
@@ -15,10 +15,10 @@ const loadJson: SyncLoader = function loadJson(filepath, content) {
     err.message = `JSON Error in ${filepath}:\n${err.message}`;
     throw err;
   }
-}
+};
 
 const loadYaml: SyncLoader = function loadYaml(filepath, content) {
   return yaml.safeLoad(content, { filename: filepath });
-}
+};
 
 export { loadJs, loadJson, loadYaml };

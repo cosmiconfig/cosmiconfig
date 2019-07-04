@@ -4,7 +4,10 @@ interface Options {
   throwNotFound?: boolean;
 }
 
-async function readFile(filepath: string, options?: Options): Promise<string | null> {
+async function readFile(
+  filepath: string,
+  options?: Options,
+): Promise<string | null> {
   options = options || {};
   const throwNotFound = options.throwNotFound || false;
 
