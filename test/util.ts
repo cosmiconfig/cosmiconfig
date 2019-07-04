@@ -62,7 +62,7 @@ class TempDir {
     fs.writeFileSync(filePath, `${contents}\n`);
   }
 
-  public getSpyPathCalls(spy: jest.Mock | jest.SpyInstance): string[] {
+  public getSpyPathCalls(spy: jest.Mock | jest.SpyInstance): Array<string> {
     const calls = spy.mock.calls;
 
     const result = calls.map((call): string => {
@@ -81,7 +81,7 @@ class TempDir {
     return result;
   }
 
-  public clean(): string[] {
+  public clean(): Array<string> {
     const cleanPattern = this.absolutePath('**/*');
     const removed = del.sync(cleanPattern, {
       dot: true,
@@ -91,7 +91,7 @@ class TempDir {
     return removed;
   }
 
-  public deleteTempDir(): string[] {
+  public deleteTempDir(): Array<string> {
     const removed = del.sync(this.dir, { force: true, dot: true });
 
     return removed;
