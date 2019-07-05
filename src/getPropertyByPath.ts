@@ -4,15 +4,16 @@
 // Nested property names that include periods, within a path, are only
 // understood in array paths.
 function getPropertyByPath(
-  source: { [key: string]: any },
+  source: { [key: string]: unknown },
   path: string | Array<string>,
-): any {
+): unknown {
   if (typeof path === 'string' && source.hasOwnProperty(path)) {
     return source[path];
   }
 
   const parsedPath = typeof path === 'string' ? path.split('.') : path;
-  return parsedPath.reduce((previous, key) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return parsedPath.reduce((previous: any, key): unknown => {
     if (previous === undefined) {
       return previous;
     }

@@ -6,7 +6,7 @@ describe('returns the searchPath if it is a directory', () => {
     expect(result).toBe(subject);
   };
 
-  test('async', () => {
+  test('async', async () => {
     return getDirectory(subject).then(checkResult);
   });
 
@@ -21,7 +21,7 @@ describe('returns the parent directory if it is a file', () => {
     expect(result).toBe(__dirname);
   };
 
-  test('async', () => {
+  test('async', async () => {
     return getDirectory(subject).then(checkResult);
   });
 
@@ -30,12 +30,15 @@ describe('returns the parent directory if it is a file', () => {
   });
 });
 
-test('returns a promise if sync is not true', () => {
+test('returns a promise if sync is not true', async () => {
   // Although we explicitly pass `false`, the result will be a promise even
   // if a value was not passed, because it would be falsy and not exactly
   // equal to `true`.
   const res = getDirectory(__dirname);
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   expect(res).toBeInstanceOf(Promise);
+
+  return res;
 });
 
 test('propagates error thrown by is-directory in sync', () => {
@@ -45,7 +48,7 @@ test('propagates error thrown by is-directory in sync', () => {
   );
 });
 
-test('rejects with the error thrown by is-directory in async', () => {
+test('rejects with the error thrown by is-directory in async', async () => {
   expect.hasAssertions();
   // @ts-ignore
   return getDirectory(null).catch((err): any => {

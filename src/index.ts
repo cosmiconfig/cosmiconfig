@@ -25,7 +25,7 @@ function cosmiconfig(
     cache?: boolean;
     transform?: (cosmiconfigResult: CosmiconfigResult) => CosmiconfigResult;
   },
-) {
+): ReturnType<typeof createExplorer> {
   options = options || {};
   const defaults = {
     packageProp: moduleName,
@@ -72,7 +72,7 @@ function normalizeLoaders(rawLoaders?: RawLoaders): Loaders {
     return defaults;
   }
 
-  return Object.keys(rawLoaders).reduce((result: Loaders, ext) => {
+  return Object.keys(rawLoaders).reduce((result: Loaders, ext): Loaders => {
     const entry = rawLoaders && rawLoaders[ext];
     if (typeof entry === 'function') {
       result[ext] = { sync: entry, async: entry };
