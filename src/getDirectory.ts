@@ -1,13 +1,14 @@
 import path from 'path';
 import isDirectory from 'is-directory';
 
-function getDirectory(filepath: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    return isDirectory(filepath, (err, filepathIsDirectory) => {
+async function getDirectory(filepath: string): Promise<string> {
+  return new Promise((resolve, reject): void => {
+    isDirectory(filepath, (err, filepathIsDirectory): void => {
       if (err) {
-        return reject(err);
+        reject(err);
+        return;
       }
-      return resolve(filepathIsDirectory ? filepath : path.dirname(filepath));
+      resolve(filepathIsDirectory ? filepath : path.dirname(filepath));
     });
   });
 }

@@ -27,7 +27,7 @@ describe('loads defined JSON config path', () => {
     expect(result.filepath).toBe(file);
   };
 
-  test('async', () => {
+  test('async', async () => {
     return cosmiconfig('successful-files-tests')
       .load(file)
       .then(checkResult);
@@ -50,7 +50,7 @@ describe('loads defined YAML config path', () => {
     expect(result.filepath).toBe(file);
   };
 
-  test('async', () => {
+  test('async', async () => {
     return cosmiconfig('successful-files-tests')
       .load(file)
       .then(checkResult);
@@ -73,7 +73,7 @@ describe('loads defined JS config path', () => {
     expect(result.filepath).toBe(file);
   };
 
-  test('async', () => {
+  test('async', async () => {
     return cosmiconfig('successful-files-tests')
       .load(file)
       .then(checkResult);
@@ -97,7 +97,7 @@ describe('loads modularized JS config path', () => {
     expect(result.filepath).toBe(file);
   };
 
-  test('async', () => {
+  test('async', async () => {
     return cosmiconfig('successful-files-tests')
       .load(file)
       .then(checkResult);
@@ -120,7 +120,7 @@ describe('loads yaml-like JS config path', () => {
     expect(result.filepath).toBe(file);
   };
 
-  test('async', () => {
+  test('async', async () => {
     return cosmiconfig('successful-files-tests')
       .load(file)
       .then(checkResult);
@@ -157,10 +157,10 @@ describe('loads package prop when configPath is package.json', () => {
     const explorer = cosmiconfig('foo');
     const expectedConfig = { bar: 'baz' };
 
-    test('async', () => {
+    test('async', async () => {
       return explorer
         .load(configPath)
-        .then(result => checkResult(result, expectedConfig));
+        .then((result) => checkResult(result, expectedConfig));
     });
 
     test('sync', () => {
@@ -173,10 +173,10 @@ describe('loads package prop when configPath is package.json', () => {
     const explorer = cosmiconfig('foo', { packageProp: 'otherPackage' });
     const expectedConfig = { please: 'no' };
 
-    test('async', () => {
+    test('async', async () => {
       return explorer
         .load(configPath)
-        .then(result => checkResult(result, expectedConfig));
+        .then((result) => checkResult(result, expectedConfig));
     });
 
     test('sync', () => {
@@ -189,10 +189,10 @@ describe('loads package prop when configPath is package.json', () => {
     const explorer = cosmiconfig('foo', { packageProp: 'foo.bar' });
     const expectedConfig = 'baz';
 
-    test('async', () => {
+    test('async', async () => {
       return explorer
         .load(configPath)
-        .then(result => checkResult(result, expectedConfig));
+        .then((result) => checkResult(result, expectedConfig));
     });
 
     test('sync', () => {
@@ -204,10 +204,10 @@ describe('loads package prop when configPath is package.json', () => {
   describe('inaccurate packageProp returns undefined, does not error', () => {
     const explorer = cosmiconfig('foo', { packageProp: 'otherrrPackage' });
 
-    test('async', () => {
+    test('async', async () => {
       return explorer
         .load(configPath)
-        .then(result => expect(result).toBeNull());
+        .then((result) => expect(result).toBeNull());
     });
 
     test('sync', () => {
@@ -219,10 +219,10 @@ describe('loads package prop when configPath is package.json', () => {
   describe('inaccurate nested packageProp returns undefined, does not error', () => {
     const explorer = cosmiconfig('foo', { packageProp: 'foo.baz' });
 
-    test('async', () => {
+    test('async', async () => {
       return explorer
         .load(configPath)
-        .then(result => expect(result).toBeNull());
+        .then((result) => expect(result).toBeNull());
     });
 
     test('sync', () => {
@@ -246,7 +246,7 @@ describe('runs transform', () => {
     expect(result.config).toEqual({ foo: [true] });
   };
 
-  test('async', () => {
+  test('async', async () => {
     return cosmiconfig('successful-files-tests', { transform })
       .load(configPath)
       .then(checkResult);
@@ -274,7 +274,7 @@ describe('does not swallow transform errors', () => {
     expect(error.message).toBe('These pretzels are making me thirsty!');
   };
 
-  test('async', () => {
+  test('async', async () => {
     expect.hasAssertions();
     return cosmiconfig('successful-files-tests', { transform })
       .load(configPath)
@@ -302,10 +302,10 @@ describe('loads defined JSON file with no extension', () => {
     expect(result.filepath).toBe(file);
   };
 
-  test('async', () => {
+  test('async', async () => {
     return cosmiconfig('successful-files-tests')
       .load(file)
-      .then(result => {
+      .then((result) => {
         checkResult(result);
       });
   });
@@ -327,10 +327,10 @@ describe('loads defined YAML file with no extension', () => {
     expect(result.filepath).toBe(file);
   };
 
-  test('async', () => {
+  test('async', async () => {
     return cosmiconfig('successful-files-tests')
       .load(file)
-      .then(result => {
+      .then((result) => {
         checkResult(result);
       });
   });
@@ -350,7 +350,7 @@ describe('custom loaders can be async', () => {
     loadThingsSync = jest.fn(() => {
       return { things: true };
     });
-    loadThingsAsync = jest.fn(() => {
+    loadThingsAsync = jest.fn(async () => {
       return Promise.resolve({ things: true });
     });
     explorerOptions = {
@@ -366,7 +366,7 @@ describe('custom loaders can be async', () => {
     expect(result.filepath).toBe(file);
   };
 
-  test('async', () => {
+  test('async', async () => {
     return cosmiconfig('foo', explorerOptions)
       .load(file)
       .then(checkResult);
@@ -383,7 +383,7 @@ describe('a custom loader entry can include just an async loader', () => {
     temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
   });
 
-  const loadThingsAsync = () => {
+  const loadThingsAsync = async () => {
     return Promise.resolve({ things: true });
   };
 
@@ -399,7 +399,7 @@ describe('a custom loader entry can include just an async loader', () => {
     expect(result.filepath).toBe(file);
   };
 
-  test('async', () => {
+  test('async', async () => {
     return cosmiconfig('foo', explorerOptions)
       .load(file)
       .then(checkResult);
@@ -427,7 +427,7 @@ describe('a custom loader entry can include only a sync loader and work for both
     expect(result.filepath).toBe(file);
   };
 
-  test('async', () => {
+  test('async', async () => {
     return cosmiconfig('foo', explorerOptions)
       .load(file)
       .then(checkResult);
@@ -487,7 +487,7 @@ describe('loads defined JS config relative path', () => {
     expect(result.filepath).toBe(absoluteFile);
   };
 
-  test('async', () => {
+  test('async', async () => {
     return cosmiconfig('successful-files-tests')
       .load(relativeFile)
       .then(checkResult);

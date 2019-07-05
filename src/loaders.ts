@@ -1,23 +1,24 @@
 import parseJson from 'parse-json';
 import yaml from 'js-yaml';
 import importFresh from 'import-fresh';
+import { SyncLoader } from './types';
 
-function loadJs(filepath: string): Object {
+const loadJs: SyncLoader = function loadJs(filepath) {
   const result = importFresh(filepath);
   return result;
-}
+};
 
-function loadJson(filepath: string, content: string): Object {
+const loadJson: SyncLoader = function loadJson(filepath, content) {
   try {
     return parseJson(content);
   } catch (err) {
     err.message = `JSON Error in ${filepath}:\n${err.message}`;
     throw err;
   }
-}
+};
 
-function loadYaml(filepath: string, content: string): Object {
+const loadYaml: SyncLoader = function loadYaml(filepath, content) {
   return yaml.safeLoad(content, { filename: filepath });
-}
+};
 
 export { loadJs, loadJson, loadYaml };
