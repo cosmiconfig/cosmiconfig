@@ -14,17 +14,19 @@ interface RawLoaders {
   [key: string]: LoaderEntry | SyncLoader | AsyncLoader;
 }
 
+export interface Options {
+  packageProp?: string;
+  loaders?: RawLoaders;
+  searchPlaces?: Array<string>;
+  ignoreEmptySearchPlaces?: boolean;
+  stopDir?: string;
+  cache?: boolean;
+  transform?: (cosmiconfigResult: CosmiconfigResult) => CosmiconfigResult;
+}
+
 function cosmiconfig(
   moduleName: string,
-  options?: {
-    packageProp?: string;
-    loaders?: RawLoaders;
-    searchPlaces?: Array<string>;
-    ignoreEmptySearchPlaces?: boolean;
-    stopDir?: string;
-    cache?: boolean;
-    transform?: (cosmiconfigResult: CosmiconfigResult) => CosmiconfigResult;
-  },
+  options?: Options,
 ): ReturnType<typeof createExplorer> {
   options = options || {};
   const defaults = {

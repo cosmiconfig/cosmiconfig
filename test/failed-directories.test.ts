@@ -1,7 +1,6 @@
 import fs from 'fs';
 import { TempDir } from './util';
-import { cosmiconfig } from '../src';
-import { ExplorerOptions } from '../src/types';
+import { cosmiconfig, Options } from '../src';
 
 const temp = new TempDir();
 
@@ -578,11 +577,11 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
     temp.createFile('a/b/c/d/e/f/.foorc', '{ "foo": "bar" }');
   });
 
-  const explorerOptions: ExplorerOptions = {
+  const explorerOptions: Options = {
     stopDir: temp.absolutePath('.'),
     searchPlaces: ['package.json', '.foorc'],
+    // @ts-ignore
     loaders: {
-      // @ts-ignore
       noExt: undefined,
     },
   };
@@ -764,7 +763,7 @@ describe('errors if it cannot figure out an async loader', () => {
     return Promise.resolve({ things: true });
   };
 
-  const explorerOptions: ExplorerOptions = {
+  const explorerOptions: Options = {
     stopDir: temp.absolutePath('.'),
     searchPlaces: ['.foorc.things'],
     loaders: {
