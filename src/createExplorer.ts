@@ -119,6 +119,7 @@ class Explorer {
       if (nextDir) {
         return this.searchFromDirectorySync(nextDir);
       }
+      // @ts-ignore
       return this.config.transform(result);
     };
 
@@ -333,6 +334,7 @@ class Explorer {
           absoluteFilePath,
           content,
         );
+        // @ts-ignore
         return this.config.transform(result);
       },
     );
