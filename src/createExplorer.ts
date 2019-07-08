@@ -19,7 +19,7 @@ const MODE_SYNC = 'sync';
 // null represents that the loader did not find anything relevant.
 // undefined represents that the loader found something relevant
 // but it was empty.
-type LoadedFileContent = Config | void;
+type LoadedFileContent = Config | null | undefined;
 
 class Explorer {
   private readonly loadCache?: Cache;
