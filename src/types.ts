@@ -28,3 +28,5 @@ export interface Loaders {
 export interface ExplorerOptions extends Required<Options> {
   loaders: Loaders;
 }
+
+export type Cache = Map<string, CosmiconfigResult>;
