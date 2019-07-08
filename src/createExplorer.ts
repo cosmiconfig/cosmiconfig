@@ -77,8 +77,9 @@ class Explorer {
     });
   }
 
-  public async search(searchFrom?: string): Promise<CosmiconfigResult> {
-    searchFrom = searchFrom || process.cwd();
+  public async search(
+    searchFrom: string = process.cwd(),
+  ): Promise<CosmiconfigResult> {
     return getDirectory(searchFrom).then(
       async (dir): Promise<CosmiconfigResult> => {
         return this.searchFromDirectory(dir);
@@ -106,8 +107,7 @@ class Explorer {
     return run();
   }
 
-  public searchSync(searchFrom?: string): CosmiconfigResult {
-    searchFrom = searchFrom || process.cwd();
+  public searchSync(searchFrom: string = process.cwd()): CosmiconfigResult {
     const dir = getDirectory.sync(searchFrom);
     return this.searchFromDirectorySync(dir);
   }
@@ -302,7 +302,7 @@ class Explorer {
     return this.loadedContentToCosmiconfigResult(filepath, loaderResult);
   }
 
-  private validateFilePath(filepath?: string): void {
+  private validateFilePath(filepath: string): void {
     if (!filepath) {
       throw new Error('load and loadSync must pass a non-empty string');
     }

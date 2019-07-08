@@ -6,9 +6,8 @@ interface Options {
 
 async function readFile(
   filepath: string,
-  options?: Options,
+  options: Options = {},
 ): Promise<string | null> {
-  options = options || {};
   const throwNotFound = options.throwNotFound || false;
 
   return new Promise((resolve, reject): void => {
@@ -28,9 +27,8 @@ async function readFile(
 
 readFile.sync = function readFileSync(
   filepath: string,
-  options?: Options,
+  options: Options = {},
 ): string | null {
-  options = options || {};
   const throwNotFound = options.throwNotFound || false;
 
   try {
