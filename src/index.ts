@@ -36,9 +36,8 @@ export interface Options {
 
 function cosmiconfig(
   moduleName: string,
-  options?: Options,
+  options: Options = {},
 ): ReturnType<typeof createExplorer> {
-  options = options || {};
   const defaults = {
     packageProp: moduleName,
     searchPlaces: [
