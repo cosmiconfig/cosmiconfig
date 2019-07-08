@@ -13,8 +13,6 @@ import {
 } from './types';
 import { LoaderAsync, LoaderSync } from './index';
 
-const MODE_SYNC = 'sync';
-
 // An object value represents a config object.
 // null represents that the loader did not find anything relevant.
 // undefined represents that the loader found something relevant
@@ -238,22 +236,34 @@ class Explorer {
     return loader;
   }
 
-  private loadFileContent(
-    mode: 'sync' | 'async',
+  private async loadFileContent(
     filepath: string,
     content: string | null,
-  ): Promise<LoadedFileContent> | LoadedFileContent {
+  ): Promise<LoadedFileContent> {
     if (content === null) {
       return null;
     }
     if (content.trim() === '') {
       return undefined;
     }
-    const loader =
-      mode === MODE_SYNC
-        ? this.getSyncLoaderForFile(filepath)
-        : this.getAsyncLoaderForFile(filepath);
-    return loader(filepath, content);
+    const loader = this.getAsyncLoaderForFile(filepath);
+    const loaderResult = await loader(filepath, content);
+    return loaderResult;
+  }
+
+  private loadFileContentSync(
+    filepath: string,
+    content: string | null,
+  ): LoadedFileContent {
+    if (content === null) {
+      return null;
+    }
+    if (content.trim() === '') {
+      return undefined;
+    }
+    const loader = this.getSyncLoaderForFile(filepath);
+    const loaderResult = loader(filepath, content);
+    return loaderResult;
   }
 
   private loadedContentToCosmiconfigResult(
@@ -275,7 +285,7 @@ class Explorer {
   ): Promise<CosmiconfigResult> {
     return Promise.resolve()
       .then((): Promise<LoadedFileContent> | LoadedFileContent => {
-        return this.loadFileContent('async', filepath, content);
+        return this.loadFileContent(filepath, content);
       })
       .then(
         (loaderResult): CosmiconfigResult => {
@@ -288,7 +298,7 @@ class Explorer {
     filepath: string,
     content: string | null,
   ): CosmiconfigResult {
-    const loaderResult = this.loadFileContent('sync', filepath, content);
+    const loaderResult = this.loadFileContentSync(filepath, content);
     return this.loadedContentToCosmiconfigResult(filepath, loaderResult);
   }
 
