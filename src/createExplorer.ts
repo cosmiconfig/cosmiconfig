@@ -2,7 +2,7 @@ import path from 'path';
 import * as loaders from './loaders';
 import { readFile } from './readFile';
 import { cacheWrapper, cacheWrapperSync } from './cacheWrapper';
-import { getDirectory } from './getDirectory';
+import { getDirectory, getDirectorySync } from './getDirectory';
 import { getPropertyByPath } from './getPropertyByPath';
 import {
   CosmiconfigResult,
@@ -108,7 +108,7 @@ class Explorer {
   }
 
   public searchSync(searchFrom: string = process.cwd()): CosmiconfigResult {
-    const dir = getDirectory.sync(searchFrom);
+    const dir = getDirectorySync(searchFrom);
     return this.searchFromDirectorySync(dir);
   }
 

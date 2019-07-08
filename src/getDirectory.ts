@@ -13,8 +13,8 @@ async function getDirectory(filepath: string): Promise<string> {
   });
 }
 
-getDirectory.sync = function getDirectorySync(filepath: string): string {
+function getDirectorySync(filepath: string): string {
   return isDirectory.sync(filepath) ? filepath : path.dirname(filepath);
-};
+}
 
-export { getDirectory };
+export { getDirectory, getDirectorySync };
