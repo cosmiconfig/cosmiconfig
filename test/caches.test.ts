@@ -1,10 +1,13 @@
 import fs from 'fs';
-import importFreshMock from 'import-fresh';
+import importFreshActual from 'import-fresh';
 import { TempDir } from './util';
 import { cosmiconfig } from '../src';
 
 // mocks are hoisted
 jest.mock('import-fresh');
+
+const importFreshMock = importFreshActual as typeof importFreshActual &
+  jest.Mock;
 
 const temp = new TempDir();
 

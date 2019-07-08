@@ -1,5 +1,3 @@
-declare module 'import-fresh';
-
 // https://github.com/jonschlinkert/is-directory/blob/master/index.d.ts
 declare module 'is-directory' {
   interface IsDirectory {
