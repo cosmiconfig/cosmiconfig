@@ -54,14 +54,11 @@ function cosmiconfig(
     cache: true,
     transform: identity,
   };
-  const normalizedOptions: ExplorerOptions = Object.assign(
-    {},
-    defaults,
-    options,
-    {
-      loaders: normalizeLoaders(options.loaders),
-    },
-  );
+  const normalizedOptions: ExplorerOptions = {
+    ...defaults,
+    ...options,
+    loaders: normalizeLoaders(options.loaders),
+  };
 
   return createExplorer(normalizedOptions);
 }
