@@ -25,7 +25,7 @@ async function readFile(
   });
 }
 
-readFile.sync = function readFileSync(
+function readFileSync(
   filepath: string,
   options: Options = {},
 ): string | null {
@@ -41,4 +41,4 @@ readFile.sync = function readFileSync(
   }
 };
 
-export { readFile };
+export { readFile, readFileSync };

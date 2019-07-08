@@ -1,6 +1,6 @@
 import path from 'path';
 import * as loaders from './loaders';
-import { readFile } from './readFile';
+import { readFile, readFileSync } from './readFile';
 import { cacheWrapper, cacheWrapperSync } from './cacheWrapper';
 import { getDirectory, getDirectorySync } from './getDirectory';
 import { getPropertyByPath } from './getPropertyByPath';
@@ -178,7 +178,7 @@ class Explorer {
 
   private loadSearchPlaceSync(dir: string, place: string): CosmiconfigResult {
     const filepath = path.join(dir, place);
-    const content = readFile.sync(filepath);
+    const content = readFileSync(filepath);
     return this.createCosmiconfigResultSync(filepath, content);
   }
 
@@ -334,7 +334,7 @@ class Explorer {
     const absoluteFilePath = path.resolve(process.cwd(), filepath);
 
     const runLoadSync = (): CosmiconfigResult => {
-      const content = readFile.sync(absoluteFilePath, {
+      const content = readFileSync(absoluteFilePath, {
         throwNotFound: true,
       });
       const result = this.createCosmiconfigResultSync(
