@@ -1,3 +1,5 @@
+import { Options } from './index';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Config = any;
 
@@ -23,12 +25,6 @@ export interface Loaders {
 }
 
 // These are the user options with defaults applied.
-export interface ExplorerOptions {
-  stopDir: string;
-  cache: boolean;
-  transform: (cosmiconfigResult: CosmiconfigResult) => CosmiconfigResult;
-  packageProp: string;
+export interface ExplorerOptions extends Required<Options> {
   loaders: Loaders;
-  searchPlaces: Array<string>;
-  ignoreEmptySearchPlaces: boolean;
 }

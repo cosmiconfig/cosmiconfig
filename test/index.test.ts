@@ -1,9 +1,9 @@
 import os from 'os';
 import { TempDir } from './util';
-import { cosmiconfig } from '../src';
+import { cosmiconfig, Options } from '../src';
 import { createExplorer } from '../src/createExplorer';
 import * as loaders from '../src/loaders';
-import { ExplorerOptions, SyncLoader } from '../src/types';
+import { SyncLoader } from '../src/types';
 
 // @ts-ignore
 const createExplorerMock: typeof createExplorer & jest.Mock = createExplorer;
@@ -77,15 +77,13 @@ describe('cosmiconfig', () => {
     const jsonLoader: SyncLoader = () => {};
     const yamlLoader: SyncLoader = () => {};
 
-    const options: ExplorerOptions = {
+    const options: Options = {
       stopDir: __dirname,
       cache: false,
       searchPlaces: ['.foorc.json', 'wildandfree.js'],
       packageProp: 'wildandfree',
       ignoreEmptySearchPlaces: false,
       loaders: {
-        // TODO: fix ts error
-        // @ts-ignore
         noExt: noExtLoader,
         '.js': { async: jsLoader },
         '.json': { sync: jsonLoader },
