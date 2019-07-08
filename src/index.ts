@@ -14,6 +14,11 @@ interface RawLoaders {
   [key: string]: LoaderEntry | SyncLoader | AsyncLoader;
 }
 
+// cannot return a promise with sync methods
+export type Transform = (
+  CosmiconfigResult: CosmiconfigResult,
+) => CosmiconfigResult | Promise<CosmiconfigResult>;
+
 export interface Options {
   packageProp?: string;
   loaders?: RawLoaders;
@@ -21,7 +26,7 @@ export interface Options {
   ignoreEmptySearchPlaces?: boolean;
   stopDir?: string;
   cache?: boolean;
-  transform?: (cosmiconfigResult: CosmiconfigResult) => CosmiconfigResult;
+  transform?: Transform;
 }
 
 function cosmiconfig(
@@ -85,8 +90,8 @@ function normalizeLoaders(rawLoaders?: RawLoaders): Loaders {
   }, defaults);
 }
 
-function identity<T>(x: T): T {
+const identity: Transform = function identity(x) {
   return x;
-}
+};
 
 export { cosmiconfig };
