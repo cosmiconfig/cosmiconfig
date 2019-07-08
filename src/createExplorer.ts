@@ -8,11 +8,10 @@ import {
   CosmiconfigResult,
   ExplorerOptions,
   LoaderEntry,
-  SyncLoader,
-  AsyncLoader,
   Config,
   Cache,
 } from './types';
+import { LoaderAsync, LoaderSync } from './index';
 
 const MODE_SYNC = 'sync';
 
@@ -218,7 +217,7 @@ class Explorer {
     return this.config.loaders[loaderKey] || {};
   }
 
-  private getSyncLoaderForFile(filepath: string): SyncLoader {
+  private getSyncLoaderForFile(filepath: string): LoaderSync {
     const entry = this.getLoaderEntryForFile(filepath);
     if (!entry.sync) {
       throw new Error(
@@ -228,7 +227,7 @@ class Explorer {
     return entry.sync;
   }
 
-  private getAsyncLoaderForFile(filepath: string): AsyncLoader {
+  private getAsyncLoaderForFile(filepath: string): LoaderAsync {
     const entry = this.getLoaderEntryForFile(filepath);
     const loader = entry.async || entry.sync;
     if (!loader) {

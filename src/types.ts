@@ -1,4 +1,4 @@
-import { Options } from './index';
+import { Options, LoaderAsync, LoaderSync } from './index';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Config = any;
@@ -9,15 +9,9 @@ export type CosmiconfigResult = {
   isEmpty?: boolean;
 } | null;
 
-type LoaderResult = Config | null;
-export type SyncLoader = (filepath: string, content: string) => LoaderResult;
-export type AsyncLoader =
-  | ((filepath: string, content: string) => Promise<LoaderResult>)
-  | SyncLoader;
-
 export interface LoaderEntry {
-  sync?: SyncLoader;
-  async?: AsyncLoader;
+  sync?: LoaderSync;
+  async?: LoaderAsync;
 }
 
 export interface Loaders {
