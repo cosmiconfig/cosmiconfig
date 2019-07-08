@@ -1,7 +1,7 @@
 import path from 'path';
 import * as loaders from './loaders';
 import { readFile } from './readFile';
-import { cacheWrapper } from './cacheWrapper';
+import { cacheWrapper, cacheWrapperSync } from './cacheWrapper';
 import { getDirectory } from './getDirectory';
 import { getPropertyByPath } from './getPropertyByPath';
 import {
@@ -11,6 +11,7 @@ import {
   SyncLoader,
   AsyncLoader,
   Config,
+  Cache,
 } from './types';
 
 const MODE_SYNC = 'sync';
@@ -22,17 +23,20 @@ const MODE_SYNC = 'sync';
 type LoadedFileContent = Config | void;
 
 class Explorer {
-  private readonly loadCache: Map<string, Promise<CosmiconfigResult>> | null;
-  private readonly loadSyncCache: Map<string, CosmiconfigResult> | null;
-  private readonly searchCache: Map<string, Promise<CosmiconfigResult>> | null;
-  private readonly searchSyncCache: Map<string, CosmiconfigResult> | null;
+  private readonly loadCache?: Cache;
+  private readonly loadSyncCache?: Cache;
+  private readonly searchCache?: Cache;
+  private readonly searchSyncCache?: Cache;
   private readonly config: ExplorerOptions;
 
   public constructor(options: ExplorerOptions) {
-    this.loadCache = options.cache ? new Map() : null;
-    this.loadSyncCache = options.cache ? new Map() : null;
-    this.searchCache = options.cache ? new Map() : null;
-    this.searchSyncCache = options.cache ? new Map() : null;
+    if (options.cache === true) {
+      this.loadCache = new Map();
+      this.loadSyncCache = new Map();
+      this.searchCache = new Map();
+      this.searchSyncCache = new Map();
+    }
+
     this.config = options;
     this.validateConfig();
   }
@@ -124,7 +128,7 @@ class Explorer {
     };
 
     if (this.searchSyncCache) {
-      return cacheWrapper(this.searchSyncCache, absoluteDir, run);
+      return cacheWrapperSync(this.searchSyncCache, absoluteDir, run);
     }
     return run();
   }
@@ -296,48 +300,52 @@ class Explorer {
   }
 
   public async load(filepath: string): Promise<CosmiconfigResult> {
-    return Promise.resolve().then(
-      async (): Promise<CosmiconfigResult> => {
-        this.validateFilePath(filepath);
-        const absoluteFilePath = path.resolve(process.cwd(), filepath);
-        return cacheWrapper(
-          this.loadCache,
-          absoluteFilePath,
-          async (): Promise<CosmiconfigResult> => {
-            return readFile(absoluteFilePath, { throwNotFound: true })
-              .then(
-                async (content): Promise<CosmiconfigResult> => {
-                  return this.createCosmiconfigResult(
-                    absoluteFilePath,
-                    content,
-                  );
-                },
-              )
-              .then(this.config.transform);
+    this.validateFilePath(filepath);
+    const absoluteFilePath = path.resolve(process.cwd(), filepath);
+
+    const runLoad = async (): Promise<CosmiconfigResult> => {
+      return readFile(absoluteFilePath, { throwNotFound: true })
+        .then(
+          async (content): Promise<CosmiconfigResult> => {
+            return this.createCosmiconfigResult(absoluteFilePath, content);
           },
-        );
-      },
-    );
+        )
+        .then(this.config.transform);
+    };
+
+    if (this.loadCache) {
+      return cacheWrapper(this.loadCache, absoluteFilePath, runLoad);
+    }
+
+    return runLoad();
   }
 
   public loadSync(filepath: string): CosmiconfigResult {
     this.validateFilePath(filepath);
     const absoluteFilePath = path.resolve(process.cwd(), filepath);
-    return cacheWrapper(
-      this.loadSyncCache,
-      absoluteFilePath,
-      (): CosmiconfigResult => {
-        const content = readFile.sync(absoluteFilePath, {
-          throwNotFound: true,
-        });
-        const result = this.createCosmiconfigResultSync(
-          absoluteFilePath,
-          content,
-        );
-        // @ts-ignore
-        return this.config.transform(result);
-      },
-    );
+
+    const runLoadSync = (): CosmiconfigResult => {
+      const content = readFile.sync(absoluteFilePath, {
+        throwNotFound: true,
+      });
+      const result = this.createCosmiconfigResultSync(
+        absoluteFilePath,
+        content,
+      );
+
+      // @ts-ignore
+      return this.config.transform(result);
+    };
+
+    if (this.loadSyncCache) {
+      return cacheWrapperSync(
+        this.loadSyncCache,
+        absoluteFilePath,
+        runLoadSync,
+      );
+    }
+
+    return runLoadSync();
   }
 }
 
