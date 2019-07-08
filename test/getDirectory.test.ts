@@ -1,4 +1,4 @@
-import { getDirectory } from '../src/getDirectory';
+import { getDirectory, getDirectorySync } from '../src/getDirectory';
 
 describe('returns the searchPath if it is a directory', () => {
   const subject = __dirname;
@@ -11,7 +11,7 @@ describe('returns the searchPath if it is a directory', () => {
   });
 
   test('sync', () => {
-    checkResult(getDirectory.sync(subject));
+    checkResult(getDirectorySync(subject));
   });
 });
 
@@ -26,7 +26,7 @@ describe('returns the parent directory if it is a file', () => {
   });
 
   test('sync', () => {
-    checkResult(getDirectory.sync(subject));
+    checkResult(getDirectorySync(subject));
   });
 });
 
@@ -43,7 +43,7 @@ test('returns a promise if sync is not true', async () => {
 
 test('propagates error thrown by is-directory in sync', () => {
   // @ts-ignore
-  expect(() => getDirectory.sync(null)).toThrow(
+  expect(() => getDirectorySync(null)).toThrow(
     'expected filepath to be a string',
   );
 });
