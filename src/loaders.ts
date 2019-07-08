@@ -1,14 +1,14 @@
 import parseJson from 'parse-json';
 import yaml from 'js-yaml';
 import importFresh from 'import-fresh';
-import { SyncLoader } from './types';
+import { LoaderSync } from './index';
 
-const loadJs: SyncLoader = function loadJs(filepath) {
+const loadJs: LoaderSync = function loadJs(filepath) {
   const result = importFresh(filepath);
   return result;
 };
 
-const loadJson: SyncLoader = function loadJson(filepath, content) {
+const loadJson: LoaderSync = function loadJson(filepath, content) {
   try {
     return parseJson(content);
   } catch (err) {
@@ -17,7 +17,7 @@ const loadJson: SyncLoader = function loadJson(filepath, content) {
   }
 };
 
-const loadYaml: SyncLoader = function loadYaml(filepath, content) {
+const loadYaml: LoaderSync = function loadYaml(filepath, content) {
   return yaml.safeLoad(content, { filename: filepath });
 };
 

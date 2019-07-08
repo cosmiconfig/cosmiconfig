@@ -2,16 +2,21 @@ import os from 'os';
 import { createExplorer } from './createExplorer';
 import * as loaders from './loaders';
 import {
-  AsyncLoader,
+  Config,
   CosmiconfigResult,
   ExplorerOptions,
   LoaderEntry,
   Loaders,
-  SyncLoader,
 } from './types';
 
+type LoaderResult = Config | null;
+export type LoaderSync = (filepath: string, content: string) => LoaderResult;
+export type LoaderAsync =
+  | ((filepath: string, content: string) => Promise<LoaderResult>)
+  | LoaderSync;
+
 interface RawLoaders {
-  [key: string]: LoaderEntry | SyncLoader | AsyncLoader;
+  [key: string]: LoaderEntry | LoaderSync | LoaderAsync;
 }
 
 // cannot return a promise with sync methods
@@ -82,7 +87,11 @@ function normalizeLoaders(rawLoaders?: RawLoaders): Loaders {
   return Object.keys(rawLoaders).reduce((result: Loaders, ext): Loaders => {
     const entry = rawLoaders && rawLoaders[ext];
     if (typeof entry === 'function') {
-      result[ext] = { sync: entry, async: entry };
+      // the sync loader can incorrectly be async here
+      const sync: LoaderSync = entry;
+      const async: LoaderAsync = entry;
+
+      result[ext] = { sync, async };
     } else {
       result[ext] = entry;
     }
