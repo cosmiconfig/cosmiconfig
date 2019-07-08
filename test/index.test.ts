@@ -1,9 +1,8 @@
 import os from 'os';
 import { TempDir } from './util';
-import { cosmiconfig, Options } from '../src';
+import { cosmiconfig, Options, LoaderSync } from '../src';
 import { createExplorer } from '../src/createExplorer';
 import * as loaders from '../src/loaders';
-import { SyncLoader } from '../src/types';
 
 // @ts-ignore
 const createExplorerMock: typeof createExplorer & jest.Mock = createExplorer;
@@ -72,10 +71,10 @@ describe('cosmiconfig', () => {
   test('creates explorer with preference for given options over defaults', () => {
     temp.createFile('foo.json', '{ "foo": true }');
 
-    const noExtLoader: SyncLoader = () => {};
-    const jsLoader: SyncLoader = () => {};
-    const jsonLoader: SyncLoader = () => {};
-    const yamlLoader: SyncLoader = () => {};
+    const noExtLoader: LoaderSync = () => {};
+    const jsLoader: LoaderSync = () => {};
+    const jsonLoader: LoaderSync = () => {};
+    const yamlLoader: LoaderSync = () => {};
 
     const options: Options = {
       stopDir: __dirname,
