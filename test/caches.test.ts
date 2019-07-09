@@ -52,11 +52,9 @@ describe('cache is not used initially', () => {
 
   test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-
     const cachedSearch = cosmiconfig('foo').search;
-    return cachedSearch(searchPath).then((result) => {
-      checkResult(readFileSpy, result);
-    });
+    const result = await cachedSearch(searchPath);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -80,18 +78,14 @@ describe('cache is used for already-visited directories', () => {
 
   test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-
     const cachedSearch = cosmiconfig('foo').search;
     // First pass, prime the cache ...
-    return cachedSearch(searchPath)
-      .then(async () => {
-        // Reset readFile mocks and search again.
-        readFileSpy.mockClear();
-        return cachedSearch(searchPath);
-      })
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    await cachedSearch(searchPath);
+    // Reset readFile mocks and search again.
+    readFileSpy.mockClear();
+
+    const result = await cachedSearch(searchPath);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -101,6 +95,7 @@ describe('cache is used for already-visited directories', () => {
     cachedSearchSync(searchPath);
     // Reset readFile mocks and search again.
     readFileSpy.mockClear();
+
     const result = cachedSearchSync(searchPath);
     checkResult(readFileSpy, result);
   });
@@ -119,18 +114,14 @@ describe('cache is used for already-loaded file', () => {
 
   test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-
     const cachedLoad = cosmiconfig('foo').load;
     // First pass, prime the cache ...
-    return cachedLoad(loadPath)
-      .then(async () => {
-        // Reset readFile mocks and search again.
-        readFileSpy.mockClear();
-        return cachedLoad(loadPath);
-      })
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    await cachedLoad(loadPath);
+    // Reset readFile mocks and search again.
+    readFileSpy.mockClear();
+
+    const result = await cachedLoad(loadPath);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -140,6 +131,7 @@ describe('cache is used for already-loaded file', () => {
     cachedLoadSync(loadPath);
     // Reset readFile mocks and search again.
     readFileSpy.mockClear();
+
     const result = cachedLoadSync(loadPath);
     checkResult(readFileSpy, result);
   });
@@ -168,18 +160,14 @@ describe('cache is used when some directories in search are already visted', () 
 
   test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-
     const cachedSearch = cosmiconfig('foo').search;
     // First pass, prime the cache ...
-    return cachedSearch(firstSearchPath)
-      .then(async () => {
-        // Reset readFile mocks and search again.
-        readFileSpy.mockClear();
-        return cachedSearch(secondSearchPath);
-      })
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    await cachedSearch(firstSearchPath);
+    // Reset readFile mocks and search again.
+    readFileSpy.mockClear();
+
+    const result = await cachedSearch(secondSearchPath);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -189,6 +177,7 @@ describe('cache is used when some directories in search are already visted', () 
     cachedSearchSync(firstSearchPath);
     // Reset readFile mocks and search again.
     readFileSpy.mockClear();
+
     const result = cachedSearchSync(secondSearchPath);
     checkResult(readFileSpy, result);
   });
@@ -210,16 +199,12 @@ describe('cache is not used when directly loading an unvisited file', () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
     const explorer = cosmiconfig('foo');
     // First pass, prime the cache ...
-    return explorer
-      .search(firstSearchPath)
-      .then(async () => {
-        // Reset readFile mocks and search again.
-        readFileSpy.mockClear();
-        return explorer.load(loadPath);
-      })
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    await explorer.search(firstSearchPath);
+    // Reset readFile mocks and search again.
+    readFileSpy.mockClear();
+
+    const result = await explorer.load(loadPath);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -229,6 +214,7 @@ describe('cache is not used when directly loading an unvisited file', () => {
     explorer.searchSync(firstSearchPath);
     // Reset readFile mocks and search again.
     readFileSpy.mockClear();
+
     const result = explorer.loadSync(loadPath);
     checkResult(readFileSpy, result);
   });
@@ -258,23 +244,22 @@ describe('cache is not used in a new cosmiconfig instance', () => {
 
   test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    return cosmiconfig('foo')
-      .search(searchPath)
-      .then(async () => {
-        // Reset readFile mocks and search again.
-        readFileSpy.mockClear();
-        return cosmiconfig('foo').search(searchPath);
-      })
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    // First pass, prime the cache ...
+    await cosmiconfig('foo').search(searchPath);
+    // Reset readFile mocks and search again.
+    readFileSpy.mockClear();
+
+    const result = await cosmiconfig('foo').search(searchPath);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
     const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    // First pass, prime the cache ...
     cosmiconfig('foo').searchSync(searchPath);
     // Reset readFile mocks and search again.
     readFileSpy.mockClear();
+
     const result = cosmiconfig('foo').searchSync(searchPath);
     checkResult(readFileSpy, result);
   });
@@ -295,17 +280,12 @@ describe('clears file cache on calling clearLoadCache', () => {
   test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
     const explorer = cosmiconfig('foo');
-    return explorer
-      .load(loadPath)
-      .then(async () => {
-        // Reset readFile mocks and search again.
-        readFileSpy.mockClear();
-        explorer.clearLoadCache();
-        return explorer.load(loadPath);
-      })
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    await explorer.load(loadPath);
+    readFileSpy.mockClear();
+    explorer.clearLoadCache();
+
+    const result = await explorer.load(loadPath);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -315,6 +295,7 @@ describe('clears file cache on calling clearLoadCache', () => {
     // Reset readFile mocks and search again.
     readFileSpy.mockClear();
     explorer.clearLoadCache();
+
     const result = explorer.loadSync(loadPath);
     checkResult(readFileSpy, result);
   });
@@ -335,17 +316,12 @@ describe('clears file cache on calling clearCaches', () => {
   test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
     const explorer = cosmiconfig('foo');
-    return explorer
-      .load(loadPath)
-      .then(async () => {
-        // Reset readFile mocks and search again.
-        readFileSpy.mockClear();
-        explorer.clearCaches();
-        return explorer.load(loadPath);
-      })
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    await explorer.load(loadPath);
+    readFileSpy.mockClear();
+    explorer.clearCaches();
+
+    const result = await explorer.load(loadPath);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -385,17 +361,12 @@ describe('clears directory cache on calling clearSearchCache', () => {
   test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
     const explorer = cosmiconfig('foo');
-    return explorer
-      .search(searchPath)
-      .then(async () => {
-        // Reset readFile mocks and search again.
-        readFileSpy.mockClear();
-        explorer.clearSearchCache();
-        return explorer.search(searchPath);
-      })
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    await explorer.search(searchPath);
+    readFileSpy.mockClear();
+    explorer.clearSearchCache();
+
+    const result = await explorer.search(searchPath);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -405,6 +376,7 @@ describe('clears directory cache on calling clearSearchCache', () => {
     // Reset readFile mocks and search again.
     readFileSpy.mockClear();
     explorer.clearSearchCache();
+
     const result = explorer.searchSync(searchPath);
     checkResult(readFileSpy, result);
   });
@@ -435,17 +407,12 @@ describe('clears directory cache on calling clearCaches', () => {
   test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
     const explorer = cosmiconfig('foo');
-    return explorer
-      .search(searchPath)
-      .then(async () => {
-        // Reset readFile mocks and search again.
-        readFileSpy.mockClear();
-        explorer.clearCaches();
-        return explorer.search(searchPath);
-      })
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    await explorer.search(searchPath);
+    readFileSpy.mockClear();
+    explorer.clearCaches();
+
+    const result = await explorer.search(searchPath);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
@@ -455,6 +422,7 @@ describe('clears directory cache on calling clearCaches', () => {
     // Reset readFile mocks and search again.
     readFileSpy.mockClear();
     explorer.clearCaches();
+
     const result = explorer.searchSync(searchPath);
     checkResult(readFileSpy, result);
   });
@@ -501,24 +469,19 @@ describe('with cache disabled, does not cache directory results', () => {
   test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
     const explorer = cosmiconfig('foo', { cache: false });
-    return explorer
-      .search(searchPath)
-      .then(async () => {
-        // Reset readFile mocks and search again.
-        readFileSpy.mockClear();
-        return explorer.search(searchPath);
-      })
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    await explorer.search(searchPath);
+    readFileSpy.mockClear();
+
+    const result = await explorer.search(searchPath);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
     const readFileSpy = jest.spyOn(fs, 'readFileSync');
     const explorer = cosmiconfig('foo', { cache: false });
     explorer.searchSync(searchPath);
-    // Reset readFile mocks and search again.
     readFileSpy.mockClear();
+
     const result = explorer.searchSync(searchPath);
     checkResult(readFileSpy, result);
   });
@@ -539,24 +502,19 @@ describe('with cache disabled, does not cache file results', () => {
   test('async', async () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
     const explorer = cosmiconfig('foo', { cache: false });
-    return explorer
-      .load(loadPath)
-      .then(async () => {
-        // Reset readFile mocks and search again.
-        readFileSpy.mockClear();
-        return explorer.load(loadPath);
-      })
-      .then((result) => {
-        checkResult(readFileSpy, result);
-      });
+    await explorer.load(loadPath);
+    readFileSpy.mockClear();
+
+    const result = await explorer.load(loadPath);
+    checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
     const readFileSpy = jest.spyOn(fs, 'readFileSync');
     const explorer = cosmiconfig('foo', { cache: false });
     explorer.loadSync(loadPath);
-    // Reset readFile mocks and search again.
     readFileSpy.mockClear();
+
     const result = explorer.loadSync(loadPath);
     checkResult(readFileSpy, result);
   });
@@ -581,9 +539,8 @@ describe('ensure import-fresh is called when loading a js file', () => {
     const explorer = cosmiconfig('foo');
     temp.createFile(tempFileName, 'module.exports = { foundJs: true };');
 
-    return explorer.load(loadPath).then((result) => {
-      checkResult(result);
-    });
+    const result = await explorer.load(loadPath);
+    checkResult(result);
   });
 
   test('sync', () => {
