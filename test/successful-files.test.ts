@@ -257,32 +257,21 @@ describe('does not swallow transform errors', () => {
   });
 
   const configPath = temp.absolutePath('foo.json');
+  const expectedError = new Error('These pretzels are making me thirsty!');
   const transform = () => {
-    throw new Error('These pretzels are making me thirsty!');
-  };
-
-  const checkError = (error: any) => {
-    expect(error.message).toBe('These pretzels are making me thirsty!');
+    throw expectedError;
   };
 
   test('async', async () => {
-    expect.hasAssertions();
-    try {
-      await cosmiconfig('successful-files-tests', { transform }).load(
-        configPath,
-      );
-    } catch (error) {
-      checkError(error);
-    }
+    await expect(
+      cosmiconfig('successful-files-tests', { transform }).load(configPath),
+    ).rejects.toThrow(expectedError);
   });
 
   test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig('successful-files-tests', { transform }).loadSync(configPath);
-    } catch (error) {
-      checkError(error);
-    }
+    expect(() =>
+      cosmiconfig('successful-files-tests', { transform }).loadSync(configPath),
+    ).toThrow(expectedError);
   });
 });
 
