@@ -28,6 +28,7 @@ module.exports = {
     'prefer-arrow-callback': 'off',
     'func-names': ['error', 'always'],
     'prefer-template': 'error',
+    'no-prototype-builtins': 'error',
     'object-shorthand': [
       'error',
       'always',
