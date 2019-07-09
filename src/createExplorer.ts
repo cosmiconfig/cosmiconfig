@@ -87,6 +87,12 @@ class Explorer {
     );
   }
 
+
+  public searchSync(searchFrom: string = process.cwd()): CosmiconfigResult {
+    const dir = getDirectorySync(searchFrom);
+    return this.searchFromDirectorySync(dir);
+  }
+
   private async searchFromDirectory(dir: string): Promise<CosmiconfigResult> {
     const absoluteDir = path.resolve(process.cwd(), dir);
     const run = async (): Promise<CosmiconfigResult> => {
@@ -105,11 +111,6 @@ class Explorer {
       return cacheWrapper(this.searchCache, absoluteDir, run);
     }
     return run();
-  }
-
-  public searchSync(searchFrom: string = process.cwd()): CosmiconfigResult {
-    const dir = getDirectorySync(searchFrom);
-    return this.searchFromDirectorySync(dir);
   }
 
   private searchFromDirectorySync(dir: string): CosmiconfigResult {
@@ -215,16 +216,6 @@ class Explorer {
     return this.config.loaders[loaderKey] || {};
   }
 
-  private getSyncLoaderForFile(filepath: string): LoaderSync {
-    const entry = this.getLoaderEntryForFile(filepath);
-    if (!entry.sync) {
-      throw new Error(
-        `No sync loader specified for ${getExtensionDescription(filepath)}`,
-      );
-    }
-    return entry.sync;
-  }
-
   private getAsyncLoaderForFile(filepath: string): LoaderAsync {
     const entry = this.getLoaderEntryForFile(filepath);
     const loader = entry.async || entry.sync;
@@ -234,6 +225,16 @@ class Explorer {
       );
     }
     return loader;
+  }
+
+  private getSyncLoaderForFile(filepath: string): LoaderSync {
+    const entry = this.getLoaderEntryForFile(filepath);
+    if (!entry.sync) {
+      throw new Error(
+        `No sync loader specified for ${getExtensionDescription(filepath)}`,
+      );
+    }
+    return entry.sync;
   }
 
   private async loadFileContent(
