@@ -7,7 +7,10 @@ function getPropertyByPath(
   source: { [key: string]: unknown },
   path: string | Array<string>,
 ): unknown {
-  if (typeof path === 'string' && source.hasOwnProperty(path)) {
+  if (
+    typeof path === 'string' &&
+    Object.prototype.hasOwnProperty.call(source, path)
+  ) {
     return source[path];
   }
 
