@@ -120,26 +120,19 @@ describe('throws error for invalid YAML in rc file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const checkError = (error: any) => {
-    expect(error.name).toBe('YAMLException');
-  };
+  const expectedError =
+    'incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line';
 
   test('async', async () => {
-    expect.hasAssertions();
-    try {
-      await cosmiconfig('foo', explorerOptions).search(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    await expect(
+      cosmiconfig('foo', explorerOptions).search(startDir),
+    ).rejects.toThrow(expectedError);
   });
 
   test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig('foo', explorerOptions).searchSync(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    expect(() =>
+      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+    ).toThrow(expectedError);
   });
 });
 
@@ -156,26 +149,18 @@ describe('throws error for invalid JSON in extensionless rc file loaded as JSON'
     },
   };
 
-  const checkError = (error: any) => {
-    expect(error.name).toMatch(/JSONError/);
-  };
+  const expectedError = 'JSON Error in';
 
   test('async', async () => {
-    expect.hasAssertions();
-    try {
-      await cosmiconfig('foo', explorerOptions).search(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    await expect(
+      cosmiconfig('foo', explorerOptions).search(startDir),
+    ).rejects.toThrow(expectedError);
   });
 
   test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig('foo', explorerOptions).searchSync(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    expect(() =>
+      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+    ).toThrow(expectedError);
   });
 });
 
@@ -187,26 +172,18 @@ describe('throws error for invalid package.json', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const checkError = (error: any) => {
-    expect(error.name).toMatch(/JSONError/);
-  };
+  const expectedError = 'JSON Error in';
 
   test('async', async () => {
-    expect.hasAssertions();
-    try {
-      await cosmiconfig('foo', explorerOptions).search(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    await expect(
+      cosmiconfig('foo', explorerOptions).search(startDir),
+    ).rejects.toThrow(expectedError);
   });
 
   test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig('foo', explorerOptions).searchSync(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    expect(() =>
+      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+    ).toThrow(expectedError);
   });
 });
 
@@ -221,26 +198,18 @@ describe('throws error for invalid JS in .config.js file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const checkError = (error: any) => {
-    expect(error.name).toBe('SyntaxError');
-  };
+  const expectedError = 'Unexpected token, expected ","';
 
   test('async', async () => {
-    expect.hasAssertions();
-    try {
-      await cosmiconfig('foo', explorerOptions).search(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    await expect(
+      cosmiconfig('foo', explorerOptions).search(startDir),
+    ).rejects.toThrow(expectedError);
   });
 
   test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig('foo', explorerOptions).searchSync(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    expect(() =>
+      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+    ).toThrow(expectedError);
   });
 });
 
@@ -254,26 +223,18 @@ describe('throws error for invalid JSON in .foorc.json', () => {
     stopDir: temp.absolutePath('.'),
   };
 
-  const checkError = (error: any) => {
-    expect(error.message).toMatch(/JSON Error/);
-  };
+  const expectedError = 'JSON Error in';
 
   test('async', async () => {
-    expect.hasAssertions();
-    try {
-      await cosmiconfig('foo', explorerOptions).search(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    await expect(
+      cosmiconfig('foo', explorerOptions).search(startDir),
+    ).rejects.toThrow(expectedError);
   });
 
   test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig('foo', explorerOptions).searchSync(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    expect(() =>
+      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+    ).toThrow(expectedError);
   });
 });
 
@@ -287,26 +248,19 @@ describe('throws error for invalid YAML in .foorc.yml', () => {
     stopDir: temp.absolutePath('.'),
   };
 
-  const checkError = (error: any) => {
-    expect(error.name).toBe('YAMLException');
-  };
+  const expectedError =
+    'incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line';
 
   test('async', async () => {
-    expect.hasAssertions();
-    try {
-      await cosmiconfig('foo', explorerOptions).search(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    await expect(
+      cosmiconfig('foo', explorerOptions).search(startDir),
+    ).rejects.toThrow(expectedError);
   });
 
   test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig('foo', explorerOptions).searchSync(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    expect(() =>
+      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+    ).toThrow(expectedError);
   });
 });
 
@@ -329,26 +283,18 @@ describe('searching for rc files with specified extensions, throws error for inv
     ],
   };
 
-  const checkError = (error: any) => {
-    expect(error.name).toBe('SyntaxError');
-  };
+  const expectedError = 'Unexpected token, expected ";"';
 
   test('async', async () => {
-    expect.hasAssertions();
-    try {
-      await cosmiconfig('foo', explorerOptions).search(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    await expect(
+      cosmiconfig('foo', explorerOptions).search(startDir),
+    ).rejects.toThrow(expectedError);
   });
 
   test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig('foo', explorerOptions).searchSync(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    expect(() =>
+      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+    ).toThrow(expectedError);
   });
 });
 
@@ -562,19 +508,10 @@ describe('throws error if a file in searchPlaces does not have a corresponding l
     ],
   };
 
-  const checkError = (error: any) => {
-    expect(error.message).toMatch(
-      /No loader specified for extension "\.things"/,
-    );
-  };
-
   test('on instantiation', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig('foo', explorerOptions);
-    } catch (error) {
-      checkError(error);
-    }
+    expect(() => cosmiconfig('foo', explorerOptions)).toThrow(
+      'No loader specified for extension ".things"',
+    );
   });
 });
 
@@ -592,30 +529,22 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
     },
   };
 
-  const checkError = (error: any) => {
-    expect(error.message).toMatch(
-      /No loader specified for files without extensions/,
-    );
-  };
-
   test('on instantiation', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig('foo', explorerOptions);
-    } catch (error) {
-      checkError(error);
-    }
+    expect(() => cosmiconfig('foo', explorerOptions)).toThrow(
+      'No loader specified for files without extensions',
+    );
   });
 });
 
 describe('does not swallow errors from custom loaders', () => {
-  const loadJs = () => {
-    throw new Error('Failed to load JS');
-  };
-
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.js', 'module.exports = {};');
   });
+
+  const expectedError = new Error('Failed to load JS');
+  const loadJs = () => {
+    throw expectedError;
+  };
 
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
@@ -626,26 +555,16 @@ describe('does not swallow errors from custom loaders', () => {
     },
   };
 
-  const checkError = (error: any) => {
-    expect(error.message).toBe('Failed to load JS');
-  };
-
   test('async', async () => {
-    expect.hasAssertions();
-    try {
-      await cosmiconfig('foo', explorerOptions).search(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    await expect(
+      cosmiconfig('foo', explorerOptions).search(startDir),
+    ).rejects.toThrow(expectedError);
   });
 
   test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig('foo', explorerOptions).searchSync(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    expect(() =>
+      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+    ).toThrow(expectedError);
   });
 });
 
@@ -659,7 +578,7 @@ describe('errors not swallowed when async custom loader throws them', () => {
     );
   });
 
-  const expectedError = new Error();
+  const expectedError = new Error('loadThingsAsync error');
   const loadThingsAsync = () => {
     throw expectedError;
   };
@@ -672,17 +591,10 @@ describe('errors not swallowed when async custom loader throws them', () => {
     },
   };
 
-  const checkError = (error: any) => {
-    expect(error).toBe(expectedError);
-  };
-
   test('async', async () => {
-    expect.hasAssertions();
-    try {
-      await cosmiconfig('foo', explorerOptions).search(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    await expect(
+      cosmiconfig('foo', explorerOptions).search(startDir),
+    ).rejects.toThrow(expectedError);
   });
 });
 
@@ -696,7 +608,7 @@ describe('errors not swallowed when async custom loader rejects', () => {
     );
   });
 
-  const expectedError = new Error();
+  const expectedError = new Error('loadThingsAsync error');
   const loadThingsAsync = async () => {
     throw expectedError;
   };
@@ -709,17 +621,10 @@ describe('errors not swallowed when async custom loader rejects', () => {
     },
   };
 
-  const checkError = (error: any) => {
-    expect(error).toBe(expectedError);
-  };
-
   test('async', async () => {
-    expect.hasAssertions();
-    try {
-      await cosmiconfig('foo', explorerOptions).search(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    await expect(
+      cosmiconfig('foo', explorerOptions).search(startDir),
+    ).rejects.toThrow(expectedError);
   });
 });
 
@@ -743,19 +648,10 @@ describe('errors if only async loader is set but you call sync search', () => {
     },
   };
 
-  const checkError = (error: any) => {
-    expect(error.message).toMatch(
-      /No sync loader specified for extension "\.things"/,
-    );
-  };
-
   test('sync', () => {
-    expect.hasAssertions();
-    try {
-      cosmiconfig('foo', explorerOptions).searchSync(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    expect(() =>
+      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+    ).toThrow('No sync loader specified for extension ".things"');
   });
 });
 
@@ -780,18 +676,9 @@ describe('errors if it cannot figure out an async loader', () => {
     },
   };
 
-  const checkError = (error: any) => {
-    expect(error.message).toMatch(
-      /No async loader specified for extension "\.things"/,
-    );
-  };
-
   test('async', async () => {
-    expect.hasAssertions();
-    try {
-      await cosmiconfig('foo', explorerOptions).search(startDir);
-    } catch (error) {
-      checkError(error);
-    }
+    await expect(
+      cosmiconfig('foo', explorerOptions).search(startDir),
+    ).rejects.toThrow('No async loader specified for extension ".things"');
   });
 });

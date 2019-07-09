@@ -70,11 +70,8 @@ test('propagates error thrown by is-directory in sync', () => {
 });
 
 test('rejects with the error thrown by is-directory in async', async () => {
-  expect.hasAssertions();
-  try {
-    // @ts-ignore
-    await getDirectory(null);
-  } catch (err) {
-    expect(err.message).toBe('Expected a string, got object');
-  }
+  // @ts-ignore
+  await expect(getDirectory(null)).rejects.toThrow(
+    'Expected a string, got object',
+  );
 });
