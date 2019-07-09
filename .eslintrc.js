@@ -105,6 +105,7 @@ module.exports = {
     'jest/no-empty-title': 'error',
     'jest/no-test-callback': 'error',
     'jest/prefer-todo': 'error',
+    'jest/require-tothrow-message': 'error',
   },
   settings: {
     node: {
