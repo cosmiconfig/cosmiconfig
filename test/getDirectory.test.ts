@@ -1,3 +1,4 @@
+import path from 'path';
 import { getDirectory, getDirectorySync } from '../src/getDirectory';
 
 describe('returns the searchPath if it is a directory', () => {
@@ -30,6 +31,24 @@ describe('returns the parent directory if it is a file', () => {
   });
 });
 
+// https://github.com/davidtheclark/cosmiconfig/issues/63
+describe('handles process.cwd()/stdin', () => {
+  const subject = path.join(process.cwd(), 'stdin');
+  const checkResult = (result: string) => {
+    expect(result).toBe(process.cwd());
+  };
+
+  test('async', async () => {
+    const result = await getDirectory(subject);
+    checkResult(result);
+  });
+
+  test('sync', () => {
+    const result = getDirectorySync(subject);
+    checkResult(result);
+  });
+});
+
 test('returns a promise if sync is not true', async () => {
   // Although we explicitly pass `false`, the result will be a promise even
   // if a value was not passed, because it would be falsy and not exactly
@@ -43,15 +62,13 @@ test('returns a promise if sync is not true', async () => {
 
 test('propagates error thrown by is-directory in sync', () => {
   // @ts-ignore
-  expect(() => getDirectorySync(null)).toThrow(
-    'expected filepath to be a string',
-  );
+  expect(() => getDirectorySync(null)).toThrow('Expected a string, got object');
 });
 
 test('rejects with the error thrown by is-directory in async', async () => {
   expect.hasAssertions();
   // @ts-ignore
   return getDirectory(null).catch((err): any => {
-    expect(err.message).toBe('expected filepath to be a string');
+    expect(err.message).toBe('Expected a string, got object');
   });
 });
