@@ -17,10 +17,11 @@
     "lint:fix": "eslint --ext .js,.ts . --fix",
     "lint:md": "remark-preset-davidtheclark --format",
     "format": "prettier \"**/*.{js,ts,json,yml,yaml}\" --write",
+    "format:check": "prettier \"**/*.{js,ts,json,yml,yaml}\" --check",
     "typescript": "tsc",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
-    "check:all": "npm run test && npm run typescript && npm run lint",
+    "check:all": "npm run test && npm run typescript && npm run lint && npm run format:check",
     "prepublishOnly": "npm run check:all && npm run build"
   },
   "husky": {
