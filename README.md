@@ -303,17 +303,19 @@ Default: See below.
 
 An object that maps extensions to the loader functions responsible for loading and parsing files with those extensions.
 
-Cosmiconfig exposes its default loaders for `.js`, `.json`, and `.yaml` as `cosmiconfig.loadJs`, `cosmiconfig.loadJson`, and `cosmiconfig.loadYaml`, respectively.
+Cosmiconfig exposes its default loaders as a named export `defaultLoaders` for `.js`, `.json`, and `.yaml` as `defaultLoaders.loadJs`, `defaultLoaders.loadJson`, and `defaultLoaders.loadYaml`, respectively.
 
 **Default `loaders`:**
 
 ```js
+const { defaultLoaders } = require('cosmiconfig');
+
 {
-  '.json': cosmiconfig.loadJson,
-  '.yaml': cosmiconfig.loadYaml,
-  '.yml': cosmiconfig.loadYaml,
-  '.js': cosmiconfig.loadJs,
-  noExt: cosmiconfig.loadYaml
+  '.json': defaultLoaders.loadJson,
+  '.yaml': defaultLoaders.loadYaml,
+  '.yml': defaultLoaders.loadYaml,
+  '.js': defaultLoaders.loadJs,
+  noExt: defaultLoaders.loadYaml
 }
 ```
 
@@ -331,7 +333,7 @@ To accomplish that, provide the following `loaders` value:
 
 ```js
 {
-  noExt: cosmiconfig.loadJson
+  noExt: defaultLoaders.loadJson
 }
 ```
 
@@ -369,7 +371,7 @@ You can also add a `sync` property to designate a sync loader, if you want to us
 A few things to note:
 
 - If you use a custom loader, be aware of whether it's sync or async and how that aligned with your usage of sync or async search and load functions.
-- **Special JS syntax can also be handled by using a `require` hook**, because `cosmiconfig.loadJs` just uses `require`.
+- **Special JS syntax can also be handled by using a `require` hook**, because `defaultLoaders.loadJs` just uses `require`.
   Whether you use custom loaders or a `require` hook is up to you.
 
 Examples:
@@ -399,9 +401,9 @@ Examples:
 
 // Allow many flavors of JS but rely on require hooks:
 {
-  '.mjs': cosmiconfig.loadJs,
-  '.ts': cosmiconfig.loadJs,
-  '.coffee': cosmiconfig.loadJs
+  '.mjs': defaultLoaders.loadJs,
+  '.ts': defaultLoaders.loadJs,
+  '.coffee': defaultLoaders.loadJs
 }
 ```
 

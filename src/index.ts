@@ -1,6 +1,6 @@
 import os from 'os';
 import { createExplorer } from './createExplorer';
-import * as loaders from './loaders';
+import * as defaultLoaders from './loaders';
 import {
   Config,
   CosmiconfigResult,
@@ -63,17 +63,13 @@ function cosmiconfig(
   return createExplorer(normalizedOptions);
 }
 
-cosmiconfig.loadJs = loaders.loadJs;
-cosmiconfig.loadJson = loaders.loadJson;
-cosmiconfig.loadYaml = loaders.loadYaml;
-
 function normalizeLoaders(rawLoaders?: RawLoaders): Loaders {
   const defaults: Loaders = {
-    '.js': { sync: loaders.loadJs, async: loaders.loadJs },
-    '.json': { sync: loaders.loadJson, async: loaders.loadJson },
-    '.yaml': { sync: loaders.loadYaml, async: loaders.loadYaml },
-    '.yml': { sync: loaders.loadYaml, async: loaders.loadYaml },
-    noExt: { sync: loaders.loadYaml, async: loaders.loadYaml },
+    '.js': { sync: defaultLoaders.loadJs, async: defaultLoaders.loadJs },
+    '.json': { sync: defaultLoaders.loadJson, async: defaultLoaders.loadJson },
+    '.yaml': { sync: defaultLoaders.loadYaml, async: defaultLoaders.loadYaml },
+    '.yml': { sync: defaultLoaders.loadYaml, async: defaultLoaders.loadYaml },
+    noExt: { sync: defaultLoaders.loadYaml, async: defaultLoaders.loadYaml },
   };
 
   if (!rawLoaders) {
@@ -99,4 +95,4 @@ const identity: Transform = function identity(x) {
   return x;
 };
 
-export { cosmiconfig };
+export { cosmiconfig, defaultLoaders };

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { TempDir } from './util';
-import { cosmiconfig, Options } from '../src';
+import { cosmiconfig, defaultLoaders, Options } from '../src';
 
 const temp = new TempDir();
 
@@ -145,7 +145,7 @@ describe('throws error for invalid JSON in extensionless rc file loaded as JSON'
   const explorerOptions = {
     stopDir: temp.absolutePath('a'),
     loaders: {
-      noExt: cosmiconfig.loadJson,
+      noExt: defaultLoaders.loadJson,
     },
   };
 
