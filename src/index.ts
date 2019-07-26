@@ -19,10 +19,12 @@ interface RawLoaders {
   [key: string]: LoaderEntry | LoaderSync | LoaderAsync;
 }
 
-// cannot return a promise with sync methods
-export type Transform = (
+export type Transform =
+  | ((CosmiconfigResult: CosmiconfigResult) => Promise<CosmiconfigResult>)
+  | TransformSync;
+export type TransformSync = (
   CosmiconfigResult: CosmiconfigResult,
-) => CosmiconfigResult | Promise<CosmiconfigResult>;
+) => CosmiconfigResult;
 
 export interface Options {
   packageProp?: string;
@@ -32,6 +34,7 @@ export interface Options {
   stopDir?: string;
   cache?: boolean;
   transform?: Transform;
+  transformSync?: TransformSync;
 }
 
 function cosmiconfig(
@@ -53,6 +56,7 @@ function cosmiconfig(
     stopDir: os.homedir(),
     cache: true,
     transform: identity,
+    transformSync: identity,
   };
   const normalizedOptions: ExplorerOptions = {
     ...defaults,
@@ -95,7 +99,7 @@ function normalizeLoaders(rawLoaders?: RawLoaders): Loaders {
   }, defaults);
 }
 
-const identity: Transform = function identity(x) {
+const identity: TransformSync = function identity(x) {
   return x;
 };
 

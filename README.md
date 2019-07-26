@@ -51,7 +51,7 @@ If you are still using v4, those v4 docs are available [in the `4.0.0` tag](http
   - [packageProp](#packageprop)
   - [stopDir](#stopdir)
   - [cache](#cache)
-  - [transform](#transform)
+  - [transform / transformSync](#transform--transformsync)
   - [ignoreEmptySearchPlaces](#ignoreemptysearchplaces)
 - [Caching](#caching)
 - [Differences from rc](#differences-from-rc)
@@ -462,14 +462,21 @@ Default: `true`.
 If `false`, no caches will be used.
 Read more about ["Caching"](#caching) below.
 
-### transform
-
-Type: `(Result) => Promise<Result> | Result`.
+### transform / transformSync
 
 A function that transforms the parsed configuration. Receives the [result].
 
-If using [`search()`] or [`load()`] \(which are async), the transform function can return the transformed result or return a Promise that resolves with the transformed result.
-If using [`searchSync()`] or [`loadSync()`], the function must be synchronous and return the transformed result.
+##### transform
+
+Type: `(Result) => Promise<Result> | Result`.
+
+If using [`search()`] or [`load()`] \(which are async), the `transform` function can return the transformed result or return a Promise that resolves with the transformed result.
+
+##### transformSync
+
+Type: `(Result) => Result`.
+
+If using [`searchSync()`] or [`loadSync()`], the `transformSync` function must be synchronous and return the transformed result.
 
 The reason you might use this option — instead of simply applying your transform function some other way — is that *the transformed result will be cached*. If your transformation involves additional filesystem I/O or other potentially slow processing, you can use this option to avoid repeating those steps every time a given configuration is searched or loaded.
 

@@ -4,6 +4,7 @@
 
 - Migrate from Flowtype to Typescript
 - **Breaking change:** Remove support for Node 4 and 6. Requires Node 8+.
+- **Breaking change:** Use `transformSync` option for sync transform.
 - **Breaking change:** Use named export `cosmiconfig`. (see example below)
 
 ```js

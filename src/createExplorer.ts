@@ -127,9 +127,8 @@ class Explorer {
         return this.searchFromDirectorySync(nextDir);
       }
 
-      const transformResult = this.config.transform(result);
+      const transformResult = this.config.transformSync(result);
 
-      // @ts-ignore
       return transformResult;
     };
 
@@ -353,9 +352,8 @@ class Explorer {
         content,
       );
 
-      const transformResult = this.config.transform(cosmiconfigResult);
+      const transformResult = this.config.transformSync(cosmiconfigResult);
 
-      // @ts-ignore
       return transformResult;
     };
 

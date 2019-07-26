@@ -1,5 +1,5 @@
 import { TempDir } from './util';
-import { cosmiconfig } from '../src';
+import { cosmiconfig, TransformSync } from '../src';
 
 const temp = new TempDir();
 
@@ -228,7 +228,7 @@ describe('runs transform', () => {
   });
 
   const configPath = temp.absolutePath('foo.json');
-  const transform = (result: any) => {
+  const transform: TransformSync = (result: any) => {
     result.config.foo = [result.config.foo];
     return result;
   };
@@ -245,7 +245,7 @@ describe('runs transform', () => {
 
   test('sync', () => {
     const result = cosmiconfig('successful-files-tests', {
-      transform,
+      transformSync: transform,
     }).loadSync(configPath);
     checkResult(result);
   });
@@ -258,7 +258,7 @@ describe('does not swallow transform errors', () => {
 
   const configPath = temp.absolutePath('foo.json');
   const expectedError = new Error('These pretzels are making me thirsty!');
-  const transform = () => {
+  const transform: TransformSync = () => {
     throw expectedError;
   };
 
@@ -270,7 +270,9 @@ describe('does not swallow transform errors', () => {
 
   test('sync', () => {
     expect(() =>
-      cosmiconfig('successful-files-tests', { transform }).loadSync(configPath),
+      cosmiconfig('successful-files-tests', {
+        transformSync: transform,
+      }).loadSync(configPath),
     ).toThrow(expectedError);
   });
 });
