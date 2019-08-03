@@ -303,7 +303,7 @@ Default: See below.
 
 An object that maps extensions to the loader functions responsible for loading and parsing files with those extensions.
 
-Cosmiconfig exposes its default loaders as a named export `defaultLoaders` for `.js`, `.json`, and `.yaml` as `defaultLoaders.loadJs`, `defaultLoaders.loadJson`, and `defaultLoaders.loadYaml`, respectively.
+Cosmiconfig exposes its default loaders on a named export `defaultLoaders`. The loaders for `.js`, `.json`, and `.yaml` are `defaultLoaders.loadJs`, `defaultLoaders.loadJson`, and `defaultLoaders.loadYaml`, respectively.
 
 **Default `loaders`:**
 
