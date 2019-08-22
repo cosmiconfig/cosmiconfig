@@ -1,5 +1,6 @@
 import os from 'os';
-import { createExplorer } from './createExplorer';
+import { createExplorer as createExplorerAsync } from './createExplorer';
+import { createExplorerSync } from './createExplorerSync';
 import * as defaultLoaders from './loaders';
 import {
   Config,
@@ -19,25 +20,34 @@ interface RawLoaders {
   [key: string]: LoaderEntry | LoaderSync | LoaderAsync;
 }
 
-// cannot return a promise with sync methods
-export type Transform = (
+export type TransformSync = (
   CosmiconfigResult: CosmiconfigResult,
-) => CosmiconfigResult | Promise<CosmiconfigResult>;
+) => CosmiconfigResult;
 
-export interface Options {
+export type Transform =
+  | ((CosmiconfigResult: CosmiconfigResult) => Promise<CosmiconfigResult>)
+  | TransformSync;
+
+interface OptionsBase {
   packageProp?: string;
-  loaders?: RawLoaders;
   searchPlaces?: Array<string>;
   ignoreEmptySearchPlaces?: boolean;
   stopDir?: string;
   cache?: boolean;
+}
+
+export interface Options extends OptionsBase {
+  loaders?: RawLoaders;
   transform?: Transform;
 }
 
-function cosmiconfig(
-  moduleName: string,
-  options: Options = {},
-): ReturnType<typeof createExplorer> {
+export interface OptionsSync extends OptionsBase {
+  loaders?: RawLoaders;
+  transform?: TransformSync;
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function cosmiconfig(moduleName: string, options: Options = {}) {
   const defaults = {
     packageProp: moduleName,
     searchPlaces: [
@@ -60,7 +70,28 @@ function cosmiconfig(
     loaders: normalizeLoaders(options.loaders),
   };
 
-  return createExplorer(normalizedOptions);
+  // @ts-ignore
+  const syncExplorer = createExplorerSync(normalizedOptions);
+  const asyncExplorer = createExplorerAsync(normalizedOptions);
+
+  const createExplorer = {
+    ...syncExplorer,
+    ...asyncExplorer,
+    clearLoadCache(): void {
+      asyncExplorer.clearLoadCache();
+      syncExplorer.clearLoadCache();
+    },
+    clearSearchCache(): void {
+      asyncExplorer.clearSearchCache();
+      syncExplorer.clearSearchCache();
+    },
+    clearCaches(): void {
+      asyncExplorer.clearCaches();
+      syncExplorer.clearCaches();
+    },
+  };
+
+  return createExplorer;
 }
 
 function normalizeLoaders(rawLoaders?: RawLoaders): Loaders {

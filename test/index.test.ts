@@ -9,6 +9,7 @@ const createExplorerMock: typeof createExplorer & jest.Mock = createExplorer;
 
 // Mock `createExplorer` because we want to check what it is called with.
 jest.mock('../src/createExplorer');
+jest.mock('../src/createExplorerSync');
 
 const temp = new TempDir();
 
