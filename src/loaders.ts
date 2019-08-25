@@ -2,6 +2,7 @@ import parseJson from 'parse-json';
 import yaml from 'js-yaml';
 import importFresh from 'import-fresh';
 import { LoaderSync } from './index';
+import { LoadersSync } from './types';
 
 const loadJs: LoaderSync = function loadJs(filepath) {
   const result = importFresh(filepath);
@@ -21,4 +22,6 @@ const loadYaml: LoaderSync = function loadYaml(filepath, content) {
   return yaml.safeLoad(content, { filename: filepath });
 };
 
-export { loadJs, loadJson, loadYaml };
+const loaders: LoadersSync = { loadJs, loadJson, loadYaml };
+
+export { loaders };
