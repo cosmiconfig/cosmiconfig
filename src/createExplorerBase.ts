@@ -1,14 +1,14 @@
 import path from 'path';
-import * as loaders from './loaders';
+import { loaders } from './loaders';
 import { getPropertyByPath } from './getPropertyByPath';
 import {
   CosmiconfigResult,
   ExplorerOptions,
   ExplorerOptionsSync,
-  LoaderEntry,
   Cache,
   LoadedFileContent,
 } from './types';
+import { Loader } from './index';
 
 class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
   protected readonly loadCache?: Cache;
@@ -55,6 +55,14 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
           )}, so searchPlaces item "${place}" is invalid`,
         );
       }
+
+      if (typeof loader !== 'function') {
+        throw new Error(
+          `loader for ${getExtensionDescription(
+            place,
+          )} is not a function (type provided: "${typeof loader}"), so searchPlaces item "${place}" is invalid`,
+        );
+      }
     });
   }
 
@@ -87,14 +95,14 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
     return packagePropValue || null;
   }
 
-  protected getLoaderEntryForFile(filepath: string): LoaderEntry {
+  protected getLoaderEntryForFile(filepath: string): Loader | undefined {
     if (path.basename(filepath) === 'package.json') {
       const loader = this.loadPackageProp.bind(this);
-      return { sync: loader, async: loader };
+      return loader;
     }
 
     const loaderKey = path.extname(filepath) || 'noExt';
-    return this.config.loaders[loaderKey] || {};
+    return this.config.loaders[loaderKey];
   }
 
   protected loadedContentToCosmiconfigResult(
@@ -112,7 +120,7 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
 
   protected validateFilePath(filepath: string): void {
     if (!filepath) {
-      throw new Error('load and loadSync must pass a non-empty string');
+      throw new Error('load must pass a non-empty string');
     }
   }
 }

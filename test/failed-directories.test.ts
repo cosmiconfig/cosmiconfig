@@ -1,6 +1,11 @@
 import fs from 'fs';
 import { TempDir } from './util';
-import { cosmiconfig, defaultLoaders, Options } from '../src';
+import {
+  cosmiconfig,
+  cosmiconfigSync,
+  defaultLoaders,
+  OptionsSync,
+} from '../src';
 
 const temp = new TempDir();
 
@@ -66,7 +71,7 @@ describe('gives up if it cannot find the file', () => {
     const readFileSpy = jest.spyOn(fs, 'readFileSync');
     const statSpy = jest.spyOn(fs, 'statSync');
 
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
     checkResult(statSpy, readFileSpy, result);
   });
 });
@@ -107,7 +112,7 @@ describe('stops at stopDir and gives up', () => {
   test('sync', () => {
     const readFileSpy = jest.spyOn(fs, 'readFileSync');
 
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
     checkResult(readFileSpy, result);
   });
 });
@@ -131,7 +136,7 @@ describe('throws error for invalid YAML in rc file', () => {
 
   test('sync', () => {
     expect(() =>
-      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+      cosmiconfigSync('foo', explorerOptions).search(startDir),
     ).toThrow(expectedError);
   });
 });
@@ -159,7 +164,7 @@ describe('throws error for invalid JSON in extensionless rc file loaded as JSON'
 
   test('sync', () => {
     expect(() =>
-      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+      cosmiconfigSync('foo', explorerOptions).search(startDir),
     ).toThrow(expectedError);
   });
 });
@@ -182,7 +187,7 @@ describe('throws error for invalid package.json', () => {
 
   test('sync', () => {
     expect(() =>
-      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+      cosmiconfigSync('foo', explorerOptions).search(startDir),
     ).toThrow(expectedError);
   });
 });
@@ -208,7 +213,7 @@ describe('throws error for invalid JS in .config.js file', () => {
 
   test('sync', () => {
     expect(() =>
-      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+      cosmiconfigSync('foo', explorerOptions).search(startDir),
     ).toThrow(expectedError);
   });
 });
@@ -233,7 +238,7 @@ describe('throws error for invalid JSON in .foorc.json', () => {
 
   test('sync', () => {
     expect(() =>
-      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+      cosmiconfigSync('foo', explorerOptions).search(startDir),
     ).toThrow(expectedError);
   });
 });
@@ -259,7 +264,7 @@ describe('throws error for invalid YAML in .foorc.yml', () => {
 
   test('sync', () => {
     expect(() =>
-      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+      cosmiconfigSync('foo', explorerOptions).search(startDir),
     ).toThrow(expectedError);
   });
 });
@@ -293,7 +298,7 @@ describe('searching for rc files with specified extensions, throws error for inv
 
   test('sync', () => {
     expect(() =>
-      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+      cosmiconfigSync('foo', explorerOptions).search(startDir),
     ).toThrow(expectedError);
   });
 });
@@ -323,7 +328,7 @@ describe('without ignoring empty files, returns an empty config result for an em
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
     checkResult(result);
   });
 });
@@ -353,7 +358,7 @@ describe('without ignoring empty files, returns an empty config result for an em
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
     checkResult(result);
   });
 });
@@ -383,7 +388,7 @@ describe('without ignoring empty files, returns an empty config result for an em
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
     checkResult(result);
   });
 });
@@ -413,7 +418,7 @@ describe('returns an empty config result for an empty .yaml rc file', () => {
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
     checkResult(result);
   });
 });
@@ -452,7 +457,7 @@ describe('without ignoring empty configs and searching for rc files with specifi
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
     checkResult(result);
   });
 });
@@ -491,7 +496,7 @@ describe('without ignoring empty configs and searching for rc files with specifi
   });
 
   test('sync', () => {
-    const result = cosmiconfig('foo', explorerOptions).searchSync(startDir);
+    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
     checkResult(result);
   });
 });
@@ -509,7 +514,7 @@ describe('throws error if a file in searchPlaces does not have a corresponding l
   };
 
   test('on instantiation', () => {
-    expect(() => cosmiconfig('foo', explorerOptions)).toThrow(
+    expect(() => cosmiconfigSync('foo', explorerOptions)).toThrow(
       'No loader specified for extension ".things"',
     );
   });
@@ -520,7 +525,7 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
     temp.createFile('a/b/c/d/e/f/.foorc', '{ "foo": "bar" }');
   });
 
-  const explorerOptions: Options = {
+  const explorerOptions: OptionsSync = {
     stopDir: temp.absolutePath('.'),
     searchPlaces: ['package.json', '.foorc'],
     // @ts-ignore
@@ -530,7 +535,7 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
   };
 
   test('on instantiation', () => {
-    expect(() => cosmiconfig('foo', explorerOptions)).toThrow(
+    expect(() => cosmiconfigSync('foo', explorerOptions)).toThrow(
       'No loader specified for files without extensions',
     );
   });
@@ -563,7 +568,7 @@ describe('does not swallow errors from custom loaders', () => {
 
   test('sync', () => {
     expect(() =>
-      cosmiconfig('foo', explorerOptions).searchSync(startDir),
+      cosmiconfigSync('foo', explorerOptions).search(startDir),
     ).toThrow(expectedError);
   });
 });
@@ -587,7 +592,7 @@ describe('errors not swallowed when async custom loader throws them', () => {
     stopDir: temp.absolutePath('.'),
     searchPlaces: ['.foorc.things'],
     loaders: {
-      '.things': { async: loadThingsAsync },
+      '.things': loadThingsAsync,
     },
   };
 
@@ -617,7 +622,7 @@ describe('errors not swallowed when async custom loader rejects', () => {
     stopDir: temp.absolutePath('.'),
     searchPlaces: ['.foorc.things'],
     loaders: {
-      '.things': { async: loadThingsAsync },
+      '.things': loadThingsAsync,
     },
   };
 
@@ -625,60 +630,5 @@ describe('errors not swallowed when async custom loader rejects', () => {
     await expect(
       cosmiconfig('foo', explorerOptions).search(startDir),
     ).rejects.toThrow(expectedError);
-  });
-});
-
-describe('errors if only async loader is set but you call sync search', () => {
-  const startDir = temp.absolutePath('a/b/c/d/e/f');
-
-  beforeEach(() => {
-    temp.createFile(
-      'a/b/c/d/e/f/.foorc.things',
-      'one\ntwo\nthree\t\t\n  four\n',
-    );
-  });
-
-  const loadThings = async () => ({ things: true });
-
-  const explorerOptions = {
-    stopDir: temp.absolutePath('.'),
-    searchPlaces: ['.foorc.things'],
-    loaders: {
-      '.things': { async: loadThings },
-    },
-  };
-
-  test('sync', () => {
-    expect(() =>
-      cosmiconfig('foo', explorerOptions).searchSync(startDir),
-    ).toThrow('No sync loader specified for extension ".things"');
-  });
-});
-
-describe('errors if it cannot figure out an async loader', () => {
-  const startDir = temp.absolutePath('a/b/c/d/e/f');
-
-  beforeEach(() => {
-    temp.createFile(
-      'a/b/c/d/e/f/.foorc.things',
-      'one\ntwo\nthree\t\t\n  four\n',
-    );
-  });
-
-  const loadThings = async () => ({ things: true });
-
-  const explorerOptions: Options = {
-    stopDir: temp.absolutePath('.'),
-    searchPlaces: ['.foorc.things'],
-    loaders: {
-      // @ts-ignore
-      '.things': { wawa: loadThings },
-    },
-  };
-
-  test('async', async () => {
-    await expect(
-      cosmiconfig('foo', explorerOptions).search(startDir),
-    ).rejects.toThrow('No async loader specified for extension ".things"');
   });
 });

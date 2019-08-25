@@ -1,15 +1,17 @@
 import os from 'os';
 import { TempDir } from './util';
-import { cosmiconfig, Options, LoaderSync } from '../src';
-import { createExplorer } from '../src/createExplorer';
-import * as loaders from '../src/loaders';
+import { LoaderSync } from '../src';
+import * as createExplorer from '../src/createExplorer';
+import * as createExplorerSync from '../src/createExplorerSync';
+import { loaders } from '../src/loaders';
 
-// @ts-ignore
-const createExplorerMock: typeof createExplorer & jest.Mock = createExplorer;
+let createExplorerMock = jest.spyOn(createExplorer, 'createExplorer');
+let createExplorerSyncMock = jest.spyOn(
+  createExplorerSync,
+  'createExplorerSync',
+);
 
-// Mock `createExplorer` because we want to check what it is called with.
-jest.mock('../src/createExplorer');
-jest.mock('../src/createExplorerSync');
+const { cosmiconfig, cosmiconfigSync } = require('../src');
 
 const temp = new TempDir();
 
@@ -18,6 +20,11 @@ describe('cosmiconfig', () => {
 
   beforeEach(() => {
     temp.clean();
+    createExplorerMock = jest.spyOn(createExplorer, 'createExplorer');
+    createExplorerSyncMock = jest.spyOn(
+      createExplorerSync,
+      'createExplorerSync',
+    );
   });
 
   afterEach(() => {
@@ -31,53 +38,81 @@ describe('cosmiconfig', () => {
     temp.deleteTempDir();
   });
 
-  test('creates explorer with default options if not specified', () => {
-    cosmiconfig(moduleName);
+  describe('creates explorer with default options if not specified', () => {
+    const checkResult = (
+      mock: typeof createExplorerMock | typeof createExplorerSyncMock,
+    ) => {
+      expect(mock).toHaveBeenCalledTimes(1);
+      const explorerOptions = mock.mock.calls[0][0];
+      expect(explorerOptions).toMatchObject({
+        packageProp: moduleName,
+        searchPlaces: [
+          'package.json',
+          `.${moduleName}rc`,
+          `.${moduleName}rc.json`,
+          `.${moduleName}rc.yaml`,
+          `.${moduleName}rc.yml`,
+          `.${moduleName}rc.js`,
+          `${moduleName}.config.js`,
+        ],
+        ignoreEmptySearchPlaces: true,
+        stopDir: os.homedir(),
+        cache: true,
+        loaders: {
+          '.js': loaders.loadJs,
+          '.json': loaders.loadJson,
+          '.yaml': loaders.loadYaml,
+          '.yml': loaders.loadYaml,
+          noExt: loaders.loadYaml,
+        },
+        transform: expect.any(Function),
+      });
+    };
 
-    expect(createExplorerMock).toHaveBeenCalledTimes(1);
-    const explorerOptions = createExplorerMock.mock.calls[0][0];
-    expect(explorerOptions).toMatchObject({
-      packageProp: moduleName,
-      searchPlaces: [
-        'package.json',
-        `.${moduleName}rc`,
-        `.${moduleName}rc.json`,
-        `.${moduleName}rc.yaml`,
-        `.${moduleName}rc.yml`,
-        `.${moduleName}rc.js`,
-        `${moduleName}.config.js`,
-      ],
-      ignoreEmptySearchPlaces: true,
-      stopDir: os.homedir(),
-      cache: true,
-      loaders: {
-        '.js': { sync: loaders.loadJs, async: loaders.loadJs },
-        '.json': { sync: loaders.loadJson, async: loaders.loadJson },
-        '.yaml': { sync: loaders.loadYaml, async: loaders.loadYaml },
-        '.yml': { sync: loaders.loadYaml, async: loaders.loadYaml },
-        noExt: { sync: loaders.loadYaml, async: loaders.loadYaml },
-      },
-      transform: expect.any(Function),
+    test('async', () => {
+      cosmiconfig(moduleName);
+      checkResult(createExplorerMock);
+    });
+
+    test('sync', () => {
+      cosmiconfigSync(moduleName);
+      checkResult(createExplorerSyncMock);
     });
   });
 
-  test('defaults transform to identity function', () => {
-    cosmiconfig(moduleName);
-    const explorerOptions = createExplorerMock.mock.calls[0][0];
+  describe('defaults transform to sync identity function', () => {
+    const checkResult = (
+      mock: typeof createExplorerMock | typeof createExplorerSyncMock,
+    ) => {
+      const explorerOptions = mock.mock.calls[0][0];
+      const x = {};
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      expect(explorerOptions.transform(x)).toBe(x);
+    };
 
-    const x = {};
-    expect(explorerOptions.transform(x)).toBe(x);
+    test('async', () => {
+      cosmiconfig(moduleName);
+      checkResult(createExplorerMock);
+    });
+
+    test('sync', () => {
+      cosmiconfigSync(moduleName);
+      checkResult(createExplorerSyncMock);
+    });
   });
 
-  test('creates explorer with preference for given options over defaults', () => {
-    temp.createFile('foo.json', '{ "foo": true }');
+  describe('creates explorer with preference for given options over defaults', () => {
+    beforeEach(() => {
+      temp.createFile('foo.json', '{ "foo": true }');
+    });
 
     const noExtLoader: LoaderSync = () => {};
     const jsLoader: LoaderSync = () => {};
     const jsonLoader: LoaderSync = () => {};
     const yamlLoader: LoaderSync = () => {};
 
-    const options: Options = {
+    const options = {
       stopDir: __dirname,
       cache: false,
       searchPlaces: ['.foorc.json', 'wildandfree.js'],
@@ -85,29 +120,74 @@ describe('cosmiconfig', () => {
       ignoreEmptySearchPlaces: false,
       loaders: {
         noExt: noExtLoader,
-        '.js': { async: jsLoader },
-        '.json': { sync: jsonLoader },
-        '.yaml': { sync: yamlLoader, async: yamlLoader },
+        '.js': jsLoader,
+        '.json': jsonLoader,
+        '.yaml': yamlLoader,
       },
     };
 
-    cosmiconfig(moduleName, options);
+    const checkResult = (
+      mock: typeof createExplorerMock | typeof createExplorerSyncMock,
+    ) => {
+      const explorerOptions = mock.mock.calls[0][0];
+      expect(explorerOptions).toMatchObject({
+        packageProp: 'wildandfree',
+        searchPlaces: ['.foorc.json', 'wildandfree.js'],
+        ignoreEmptySearchPlaces: false,
+        stopDir: __dirname,
+        cache: false,
+        loaders: {
+          '.js': jsLoader,
+          '.json': jsonLoader,
+          '.yaml': yamlLoader,
+          '.yml': loaders.loadYaml,
+          noExt: noExtLoader,
+        },
+        transform: expect.any(Function),
+      });
+    };
 
-    const explorerOptions = createExplorerMock.mock.calls[0][0];
-    expect(explorerOptions).toMatchObject({
-      packageProp: 'wildandfree',
-      searchPlaces: ['.foorc.json', 'wildandfree.js'],
-      ignoreEmptySearchPlaces: false,
-      stopDir: __dirname,
-      cache: false,
+    test('async', () => {
+      cosmiconfig(moduleName, options);
+      checkResult(createExplorerMock);
+    });
+
+    test('sync', () => {
+      cosmiconfigSync(moduleName, options);
+      checkResult(createExplorerSyncMock);
+    });
+  });
+
+  describe('errors if loader is not passed a function', () => {
+    beforeEach(() => {
+      temp.createFile(
+        'a/b/c/d/e/f/.foorc.things',
+        'one\ntwo\nthree\t\t\n  four\n',
+      );
+    });
+
+    const explorerOptions = {
+      stopDir: temp.absolutePath('.'),
+      searchPlaces: ['.foorc.things'],
       loaders: {
-        '.js': { async: jsLoader },
-        '.json': { sync: jsonLoader },
-        '.yaml': { sync: yamlLoader, async: yamlLoader },
-        '.yml': { sync: loaders.loadYaml, async: loaders.loadYaml },
-        noExt: { sync: noExtLoader, async: noExtLoader },
+        '.things': 1,
       },
-      transform: expect.any(Function),
+    };
+
+    const expectedError =
+      'loader for extension ".things" is not a function (type provided: "number"), so searchPlaces item ".foorc.things" is invalid';
+    test('async', async () => {
+      expect(() =>
+        // @ts-ignore
+        cosmiconfig('foo', explorerOptions),
+      ).toThrow(expectedError);
+    });
+
+    test('sync', () => {
+      expect(() =>
+        // @ts-ignore
+        cosmiconfigSync('foo', explorerOptions),
+      ).toThrow(expectedError);
     });
   });
 });

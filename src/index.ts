@@ -1,32 +1,29 @@
 import os from 'os';
-import { createExplorer as createExplorerAsync } from './createExplorer';
+import { createExplorer } from './createExplorer';
 import { createExplorerSync } from './createExplorerSync';
-import * as defaultLoaders from './loaders';
+import { loaders as defaultLoaders } from './loaders';
 import {
   Config,
   CosmiconfigResult,
   ExplorerOptions,
-  LoaderEntry,
+  ExplorerOptionsSync,
   Loaders,
+  LoadersSync,
 } from './types';
 
 type LoaderResult = Config | null;
-export type LoaderSync = (filepath: string, content: string) => LoaderResult;
-export type LoaderAsync =
+export type Loader =
   | ((filepath: string, content: string) => Promise<LoaderResult>)
   | LoaderSync;
-
-interface RawLoaders {
-  [key: string]: LoaderEntry | LoaderSync | LoaderAsync;
-}
-
-export type TransformSync = (
-  CosmiconfigResult: CosmiconfigResult,
-) => CosmiconfigResult;
+export type LoaderSync = (filepath: string, content: string) => LoaderResult;
 
 export type Transform =
   | ((CosmiconfigResult: CosmiconfigResult) => Promise<CosmiconfigResult>)
   | TransformSync;
+
+export type TransformSync = (
+  CosmiconfigResult: CosmiconfigResult,
+) => CosmiconfigResult;
 
 interface OptionsBase {
   packageProp?: string;
@@ -37,18 +34,52 @@ interface OptionsBase {
 }
 
 export interface Options extends OptionsBase {
-  loaders?: RawLoaders;
+  loaders?: Loaders;
   transform?: Transform;
 }
 
 export interface OptionsSync extends OptionsBase {
-  loaders?: RawLoaders;
+  loaders?: LoadersSync;
   transform?: TransformSync;
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function cosmiconfig(moduleName: string, options: Options = {}) {
-  const defaults = {
+  const normalizedOptions: ExplorerOptions = normalizeOptions(
+    moduleName,
+    options,
+  );
+
+  const asyncExplorer = createExplorer(normalizedOptions);
+
+  return asyncExplorer;
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function cosmiconfigSync(moduleName: string, options: OptionsSync = {}) {
+  const normalizedOptions: ExplorerOptionsSync = normalizeOptions(
+    moduleName,
+    options,
+  );
+
+  const syncExplorer = createExplorerSync(normalizedOptions);
+
+  return syncExplorer;
+}
+
+function normalizeOptions(
+  moduleName: string,
+  options: OptionsSync,
+): ExplorerOptionsSync;
+function normalizeOptions(
+  moduleName: string,
+  options: Options,
+): ExplorerOptions;
+function normalizeOptions(
+  moduleName: string,
+  options: Options | OptionsSync,
+): ExplorerOptions | ExplorerOptionsSync {
+  const defaults: ExplorerOptions | ExplorerOptionsSync = {
     packageProp: moduleName,
     searchPlaces: [
       'package.json',
@@ -63,67 +94,29 @@ function cosmiconfig(moduleName: string, options: Options = {}) {
     stopDir: os.homedir(),
     cache: true,
     transform: identity,
+    loaders: {
+      '.js': defaultLoaders.loadJs,
+      '.json': defaultLoaders.loadJson,
+      '.yaml': defaultLoaders.loadYaml,
+      '.yml': defaultLoaders.loadYaml,
+      noExt: defaultLoaders.loadYaml,
+    },
   };
-  const normalizedOptions: ExplorerOptions = {
+
+  const normalizedOptions: ExplorerOptions | ExplorerOptionsSync = {
     ...defaults,
     ...options,
-    loaders: normalizeLoaders(options.loaders),
-  };
-
-  // @ts-ignore
-  const syncExplorer = createExplorerSync(normalizedOptions);
-  const asyncExplorer = createExplorerAsync(normalizedOptions);
-
-  const createExplorer = {
-    ...syncExplorer,
-    ...asyncExplorer,
-    clearLoadCache(): void {
-      asyncExplorer.clearLoadCache();
-      syncExplorer.clearLoadCache();
-    },
-    clearSearchCache(): void {
-      asyncExplorer.clearSearchCache();
-      syncExplorer.clearSearchCache();
-    },
-    clearCaches(): void {
-      asyncExplorer.clearCaches();
-      syncExplorer.clearCaches();
+    loaders: {
+      ...defaults.loaders,
+      ...options.loaders,
     },
   };
 
-  return createExplorer;
+  return normalizedOptions;
 }
 
-function normalizeLoaders(rawLoaders?: RawLoaders): Loaders {
-  const defaults: Loaders = {
-    '.js': { sync: defaultLoaders.loadJs, async: defaultLoaders.loadJs },
-    '.json': { sync: defaultLoaders.loadJson, async: defaultLoaders.loadJson },
-    '.yaml': { sync: defaultLoaders.loadYaml, async: defaultLoaders.loadYaml },
-    '.yml': { sync: defaultLoaders.loadYaml, async: defaultLoaders.loadYaml },
-    noExt: { sync: defaultLoaders.loadYaml, async: defaultLoaders.loadYaml },
-  };
-
-  if (!rawLoaders) {
-    return defaults;
-  }
-
-  return Object.keys(rawLoaders).reduce((result: Loaders, ext): Loaders => {
-    const entry = rawLoaders && rawLoaders[ext];
-    if (typeof entry === 'function') {
-      // the sync loader can incorrectly be async here
-      const sync: LoaderSync = entry;
-      const async: LoaderAsync = entry;
-
-      result[ext] = { sync, async };
-    } else {
-      result[ext] = entry;
-    }
-    return result;
-  }, defaults);
-}
-
-const identity: Transform = function identity(x) {
+const identity: TransformSync = function identity(x) {
   return x;
 };
 
-export { cosmiconfig, defaultLoaders };
+export { cosmiconfig, cosmiconfigSync, defaultLoaders };
