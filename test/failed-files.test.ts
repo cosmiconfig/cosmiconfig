@@ -1,5 +1,5 @@
 import { TempDir } from './util';
-import { cosmiconfig } from '../src';
+import { cosmiconfig, cosmiconfigSync } from '../src';
 
 const temp = new TempDir();
 
@@ -27,7 +27,7 @@ describe('throws error if defined file does not exist', () => {
   });
 
   test('sync', () => {
-    expect(() => cosmiconfig('failed-files-tests').loadSync(file)).toThrow(
+    expect(() => cosmiconfigSync('failed-files-tests').load(file)).toThrow(
       expectedError,
     );
   });
@@ -48,7 +48,7 @@ describe('throws error if defined JSON file has syntax error', () => {
   });
 
   test('sync', () => {
-    expect(() => cosmiconfig('failed-files-tests').loadSync(file)).toThrow(
+    expect(() => cosmiconfigSync('failed-files-tests').load(file)).toThrow(
       expectedError,
     );
   });
@@ -70,7 +70,7 @@ describe('throws error if defined YAML file has syntax error', () => {
   });
 
   test('sync', () => {
-    expect(() => cosmiconfig('failed-files-tests').loadSync(file)).toThrow(
+    expect(() => cosmiconfigSync('failed-files-tests').load(file)).toThrow(
       expectedError,
     );
   });
@@ -91,7 +91,7 @@ describe('throws error if defined JS file has syntax error', () => {
   });
 
   test('sync', () => {
-    expect(() => cosmiconfig('failed-files-tests').loadSync(file)).toThrow(
+    expect(() => cosmiconfigSync('failed-files-tests').load(file)).toThrow(
       expectedError,
     );
   });
@@ -117,7 +117,7 @@ describe('returns an empty config result for empty file, format JS', () => {
   });
 
   test('sync', () => {
-    const result = cosmiconfig('failed-files-tests').loadSync(file);
+    const result = cosmiconfigSync('failed-files-tests').load(file);
     checkResult(result);
   });
 });
@@ -142,7 +142,7 @@ describe('returns an empty config result for empty file, format JSON', () => {
   });
 
   test('sync', () => {
-    const result = cosmiconfig('failed-files-tests').loadSync(file);
+    const result = cosmiconfigSync('failed-files-tests').load(file);
     checkResult(result);
   });
 });
@@ -167,13 +167,13 @@ describe('returns an empty config result for empty file, format YAML', () => {
   });
 
   test('sync', () => {
-    const result = cosmiconfig('failed-files-tests').loadSync(file);
+    const result = cosmiconfigSync('failed-files-tests').load(file);
     checkResult(result);
   });
 });
 
 describe('throws an error if no configPath was specified and load is called without an argument', () => {
-  const expectedError = 'load and loadSync must pass a non-empty string';
+  const expectedError = 'load must pass a non-empty string';
 
   test('async', async () => {
     // @ts-ignore
@@ -184,7 +184,7 @@ describe('throws an error if no configPath was specified and load is called with
 
   test('sync', () => {
     // @ts-ignore
-    expect(() => cosmiconfig('not_exist_rc_name').loadSync()).toThrow(
+    expect(() => cosmiconfigSync('not_exist_rc_name').load()).toThrow(
       expectedError,
     );
   });
@@ -203,7 +203,7 @@ describe('errors not swallowed when async custom loader throws them', () => {
 
   const explorerOptions = {
     loaders: {
-      '.things': { async: loadThingsAsync },
+      '.things': loadThingsAsync,
     },
   };
 
@@ -227,7 +227,7 @@ describe('errors not swallowed when async custom loader rejects', () => {
 
   const explorerOptions = {
     loaders: {
-      '.things': { async: loadThingsAsync },
+      '.things': loadThingsAsync,
     },
   };
 
@@ -235,27 +235,6 @@ describe('errors not swallowed when async custom loader rejects', () => {
     await expect(
       cosmiconfig('not_exist_rc_name', explorerOptions).load(file),
     ).rejects.toThrow(expectedError);
-  });
-});
-
-describe('errors if only async loader is set but you call sync search', () => {
-  const file = temp.absolutePath('.foorc.things');
-  beforeEach(() => {
-    temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
-  });
-
-  const loadThingsAsync = async () => ({ things: true });
-
-  const explorerOptions = {
-    loaders: {
-      '.things': { async: loadThingsAsync },
-    },
-  };
-
-  test('sync', () => {
-    expect(() =>
-      cosmiconfig('not_exist_rc_name', explorerOptions).loadSync(file),
-    ).toThrow('No sync loader specified for extension ".things"');
   });
 });
 
@@ -271,7 +250,7 @@ describe('errors if no loader is set but you call sync load', () => {
 
   test('sync', () => {
     expect(() =>
-      cosmiconfig('not_exist_rc_name', explorerOptions).loadSync(file),
+      cosmiconfigSync('not_exist_rc_name', explorerOptions).load(file),
     ).toThrow('No sync loader specified for extension ".things"');
   });
 });

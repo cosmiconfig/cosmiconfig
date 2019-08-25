@@ -68,13 +68,14 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
   }
 
   private getSyncLoaderForFile(filepath: string): LoaderSync {
-    const entry = this.getLoaderEntryForFile(filepath);
-    if (!entry.sync) {
+    const loader = this.getLoaderEntryForFile(filepath);
+
+    if (!loader) {
       throw new Error(
         `No sync loader specified for ${getExtensionDescription(filepath)}`,
       );
     }
-    return entry.sync;
+    return loader;
   }
 
   private loadFileContentSync(
@@ -89,6 +90,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     }
     const loader = this.getSyncLoaderForFile(filepath);
     const loaderResult = loader(filepath, content);
+
     return loaderResult;
   }
 
@@ -131,8 +133,8 @@ function createExplorerSync(options: ExplorerOptionsSync) {
   const explorer = new ExplorerSync(options);
 
   return {
-    searchSync: explorer.searchSync.bind(explorer),
-    loadSync: explorer.loadSync.bind(explorer),
+    search: explorer.searchSync.bind(explorer),
+    load: explorer.loadSync.bind(explorer),
     clearLoadCache: explorer.clearLoadCache.bind(explorer),
     clearSearchCache: explorer.clearSearchCache.bind(explorer),
     clearCaches: explorer.clearCaches.bind(explorer),
