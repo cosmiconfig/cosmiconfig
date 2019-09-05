@@ -1,6 +1,6 @@
 import os from 'os';
 import { TempDir } from './util';
-import { LoaderSync } from '../src';
+import { defaultLoaders,LoaderSync } from '../src';
 import * as createExplorer from '../src/createExplorer';
 import * as createExplorerSync from '../src/createExplorerSync';
 import { loaders } from '../src/loaders';

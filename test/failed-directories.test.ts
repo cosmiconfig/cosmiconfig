@@ -150,7 +150,7 @@ describe('throws error for invalid JSON in extensionless rc file loaded as JSON'
   const explorerOptions = {
     stopDir: temp.absolutePath('a'),
     loaders: {
-      noExt: defaultLoaders.loadJson,
+      noExt: defaultLoaders['.json'],
     },
   };
 

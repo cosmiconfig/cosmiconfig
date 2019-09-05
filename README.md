@@ -305,20 +305,21 @@ Default: See below.
 
 An object that maps extensions to the loader functions responsible for loading and parsing files with those extensions.
 
-Cosmiconfig exposes its default loaders on a named export `defaultLoaders`. The loaders for `.js`, `.json`, and `.yaml` are `defaultLoaders.loadJs`, `defaultLoaders.loadJson`, and `defaultLoaders.loadYaml`, respectively.
+Cosmiconfig exposes its default loaders on a named export `defaultLoaders`. 
 
 **Default `loaders`:**
 
 ```js
 const { defaultLoaders } = require('cosmiconfig');
 
-{
-  '.json': defaultLoaders.loadJson,
-  '.yaml': defaultLoaders.loadYaml,
-  '.yml': defaultLoaders.loadYaml,
-  '.js': defaultLoaders.loadJs,
-  noExt: defaultLoaders.loadYaml
-}
+console.log(Object.entries(defaultLoaders))
+// [
+//   [ '.js', [Function: loadJs] ],
+//   [ '.json', [Function: loadJson] ],
+//   [ '.yaml', [Function: loadYaml] ],
+//   [ '.yml', [Function: loadYaml] ],
+//   [ 'noExt', [Function: loadYaml] ]
+// ]
 ```
 
 (YAML is a superset of JSON; which means YAML parsers can parse JSON; which is how extensionless files can be either YAML *or* JSON with only one parser.)
@@ -335,7 +336,7 @@ To accomplish that, provide the following `loaders` value:
 
 ```js
 {
-  noExt: defaultLoaders.loadJson
+  noExt: defaultLoaders['.json']
 }
 ```
 
@@ -371,7 +372,7 @@ Then it can be used regardless of whether you end up calling [`search()`], [`loa
 A few things to note:
 
 - If you use a custom loader, be aware of whether it's sync or async and how that aligned with your usage of sync or async search and load functions.
-- **Special JS syntax can also be handled by using a `require` hook**, because `defaultLoaders.loadJs` just uses `require`.
+- **Special JS syntax can also be handled by using a `require` hook**, because `defaultLoaders['.js']` just uses `require`.
   Whether you use custom loaders or a `require` hook is up to you.
 
 Examples:
@@ -396,9 +397,9 @@ Examples:
 
 // Allow many flavors of JS but rely on require hooks:
 {
-  '.mjs': defaultLoaders.loadJs,
-  '.ts': defaultLoaders.loadJs,
-  '.coffee': defaultLoaders.loadJs
+  '.mjs': defaultLoaders['.js'],
+  '.ts': defaultLoaders['.js'],
+  '.coffee': defaultLoaders['.js']
 }
 ```
 
