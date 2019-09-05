@@ -1,6 +1,6 @@
 import os from 'os';
 import { TempDir } from './util';
-import { defaultLoaders,LoaderSync } from '../src';
+import { LoaderSync } from '../src';
 import * as createExplorer from '../src/createExplorer';
 import * as createExplorerSync from '../src/createExplorerSync';
 import { loaders } from '../src/loaders';
@@ -11,7 +11,7 @@ let createExplorerSyncMock = jest.spyOn(
   'createExplorerSync',
 );
 
-const { cosmiconfig, cosmiconfigSync } = require('../src');
+const { cosmiconfig, cosmiconfigSync, defaultLoaders } = require('../src');
 
 const temp = new TempDir();
 
@@ -176,7 +176,7 @@ describe('cosmiconfig', () => {
 
     const expectedError =
       'loader for extension ".things" is not a function (type provided: "number"), so searchPlaces item ".foorc.things" is invalid';
-    test('async', async () => {
+    test('async', () => {
       expect(() =>
         // @ts-ignore
         cosmiconfig('foo', explorerOptions),
@@ -189,5 +189,10 @@ describe('cosmiconfig', () => {
         cosmiconfigSync('foo', explorerOptions),
       ).toThrow(expectedError);
     });
+  });
+
+  describe('cannot mutate default loaders', () => {
+    const expectedError = "Cannot delete property '.js' of #<Object>";
+    expect(() => delete defaultLoaders['.js']).toThrow(expectedError);
   });
 });
