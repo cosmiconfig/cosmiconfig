@@ -39,9 +39,9 @@ If you are still using v4, those v4 docs are available [in the `4.0.0` tag](http
   - [moduleName](#modulename)
 - [explorer.search()](#explorersearch)
   - [searchFrom](#searchfrom)
-- [explorer.searchSync()](#explorersearchsync)
+- [explorerSync.search()](#explorersyncsearch)
 - [explorer.load()](#explorerload)
-- [explorer.loadSync()](#explorerloadsync)
+- [explorerSync.load()](#explorersyncload)
 - [explorer.clearLoadCache()](#explorerclearloadcache)
 - [explorer.clearSearchCache()](#explorerclearsearchcache)
 - [explorer.clearCaches()](#explorerclearcaches)
@@ -70,7 +70,7 @@ Tested in Node 8+.
 Create a Cosmiconfig explorer, then either `search` for or directly `load` a configuration file.
 
 ```js
-const { cosmiconfig } = require('cosmiconfig');
+const { cosmiconfig, cosmiconfigSync } = require('cosmiconfig');
 // ...
 const explorer = cosmiconfig(moduleName);
 
@@ -92,8 +92,10 @@ explorer.search()
 explorer.load(pathToConfig).then(..);
 
 // You can also search and load synchronously.
-const searchedFor = explorer.searchSync();
-const loaded = explorer.loadSync(pathToConfig);
+const explorerSync = cosmiconfigSync(moduleName);
+
+const searchedFor = explorerSync.search();
+const loaded = explorerSync.load(pathToConfig);
 ```
 
 ## Result
@@ -131,7 +133,7 @@ explorer.search([searchFrom]).then(result => {..})
 
 Searches for a configuration file. Returns a Promise that resolves with a [result] or with `null`, if no configuration file is found.
 
-You can do the same thing synchronously with [`searchSync()`].
+You can do the same thing synchronously with [`cosmiconfigSync.search()`].
 
 Let's say your module name is `goldengrahams` so you initialized with `const explorer = cosmiconfig('goldengrahams');`.
 Here's how your default [`search()`] will work:
@@ -145,9 +147,9 @@ Here's how your default [`search()`] will work:
 - If none of those searches reveal a configuration object, move up one directory level and try again.
   So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking the same places in each directory.
 - Continue searching until arriving at your home directory (or some other directory defined by the cosmiconfig option [`stopDir`]).
-- If at any point a parseable configuration is found, the [`search()`] Promise resolves with its [result] \(or, with [`searchSync()`], the [result] is returned).
-- If no configuration object is found, the [`search()`] Promise resolves with `null` (or, with [`searchSync()`], `null` is returned).
-- If a configuration object is found *but is malformed* (causing a parsing error), the [`search()`] Promise rejects with that error (so you should `.catch()` it). (Or, with [`searchSync()`], the error is thrown.)
+- If at any point a parsable configuration is found, the [`search()`] Promise resolves with its [result] \(or, with [`cosmiconfigSync.search()`], the [result] is returned).
+- If no configuration object is found, the [`search()`] Promise resolves with `null` (or, with [`cosmiconfigSync.search()`], `null` is returned).
+- If a configuration object is found *but is malformed* (causing a parsing error), the [`search()`] Promise rejects with that error (so you should `.catch()` it). (Or, with [`cosmiconfigSync.search()`], the error is thrown.)
 
 **If you know exactly where your configuration file should be, you can use [`load()`], instead.**
 
@@ -165,10 +167,10 @@ A filename.
 If the value is a directory, that's where the search starts.
 If it's a file, the search starts in that file's directory.
 
-## explorer.searchSync()
+## explorerSync.search()
 
 ```js
-const result = explorer.searchSync([searchFrom]);
+const result = explorerSync.search([searchFrom]);
 ```
 
 Synchronous version of [`search()`].
@@ -191,10 +193,10 @@ explorer.load('load/this/file.json'); // Tries to load load/this/file.json.
 
 If you load a `package.json` file, the result will be derived from whatever property is specified as your [`packageProp`].
 
-## explorer.loadSync()
+## explorerSync.load()
 
 ```js
-const result = explorer.loadSync(loadPath);
+const result = explorerSync.load(loadPath);
 ```
 
 Synchronous version of [`load()`].
@@ -326,7 +328,7 @@ So you can override one or two without having to override them all.
 
 **Keys in `loaders`** are extensions (starting with a period), or `noExt` to specify the loader for files *without* extensions, like `.soursocksrc`.
 
-**Values in `loaders`** are either a loader function (described below) or an object with `sync` and/or `async` properties, whose values are loader functions.
+**Values in `loaders`** are a loader function (described below) whose values are loader functions.
 
 **The most common use case for custom loaders value is to load extensionless `rc` files as strict JSON**, instead of JSON *or* YAML (the default).
 To accomplish that, provide the following `loaders` value:
@@ -364,9 +366,7 @@ Do whatever you need to, and return either a configuration object or `null` (or,
 `null` indicates that no real configuration was found and the search should continue.
 
 It's easiest if you make your custom loader function synchronous.
-Then it can be used regardless of whether you end up calling [`search()`] or [`searchSync()`], [`load()`] or [`loadSync()`].
-If you want or need to provide an async-only loader, you can do so by making the value of `loaders` an object with an `async` property whose value is the async loader.
-You can also add a `sync` property to designate a sync loader, if you want to use both async and sync search and load functions.
+Then it can be used regardless of whether you end up calling [`search()`], [`load()`].
 
 A few things to note:
 
@@ -380,11 +380,6 @@ Examples:
 // Allow JSON5 syntax:
 {
   '.json': json5Loader
-}
-
-// Allow XML, and treat sync and async separately:
-{
-  '.xml': { async: asyncXmlLoader, sync: syncXmlLoader }
 }
 
 // Allow a special configuration syntax of your own creation:
@@ -471,7 +466,7 @@ Type: `(Result) => Promise<Result> | Result`.
 A function that transforms the parsed configuration. Receives the [result].
 
 If using [`search()`] or [`load()`] \(which are async), the transform function can return the transformed result or return a Promise that resolves with the transformed result.
-If using [`searchSync()`] or [`loadSync()`], the function must be synchronous and return the transformed result.
+If using `cosmiconfigSync`, [`search()`] or [`load()`], the function must be synchronous and return the transformed result.
 
 The reason you might use this option — instead of simply applying your transform function some other way — is that *the transformed result will be cached*. If your transformation involves additional filesystem I/O or other potentially slow processing, you can use this option to avoid repeating those steps every time a given configuration is searched or loaded.
 
@@ -516,11 +511,11 @@ And please do participate!
 
 [`load()`]: #explorerload
 
-[`loadsync()`]: #explorerloadsync
+[`loadsync()`]: #explorersyncload
 
 [`search()`]: #explorersearch
 
-[`searchsync()`]: #explorersearchsync
+[`searchsync()`]: #explorersyncsearch
 
 [`clearloadcache()`]: #explorerclearloadcache
 
