@@ -3,6 +3,31 @@
 ## HEAD
 
 - Migrate from Flowtype to Typescript
+
+- **Breaking change:** Replace `searchSync` with `cosmiconfigSync.search` and replace `loadSync` with `cosmiconfigSync.load`
+
+```js
+// cosmiconfig v5
+import { cosmiconfig } from 'cosmiconfig';
+
+const explorer = cosmiconfig('example');
+const searchAsyncResult = await explorer.search() 
+const loadAsyncResult = await explorer.load('./file/to/load') 
+const searchSyncResult = explorer.searchSync() 
+const loadSyncResult = explorer.loadSync('./file/to/load') 
+
+// cosmiconfig v6
+import { cosmiconfig, cosmiconfigSync } from 'cosmiconfig';
+
+const explorer = cosmiconfig('example');
+const searchAsyncResult = await explorer.search() 
+const loadAsyncResult = await explorer.load('./file/to/load') 
+
+const explorerSync = cosmiconfigSync('example');
+const searchSyncResult = explorerSync.search() 
+const loadSyncResult = explorerSync.load('./file/to/load') 
+```
+
 - **Breaking change:** Remove support for Node 4 and 6. Requires Node 8+.
 - **Breaking change:** Remove `cosmiconfig.loaders` and add named export `defaultLoaders`.
 - **Breaking change:** Use named export `cosmiconfig`. (see example below)
