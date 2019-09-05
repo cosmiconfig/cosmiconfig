@@ -238,7 +238,7 @@ describe('errors not swallowed when async custom loader rejects', () => {
   });
 });
 
-describe('errors if no loader is set but you call sync load', () => {
+describe('errors if no loader is set for loaded file', () => {
   const file = temp.absolutePath('.foorc.things');
   beforeEach(() => {
     temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
@@ -248,9 +248,15 @@ describe('errors if no loader is set but you call sync load', () => {
     loaders: {},
   };
 
+  test('async', async () => {
+    await expect(
+      cosmiconfig('not_exist_rc_name', explorerOptions).load(file),
+    ).rejects.toThrow('No loader specified for extension ".things"');
+  });
+
   test('sync', () => {
     expect(() =>
       cosmiconfigSync('not_exist_rc_name', explorerOptions).load(file),
-    ).toThrow('No sync loader specified for extension ".things"');
+    ).toThrow('No loader specified for extension ".things"');
   });
 });
