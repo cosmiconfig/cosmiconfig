@@ -1,5 +1,5 @@
 import path from 'path';
-import { ExplorerBase, getExtensionDescription } from './createExplorerBase';
+import { ExplorerBase } from './createExplorerBase';
 import { readFileSync } from './readFile';
 import { cacheWrapperSync } from './cacheWrapper';
 import { getDirectorySync } from './getDirectory';
@@ -8,7 +8,6 @@ import {
   ExplorerOptionsSync,
   LoadedFileContent,
 } from './types';
-import { LoaderSync } from './index';
 
 class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
   public constructor(options: ExplorerOptionsSync) {
@@ -67,17 +66,6 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     return result;
   }
 
-  private getSyncLoaderForFile(filepath: string): LoaderSync {
-    const loader = this.getLoaderEntryForFile(filepath);
-
-    if (!loader) {
-      throw new Error(
-        `No sync loader specified for ${getExtensionDescription(filepath)}`,
-      );
-    }
-    return loader;
-  }
-
   private loadFileContentSync(
     filepath: string,
     content: string | null,
@@ -88,7 +76,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     if (content.trim() === '') {
       return undefined;
     }
-    const loader = this.getSyncLoaderForFile(filepath);
+    const loader = this.getLoaderEntryForFile(filepath);
     const loaderResult = loader(filepath, content);
 
     return loaderResult;

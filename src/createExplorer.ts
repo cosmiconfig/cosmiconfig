@@ -1,10 +1,9 @@
 import path from 'path';
-import { ExplorerBase, getExtensionDescription } from './createExplorerBase';
+import { ExplorerBase } from './createExplorerBase';
 import { readFile } from './readFile';
 import { cacheWrapper } from './cacheWrapper';
 import { getDirectory } from './getDirectory';
 import { CosmiconfigResult, ExplorerOptions, LoadedFileContent } from './types';
-import { Loader } from './index';
 
 class ExplorerAsync extends ExplorerBase<ExplorerOptions> {
   public constructor(options: ExplorerOptions) {
@@ -68,16 +67,6 @@ class ExplorerAsync extends ExplorerBase<ExplorerOptions> {
     return result;
   }
 
-  private getAsyncLoaderForFile(filepath: string): Loader {
-    const loader = this.getLoaderEntryForFile(filepath);
-    if (!loader) {
-      throw new Error(
-        `No async loader specified for ${getExtensionDescription(filepath)}`,
-      );
-    }
-    return loader;
-  }
-
   private async loadFileContent(
     filepath: string,
     content: string | null,
@@ -88,7 +77,7 @@ class ExplorerAsync extends ExplorerBase<ExplorerOptions> {
     if (content.trim() === '') {
       return undefined;
     }
-    const loader = this.getAsyncLoaderForFile(filepath);
+    const loader = this.getLoaderEntryForFile(filepath);
     const loaderResult = await loader(filepath, content);
     return loaderResult;
   }

@@ -95,14 +95,23 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
     return packagePropValue || null;
   }
 
-  protected getLoaderEntryForFile(filepath: string): Loader | undefined {
+  protected getLoaderEntryForFile(filepath: string): Loader {
     if (path.basename(filepath) === 'package.json') {
       const loader = this.loadPackageProp.bind(this);
       return loader;
     }
 
     const loaderKey = path.extname(filepath) || 'noExt';
-    return this.config.loaders[loaderKey];
+
+    const loader = this.config.loaders[loaderKey];
+
+    if (!loader) {
+      throw new Error(
+        `No loader specified for ${getExtensionDescription(filepath)}`,
+      );
+    }
+
+    return loader;
   }
 
   protected loadedContentToCosmiconfigResult(
