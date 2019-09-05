@@ -3,7 +3,6 @@
 ## HEAD
 
 - Migrate from Flowtype to Typescript
-
 - **Breaking change:** Replace `searchSync` with `cosmiconfigSync.search` and replace `loadSync` with `cosmiconfigSync.load`
 
 ```js
@@ -29,7 +28,21 @@ const loadSyncResult = explorerSync.load('./file/to/load')
 ```
 
 - **Breaking change:** Remove support for Node 4 and 6. Requires Node 8+.
-- **Breaking change:** Remove `cosmiconfig.loaders` and add named export `defaultLoaders`.
+- **Breaking change:** Remove `cosmiconfig.loaders` and add named export `defaultLoaders` that exports the default loaders used for each extension.
+
+```js
+import { defaultLoaders } from 'cosmiconfig';
+
+console.log(Object.entries(defaultLoaders))
+// [
+//   [ '.js', [Function: loadJs] ],
+//   [ '.json', [Function: loadJson] ],
+//   [ '.yaml', [Function: loadYaml] ],
+//   [ '.yml', [Function: loadYaml] ],
+//   [ 'noExt', [Function: loadYaml] ]
+// ]
+```
+
 - **Breaking change:** Use named export `cosmiconfig`. (see example below)
 
 ```js
