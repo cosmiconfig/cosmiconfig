@@ -90,7 +90,8 @@
       }
     },
     "resetModules": true,
-    "clearMocks": true
+    "resetMocks": true,
+    "restoreMocks": true
   },
   "babel": {
     "presets": [
