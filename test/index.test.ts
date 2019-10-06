@@ -1,36 +1,24 @@
 import os from 'os';
 import { TempDir } from './util';
-import { LoaderSync } from '../src';
-import * as createExplorer from '../src/createExplorer';
-import * as createExplorerSync from '../src/createExplorerSync';
+import { LoaderSync, cosmiconfig, cosmiconfigSync } from '../src';
+import * as createExplorerModule from '../src/createExplorer';
+import * as createExplorerSyncModule from '../src/createExplorerSync';
 import { loaders } from '../src/loaders';
-
-let createExplorerMock = jest.spyOn(createExplorer, 'createExplorer');
-let createExplorerSyncMock = jest.spyOn(
-  createExplorerSync,
-  'createExplorerSync',
-);
-
-const { cosmiconfig, cosmiconfigSync } = require('../src');
 
 const temp = new TempDir();
 
+let createExplorerMock: jest.SpyInstance;
+let createExplorerSyncMock: jest.SpyInstance;
 describe('cosmiconfig', () => {
   const moduleName = 'foo';
 
   beforeEach(() => {
     temp.clean();
-    createExplorerMock = jest.spyOn(createExplorer, 'createExplorer');
+    createExplorerMock = jest.spyOn(createExplorerModule, 'createExplorer');
     createExplorerSyncMock = jest.spyOn(
-      createExplorerSync,
+      createExplorerSyncModule,
       'createExplorerSync',
     );
-  });
-
-  afterEach(() => {
-    // Clean up a mock's usage data between tests
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   afterAll(() => {
@@ -39,9 +27,7 @@ describe('cosmiconfig', () => {
   });
 
   describe('creates explorer with default options if not specified', () => {
-    const checkResult = (
-      mock: typeof createExplorerMock | typeof createExplorerSyncMock,
-    ) => {
+    const checkResult = (mock: jest.SpyInstance) => {
       expect(mock).toHaveBeenCalledTimes(1);
       const explorerOptions = mock.mock.calls[0][0];
       expect(explorerOptions).toMatchObject({
@@ -81,9 +67,7 @@ describe('cosmiconfig', () => {
   });
 
   describe('defaults transform to sync identity function', () => {
-    const checkResult = (
-      mock: typeof createExplorerMock | typeof createExplorerSyncMock,
-    ) => {
+    const checkResult = (mock: jest.SpyInstance) => {
       const explorerOptions = mock.mock.calls[0][0];
       const x = {};
       // @ts-ignore
@@ -126,9 +110,7 @@ describe('cosmiconfig', () => {
       },
     };
 
-    const checkResult = (
-      mock: typeof createExplorerMock | typeof createExplorerSyncMock,
-    ) => {
+    const checkResult = (mock: jest.SpyInstance) => {
       const explorerOptions = mock.mock.calls[0][0];
       expect(explorerOptions).toMatchObject({
         packageProp: 'wildandfree',
