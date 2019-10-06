@@ -27,12 +27,6 @@ describe('cosmiconfig', () => {
     );
   });
 
-  afterEach(() => {
-    // Clean up a mock's usage data between tests
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
-  });
-
   afterAll(() => {
     // Remove temp.dir created for tests
     temp.deleteTempDir();

@@ -19,10 +19,6 @@ beforeEach(() => {
   temp.createFile('a/b/package.json', '{ "foo": { "foundInB": true } }');
 });
 
-afterEach(() => {
-  jest.restoreAllMocks();
-});
-
 afterAll(() => {
   // Remove temp.dir created for tests
   temp.deleteTempDir();
