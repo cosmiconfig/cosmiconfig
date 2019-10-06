@@ -14,10 +14,6 @@ beforeEach(() => {
   temp.createDir('a/b/c/d/e/f/');
 });
 
-afterEach(() => {
-  jest.restoreAllMocks();
-});
-
 afterAll(() => {
   // Remove temp.dir created for tests
   temp.deleteTempDir();
