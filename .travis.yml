@@ -5,6 +5,7 @@ cache: yarn
 branches:
   only:
     - master
+    - v6
 matrix:
   include:
     - node_js: '8'
