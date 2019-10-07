@@ -1,8 +1,8 @@
 import os from 'os';
 import { TempDir } from './util';
 import { LoaderSync, cosmiconfig, cosmiconfigSync } from '../src';
-import * as createExplorerModule from '../src/createExplorer';
-import * as createExplorerSyncModule from '../src/createExplorerSync';
+import * as createExplorerModule from '../src/Explorer';
+import * as createExplorerSyncModule from '../src/ExplorerSync';
 import { loaders } from '../src/loaders';
 
 const temp = new TempDir();
