@@ -365,9 +365,6 @@ Cosmiconfig reads the file when it checks whether the file exists, so it will pr
 Do whatever you need to, and return either a configuration object or `null` (or, for async-only loaders, a Promise that resolves with one of those).
 `null` indicates that no real configuration was found and the search should continue.
 
-It's easiest if you make your custom loader function synchronous.
-Then it can be used regardless of whether you end up calling [`search()`], [`load()`].
-
 A few things to note:
 
 - If you use a custom loader, be aware of whether it's sync or async and how that aligned with your usage of sync or async search and load functions.
