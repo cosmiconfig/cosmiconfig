@@ -5,7 +5,7 @@ import { cacheWrapper } from './cacheWrapper';
 import { getDirectory } from './getDirectory';
 import { CosmiconfigResult, ExplorerOptions, LoadedFileContent } from './types';
 
-class ExplorerAsync extends ExplorerBase<ExplorerOptions> {
+class Explorer extends ExplorerBase<ExplorerOptions> {
   public constructor(options: ExplorerOptions) {
     super(options);
   }
@@ -119,17 +119,4 @@ class ExplorerAsync extends ExplorerBase<ExplorerOptions> {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function createExplorer(options: ExplorerOptions) {
-  const explorer = new ExplorerAsync(options);
-
-  return {
-    search: explorer.search.bind(explorer),
-    load: explorer.load.bind(explorer),
-    clearLoadCache: explorer.clearLoadCache.bind(explorer),
-    clearSearchCache: explorer.clearSearchCache.bind(explorer),
-    clearCaches: explorer.clearCaches.bind(explorer),
-  } as const;
-}
-
-export { createExplorer };
+export { Explorer };
