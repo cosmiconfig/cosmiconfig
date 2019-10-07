@@ -1,5 +1,5 @@
 import path from 'path';
-import { ExplorerBase } from './createExplorerBase';
+import { ExplorerBase } from './ExplorerBase';
 import { readFile } from './readFile';
 import { cacheWrapper } from './cacheWrapper';
 import { getDirectory } from './getDirectory';

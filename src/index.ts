@@ -1,6 +1,6 @@
 import os from 'os';
-import { createExplorer } from './createExplorer';
-import { createExplorerSync } from './createExplorerSync';
+import { createExplorer } from './Explorer';
+import { createExplorerSync } from './ExplorerSync';
 import { loaders as defaultLoaders } from './loaders';
 import {
   Config,
