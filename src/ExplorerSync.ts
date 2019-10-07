@@ -116,17 +116,4 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function createExplorerSync(options: ExplorerOptionsSync) {
-  const explorer = new ExplorerSync(options);
-
-  return {
-    search: explorer.searchSync.bind(explorer),
-    load: explorer.loadSync.bind(explorer),
-    clearLoadCache: explorer.clearLoadCache.bind(explorer),
-    clearSearchCache: explorer.clearSearchCache.bind(explorer),
-    clearCaches: explorer.clearCaches.bind(explorer),
-  } as const;
-}
-
-export { createExplorerSync };
+export { ExplorerSync };

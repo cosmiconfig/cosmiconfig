@@ -1,6 +1,6 @@
 import os from 'os';
-import { createExplorer } from './Explorer';
-import { createExplorerSync } from './ExplorerSync';
+import { Explorer } from './Explorer';
+import { ExplorerSync } from './ExplorerSync';
 import { loaders as defaultLoaders } from './loaders';
 import {
   Config,
@@ -50,9 +50,15 @@ function cosmiconfig(moduleName: string, options: Options = {}) {
     options,
   );
 
-  const asyncExplorer = createExplorer(normalizedOptions);
+  const explorer = new Explorer(normalizedOptions);
 
-  return asyncExplorer;
+  return {
+    search: explorer.search.bind(explorer),
+    load: explorer.load.bind(explorer),
+    clearLoadCache: explorer.clearLoadCache.bind(explorer),
+    clearSearchCache: explorer.clearSearchCache.bind(explorer),
+    clearCaches: explorer.clearCaches.bind(explorer),
+  } as const;
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -62,9 +68,15 @@ function cosmiconfigSync(moduleName: string, options: OptionsSync = {}) {
     options,
   );
 
-  const syncExplorer = createExplorerSync(normalizedOptions);
+  const explorerSync = new ExplorerSync(normalizedOptions);
 
-  return syncExplorer;
+  return {
+    search: explorerSync.searchSync.bind(explorerSync),
+    load: explorerSync.loadSync.bind(explorerSync),
+    clearLoadCache: explorerSync.clearLoadCache.bind(explorerSync),
+    clearSearchCache: explorerSync.clearSearchCache.bind(explorerSync),
+    clearCaches: explorerSync.clearCaches.bind(explorerSync),
+  } as const;
 }
 
 function normalizeOptions(

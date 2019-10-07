@@ -1,24 +1,54 @@
-import os from 'os';
+/* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility */
 import { TempDir } from './util';
-import { LoaderSync, cosmiconfig, cosmiconfigSync } from '../src';
-import * as createExplorerModule from '../src/Explorer';
-import * as createExplorerSyncModule from '../src/ExplorerSync';
-import { loaders } from '../src/loaders';
+import {
+  cosmiconfig as cosmiconfigModule,
+  cosmiconfigSync as cosmiconfigSyncModule,
+  LoaderSync,
+} from '../src';
 
 const temp = new TempDir();
 
-let createExplorerMock: jest.SpyInstance;
-let createExplorerSyncMock: jest.SpyInstance;
+let cosmiconfig: typeof cosmiconfigModule;
+let cosmiconfigSync: typeof cosmiconfigSyncModule;
+let createExplorerMock: jest.SpyInstance & typeof cosmiconfigModule;
+let createExplorerSyncMock: jest.SpyInstance & typeof cosmiconfigSyncModule;
 describe('cosmiconfig', () => {
   const moduleName = 'foo';
 
   beforeEach(() => {
     temp.clean();
-    createExplorerMock = jest.spyOn(createExplorerModule, 'createExplorer');
-    createExplorerSyncMock = jest.spyOn(
-      createExplorerSyncModule,
-      'createExplorerSync',
-    );
+
+    createExplorerMock = jest.fn();
+    jest.doMock('../src/Explorer', () => {
+      return {
+        Explorer: class FakeExplorer {
+          constructor(options: Parameters<typeof cosmiconfigModule>[0]) {
+            createExplorerMock(options);
+            const { Explorer } = jest.requireActual('../src/Explorer');
+
+            return new Explorer(options);
+          }
+        },
+      };
+    });
+
+    createExplorerSyncMock = jest.fn();
+    jest.doMock('../src/ExplorerSync', () => {
+      return {
+        ExplorerSync: class FakeExplorerSync {
+          constructor(options: Parameters<typeof cosmiconfigSyncModule>[0]) {
+            createExplorerSyncMock(options);
+            const { ExplorerSync } = jest.requireActual('../src/ExplorerSync');
+
+            return new ExplorerSync(options);
+          }
+        },
+      };
+    });
+
+    const index = require('../src/index');
+    cosmiconfig = index.cosmiconfig;
+    cosmiconfigSync = index.cosmiconfigSync;
   });
 
   afterAll(() => {
@@ -30,29 +60,31 @@ describe('cosmiconfig', () => {
     const checkResult = (mock: jest.SpyInstance) => {
       expect(mock).toHaveBeenCalledTimes(1);
       const explorerOptions = mock.mock.calls[0][0];
-      expect(explorerOptions).toMatchObject({
-        packageProp: moduleName,
-        searchPlaces: [
-          'package.json',
-          `.${moduleName}rc`,
-          `.${moduleName}rc.json`,
-          `.${moduleName}rc.yaml`,
-          `.${moduleName}rc.yml`,
-          `.${moduleName}rc.js`,
-          `${moduleName}.config.js`,
-        ],
-        ignoreEmptySearchPlaces: true,
-        stopDir: os.homedir(),
-        cache: true,
-        loaders: {
-          '.js': loaders.loadJs,
-          '.json': loaders.loadJson,
-          '.yaml': loaders.loadYaml,
-          '.yml': loaders.loadYaml,
-          noExt: loaders.loadYaml,
-        },
-        transform: expect.any(Function),
-      });
+      expect(explorerOptions).toMatchInlineSnapshot(`
+        Object {
+          "cache": true,
+          "ignoreEmptySearchPlaces": true,
+          "loaders": Object {
+            ".js": [Function loadJs],
+            ".json": [Function loadJson],
+            ".yaml": [Function loadYaml],
+            ".yml": [Function loadYaml],
+            "noExt": [Function loadYaml],
+          },
+          "packageProp": "foo",
+          "searchPlaces": Array [
+            "package.json",
+            ".foorc",
+            ".foorc.json",
+            ".foorc.yaml",
+            ".foorc.yml",
+            ".foorc.js",
+            "foo.config.js",
+          ],
+          "stopDir": "<HOME_DIR>",
+          "transform": [Function identity],
+        }
+      `);
     };
 
     test('async', () => {
@@ -112,21 +144,26 @@ describe('cosmiconfig', () => {
 
     const checkResult = (mock: jest.SpyInstance) => {
       const explorerOptions = mock.mock.calls[0][0];
-      expect(explorerOptions).toMatchObject({
-        packageProp: 'wildandfree',
-        searchPlaces: ['.foorc.json', 'wildandfree.js'],
-        ignoreEmptySearchPlaces: false,
-        stopDir: __dirname,
-        cache: false,
-        loaders: {
-          '.js': jsLoader,
-          '.json': jsonLoader,
-          '.yaml': yamlLoader,
-          '.yml': loaders.loadYaml,
-          noExt: noExtLoader,
-        },
-        transform: expect.any(Function),
-      });
+      expect(explorerOptions).toMatchInlineSnapshot(`
+        Object {
+          "cache": false,
+          "ignoreEmptySearchPlaces": false,
+          "loaders": Object {
+            ".js": [Function jsLoader],
+            ".json": [Function jsonLoader],
+            ".yaml": [Function yamlLoader],
+            ".yml": [Function loadYaml],
+            "noExt": [Function noExtLoader],
+          },
+          "packageProp": "wildandfree",
+          "searchPlaces": Array [
+            ".foorc.json",
+            "wildandfree.js",
+          ],
+          "stopDir": "<PROJECT_ROOT>/test",
+          "transform": [Function identity],
+        }
+      `);
     };
 
     test('async', () => {
