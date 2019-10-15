@@ -35,31 +35,31 @@ If you are still using v4, those v4 docs are available [in the `4.0.0` tag](http
 - [Installation](#installation)
 - [Usage](#usage)
 - [Result](#result)
-- [cosmiconfig()](#cosmiconfig-1)
-  - [moduleName](#modulename)
-- [explorer.search()](#explorersearch)
-  - [searchFrom](#searchfrom)
-- [explorer.searchSync()](#explorersearchsync)
-- [explorer.load()](#explorerload)
-- [explorer.loadSync()](#explorerloadsync)
-- [explorer.clearLoadCache()](#explorerclearloadcache)
-- [explorer.clearSearchCache()](#explorerclearsearchcache)
-- [explorer.clearCaches()](#explorerclearcaches)
-- [cosmiconfigOptions](#cosmiconfigoptions)
-  - [searchPlaces](#searchplaces)
-  - [loaders](#loaders)
-  - [packageProp](#packageprop)
-  - [stopDir](#stopdir)
-  - [cache](#cache)
-  - [transform](#transform)
-  - [ignoreEmptySearchPlaces](#ignoreemptysearchplaces)
+- [`cosmiconfig()`](#cosmiconfig-1)
+  - [`moduleName`](#modulename)
+- [`explorer.search()`](#explorersearch)
+  - [`searchFrom`](#searchfrom)
+- [`explorer.searchSync()`](#explorersearchsync)
+- [`explorer.load()`](#explorerload)
+- [`explorer.loadSync()`](#explorerloadsync)
+- [`explorer.clearLoadCache()`](#explorerclearloadcache)
+- [`explorer.clearSearchCache()`](#explorerclearsearchcache)
+- [`explorer.clearCaches()`](#explorerclearcaches)
+- [`cosmiconfigOptions`](#cosmiconfigoptions)
+  - [`searchPlaces`](#searchplaces)
+  - [`loaders`](#loaders)
+  - [`packageProp`](#packageprop)
+  - [`stopDir`](#stopdir)
+  - [`cache`](#cache)
+  - [`transform`](#transform)
+  - [`ignoreEmptySearchPlaces`](#ignoreemptysearchplaces)
 - [Caching](#caching)
 - [Differences from rc](#differences-from-rc)
 - [Contributing & Development](#contributing--development)
 
 ## Installation
 
-```
+```sh
 npm install cosmiconfig
 ```
 
@@ -104,7 +104,7 @@ The result object you get from `search` or `load` has the following properties:
 - **filepath:** The path to the configuration file that was found.
 - **isEmpty:** `true` if the configuration file is empty. This property will not be present if the configuration file is not empty.
 
-## cosmiconfig()
+## `cosmiconfig()`
 
 ```js
 const explorer = cosmiconfig(moduleName[, cosmiconfigOptions])
@@ -112,7 +112,7 @@ const explorer = cosmiconfig(moduleName[, cosmiconfigOptions])
 
 Creates a cosmiconfig instance ("explorer") configured according to the arguments, and initializes its caches.
 
-### moduleName
+### `moduleName`
 
 Type: `string`. **Required.**
 
@@ -121,7 +121,7 @@ Your module name. This is used to create the default [`searchPlaces`] and [`pack
 **[`cosmiconfigOptions`] are documented below.**
 You may not need them, and should first read about the functions you'll use.
 
-## explorer.search()
+## `explorer.search()`
 
 ```js
 explorer.search([searchFrom]).then(result => {..})
@@ -152,7 +152,7 @@ Here's how your default [`search()`] will work:
 **The search process is highly customizable.**
 Use the cosmiconfig options [`searchPlaces`] and [`loaders`] to precisely define where you want to look for configurations and how you want to load them.
 
-### searchFrom
+### `searchFrom`
 
 Type: `string`.
 Default: `process.cwd()`.
@@ -163,7 +163,7 @@ A filename.
 If the value is a directory, that's where the search starts.
 If it's a file, the search starts in that file's directory.
 
-## explorer.searchSync()
+## `explorer.searchSync()`
 
 ```js
 const result = explorer.searchSync([searchFrom]);
@@ -173,7 +173,7 @@ Synchronous version of [`search()`].
 
 Returns a [result] or `null`.
 
-## explorer.load()
+## `explorer.load()`
 
 ```js
 explorer.load(loadPath).then(result => {..})
@@ -189,7 +189,7 @@ explorer.load('load/this/file.json'); // Tries to load load/this/file.json.
 
 If you load a `package.json` file, the result will be derived from whatever property is specified as your [`packageProp`].
 
-## explorer.loadSync()
+## `explorer.loadSync()`
 
 ```js
 const result = explorer.loadSync(loadPath);
@@ -199,25 +199,25 @@ Synchronous version of [`load()`].
 
 Returns a [result].
 
-## explorer.clearLoadCache()
+## `explorer.clearLoadCache()`
 
 Clears the cache used in [`load()`].
 
-## explorer.clearSearchCache()
+## `explorer.clearSearchCache()`
 
 Clears the cache used in [`search()`].
 
-## explorer.clearCaches()
+## `explorer.clearCaches()`
 
 Performs both [`clearLoadCache()`] and [`clearSearchCache()`].
 
-## cosmiconfigOptions
+## `cosmiconfigOptions`
 
 Type: `Object`.
 
 Possible options are documented below.
 
-### searchPlaces
+### `searchPlaces`
 
 Type: `Array<string>`.
 Default: See below.
@@ -294,7 +294,7 @@ Examples, with a module named `porgy`:
 ]
 ```
 
-### loaders
+### `loaders`
 
 Type: `Object`.
 Default: See below.
@@ -337,7 +337,7 @@ If you want to load files that are not handled by the loader functions Cosmiconf
 
 **Third-party loaders:**
 
-- [@endemolshinegroup/cosmiconfig-typescript-loader](https://github.com/EndemolShineGroup/cosmiconfig-typescript-loader)
+- [`@endemolshinegroup/cosmiconfig-typescript-loader`](https://github.com/EndemolShineGroup/cosmiconfig-typescript-loader)
 
 **Use cases for custom loader function:**
 
@@ -403,7 +403,7 @@ Examples:
 }
 ```
 
-### packageProp
+### `packageProp`
 
 Type: `string | Array<string>`.
 Default: `` `${moduleName}` ``.
@@ -445,14 +445,14 @@ If a string includes period but corresponds to a top-level property name, it wil
 }
 ```
 
-### stopDir
+### `stopDir`
 
 Type: `string`.
 Default: Absolute path to your home directory.
 
 Directory where the search will stop.
 
-### cache
+### `cache`
 
 Type: `boolean`.
 Default: `true`.
@@ -460,7 +460,7 @@ Default: `true`.
 If `false`, no caches will be used.
 Read more about ["Caching"](#caching) below.
 
-### transform
+### `transform`
 
 Type: `(Result) => Promise<Result> | Result`.
 
@@ -471,7 +471,7 @@ If using [`searchSync()`] or [`loadSync()`], the function must be synchronous an
 
 The reason you might use this option — instead of simply applying your transform function some other way — is that *the transformed result will be cached*. If your transformation involves additional filesystem I/O or other potentially slow processing, you can use this option to avoid repeating those steps every time a given configuration is searched or loaded.
 
-### ignoreEmptySearchPlaces
+### `ignoreEmptySearchPlaces`
 
 Type: `boolean`.
 Default: `true`.
