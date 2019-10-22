@@ -347,7 +347,7 @@ describe('finds rc file in third searched dir, skipping packageProp, parsing ext
   const explorerOptions = {
     stopDir: temp.absolutePath('.'),
     loaders: {
-      noExt: defaultLoaders.loadJson,
+      noExt: defaultLoaders['.json'],
     },
     searchPlaces: ['.foorc', 'foo.config.js'],
   };
