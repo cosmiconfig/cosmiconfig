@@ -1,7 +1,7 @@
 import os from 'os';
 import { Explorer } from './Explorer';
 import { ExplorerSync } from './ExplorerSync';
-import { loaders as defaultLoaders } from './loaders';
+import { loaders } from './loaders';
 import {
   Config,
   CosmiconfigResult,
@@ -79,6 +79,14 @@ function cosmiconfigSync(moduleName: string, options: OptionsSync = {}) {
   } as const;
 }
 
+const defaultLoaders = {
+  '.js': loaders.loadJs,
+  '.json': loaders.loadJson,
+  '.yaml': loaders.loadYaml,
+  '.yml': loaders.loadYaml,
+  noExt: loaders.loadYaml,
+} as const;
+
 function normalizeOptions(
   moduleName: string,
   options: OptionsSync,
@@ -106,13 +114,7 @@ function normalizeOptions(
     stopDir: os.homedir(),
     cache: true,
     transform: identity,
-    loaders: {
-      '.js': defaultLoaders.loadJs,
-      '.json': defaultLoaders.loadJson,
-      '.yaml': defaultLoaders.loadYaml,
-      '.yml': defaultLoaders.loadYaml,
-      noExt: defaultLoaders.loadYaml,
-    },
+    loaders: defaultLoaders,
   };
 
   const normalizedOptions: ExplorerOptions | ExplorerOptionsSync = {
