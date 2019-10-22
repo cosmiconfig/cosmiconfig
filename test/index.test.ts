@@ -3,6 +3,7 @@ import { TempDir } from './util';
 import {
   cosmiconfig as cosmiconfigModule,
   cosmiconfigSync as cosmiconfigSyncModule,
+  defaultLoaders,
   LoaderSync,
 } from '../src';
 
@@ -195,7 +196,7 @@ describe('cosmiconfig', () => {
 
     const expectedError =
       'loader for extension ".things" is not a function (type provided: "number"), so searchPlaces item ".foorc.things" is invalid';
-    test('async', async () => {
+    test('async', () => {
       expect(() =>
         // @ts-ignore
         cosmiconfig('foo', explorerOptions),
@@ -208,5 +209,11 @@ describe('cosmiconfig', () => {
         cosmiconfigSync('foo', explorerOptions),
       ).toThrow(expectedError);
     });
+  });
+
+  describe('cannot mutate default loaders', () => {
+    const expectedError = "Cannot delete property '.js' of #<Object>";
+    // @ts-ignore
+    expect(() => delete defaultLoaders['.js']).toThrow(expectedError);
   });
 });
