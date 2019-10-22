@@ -57,7 +57,7 @@ describe('throws error if defined YAML file has syntax error', () => {
 
   const file = temp.absolutePath('foo-invalid.yaml');
   const expectedError =
-    'incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line in';
+    'Nested mappings are not allowed in compact mappings at line 1, column 6:';
 
   test('async', async () => {
     await expect(cosmiconfig('failed-files-tests').load(file)).rejects.toThrow(
