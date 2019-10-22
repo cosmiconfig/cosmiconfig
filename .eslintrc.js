@@ -8,12 +8,13 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     sourceType: 'module',
-    project: './tsconfig.json',
+    project: './tsconfig.eslint.json',
   },
   extends: [
     'eslint-config-davidtheclark-node',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:import/typescript',
@@ -45,7 +46,7 @@ module.exports = {
       },
     ],
     '@typescript-eslint/no-use-before-define': 'off',
-    '@typescript-eslint/array-type': ['error', 'generic'],
+    '@typescript-eslint/array-type': ['error', { default: 'generic' }],
 
     // requires type information rules
     '@typescript-eslint/await-thenable': 'error',
@@ -131,6 +132,7 @@ module.exports = {
         '@typescript-eslint/no-require-imports': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/require-await': 'off',
       },
     },
     {
