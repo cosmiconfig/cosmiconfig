@@ -122,7 +122,7 @@ describe('throws error for invalid YAML in rc file', () => {
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
   const expectedError =
-    'incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line';
+    'Nested mappings are not allowed in compact mappings at line 1, column 8:';
 
   test('async', async () => {
     await expect(
@@ -250,7 +250,7 @@ describe('throws error for invalid YAML in .foorc.yml', () => {
   };
 
   const expectedError =
-    'incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line';
+    'Nested mappings are not allowed in compact mappings at line 1, column 8:';
 
   test('async', async () => {
     await expect(

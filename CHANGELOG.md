@@ -3,6 +3,7 @@
 ## HEAD
 
 - Migrate from Flowtype to Typescript
+- **Breaking change:** Use npm package [yaml](https://www.npmjs.com/package/yaml) to parse YAML instead of npm package [js-yaml](https://www.npmjs.com/package/js-yaml).
 - **Breaking change:** Replace `searchSync` with `cosmiconfigSync.search` and replace `loadSync` with `cosmiconfigSync.load`
 
 ```js
