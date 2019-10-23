@@ -6,6 +6,12 @@ import os from 'os';
 
 const fs = jest.requireActual('fs');
 
+function normalizeDirectorySlash(pathname: string): string {
+  const normalizeCrossPlatform = pathname.replace(/\\/g, '/');
+
+  return normalizeCrossPlatform;
+}
+
 class TempDir {
   public dir: string;
 
@@ -73,7 +79,7 @@ class TempDir {
        * Replace Windows backslash directory separators with forward slashes
        * so expected paths will be consistent cross platform
        */
-      const normalizeCrossPlatform = relativePath.replace(/\\/g, '/');
+      const normalizeCrossPlatform = normalizeDirectorySlash(relativePath);
 
       return normalizeCrossPlatform;
     });
@@ -82,7 +88,7 @@ class TempDir {
   }
 
   public clean(): Array<string> {
-    const cleanPattern = this.absolutePath('**/*');
+    const cleanPattern = normalizeDirectorySlash(this.absolutePath('**/*'));
     const removed = del.sync(cleanPattern, {
       dot: true,
       force: true,
@@ -92,7 +98,10 @@ class TempDir {
   }
 
   public deleteTempDir(): Array<string> {
-    const removed = del.sync(this.dir, { force: true, dot: true });
+    const removed = del.sync(normalizeDirectorySlash(this.dir), {
+      force: true,
+      dot: true,
+    });
 
     return removed;
   }
