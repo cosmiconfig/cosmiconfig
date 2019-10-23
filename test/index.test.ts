@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility */
+import os from 'os';
 import { TempDir } from './util';
 import {
   cosmiconfig as cosmiconfigModule,
@@ -6,8 +7,23 @@ import {
   defaultLoaders,
   LoaderSync,
 } from '../src';
+import { Loaders } from '../src/types';
 
 const temp = new TempDir();
+
+function getLoaderFunctionsByName(loaders: Loaders) {
+  const loaderFunctionsByName = Object.entries(loaders).reduce(
+    (acc, [extension, loader]) => {
+      return {
+        ...acc,
+        [extension]: loader.name,
+      };
+    },
+    {},
+  );
+
+  return loaderFunctionsByName;
+}
 
 let cosmiconfig: typeof cosmiconfigModule;
 let cosmiconfigSync: typeof cosmiconfigSyncModule;
@@ -59,33 +75,35 @@ describe('cosmiconfig', () => {
 
   describe('creates explorer with default options if not specified', () => {
     const checkResult = (mock: jest.SpyInstance) => {
-      expect(mock).toHaveBeenCalledTimes(1);
-      const explorerOptions = mock.mock.calls[0][0];
-      expect(explorerOptions).toMatchInlineSnapshot(`
-        Object {
-          "cache": true,
-          "ignoreEmptySearchPlaces": true,
-          "loaders": Object {
-            ".js": [Function loadJs],
-            ".json": [Function loadJson],
-            ".yaml": [Function loadYaml],
-            ".yml": [Function loadYaml],
-            "noExt": [Function loadYaml],
-          },
-          "packageProp": "foo",
-          "searchPlaces": Array [
-            "package.json",
-            ".foorc",
-            ".foorc.json",
-            ".foorc.yaml",
-            ".foorc.yml",
-            ".foorc.js",
-            "foo.config.js",
-          ],
-          "stopDir": "<HOME_DIR>",
-          "transform": [Function identity],
-        }
-      `);
+      expect(mock.mock.calls.length).toEqual(1);
+      expect(mock.mock.calls[0].length).toEqual(1);
+
+      const { transform, loaders, ...explorerOptions } = mock.mock.calls[0][0];
+      expect(transform.name).toBe('identity');
+      const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
+      expect(loaderFunctionsByName).toEqual({
+        '.js': 'loadJs',
+        '.json': 'loadJson',
+        '.yaml': 'loadYaml',
+        '.yml': 'loadYaml',
+        noExt: 'loadYaml',
+      });
+
+      expect(explorerOptions).toEqual({
+        packageProp: moduleName,
+        searchPlaces: [
+          'package.json',
+          `.${moduleName}rc`,
+          `.${moduleName}rc.json`,
+          `.${moduleName}rc.yaml`,
+          `.${moduleName}rc.yml`,
+          `.${moduleName}rc.js`,
+          `${moduleName}.config.js`,
+        ],
+        ignoreEmptySearchPlaces: true,
+        stopDir: os.homedir(),
+        cache: true,
+      });
     };
 
     test('async', () => {
@@ -144,27 +162,27 @@ describe('cosmiconfig', () => {
     };
 
     const checkResult = (mock: jest.SpyInstance) => {
-      const explorerOptions = mock.mock.calls[0][0];
-      expect(explorerOptions).toMatchInlineSnapshot(`
-        Object {
-          "cache": false,
-          "ignoreEmptySearchPlaces": false,
-          "loaders": Object {
-            ".js": [Function jsLoader],
-            ".json": [Function jsonLoader],
-            ".yaml": [Function yamlLoader],
-            ".yml": [Function loadYaml],
-            "noExt": [Function noExtLoader],
-          },
-          "packageProp": "wildandfree",
-          "searchPlaces": Array [
-            ".foorc.json",
-            "wildandfree.js",
-          ],
-          "stopDir": "<PROJECT_ROOT>/test",
-          "transform": [Function identity],
-        }
-      `);
+      expect(mock.mock.calls.length).toEqual(1);
+      expect(mock.mock.calls[0].length).toEqual(1);
+      const { transform, loaders, ...explorerOptions } = mock.mock.calls[0][0];
+
+      expect(transform.name).toBe('identity');
+      const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
+      expect(loaderFunctionsByName).toEqual({
+        '.js': 'jsLoader',
+        '.json': 'jsonLoader',
+        '.yaml': 'yamlLoader',
+        '.yml': 'loadYaml',
+        noExt: 'noExtLoader',
+      });
+
+      expect(explorerOptions).toEqual({
+        packageProp: 'wildandfree',
+        searchPlaces: ['.foorc.json', 'wildandfree.js'],
+        ignoreEmptySearchPlaces: false,
+        stopDir: __dirname,
+        cache: false,
+      });
     };
 
     test('async', () => {

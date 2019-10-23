@@ -73,10 +73,6 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "snapshotSerializers": [
-      "jest-serializer-path",
-      "jest-snapshot-serializer-function-name"
-    ],
     "collectCoverageFrom": [
       "src/**/*.{js,ts}"
     ],
@@ -137,8 +133,6 @@
     "eslint-plugin-node": "^10.0.0",
     "husky": "^3.0.9",
     "jest": "^24.9.0",
-    "jest-serializer-path": "^0.1.15",
-    "jest-snapshot-serializer-function-name": "^1.1.0",
     "lint-staged": "^9.4.2",
     "make-dir": "^3.0.0",
     "parent-module": "^2.0.0",
