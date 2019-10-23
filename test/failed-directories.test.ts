@@ -121,8 +121,9 @@ describe('throws error for invalid YAML in rc file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const expectedError =
-    'Nested mappings are not allowed in compact mappings at line 1, column 8:';
+  const expectedError = `YAML Error in ${temp.absolutePath(
+    'a/b/.foorc',
+  )}:\nNested mappings are not allowed in compact mappings at line 1, column 8:`;
 
   test('async', async () => {
     await expect(
@@ -249,8 +250,9 @@ describe('throws error for invalid YAML in .foorc.yml', () => {
     stopDir: temp.absolutePath('.'),
   };
 
-  const expectedError =
-    'Nested mappings are not allowed in compact mappings at line 1, column 8:';
+  const expectedError = `YAML Error in ${temp.absolutePath(
+    'a/b/c/d/e/f/.foorc.yml',
+  )}:\nNested mappings are not allowed in compact mappings at line 1, column 8:`;
 
   test('async', async () => {
     await expect(

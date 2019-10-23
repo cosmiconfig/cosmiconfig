@@ -11,15 +11,22 @@ const loadJs: LoaderSync = function loadJs(filepath) {
 
 const loadJson: LoaderSync = function loadJson(filepath, content) {
   try {
-    return parseJson(content);
-  } catch (err) {
-    err.message = `JSON Error in ${filepath}:\n${err.message}`;
-    throw err;
+    const result = parseJson(content);
+    return result;
+  } catch (error) {
+    error.message = `JSON Error in ${filepath}:\n${error.message}`;
+    throw error;
   }
 };
 
 const loadYaml: LoaderSync = function loadYaml(filepath, content) {
-  return yaml.parse(content, { prettyErrors: true });
+  try {
+    const result = yaml.parse(content, { prettyErrors: true });
+    return result;
+  } catch (error) {
+    error.message = `YAML Error in ${filepath}:\n${error.message}`;
+    throw error;
+  }
 };
 
 const loaders: LoadersSync = { loadJs, loadJson, loadYaml };
