@@ -1,6 +1,6 @@
 {
   "name": "cosmiconfig",
-  "version": "5.2.1",
+  "version": "6.0.0",
   "description": "Find and load configuration from a package.json property, rc file, or CommonJS module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,8 +15,9 @@
     "dev": "npm run clean && npm run build:compile -- --watch",
     "lint": "eslint --ext .js,.ts . && npm run lint:md",
     "lint:fix": "eslint --ext .js,.ts . --fix",
-    "lint:md": "remark-preset-davidtheclark --format",
+    "lint:md": "remark-preset-davidtheclark",
     "format": "prettier \"**/*.{js,ts,json,yml,yaml}\" --write",
+    "format:md": "remark-preset-davidtheclark --format",
     "format:check": "prettier \"**/*.{js,ts,json,yml,yaml}\" --check",
     "typescript": "tsc",
     "test": "jest --coverage",
@@ -41,6 +42,7 @@
       "git add"
     ],
     "*.md": [
+      "remark-preset-davidtheclark",
       "remark-preset-davidtheclark --format",
       "git add"
     ]
