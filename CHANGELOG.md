@@ -1,59 +1,49 @@
 # Changelog
 
-## HEAD
+## 6.0.0
 
-- Migrate from Flowtype to Typescript
-- Lazy load all default loaders
-- **Breaking change:** Use npm package [yaml](https://www.npmjs.com/package/yaml) to parse YAML instead of npm package [js-yaml](https://www.npmjs.com/package/js-yaml).
-- **Breaking change:** Replace `searchSync` with `cosmiconfigSync.search` and replace `loadSync` with `cosmiconfigSync.load`
+- **Breaking change:** The package now has named exports. See examples below.
+- **Breaking change:** Separate async and sync APIs, accessible from different named exports. If you used `explorer.searchSync()` or `explorer.loadSync()`, you'll now create a sync explorer with `cosmiconfigSync()`, then use `explorerSync.search()` and `explorerSync.load()`.
 
-```js
-// cosmiconfig v5
-import { cosmiconfig } from 'cosmiconfig';
+  ```js
+  // OLD: cosmiconfig v5
+  import { cosmiconfig } from 'cosmiconfig';
 
-const explorer = cosmiconfig('example');
-const searchAsyncResult = await explorer.search() 
-const loadAsyncResult = await explorer.load('./file/to/load') 
-const searchSyncResult = explorer.searchSync() 
-const loadSyncResult = explorer.loadSync('./file/to/load') 
+  const explorer = cosmiconfig('example');
+  const searchAsyncResult = await explorer.search();
+  const loadAsyncResult = await explorer.load('./file/to/load');
+  const searchSyncResult = explorer.searchSync();
+  const loadSyncResult = explorer.loadSync('./file/to/load');
 
-// cosmiconfig v6
-import { cosmiconfig, cosmiconfigSync } from 'cosmiconfig';
+  // NEW: cosmiconfig v6
+  import { cosmiconfig, cosmiconfigSync } from 'cosmiconfig';
 
-const explorer = cosmiconfig('example');
-const searchAsyncResult = await explorer.search() 
-const loadAsyncResult = await explorer.load('./file/to/load') 
+  const explorer = cosmiconfig('example');
+  const searchAsyncResult = await explorer.search();
+  const loadAsyncResult = await explorer.load('./file/to/load');
 
-const explorerSync = cosmiconfigSync('example');
-const searchSyncResult = explorerSync.search() 
-const loadSyncResult = explorerSync.load('./file/to/load') 
-```
-
+  const explorerSync = cosmiconfigSync('example');
+  const searchSyncResult = explorerSync.search();
+  const loadSyncResult = explorerSync.load('./file/to/load');
+  ```
 - **Breaking change:** Remove support for Node 4 and 6. Requires Node 8+.
+- **Breaking change:** Use npm package [yaml](https://www.npmjs.com/package/yaml) to parse YAML instead of npm package [js-yaml](https://www.npmjs.com/package/js-yaml).
 - **Breaking change:** Remove `cosmiconfig.loaders` and add named export `defaultLoaders` that exports the default loaders used for each extension.
 
-```js
-import { defaultLoaders } from 'cosmiconfig';
+  ```js
+  import { defaultLoaders } from 'cosmiconfig';
 
-console.log(Object.entries(defaultLoaders))
-// [
-//   [ '.js', [Function: loadJs] ],
-//   [ '.json', [Function: loadJson] ],
-//   [ '.yaml', [Function: loadYaml] ],
-//   [ '.yml', [Function: loadYaml] ],
-//   [ 'noExt', [Function: loadYaml] ]
-// ]
-```
-
-- **Breaking change:** Use named export `cosmiconfig`. (see example below)
-
-```js
-// es modules
-import { cosmiconfig } from 'cosmiconfig';
-
-// common js
-const { cosmiconfig } = require('cosmiconfig');
-```
+  console.log(Object.entries(defaultLoaders))
+  // [
+  //   [ '.js', [Function: loadJs] ],
+  //   [ '.json', [Function: loadJson] ],
+  //   [ '.yaml', [Function: loadYaml] ],
+  //   [ '.yml', [Function: loadYaml] ],
+  //   [ 'noExt', [Function: loadYaml] ]
+  // ]
+  ```
+- Migrate from Flowtype to Typescript.
+- Lazy load all default loaders.
 
 ## 5.2.1
 

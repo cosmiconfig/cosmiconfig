@@ -15,36 +15,40 @@ By default, Cosmiconfig will start where you tell it to start and search up the 
 - an "rc file" with the extensions `.json`, `.yaml`, `.yml`, or `.js`.
 - a `.config.js` CommonJS module
 
-For example, if your module's name is "soursocks", cosmiconfig will search up the directory tree for configuration in the following places:
+For example, if your module's name is "myapp", cosmiconfig will search up the directory tree for configuration in the following places:
 
-- a `soursocks` property in `package.json`
-- a `.soursocksrc` file in JSON or YAML format
-- a `.soursocksrc.json` file
-- a `.soursocksrc.yaml`, `.soursocksrc.yml`, or `.soursocksrc.js` file
-- a `soursocks.config.js` file exporting a JS object
+- a `myapp` property in `package.json`
+- a `.myapprc` file in JSON or YAML format
+- a `.myapprc.json` file
+- a `.myapprc.yaml`, `.myapprc.yml`, or `.myapprc.js` file
+- a `myapp.config.js` file exporting a JS object
 
 Cosmiconfig continues to search up the directory tree, checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
 
-👀 **Looking for the v4 docs?**
-v5 involves significant revisions to Cosmiconfig's API, allowing for much greater flexibility and clarifying some things.
-If you have trouble switching from v4 to v5, please file an issue.
-If you are still using v4, those v4 docs are available [in the `4.0.0` tag](https://github.com/davidtheclark/cosmiconfig/tree/4.0.0).
+👀 **Looking for the v5 docs?**
+v6 involves slight changes to Cosmiconfig's API, clarifying the difference between synchronous and asynchronous usage.
+If you have trouble switching from v5 to v6, please file an issue.
+If you are still using v5, those v5 docs are available [in the `5.x.x` tagged code](https://github.com/davidtheclark/cosmiconfig/tree/5.2.1).
 
 ## Table of contents
 
 - [Installation](#installation)
 - [Usage](#usage)
 - [Result](#result)
-- [cosmiconfig()](#cosmiconfig)
-  - [moduleName](#modulename)
-- [explorer.search()](#explorersearch)
-  - [searchFrom](#searchfrom)
-- [explorerSync.search()](#explorersyncsearch)
-- [explorer.load()](#explorerload)
-- [explorerSync.load()](#explorersyncload)
-- [explorer.clearLoadCache()](#explorerclearloadcache)
-- [explorer.clearSearchCache()](#explorerclearsearchcache)
-- [explorer.clearCaches()](#explorerclearcaches)
+- [Asynchronous API](#asynchronous-api)
+  - [cosmiconfig()](#cosmiconfig)
+  - [explorer.search()](#explorersearch)
+  - [explorer.load()](#explorerload)
+  - [explorer.clearLoadCache()](#explorerclearloadcache)
+  - [explorer.clearSearchCache()](#explorerclearsearchcache)
+  - [explorer.clearCaches()](#explorerclearcaches)
+- [Synchronsous API](#synchronsous-api)
+  - [cosmiconfigSync()](#cosmiconfigsync)
+  - [explorerSync.search()](#explorersyncsearch)
+  - [explorerSync.load()](#explorersyncload)
+  - [explorerSync.clearLoadCache()](#explorersyncclearloadcache)
+  - [explorerSync.clearSearchCache()](#explorersyncclearsearchcache)
+  - [explorerSync.clearCaches()](#explorersyncclearcaches)
 - [cosmiconfigOptions](#cosmiconfigoptions)
   - [searchPlaces](#searchplaces)
   - [loaders](#loaders)
@@ -106,15 +110,18 @@ The result object you get from `search` or `load` has the following properties:
 - **filepath:** The path to the configuration file that was found.
 - **isEmpty:** `true` if the configuration file is empty. This property will not be present if the configuration file is not empty.
 
-## cosmiconfig()
+## Asynchronous API
+
+### cosmiconfig()
 
 ```js
+const { cosmiconfig } = require('cosmiconfig');
 const explorer = cosmiconfig(moduleName[, cosmiconfigOptions])
 ```
 
 Creates a cosmiconfig instance ("explorer") configured according to the arguments, and initializes its caches.
 
-### moduleName
+#### moduleName
 
 Type: `string`. **Required.**
 
@@ -125,7 +132,7 @@ If your [`searchPlaces`] value will include files, as it does by default (e.g. `
 **[`cosmiconfigOptions`] are documented below.**
 You may not need them, and should first read about the functions you'll use.
 
-## explorer.search()
+### explorer.search()
 
 ```js
 explorer.search([searchFrom]).then(result => {..})
@@ -133,7 +140,7 @@ explorer.search([searchFrom]).then(result => {..})
 
 Searches for a configuration file. Returns a Promise that resolves with a [result] or with `null`, if no configuration file is found.
 
-You can do the same thing synchronously with [`cosmiconfigSync.search()`].
+You can do the same thing synchronously with [`explorerSync.search()`].
 
 Let's say your module name is `goldengrahams` so you initialized with `const explorer = cosmiconfig('goldengrahams');`.
 Here's how your default [`search()`] will work:
@@ -147,16 +154,16 @@ Here's how your default [`search()`] will work:
 - If none of those searches reveal a configuration object, move up one directory level and try again.
   So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking the same places in each directory.
 - Continue searching until arriving at your home directory (or some other directory defined by the cosmiconfig option [`stopDir`]).
-- If at any point a parsable configuration is found, the [`search()`] Promise resolves with its [result] \(or, with [`cosmiconfigSync.search()`], the [result] is returned).
-- If no configuration object is found, the [`search()`] Promise resolves with `null` (or, with [`cosmiconfigSync.search()`], `null` is returned).
-- If a configuration object is found *but is malformed* (causing a parsing error), the [`search()`] Promise rejects with that error (so you should `.catch()` it). (Or, with [`cosmiconfigSync.search()`], the error is thrown.)
+- If at any point a parsable configuration is found, the [`search()`] Promise resolves with its [result] \(or, with [`explorerSync.search()`], the [result] is returned).
+- If no configuration object is found, the [`search()`] Promise resolves with `null` (or, with [`explorerSync.search()`], `null` is returned).
+- If a configuration object is found *but is malformed* (causing a parsing error), the [`search()`] Promise rejects with that error (so you should `.catch()` it). (Or, with [`explorerSync.search()`], the error is thrown.)
 
 **If you know exactly where your configuration file should be, you can use [`load()`], instead.**
 
 **The search process is highly customizable.**
 Use the cosmiconfig options [`searchPlaces`] and [`loaders`] to precisely define where you want to look for configurations and how you want to load them.
 
-### searchFrom
+#### searchFrom
 
 Type: `string`.
 Default: `process.cwd()`.
@@ -167,17 +174,7 @@ A filename.
 If the value is a directory, that's where the search starts.
 If it's a file, the search starts in that file's directory.
 
-## explorerSync.search()
-
-```js
-const result = explorerSync.search([searchFrom]);
-```
-
-Synchronous version of [`search()`].
-
-Returns a [result] or `null`.
-
-## explorer.load()
+### explorer.load()
 
 ```js
 explorer.load(loadPath).then(result => {..})
@@ -193,25 +190,62 @@ explorer.load('load/this/file.json'); // Tries to load load/this/file.json.
 
 If you load a `package.json` file, the result will be derived from whatever property is specified as your [`packageProp`].
 
-## explorerSync.load()
+You can do the same thing synchronously with [`explorerSync.load()`].
+
+### explorer.clearLoadCache()
+
+Clears the cache used in [`load()`].
+
+### explorer.clearSearchCache()
+
+Clears the cache used in [`search()`].
+
+### explorer.clearCaches()
+
+Performs both [`clearLoadCache()`] and [`clearSearchCache()`].
+
+## Synchronsous API
+
+### cosmiconfigSync()
+
+```js
+const { cosmiconfigSync } = require('cosmiconfig');
+const explorerSync = cosmiconfigSync(moduleName[, cosmiconfigOptions])
+```
+
+Creates a *synchronous* cosmiconfig instance ("explorerSync") configured according to the arguments, and initializes its caches.
+
+See [`cosmiconfig()`].
+
+### explorerSync.search()
+
+```js
+const result = explorerSync.search([searchFrom]);
+```
+
+Synchronous version of [`explorer.search()`].
+
+Returns a [result] or `null`.
+
+### explorerSync.load()
 
 ```js
 const result = explorerSync.load(loadPath);
 ```
 
-Synchronous version of [`load()`].
+Synchronous version of [`explorer.load()`].
 
 Returns a [result].
 
-## explorer.clearLoadCache()
+### explorerSync.clearLoadCache()
 
 Clears the cache used in [`load()`].
 
-## explorer.clearSearchCache()
+### explorerSync.clearSearchCache()
 
 Clears the cache used in [`search()`].
 
-## explorer.clearCaches()
+### explorerSync.clearCaches()
 
 Performs both [`clearLoadCache()`] and [`clearSearchCache()`].
 
@@ -327,7 +361,7 @@ console.log(Object.entries(defaultLoaders))
 **If you provide a `loaders` object, your object will be *merged* with the defaults.**
 So you can override one or two without having to override them all.
 
-**Keys in `loaders`** are extensions (starting with a period), or `noExt` to specify the loader for files *without* extensions, like `.soursocksrc`.
+**Keys in `loaders`** are extensions (starting with a period), or `noExt` to specify the loader for files *without* extensions, like `.myapprc`.
 
 **Values in `loaders`** are a loader function (described below) whose values are loader functions.
 
@@ -368,7 +402,7 @@ Do whatever you need to, and return either a configuration object or `null` (or,
 
 A few things to note:
 
-- If you use a custom loader, be aware of whether it's sync or async and how that aligned with your usage of sync or async search and load functions.
+- If you use a custom loader, be aware of whether it's sync or async: you cannot use async customer loaders with the sync API ([`cosmiconfigSync()`]).
 - **Special JS syntax can also be handled by using a `require` hook**, because `defaultLoaders['.js']` just uses `require`.
   Whether you use custom loaders or a `require` hook is up to you.
 
@@ -509,15 +543,15 @@ And please do participate!
 
 [`load()`]: #explorerload
 
-[`loadsync()`]: #explorersyncload
-
 [`search()`]: #explorersearch
-
-[`searchsync()`]: #explorersyncsearch
 
 [`clearloadcache()`]: #explorerclearloadcache
 
 [`clearsearchcache()`]: #explorerclearsearchcache
+
+[`cosmiconfig()`]: #cosmiconfig
+
+[`cosmiconfigSync()`]: #cosmiconfigsync
 
 [`clearcaches()`]: #explorerclearcaches
 
@@ -532,3 +566,11 @@ And please do participate!
 [`loaders`]: #loaders
 
 [`cosmiconfigoptions`]: #cosmiconfigoptions
+
+[`explorerSync.search()`]: #explorersyncsearch
+
+[`explorerSync.load()`]: #explorersyncload
+
+[`explorer.search()`]: #explorersearch
+
+[`explorer.load()`]: #explorerload

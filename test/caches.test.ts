@@ -1,13 +1,6 @@
 import fs from 'fs';
-import importFreshActual from 'import-fresh';
 import { TempDir } from './util';
 import { cosmiconfig, cosmiconfigSync } from '../src';
-
-// mocks are hoisted
-jest.mock('import-fresh');
-
-const importFreshMock = importFreshActual as typeof importFreshActual &
-  jest.Mock;
 
 const temp = new TempDir();
 
@@ -517,39 +510,5 @@ describe('with cache disabled, does not cache file results', () => {
 
     const result = explorer.load(loadPath);
     checkResult(readFileSpy, result);
-  });
-});
-
-// This test does not work with lazy loading JS -- TODO: fix or remove
-// eslint-disable-next-line jest/no-disabled-tests
-describe.skip('ensure import-fresh is called when loading a js file', () => {
-  const tempFileName = 'a/b/c/d/.foorc.js';
-  const loadPath = temp.absolutePath(tempFileName);
-
-  beforeEach(() => {
-    importFreshMock.mockReturnValue({ foundJs: true });
-  });
-
-  const checkResult = (result: any) => {
-    expect(importFreshMock).toHaveBeenCalledTimes(1);
-    expect(importFreshMock).toHaveBeenCalledWith(loadPath);
-
-    expect(result.config).toEqual({ foundJs: true });
-  };
-
-  test('async', async () => {
-    const explorer = cosmiconfig('foo');
-    temp.createFile(tempFileName, 'module.exports = { foundJs: true };');
-
-    const result = await explorer.load(loadPath);
-    checkResult(result);
-  });
-
-  test('sync', () => {
-    const explorer = cosmiconfigSync('foo');
-    temp.createFile(tempFileName, 'module.exports = { foundJs: true };');
-
-    const result = explorer.load(loadPath);
-    checkResult(result);
   });
 });
