@@ -7,7 +7,7 @@
 
   ```js
   // OLD: cosmiconfig v5
-  import { cosmiconfig } from 'cosmiconfig';
+  import cosmiconfig from 'cosmiconfig';
 
   const explorer = cosmiconfig('example');
   const searchAsyncResult = await explorer.search();
