@@ -42,7 +42,7 @@ If you are still using v5, those v5 docs are available [in the `5.x.x` tagged co
   - [explorer.clearLoadCache()](#explorerclearloadcache)
   - [explorer.clearSearchCache()](#explorerclearsearchcache)
   - [explorer.clearCaches()](#explorerclearcaches)
-- [Synchronsous API](#synchronsous-api)
+- [Synchronous API](#synchronous-api)
   - [cosmiconfigSync()](#cosmiconfigsync)
   - [explorerSync.search()](#explorersyncsearch)
   - [explorerSync.load()](#explorersyncload)
@@ -204,7 +204,7 @@ Clears the cache used in [`search()`].
 
 Performs both [`clearLoadCache()`] and [`clearSearchCache()`].
 
-## Synchronsous API
+## Synchronous API
 
 ### cosmiconfigSync()
 
