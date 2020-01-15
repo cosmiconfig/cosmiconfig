@@ -109,7 +109,6 @@
     ]
   },
   "dependencies": {
-    "@types/parse-json": "^4.0.0",
     "import-fresh": "^3.1.0",
     "parse-json": "^5.0.0",
     "path-type": "^4.0.0",
@@ -122,6 +121,7 @@
     "@babel/preset-typescript": "^7.6.0",
     "@types/jest": "^24.0.19",
     "@types/node": "^12.11.5",
+    "@types/parse-json": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^2.5.0",
     "@typescript-eslint/parser": "^2.5.0",
     "cross-env": "^6.0.3",
