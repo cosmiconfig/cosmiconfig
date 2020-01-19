@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility */
+/* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function */
 import os from 'os';
 import { TempDir } from './util';
 import {

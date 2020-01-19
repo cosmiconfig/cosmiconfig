@@ -139,7 +139,7 @@
     "make-dir": "^3.0.0",
     "parent-module": "^2.0.0",
     "prettier": "^1.18.2",
-    "remark-preset-davidtheclark": "^0.10.0",
+    "remark-preset-davidtheclark": "^0.12.0",
     "typescript": "^3.6.4"
   },
   "engines": {
