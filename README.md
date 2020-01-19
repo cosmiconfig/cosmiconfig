@@ -36,7 +36,7 @@ If you are still using v5, those v5 docs are available [in the `5.x.x` tagged co
 - [Usage](#usage)
 - [Result](#result)
 - [Asynchronous API](#asynchronous-api)
-  - [cosmiconfig()](#cosmiconfig)
+  - [cosmiconfig()](#cosmiconfig-1)
   - [explorer.search()](#explorersearch)
   - [explorer.load()](#explorerload)
   - [explorer.clearLoadCache()](#explorerclearloadcache)
