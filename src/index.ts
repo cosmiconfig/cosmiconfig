@@ -26,7 +26,7 @@ export type TransformSync = (
 ) => CosmiconfigResult;
 
 interface OptionsBase {
-  packageProp?: string;
+  packageProp?: string | Array<string>;
   searchPlaces?: Array<string>;
   ignoreEmptySearchPlaces?: boolean;
   stopDir?: string;
