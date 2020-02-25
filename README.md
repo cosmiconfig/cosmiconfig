@@ -57,6 +57,7 @@ If you are still using v5, those v5 docs are available [in the `5.x.x` tagged co
   - [cache](#cache)
   - [transform](#transform)
   - [ignoreEmptySearchPlaces](#ignoreemptysearchplaces)
+  - [breakOnDuplicateConfig](#breakonduplicateconfig)
 - [Caching](#caching)
 - [Differences from rc](#differences-from-rc)
 - [Contributing & Development](#contributing--development)
@@ -512,6 +513,14 @@ If you'd like to load empty configuration files, instead, set this option to `fa
 
 Why might you want to load empty configuration files?
 If you want to throw an error, or if an empty configuration file means something to your program.
+
+### breakOnDuplicateConfig
+
+Type: `boolean`.
+Default: `false`.
+
+By default, [`search()`] returns the first configuration it finds in one of the [`searchPlaces`].
+If you'd like to continue the search and throw an error on multiple configurations, set this option to `true`.
 
 ## Caching
 

@@ -22,12 +22,23 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
   private async searchFromDirectory(dir: string): Promise<CosmiconfigResult> {
     const absoluteDir = path.resolve(process.cwd(), dir);
 
-    const run = async (): Promise<CosmiconfigResult> => {
-      const result = await this.searchDirectory(absoluteDir);
+    const run = async (
+      shouldSkipFiles: Array<string> = [],
+    ): Promise<CosmiconfigResult> => {
+      const result = await this.searchDirectory(absoluteDir, shouldSkipFiles);
       const nextDir = this.nextDirectoryToSearch(absoluteDir, result);
 
       if (nextDir) {
         return this.searchFromDirectory(nextDir);
+      } else if (result && this.config.breakOnDuplicateConfig) {
+        const anotherResult = await run(
+          shouldSkipFiles.concat(result.filepath),
+        );
+        if (result && anotherResult) {
+          throw new Error(
+            `Duplicate configuration detected in "${result.filepath}" and "${anotherResult.filepath}"`,
+          );
+        }
       }
 
       const transformResult = await this.config.transform(result);
@@ -42,12 +53,18 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
     return run();
   }
 
-  private async searchDirectory(dir: string): Promise<CosmiconfigResult> {
+  private async searchDirectory(
+    dir: string,
+    shouldSkipFiles: Array<string>,
+  ): Promise<CosmiconfigResult> {
     for await (const place of this.config.searchPlaces) {
-      const placeResult = await this.loadSearchPlace(dir, place);
+      const filepath = path.join(dir, place);
+      if (!shouldSkipFiles.find((p) => p === filepath)) {
+        const placeResult = await this.loadSearchPlace(filepath);
 
-      if (this.shouldSearchStopWithResult(placeResult) === true) {
-        return placeResult;
+        if (this.shouldSearchStopWithResult(placeResult)) {
+          return placeResult;
+        }
       }
     }
 
@@ -55,11 +72,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
     return null;
   }
 
-  private async loadSearchPlace(
-    dir: string,
-    place: string,
-  ): Promise<CosmiconfigResult> {
-    const filepath = path.join(dir, place);
+  private async loadSearchPlace(filepath: string): Promise<CosmiconfigResult> {
     const fileContents = await readFile(filepath);
 
     const result = await this.createCosmiconfigResult(filepath, fileContents);

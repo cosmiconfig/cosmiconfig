@@ -24,12 +24,19 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
   private searchFromDirectorySync(dir: string): CosmiconfigResult {
     const absoluteDir = path.resolve(process.cwd(), dir);
 
-    const run = (): CosmiconfigResult => {
-      const result = this.searchDirectorySync(absoluteDir);
+    const run = (shouldSkipFiles: Array<string> = []): CosmiconfigResult => {
+      const result = this.searchDirectorySync(absoluteDir, shouldSkipFiles);
       const nextDir = this.nextDirectoryToSearch(absoluteDir, result);
 
       if (nextDir) {
         return this.searchFromDirectorySync(nextDir);
+      } else if (result && this.config.breakOnDuplicateConfig) {
+        const anotherResult = run(shouldSkipFiles.concat(result.filepath));
+        if (result && anotherResult) {
+          throw new Error(
+            `Duplicate configuration detected in "${result.filepath}" and "${anotherResult.filepath}"`,
+          );
+        }
       }
 
       const transformResult = this.config.transform(result);
@@ -44,12 +51,18 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     return run();
   }
 
-  private searchDirectorySync(dir: string): CosmiconfigResult {
+  private searchDirectorySync(
+    dir: string,
+    shouldSkipFiles: Array<string>,
+  ): CosmiconfigResult {
     for (const place of this.config.searchPlaces) {
-      const placeResult = this.loadSearchPlaceSync(dir, place);
+      const filepath = path.join(dir, place);
+      if (!shouldSkipFiles.find((p) => p === filepath)) {
+        const placeResult = this.loadSearchPlaceSync(filepath);
 
-      if (this.shouldSearchStopWithResult(placeResult) === true) {
-        return placeResult;
+        if (this.shouldSearchStopWithResult(placeResult)) {
+          return placeResult;
+        }
       }
     }
 
@@ -57,8 +70,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     return null;
   }
 
-  private loadSearchPlaceSync(dir: string, place: string): CosmiconfigResult {
-    const filepath = path.join(dir, place);
+  private loadSearchPlaceSync(filepath: string): CosmiconfigResult {
     const content = readFileSync(filepath);
 
     const result = this.createCosmiconfigResultSync(filepath, content);

@@ -31,6 +31,7 @@ interface OptionsBase {
   ignoreEmptySearchPlaces?: boolean;
   stopDir?: string;
   cache?: boolean;
+  breakOnDuplicateConfig?: boolean;
 }
 
 export interface Options extends OptionsBase {
@@ -116,6 +117,7 @@ function normalizeOptions(
     cache: true,
     transform: identity,
     loaders: defaultLoaders,
+    breakOnDuplicateConfig: false,
   };
 
   const normalizedOptions: ExplorerOptions | ExplorerOptionsSync = {

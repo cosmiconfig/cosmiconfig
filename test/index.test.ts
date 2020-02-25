@@ -103,6 +103,7 @@ describe('cosmiconfig', () => {
         ignoreEmptySearchPlaces: true,
         stopDir: os.homedir(),
         cache: true,
+        breakOnDuplicateConfig: false,
       });
     };
 
@@ -182,6 +183,7 @@ describe('cosmiconfig', () => {
         ignoreEmptySearchPlaces: false,
         stopDir: __dirname,
         cache: false,
+        breakOnDuplicateConfig: false,
       });
     };
 
