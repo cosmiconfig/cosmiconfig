@@ -43,8 +43,26 @@ export interface OptionsSync extends OptionsBase {
   transform?: TransformSync;
 }
 
+type ExplorerLike = Readonly<Explorer>;
+type TypedTransform<T> =
+  | ((CosmiconfigResult: CosmiconfigResult) => Promise<T>)
+  | TypedTransformSync<T>;
+interface TypedOptions<T> extends Omit<Options, 'transform'> {
+  transform: TypedTransform<T>;
+}
+interface TypedExplorer<T> extends Omit<ExplorerLike, 'search' | 'load'> {
+  readonly search: (searchFrom?: string) => Promise<T>;
+  readonly load: (filepath: string) => Promise<T>;
+}
+
+function cosmiconfig<T>(
+  moduleName: string,
+  options: TypedOptions<T>,
+): TypedExplorer<T>;
+function cosmiconfig(moduleName: string, options?: Options): ExplorerLike;
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function cosmiconfig(moduleName: string, options: Options = {}) {
+function cosmiconfig(moduleName: string, options: Options = {}): ExplorerLike {
   const normalizedOptions: ExplorerOptions = normalizeOptions(
     moduleName,
     options,
@@ -60,6 +78,31 @@ function cosmiconfig(moduleName: string, options: Options = {}) {
     clearCaches: explorer.clearCaches.bind(explorer),
   } as const;
 }
+
+interface ExplorerSyncLike
+  extends Omit<ExplorerSync, 'searchSync' | 'loadSync'> {
+  readonly search: ExplorerSync['searchSync'];
+  readonly load: ExplorerSync['loadSync'];
+}
+
+type TypedTransformSync<T> = (CosmiconfigResult: CosmiconfigResult) => T;
+interface TypedOptionsSync<T> extends Omit<Options, 'transform'> {
+  transform: TypedTransformSync<T>;
+}
+interface TypedExplorerSync<T>
+  extends Omit<ExplorerSyncLike, 'search' | 'load'> {
+  search(searchFrom?: string): T;
+  load(filepath: string): T;
+}
+
+function cosmiconfigSync<T>(
+  moduleName: string,
+  options?: TypedOptionsSync<T>,
+): TypedExplorerSync<T>;
+function cosmiconfigSync(
+  moduleName: string,
+  options?: OptionsSync,
+): ExplorerSyncLike;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function cosmiconfigSync(moduleName: string, options: OptionsSync = {}) {
