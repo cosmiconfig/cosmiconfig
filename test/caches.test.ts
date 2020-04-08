@@ -52,6 +52,7 @@ describe('cache is not used initially', () => {
 
   test('sync', () => {
     const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     const cachedSearchSync = cosmiconfigSync('foo').search;
     const result = cachedSearchSync(searchPath);
     checkResult(readFileSpy, result);
@@ -83,6 +84,7 @@ describe('cache is used for already-visited directories', () => {
 
   test('sync', () => {
     const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     const cachedSearchSync = cosmiconfigSync('foo').search;
     // First pass, prime the cache ...
     cachedSearchSync(searchPath);
@@ -119,6 +121,7 @@ describe('cache is used for already-loaded file', () => {
 
   test('sync', () => {
     const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     const cachedLoadSync = cosmiconfigSync('foo').load;
     // First pass, prime the cache ...
     cachedLoadSync(loadPath);
@@ -165,6 +168,7 @@ describe('cache is used when some directories in search are already visted', () 
 
   test('sync', () => {
     const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     const cachedSearchSync = cosmiconfigSync('foo').search;
     // First pass, prime the cache ...
     cachedSearchSync(firstSearchPath);
