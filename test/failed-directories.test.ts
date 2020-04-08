@@ -526,9 +526,8 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
   const explorerOptions: OptionsSync = {
     stopDir: temp.absolutePath('.'),
     searchPlaces: ['package.json', '.foorc'],
-    // @ts-ignore
     loaders: {
-      noExt: undefined,
+      noExt: undefined as never,
     },
   };
 
