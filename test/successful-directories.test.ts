@@ -33,6 +33,8 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
       'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.cjs',
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
       'a/b/c/d/e/.foorc.json',
@@ -40,6 +42,8 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
       'a/b/c/d/e/.foorc.yml',
       'a/b/c/d/e/.foorc.js',
       'a/b/c/d/e/foo.config.js',
+      'a/b/c/d/e/.foorc.cjs',
+      'a/b/c/d/e/foo.config.cjs',
       'a/b/c/d/package.json',
       'a/b/c/d/.foorc',
     ]);
@@ -86,6 +90,8 @@ describe('finds package.json prop in second searched dir', () => {
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
       'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.cjs',
       'a/b/c/d/e/package.json',
     ]);
 
@@ -139,6 +145,8 @@ describe('finds package.json with nested packageProp in second searched dir', ()
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
       'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.cjs',
       'a/b/c/d/e/package.json',
     ]);
 
@@ -188,6 +196,53 @@ describe('finds JS file in first searched dir', () => {
     expect(result).toEqual({
       config: { found: true },
       filepath: temp.absolutePath('a/b/c/d/e/f/foo.config.js'),
+    });
+  };
+
+  test('async', async () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+
+    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
+describe('finds CJS file in first searched dir', () => {
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/foo.config.cjs',
+      'module.exports = { found: true };',
+    );
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = { stopDir: temp.absolutePath('.') };
+
+  const checkResult = (readFileSpy: any, result: any) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+
+    expect(filesChecked).toEqual([
+      'a/b/c/d/e/f/package.json',
+      'a/b/c/d/e/f/.foorc',
+      'a/b/c/d/e/f/.foorc.json',
+      'a/b/c/d/e/f/.foorc.yaml',
+      'a/b/c/d/e/f/.foorc.yml',
+      'a/b/c/d/e/f/.foorc.js',
+      'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.cjs',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/e/f/foo.config.cjs'),
     });
   };
 
@@ -443,6 +498,8 @@ describe('finds .foorc.json in second searched dir', () => {
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
       'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.cjs',
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
       'a/b/c/d/e/.foorc.json',
@@ -567,6 +624,8 @@ describe('adding myfooconfig.js to searchPlaces, finds it in first searched dir'
       '.foorc.json',
       '.foorc.yaml',
       '.foorc.yml',
+      '.foorc.cjs',
+      'foo.config.cjs',
       '.foorc.js',
       'foo.config.js',
       'myfooconfig.js',
@@ -581,6 +640,8 @@ describe('adding myfooconfig.js to searchPlaces, finds it in first searched dir'
       'a/b/c/d/e/f/.foorc.json',
       'a/b/c/d/e/f/.foorc.yaml',
       'a/b/c/d/e/f/.foorc.yml',
+      'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.cjs',
       'a/b/c/d/e/f/.foorc.js',
       'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/myfooconfig.js',
@@ -635,6 +696,8 @@ describe('finds JS file traversing from cwd', () => {
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
       'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.cjs',
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
       'a/b/c/d/e/.foorc.json',
@@ -861,6 +924,7 @@ describe('defaults loaders can be overridden', () => {
     searchPlaces: [
       'package.json',
       '.foorc.json',
+      'foo.config.cjs',
       'foo.config.js',
       '.foorc.yml',
     ],
@@ -874,10 +938,12 @@ describe('defaults loaders can be overridden', () => {
     expect(filesChecked).toEqual([
       'a/b/c/d/e/f/package.json',
       'a/b/c/d/e/f/.foorc.json',
+      'a/b/c/d/e/f/foo.config.cjs',
       'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc.json',
+      'a/b/c/d/e/foo.config.cjs',
       'a/b/c/d/e/foo.config.js',
     ]);
 
