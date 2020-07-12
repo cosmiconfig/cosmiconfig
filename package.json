@@ -143,6 +143,6 @@
     "typescript": "^3.6.4"
   },
   "engines": {
-    "node": ">=8"
+    "node": ">=10"
   }
 }
