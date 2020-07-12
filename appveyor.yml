@@ -3,7 +3,7 @@
 branches:
   only:
     - master
-    - v6
+    - v7
 
 clone_depth: 5
 version: '{build}'
@@ -14,9 +14,9 @@ cache:
 
 environment:
   matrix:
-    - nodejs_version: '8'
     - nodejs_version: '10'
     - nodejs_version: '12'
+    - nodejs_version: '14'
 
 install:
   # https://www.appveyor.com/docs/lang/nodejs-iojs/#installing-any-version-of-nodejs-or-iojs
