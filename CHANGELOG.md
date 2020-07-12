@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.0.0
+
+- **Breaking change:** Drop support for Node 8. Now requires Node 10+.
+
 ## 6.0.0
 
 - **Breaking change:** The package now has named exports. See examples below.
