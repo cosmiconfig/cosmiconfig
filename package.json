@@ -110,10 +110,10 @@
   },
   "dependencies": {
     "@types/parse-json": "^4.0.0",
-    "import-fresh": "^3.1.0",
+    "import-fresh": "^3.2.1",
     "parse-json": "^5.0.0",
     "path-type": "^4.0.0",
-    "yaml": "^1.7.2"
+    "yaml": "^1.10.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
