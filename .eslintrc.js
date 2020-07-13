@@ -14,7 +14,9 @@ module.exports = {
     'eslint-config-davidtheclark-node',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    // This is making an annoying amount of unnecessary noise.
+    // If anybody would like to turn it back on, PR welcome.
+    // 'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:import/typescript',
@@ -103,10 +105,13 @@ module.exports = {
      * eslint-plugin-jest
      */
     'jest/consistent-test-it': ['error', { fn: 'test' }],
-    'jest/no-empty-title': 'error',
+    'jest/valid-title': 'error',
     'jest/no-test-callback': 'error',
     'jest/prefer-todo': 'error',
-    'jest/require-tothrow-message': 'error',
+    'jest/require-to-throw-message': 'error',
+    // Many tests make assertions indirectly in a way the plugin
+    // does not understand.
+    'jest/expect-expect': 'off',
   },
   settings: {
     node: {
@@ -127,7 +132,7 @@ module.exports = {
     {
       files: ['*.test.{js,ts}', '.*.test.{js,ts}'],
       rules: {
-        '@typescript-eslint/ban-ts-ignore': 'off',
+        '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-var-requires': 'off',
         '@typescript-eslint/no-require-imports': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',

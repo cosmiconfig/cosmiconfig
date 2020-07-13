@@ -1,5 +1,5 @@
 {
   // extend your base config so you don't have to redefine your compilerOptions
   "extends": "./tsconfig.json",
-  "include": ["**/*.ts", "**/*.js"]
+  "include": ["**/*.ts", "**/*.js", ".eslintrc.js"]
 }

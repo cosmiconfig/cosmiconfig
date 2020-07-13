@@ -229,7 +229,7 @@ describe('cosmiconfig', () => {
     });
   });
 
-  describe('cannot mutate default loaders', () => {
+  test('cannot mutate default loaders', () => {
     const expectedError = "Cannot delete property '.js' of #<Object>";
     // @ts-ignore
     expect(() => delete defaultLoaders['.js']).toThrow(expectedError);
