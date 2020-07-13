@@ -67,7 +67,7 @@ If you are still using v5, those v5 docs are available [in the `5.x.x` tagged co
 npm install cosmiconfig
 ```
 
-Tested in Node 8+.
+Tested in Node 10+.
 
 ## Usage
 
