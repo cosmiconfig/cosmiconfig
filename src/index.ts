@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import os from 'os';
 import { Explorer } from './Explorer';
 import { ExplorerSync } from './ExplorerSync';
@@ -88,6 +89,10 @@ const defaultLoaders = Object.freeze({
   noExt: loaders.loadYaml,
 } as const);
 
+const identity: TransformSync = function identity(x) {
+  return x;
+};
+
 function normalizeOptions(
   moduleName: string,
   options: OptionsSync,
@@ -129,9 +134,5 @@ function normalizeOptions(
 
   return normalizedOptions;
 }
-
-const identity: TransformSync = function identity(x) {
-  return x;
-};
 
 export { cosmiconfig, cosmiconfigSync, defaultLoaders };
