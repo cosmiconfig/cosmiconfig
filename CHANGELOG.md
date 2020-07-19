@@ -2,6 +2,7 @@
 
 ## 7.0.0
 
+- **Breaking change:** Add `${moduleName}rc.cjs` and `${moduleName}.config.cjs` to the default `searchPlaces`, to support users of `"type": "module"` in recent versions of Node.
 - **Breaking change:** Drop support for Node 8. Now requires Node 10+.
 
 ## 6.0.0

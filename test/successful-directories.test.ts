@@ -32,8 +32,8 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
       'a/b/c/d/e/f/.foorc.yaml',
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
-      'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/foo.config.cjs',
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
@@ -41,8 +41,8 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
       'a/b/c/d/e/.foorc.yaml',
       'a/b/c/d/e/.foorc.yml',
       'a/b/c/d/e/.foorc.js',
-      'a/b/c/d/e/foo.config.js',
       'a/b/c/d/e/.foorc.cjs',
+      'a/b/c/d/e/foo.config.js',
       'a/b/c/d/e/foo.config.cjs',
       'a/b/c/d/package.json',
       'a/b/c/d/.foorc',
@@ -89,8 +89,8 @@ describe('finds package.json prop in second searched dir', () => {
       'a/b/c/d/e/f/.foorc.yaml',
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
-      'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/foo.config.cjs',
       'a/b/c/d/e/package.json',
     ]);
@@ -144,8 +144,8 @@ describe('finds package.json with nested packageProp in second searched dir', ()
       'a/b/c/d/e/f/.foorc.yaml',
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
-      'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/foo.config.cjs',
       'a/b/c/d/e/package.json',
     ]);
@@ -190,6 +190,7 @@ describe('finds JS file in first searched dir', () => {
       'a/b/c/d/e/f/.foorc.yaml',
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
+      'a/b/c/d/e/f/.foorc.cjs',
       'a/b/c/d/e/f/foo.config.js',
     ]);
 
@@ -235,8 +236,8 @@ describe('finds CJS file in first searched dir', () => {
       'a/b/c/d/e/f/.foorc.yaml',
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
-      'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/foo.config.cjs',
     ]);
 
@@ -327,6 +328,7 @@ describe('skips over empty file to find JS file in first searched dir', () => {
       'a/b/c/d/e/f/.foorc.yaml',
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
+      'a/b/c/d/e/f/.foorc.cjs',
       'a/b/c/d/e/f/foo.config.js',
     ]);
 
@@ -497,8 +499,8 @@ describe('finds .foorc.json in second searched dir', () => {
       'a/b/c/d/e/f/.foorc.yaml',
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
-      'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/foo.config.cjs',
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
@@ -695,8 +697,8 @@ describe('finds JS file traversing from cwd', () => {
       'a/b/c/d/e/f/.foorc.yaml',
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
-      'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.js',
       'a/b/c/d/e/f/foo.config.cjs',
       'a/b/c/d/e/package.json',
       'a/b/c/d/e/.foorc',
@@ -704,6 +706,7 @@ describe('finds JS file traversing from cwd', () => {
       'a/b/c/d/e/.foorc.yaml',
       'a/b/c/d/e/.foorc.yml',
       'a/b/c/d/e/.foorc.js',
+      'a/b/c/d/e/.foorc.cjs',
       'a/b/c/d/e/foo.config.js',
     ]);
 
