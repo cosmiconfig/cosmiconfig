@@ -82,6 +82,7 @@ describe('cosmiconfig', () => {
       expect(transform.name).toBe('identity');
       const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
       expect(loaderFunctionsByName).toEqual({
+        '.cjs': 'loadJs',
         '.js': 'loadJs',
         '.json': 'loadJson',
         '.yaml': 'loadYaml',
@@ -99,6 +100,8 @@ describe('cosmiconfig', () => {
           `.${moduleName}rc.yml`,
           `.${moduleName}rc.js`,
           `${moduleName}.config.js`,
+          `.${moduleName}rc.cjs`,
+          `${moduleName}.config.cjs`,
         ],
         ignoreEmptySearchPlaces: true,
         stopDir: os.homedir(),
@@ -155,6 +158,7 @@ describe('cosmiconfig', () => {
       ignoreEmptySearchPlaces: false,
       loaders: {
         noExt: noExtLoader,
+        '.cjs': jsLoader,
         '.js': jsLoader,
         '.json': jsonLoader,
         '.yaml': yamlLoader,
@@ -169,6 +173,7 @@ describe('cosmiconfig', () => {
       expect(transform.name).toBe('identity');
       const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
       expect(loaderFunctionsByName).toEqual({
+        '.cjs': 'jsLoader',
         '.js': 'jsLoader',
         '.json': 'jsonLoader',
         '.yaml': 'yamlLoader',
