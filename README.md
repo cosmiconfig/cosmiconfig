@@ -148,7 +148,7 @@ Here's how your default [`search()`] will work:
   1. A `goldengrahams` property in a `package.json` file.
   2. A `.goldengrahamsrc` file with JSON or YAML syntax.
   3. A `.goldengrahamsrc.json`, `.goldengrahamsrc.yaml`, `.goldengrahamsrc.yml`, `.goldengrahamsrc.js`, or `.goldengrahamsrc.cjs` file.
-  4. A `goldengrahams.config.js` or `goldengrahams.config.cjs` CommonJJ module exporting the object.
+  4. A `goldengrahams.config.js` or `goldengrahams.config.cjs` CommonJS module exporting the object.
 - If none of those searches reveal a configuration object, move up one directory level and try again.
   So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking the same places in each directory.
 - Continue searching until arriving at your home directory (or some other directory defined by the cosmiconfig option [`stopDir`]).
