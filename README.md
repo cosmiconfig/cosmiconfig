@@ -24,11 +24,6 @@ For example, if your module's name is "myapp", cosmiconfig will search up the di
 
 Cosmiconfig continues to search up the directory tree, checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
 
-👀 **Looking for the v5 docs?**
-v6 involves slight changes to Cosmiconfig's API, clarifying the difference between synchronous and asynchronous usage.
-If you have trouble switching from v5 to v6, please file an issue.
-If you are still using v5, those v5 docs are available [in the `5.x.x` tagged code](https://github.com/davidtheclark/cosmiconfig/tree/5.2.1).
-
 ## Table of contents
 
 - [Installation](#installation)
