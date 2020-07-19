@@ -33,6 +33,8 @@ describe('cache is not used initially', () => {
       'a/b/c/d/e/.foorc.yml',
       'a/b/c/d/e/.foorc.js',
       'a/b/c/d/e/foo.config.js',
+      'a/b/c/d/e/.foorc.cjs',
+      'a/b/c/d/e/foo.config.cjs',
       'a/b/c/d/package.json',
       'a/b/c/d/.foorc',
     ]);
@@ -143,6 +145,8 @@ describe('cache is used when some directories in search are already visted', () 
       'a/b/c/d/e/f/.foorc.yml',
       'a/b/c/d/e/f/.foorc.js',
       'a/b/c/d/e/f/foo.config.js',
+      'a/b/c/d/e/f/.foorc.cjs',
+      'a/b/c/d/e/f/foo.config.cjs',
     ]);
 
     expect(result).toEqual({
@@ -225,6 +229,8 @@ describe('cache is not used in a new cosmiconfig instance', () => {
       'a/b/c/d/e/.foorc.yml',
       'a/b/c/d/e/.foorc.js',
       'a/b/c/d/e/foo.config.js',
+      'a/b/c/d/e/.foorc.cjs',
+      'a/b/c/d/e/foo.config.cjs',
       'a/b/c/d/package.json',
       'a/b/c/d/.foorc',
     ]);
@@ -341,6 +347,8 @@ describe('clears directory cache on calling clearSearchCache', () => {
       'a/b/c/d/e/.foorc.yml',
       'a/b/c/d/e/.foorc.js',
       'a/b/c/d/e/foo.config.js',
+      'a/b/c/d/e/.foorc.cjs',
+      'a/b/c/d/e/foo.config.cjs',
       'a/b/c/d/package.json',
       'a/b/c/d/.foorc',
     ]);
@@ -387,6 +395,8 @@ describe('clears directory cache on calling clearCaches', () => {
       'a/b/c/d/e/.foorc.yml',
       'a/b/c/d/e/.foorc.js',
       'a/b/c/d/e/foo.config.js',
+      'a/b/c/d/e/.foorc.cjs',
+      'a/b/c/d/e/foo.config.cjs',
       'a/b/c/d/package.json',
       'a/b/c/d/.foorc',
     ]);
@@ -449,6 +459,8 @@ describe('with cache disabled, does not cache directory results', () => {
       'a/b/c/d/e/.foorc.yml',
       'a/b/c/d/e/.foorc.js',
       'a/b/c/d/e/foo.config.js',
+      'a/b/c/d/e/.foorc.cjs',
+      'a/b/c/d/e/foo.config.cjs',
       'a/b/c/d/package.json',
       'a/b/c/d/.foorc',
     ]);

@@ -36,6 +36,8 @@ describe('gives up if it cannot find the file', () => {
       'a/b/.foorc.yml',
       'a/b/.foorc.js',
       'a/b/foo.config.js',
+      'a/b/.foorc.cjs',
+      'a/b/foo.config.cjs',
       'a/package.json',
       'a/.foorc',
       'a/.foorc.json',
@@ -43,6 +45,8 @@ describe('gives up if it cannot find the file', () => {
       'a/.foorc.yml',
       'a/.foorc.js',
       'a/foo.config.js',
+      'a/.foorc.cjs',
+      'a/foo.config.cjs',
       'package.json',
       '.foorc',
       '.foorc.json',
@@ -50,6 +54,8 @@ describe('gives up if it cannot find the file', () => {
       '.foorc.yml',
       '.foorc.js',
       'foo.config.js',
+      '.foorc.cjs',
+      'foo.config.cjs',
     ]);
 
     expect(result).toBe(null);
@@ -86,6 +92,8 @@ describe('stops at stopDir and gives up', () => {
       'a/b/.foorc.yml',
       'a/b/.foorc.js',
       'a/b/foo.config.js',
+      'a/b/.foorc.cjs',
+      'a/b/foo.config.cjs',
       'a/package.json',
       'a/.foorc',
       'a/.foorc.json',
@@ -93,6 +101,8 @@ describe('stops at stopDir and gives up', () => {
       'a/.foorc.yml',
       'a/.foorc.js',
       'a/foo.config.js',
+      'a/.foorc.cjs',
+      'a/foo.config.cjs',
     ]);
 
     expect(result).toBe(null);
