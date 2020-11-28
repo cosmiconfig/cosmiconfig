@@ -38,7 +38,7 @@ const loadYaml: LoaderSync = function loadYaml(filepath, content) {
   }
 
   try {
-    const result = yaml.parse(content, { prettyErrors: true });
+    const result = yaml.parse(content, { prettyErrors: true, merge: true });
     return result;
   } catch (error) {
     error.message = `YAML Error in ${filepath}:\n${error.message}`;
