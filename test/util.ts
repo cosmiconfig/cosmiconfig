@@ -72,14 +72,6 @@ class TempDir {
     const calls = spy.mock.calls;
 
     const result = calls
-      .filter((call): boolean => {
-        /**
-         * Filter out `fs` calls that are made within cosmiconfig's dependency
-         * tree.
-         */
-        const filePath = call[0];
-        return !filePath.includes('/cosmiconfig/node_modules/');
-      })
       .map((call): string => {
         const filePath = call[0];
         const relativePath = path.relative(this.dir, filePath);
@@ -91,6 +83,13 @@ class TempDir {
         const normalizeCrossPlatform = normalizeDirectorySlash(relativePath);
 
         return normalizeCrossPlatform;
+      })
+      .filter((filePath): boolean => {
+        /**
+         * Filter out `fs` calls that are made within cosmiconfig's dependency
+         * tree.
+         */
+        return !filePath.includes('/cosmiconfig/node_modules/');
       });
 
     return result;
