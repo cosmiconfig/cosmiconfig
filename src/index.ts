@@ -13,10 +13,15 @@ import {
 } from './types';
 
 type LoaderResult = Config | null;
-export type Loader =
-  | ((filepath: string, content: string) => Promise<LoaderResult>)
-  | LoaderSync;
-export type LoaderSync = (filepath: string, content: string) => LoaderResult;
+export type LoaderSync = (
+  filepath: string,
+  content: string | null,
+) => LoaderResult;
+export type LoaderAsync = (
+  filepath: string,
+  content: string | null,
+) => Promise<LoaderResult>;
+export type Loader = LoaderAsync | LoaderSync;
 
 export type Transform =
   | ((CosmiconfigResult: CosmiconfigResult) => Promise<CosmiconfigResult>)
@@ -64,7 +69,7 @@ function cosmiconfig(moduleName: string, options: Options = {}) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function cosmiconfigSync(moduleName: string, options: OptionsSync = {}) {
-  const normalizedOptions: ExplorerOptionsSync = normalizeOptions(
+  const normalizedOptions: ExplorerOptionsSync = normalizeOptionsSync(
     moduleName,
     options,
   );
@@ -82,8 +87,17 @@ function cosmiconfigSync(moduleName: string, options: OptionsSync = {}) {
 
 // do not allow mutation of default loaders. Make sure it is set inside options
 const defaultLoaders = Object.freeze({
+  // '.mjs': loaders.loadJs,
   '.cjs': loaders.loadJs,
   '.js': loaders.loadJs,
+  '.json': loaders.loadJson,
+  '.yaml': loaders.loadYaml,
+  '.yml': loaders.loadYaml,
+  noExt: loaders.loadYaml,
+} as const);
+const defaultLoadersSync = Object.freeze({
+  '.cjs': loaders.loadJsSync,
+  '.js': loaders.loadJsSync,
   '.json': loaders.loadJson,
   '.yaml': loaders.loadYaml,
   '.yml': loaders.loadYaml,
@@ -96,17 +110,47 @@ const identity: TransformSync = function identity(x) {
 
 function normalizeOptions(
   moduleName: string,
-  options: OptionsSync,
-): ExplorerOptionsSync;
-function normalizeOptions(
-  moduleName: string,
   options: Options,
-): ExplorerOptions;
-function normalizeOptions(
+): ExplorerOptions {
+  const defaults: ExplorerOptions = {
+    packageProp: moduleName,
+    searchPlaces: [
+      'package.json',
+      `.${moduleName}rc`,
+      `.${moduleName}rc.json`,
+      `.${moduleName}rc.yaml`,
+      `.${moduleName}rc.yml`,
+      `.${moduleName}rc.js`,
+      // `.${moduleName}rc.mjs`,
+      `.${moduleName}rc.cjs`,
+      `${moduleName}.config.js`,
+      // `${moduleName}.config.mjs`,
+      `${moduleName}.config.cjs`,
+    ],
+    ignoreEmptySearchPlaces: true,
+    stopDir: os.homedir(),
+    cache: true,
+    transform: identity,
+    loaders: defaultLoaders,
+  };
+
+  const normalizedOptions: ExplorerOptions = {
+    ...defaults,
+    ...options,
+    loaders: {
+      ...defaults.loaders,
+      ...options.loaders,
+    },
+  };
+
+  return normalizedOptions;
+}
+
+function normalizeOptionsSync(
   moduleName: string,
-  options: Options | OptionsSync,
-): ExplorerOptions | ExplorerOptionsSync {
-  const defaults: ExplorerOptions | ExplorerOptionsSync = {
+  options: OptionsSync,
+): ExplorerOptionsSync {
+  const defaults: ExplorerOptionsSync = {
     packageProp: moduleName,
     searchPlaces: [
       'package.json',
@@ -123,10 +167,10 @@ function normalizeOptions(
     stopDir: os.homedir(),
     cache: true,
     transform: identity,
-    loaders: defaultLoaders,
+    loaders: defaultLoadersSync,
   };
 
-  const normalizedOptions: ExplorerOptions | ExplorerOptionsSync = {
+  const normalizedOptions: ExplorerOptionsSync = {
     ...defaults,
     ...options,
     loaders: {

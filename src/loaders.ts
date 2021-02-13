@@ -3,17 +3,30 @@
 import parseJsonType from 'parse-json';
 import yamlType from 'yaml';
 import importFreshType from 'import-fresh';
-import { LoaderSync } from './index';
-import { LoadersSync } from './types';
+import { LoaderSync, LoaderAsync } from './index';
+import { Loaders } from './types';
+import { canUseDynamicImport } from './canUseDynamicImport';
 
 let importFresh: typeof importFreshType;
-const loadJs: LoaderSync = function loadJs(filepath) {
+const loadJsSync: LoaderSync = function loadJsSync(filepath) {
   if (importFresh === undefined) {
     importFresh = require('import-fresh');
   }
 
   const result = importFresh(filepath);
   return result;
+};
+
+const loadJs: LoaderAsync = async function loadJs(filepath) {
+  // This logic is validated by tests running in Node versions that don't
+  // support dynamic imports, like Node 10.
+  /* istanbul ignore else */
+  if (canUseDynamicImport()) {
+    const imported = await import(filepath);
+    return imported.default;
+  } else {
+    return loadJsSync(filepath, null);
+  }
 };
 
 let parseJson: typeof parseJsonType;
@@ -46,6 +59,6 @@ const loadYaml: LoaderSync = function loadYaml(filepath, content) {
   }
 };
 
-const loaders: LoadersSync = { loadJs, loadJson, loadYaml };
+const loaders: Loaders = { loadJs, loadJsSync, loadJson, loadYaml };
 
 export { loaders };

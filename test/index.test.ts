@@ -74,21 +74,17 @@ describe('cosmiconfig', () => {
   });
 
   describe('creates explorer with default options if not specified', () => {
-    const checkResult = (mock: jest.SpyInstance) => {
+    const checkResult = (
+      mock: jest.SpyInstance,
+      { expectedLoaders }: { expectedLoaders: { [key: string]: string } },
+    ) => {
       expect(mock.mock.calls.length).toEqual(1);
       expect(mock.mock.calls[0].length).toEqual(1);
 
       const { transform, loaders, ...explorerOptions } = mock.mock.calls[0][0];
       expect(transform.name).toBe('identity');
       const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
-      expect(loaderFunctionsByName).toEqual({
-        '.cjs': 'loadJs',
-        '.js': 'loadJs',
-        '.json': 'loadJson',
-        '.yaml': 'loadYaml',
-        '.yml': 'loadYaml',
-        noExt: 'loadYaml',
-      });
+      expect(loaderFunctionsByName).toEqual(expectedLoaders);
 
       expect(explorerOptions).toEqual({
         packageProp: moduleName,
@@ -111,12 +107,30 @@ describe('cosmiconfig', () => {
 
     test('async', () => {
       cosmiconfig(moduleName);
-      checkResult(createExplorerMock);
+      checkResult(createExplorerMock, {
+        expectedLoaders: {
+          '.cjs': 'loadJs',
+          '.js': 'loadJs',
+          '.json': 'loadJson',
+          '.yaml': 'loadYaml',
+          '.yml': 'loadYaml',
+          noExt: 'loadYaml',
+        },
+      });
     });
 
     test('sync', () => {
       cosmiconfigSync(moduleName);
-      checkResult(createExplorerSyncMock);
+      checkResult(createExplorerSyncMock, {
+        expectedLoaders: {
+          '.cjs': 'loadJsSync',
+          '.js': 'loadJsSync',
+          '.json': 'loadJson',
+          '.yaml': 'loadYaml',
+          '.yml': 'loadYaml',
+          noExt: 'loadYaml',
+        },
+      });
     });
   });
 

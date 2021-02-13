@@ -71,6 +71,7 @@
     "tabWidth": 2
   },
   "jest": {
+    "testRunner": "jest-circus/runner",
     "testEnvironment": "node",
     "collectCoverageFrom": [
       "src/**/*.{js,ts}"
@@ -131,7 +132,8 @@
     "eslint-plugin-jest": "^23.18.0",
     "eslint-plugin-node": "^11.1.0",
     "husky": "^4.2.5",
-    "jest": "^26.1.0",
+    "jest": "^26.6.3",
+    "jest-circus": "^26.6.3",
     "lint-staged": "^10.2.11",
     "make-dir": "^3.1.0",
     "parent-module": "^2.0.0",
