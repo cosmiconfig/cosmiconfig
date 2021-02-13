@@ -210,18 +210,16 @@ describe('throws error for invalid JS in .config.js file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const expectedError = 'Unexpected token, expected ","';
-
   test('async', async () => {
     await expect(
       cosmiconfig('foo', explorerOptions).search(startDir),
-    ).rejects.toThrow(expectedError);
+    ).rejects.toThrow();
   });
 
   test('sync', () => {
     expect(() =>
       cosmiconfigSync('foo', explorerOptions).search(startDir),
-    ).toThrow(expectedError);
+    ).toThrow();
   });
 });
 
@@ -296,18 +294,16 @@ describe('searching for rc files with specified extensions, throws error for inv
     ],
   };
 
-  const expectedError = 'Unexpected token, expected ";"';
-
   test('async', async () => {
     await expect(
       cosmiconfig('foo', explorerOptions).search(startDir),
-    ).rejects.toThrow(expectedError);
+    ).rejects.toThrow();
   });
 
   test('sync', () => {
     expect(() =>
       cosmiconfigSync('foo', explorerOptions).search(startDir),
-    ).toThrow(expectedError);
+    ).toThrow();
   });
 });
 

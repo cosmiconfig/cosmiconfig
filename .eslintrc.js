@@ -108,7 +108,7 @@ module.exports = {
     'jest/valid-title': 'error',
     'jest/no-test-callback': 'error',
     'jest/prefer-todo': 'error',
-    'jest/require-to-throw-message': 'error',
+    'jest/require-to-throw-message': 'off',
     // Many tests make assertions indirectly in a way the plugin
     // does not understand.
     'jest/expect-expect': 'off',
