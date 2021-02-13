@@ -3,15 +3,15 @@ git:
   depth: 5
 cache: yarn
 branches:
-  only:
-    - main
-    - v7
+  # only:
+  #   - main
+  #   - v7
 matrix:
   include:
     - node_js: '10'
-      after_success: 'bash <(curl -s https://codecov.io/bash)'
     - node_js: '12'
     - node_js: '14'
+      after_success: 'bash <(curl -s https://codecov.io/bash)'
 install:
   - yarn install --frozen-lockfile
 script:

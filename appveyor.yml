@@ -1,9 +1,9 @@
 # http://www.appveyor.com/docs/appveyor-yml
 
-branches:
-  only:
-    - main
-    - v7
+# branches:
+#   only:
+#     - main
+#     - v7
 
 clone_depth: 5
 version: '{build}'
