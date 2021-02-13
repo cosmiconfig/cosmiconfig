@@ -115,4 +115,8 @@ class TempDir {
   }
 }
 
-export { TempDir };
+function isNotMjs(filePath: string): boolean {
+  return path.extname(filePath) !== '.mjs';
+}
+
+export { TempDir, isNotMjs };

@@ -1,11 +1,15 @@
-/* istanbul ignore next */
+/* istanbul ignore file */
+let result: boolean;
 function canUseDynamicImport(): boolean {
-  try {
-    new Function('id', 'return import(id);');
-    return true;
-  } catch (e) {
-    return false;
+  if (result === undefined) {
+    try {
+      new Function('id', 'return import(id);');
+      result = true;
+    } catch (e) {
+      result = false;
+    }
   }
+  return result;
 }
 
 export { canUseDynamicImport };

@@ -1,5 +1,12 @@
 # Changelog
 
+## HEAD
+
+- **Breaking change:** Add support for ECMAScript modules (ESM) to the [*asynchronous* API](./README.md#asynchronous-api). End users running Node versions that support ESM can provide `.mjs` files, or `.js` files whose nearest parent `package.json` file contains `"type": "module"`.
+  - `${moduleName}rc.mjs` and `${moduleName}.config.mjs` are included in the default `searchPlaces` of the asynchronous API.
+  - The [synchronous API](./README.md#synchronous-api) does not support ECMAScript modules, so does not look for `.mjs` files.
+  - To learn more, read ["Loading JS modules"](./README.md#loading-js-modules).
+
 ## 7.0.0
 
 - **Breaking change:** Add `${moduleName}rc.cjs` and `${moduleName}.config.cjs` to the default `searchPlaces`, to support users of `"type": "module"` in recent versions of Node.

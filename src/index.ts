@@ -87,7 +87,7 @@ function cosmiconfigSync(moduleName: string, options: OptionsSync = {}) {
 
 // do not allow mutation of default loaders. Make sure it is set inside options
 const defaultLoaders = Object.freeze({
-  // '.mjs': loaders.loadJs,
+  '.mjs': loaders.loadJs,
   '.cjs': loaders.loadJs,
   '.js': loaders.loadJs,
   '.json': loaders.loadJson,
@@ -121,12 +121,12 @@ function normalizeOptions(
       `.${moduleName}rc.yaml`,
       `.${moduleName}rc.yml`,
       `.${moduleName}rc.js`,
-      // `.${moduleName}rc.mjs`,
+      `.${moduleName}rc.mjs`,
       `.${moduleName}rc.cjs`,
       `${moduleName}.config.js`,
-      // `${moduleName}.config.mjs`,
+      `${moduleName}.config.mjs`,
       `${moduleName}.config.cjs`,
-    ],
+    ].filter(Boolean),
     ignoreEmptySearchPlaces: true,
     stopDir: os.homedir(),
     cache: true,
@@ -182,4 +182,4 @@ function normalizeOptionsSync(
   return normalizedOptions;
 }
 
-export { cosmiconfig, cosmiconfigSync, defaultLoaders };
+export { cosmiconfig, cosmiconfigSync, defaultLoaders, defaultLoadersSync };

@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { TempDir } from './util';
+import { TempDir, isNotMjs } from './util';
 import {
   cosmiconfig,
   cosmiconfigSync,
@@ -23,40 +23,53 @@ describe('gives up if it cannot find the file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('.') };
 
-  const checkResult = (statSpy: any, readFileSpy: any, result: any) => {
+  const expectedFilesChecked = [
+    'a/b/package.json',
+    'a/b/.foorc',
+    'a/b/.foorc.json',
+    'a/b/.foorc.yaml',
+    'a/b/.foorc.yml',
+    'a/b/.foorc.js',
+    'a/b/.foorc.mjs',
+    'a/b/.foorc.cjs',
+    'a/b/foo.config.js',
+    'a/b/foo.config.mjs',
+    'a/b/foo.config.cjs',
+    'a/package.json',
+    'a/.foorc',
+    'a/.foorc.json',
+    'a/.foorc.yaml',
+    'a/.foorc.yml',
+    'a/.foorc.js',
+    'a/.foorc.mjs',
+    'a/.foorc.cjs',
+    'a/foo.config.js',
+    'a/foo.config.mjs',
+    'a/foo.config.cjs',
+    'package.json',
+    '.foorc',
+    '.foorc.json',
+    '.foorc.yaml',
+    '.foorc.yml',
+    '.foorc.js',
+    '.foorc.mjs',
+    '.foorc.cjs',
+    'foo.config.js',
+    'foo.config.mjs',
+    'foo.config.cjs',
+  ];
+
+  const checkResult = (
+    statSpy: any,
+    readFileSpy: any,
+    result: any,
+    files: any,
+  ) => {
     const statPath = temp.getSpyPathCalls(statSpy);
     expect(statPath).toEqual(['a/b']);
 
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
-    expect(filesChecked).toEqual([
-      'a/b/package.json',
-      'a/b/.foorc',
-      'a/b/.foorc.json',
-      'a/b/.foorc.yaml',
-      'a/b/.foorc.yml',
-      'a/b/.foorc.js',
-      'a/b/.foorc.cjs',
-      'a/b/foo.config.js',
-      'a/b/foo.config.cjs',
-      'a/package.json',
-      'a/.foorc',
-      'a/.foorc.json',
-      'a/.foorc.yaml',
-      'a/.foorc.yml',
-      'a/.foorc.js',
-      'a/.foorc.cjs',
-      'a/foo.config.js',
-      'a/foo.config.cjs',
-      'package.json',
-      '.foorc',
-      '.foorc.json',
-      '.foorc.yaml',
-      '.foorc.yml',
-      '.foorc.js',
-      '.foorc.cjs',
-      'foo.config.js',
-      'foo.config.cjs',
-    ]);
+    expect(filesChecked).toEqual(files);
 
     expect(result).toBe(null);
   };
@@ -66,7 +79,7 @@ describe('gives up if it cannot find the file', () => {
     const statSpy = jest.spyOn(fs, 'stat');
 
     const result = await cosmiconfig('foo', explorerOptions).search(startDir);
-    checkResult(statSpy, readFileSpy, result);
+    checkResult(statSpy, readFileSpy, result, expectedFilesChecked);
   });
 
   test('sync', () => {
@@ -74,7 +87,12 @@ describe('gives up if it cannot find the file', () => {
     const statSpy = jest.spyOn(fs, 'statSync');
 
     const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
-    checkResult(statSpy, readFileSpy, result);
+    checkResult(
+      statSpy,
+      readFileSpy,
+      result,
+      expectedFilesChecked.filter(isNotMjs),
+    );
   });
 });
 
@@ -82,28 +100,34 @@ describe('stops at stopDir and gives up', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const checkResult = (readFileSpy: any, result: any) => {
+  const expectedFilesChecked = [
+    'a/b/package.json',
+    'a/b/.foorc',
+    'a/b/.foorc.json',
+    'a/b/.foorc.yaml',
+    'a/b/.foorc.yml',
+    'a/b/.foorc.js',
+    'a/b/.foorc.mjs',
+    'a/b/.foorc.cjs',
+    'a/b/foo.config.js',
+    'a/b/foo.config.mjs',
+    'a/b/foo.config.cjs',
+    'a/package.json',
+    'a/.foorc',
+    'a/.foorc.json',
+    'a/.foorc.yaml',
+    'a/.foorc.yml',
+    'a/.foorc.js',
+    'a/.foorc.mjs',
+    'a/.foorc.cjs',
+    'a/foo.config.js',
+    'a/foo.config.mjs',
+    'a/foo.config.cjs',
+  ];
+
+  const checkResult = (readFileSpy: any, result: any, files: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
-    expect(filesChecked).toEqual([
-      'a/b/package.json',
-      'a/b/.foorc',
-      'a/b/.foorc.json',
-      'a/b/.foorc.yaml',
-      'a/b/.foorc.yml',
-      'a/b/.foorc.js',
-      'a/b/.foorc.cjs',
-      'a/b/foo.config.js',
-      'a/b/foo.config.cjs',
-      'a/package.json',
-      'a/.foorc',
-      'a/.foorc.json',
-      'a/.foorc.yaml',
-      'a/.foorc.yml',
-      'a/.foorc.js',
-      'a/.foorc.cjs',
-      'a/foo.config.js',
-      'a/foo.config.cjs',
-    ]);
+    expect(filesChecked).toEqual(files);
 
     expect(result).toBe(null);
   };
@@ -112,14 +136,14 @@ describe('stops at stopDir and gives up', () => {
     const readFileSpy = jest.spyOn(fs, 'readFile');
 
     const result = await cosmiconfig('foo', explorerOptions).search(startDir);
-    checkResult(readFileSpy, result);
+    checkResult(readFileSpy, result, expectedFilesChecked);
   });
 
   test('sync', () => {
     const readFileSpy = jest.spyOn(fs, 'readFileSync');
 
     const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
-    checkResult(readFileSpy, result);
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
 });
 
