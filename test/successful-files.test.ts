@@ -1,7 +1,14 @@
 import { TempDir } from './util';
 import { cosmiconfig, cosmiconfigSync } from '../src';
+import { canUseDynamicImport } from '../src/canUseDynamicImport';
 
 const temp = new TempDir();
+
+const describeEsmOnly = canUseDynamicImport() ? describe : describe.skip;
+
+function randomString(): string {
+  return Math.random().toString(36).substring(7);
+}
 
 beforeEach(() => {
   temp.clean();
@@ -71,14 +78,32 @@ describe('loads defined JS config path', () => {
     const result = await cosmiconfig('successful-files-tests').load(file);
     checkResult(result);
   });
-
-  test('sync', () => {
-    const result = cosmiconfigSync('successful-files-tests').load(file);
-    checkResult(result);
-  });
 });
 
-describe('loads modularized JS config path', () => {
+describeEsmOnly(
+  'loads ESM from defined .js config path (nearest package.json says it is ESM)',
+  () => {
+    // Random basename works around our inability to clear the ESM loader cache.
+    const fileBasename = `${randomString()}.js`;
+    const file = temp.absolutePath(fileBasename);
+    const checkResult = (result: any) => {
+      expect(result.config).toEqual({ foo: true });
+      expect(result.filepath).toBe(file);
+    };
+
+    beforeEach(() => {
+      temp.createFile('package.json', '{ "type": "module" }');
+      temp.createFile(fileBasename, 'export default { foo: true };');
+    });
+
+    test('async', async () => {
+      const result = await cosmiconfig('successful-files-tests').load(file);
+      checkResult(result);
+    });
+  },
+);
+
+describe('loads CommonJS with its own dependency', () => {
   beforeEach(() => {
     temp.createFile('foo.js', 'module.exports = { foo: true };');
     temp.createFile('foo-module.js', 'module.exports = require("./foo");');
@@ -97,6 +122,30 @@ describe('loads modularized JS config path', () => {
 
   test('sync', () => {
     const result = cosmiconfigSync('successful-files-tests').load(file);
+    checkResult(result);
+  });
+});
+
+describeEsmOnly('loads ESM with its own dependency', () => {
+  // Random basename works around our inability to clear the ESM loader cache.
+  const depFileBasename = `${randomString()}.mjs`;
+  const fileBasename = `${randomString()}.mjs`;
+  const file = temp.absolutePath(fileBasename);
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  beforeEach(() => {
+    temp.createFile(depFileBasename, 'export default { foo: true };');
+    temp.createFile(
+      fileBasename,
+      `import config from "./${depFileBasename}"; export default config;`,
+    );
+  });
+
+  test('async', async () => {
+    const result = await cosmiconfig('successful-files-tests').load(file);
     checkResult(result);
   });
 });

@@ -1,8 +1,15 @@
 import fs from 'fs';
 import { TempDir, isNotMjs } from './util';
 import { cosmiconfig, cosmiconfigSync, defaultLoaders } from '../src';
+import { canUseDynamicImport } from '../src/canUseDynamicImport';
 
 const temp = new TempDir();
+
+const describeEsmOnly = canUseDynamicImport() ? describe : describe.skip;
+
+function randomString(): string {
+  return Math.random().toString(36).substring(7);
+}
 
 beforeEach(() => {
   temp.clean();
@@ -283,6 +290,97 @@ describe('finds CJS file in first searched dir', () => {
   });
 });
 
+describeEsmOnly('finds ESM foo.config.mjs file in first searched dir', () => {
+  // This prefix works around our inability to clear the ESM loader cache.
+  const dirPrefix = randomString();
+  const startDir = temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f`);
+  const explorerOptions = { stopDir: temp.absolutePath('.') };
+
+  const expectedFilesChecked = [
+    `${dirPrefix}/a/b/c/d/e/f/package.json`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.json`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.yaml`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.yml`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.js`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.mjs`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.cjs`,
+    `${dirPrefix}/a/b/c/d/e/f/foo.config.js`,
+    `${dirPrefix}/a/b/c/d/e/f/foo.config.mjs`,
+  ];
+
+  const checkResult = (readFileSpy: any, result: any, files: any) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+
+    expect(filesChecked).toEqual(files);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f/foo.config.mjs`),
+    });
+  };
+
+  test('async', async () => {
+    temp.createDir(`${dirPrefix}/a/b/c/d/e/f`);
+    temp.createFile(
+      `${dirPrefix}/a/b/c/d/e/f/foo.config.mjs`,
+      'export default { found: true };',
+    );
+
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result, expectedFilesChecked);
+  });
+});
+
+describeEsmOnly('finds ESM foo.config.js file in first searched dir', () => {
+  // This prefix works around our inability to clear the ESM loader cache.
+  const dirPrefix = randomString();
+  const startDir = temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f`);
+  const explorerOptions = { stopDir: temp.absolutePath('.') };
+
+  const expectedFilesChecked = [
+    `${dirPrefix}/a/b/c/d/e/f/package.json`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.json`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.yaml`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.yml`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.js`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.mjs`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.cjs`,
+    `${dirPrefix}/a/b/c/d/e/f/foo.config.js`,
+  ];
+
+  const checkResult = (readFileSpy: any, result: any, files: any) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+
+    expect(filesChecked).toEqual(files);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f/foo.config.js`),
+    });
+  };
+
+  test('async', async () => {
+    temp.createDir(`${dirPrefix}/a/b/c/d/e/f`);
+    temp.createFile(
+      `${dirPrefix}/a/b/c/d/e/f/foo.config.js`,
+      'export default { found: true };',
+    );
+    temp.createFile(
+      `${dirPrefix}/a/b/c/d/e/f/package.json`,
+      '{ "type": "module" }',
+    );
+
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result, expectedFilesChecked);
+  });
+});
+
 describe('finds .foorc.js file in first searched dir', () => {
   beforeEach(() => {
     temp.createFile(
@@ -326,6 +424,91 @@ describe('finds .foorc.js file in first searched dir', () => {
 
     const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+  });
+});
+
+describeEsmOnly('finds ESM .foorc.mjs file in first searched dir', () => {
+  // This prefix works around our inability to clear the ESM loader cache.
+  const dirPrefix = randomString();
+  const startDir = temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f`);
+  const explorerOptions = { stopDir: temp.absolutePath('.') };
+
+  const expectedFilesChecked = [
+    `${dirPrefix}/a/b/c/d/e/f/package.json`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.json`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.yaml`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.yml`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.js`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.mjs`,
+  ];
+
+  const checkResult = (readFileSpy: any, result: any, files: any) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+
+    expect(filesChecked).toEqual(files);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f/.foorc.mjs`),
+    });
+  };
+
+  test('async', async () => {
+    temp.createDir(`${dirPrefix}/a/b/c/d/e/f`);
+    temp.createFile(
+      `${dirPrefix}/a/b/c/d/e/f/.foorc.mjs`,
+      'export default { found: true };',
+    );
+
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result, expectedFilesChecked);
+  });
+});
+
+describeEsmOnly('finds ESM .foorc.js file in first searched dir', () => {
+  // This prefix works around our inability to clear the ESM loader cache.
+  const dirPrefix = randomString();
+  const startDir = temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f`);
+  const explorerOptions = { stopDir: temp.absolutePath('.') };
+
+  const expectedFilesChecked = [
+    `${dirPrefix}/a/b/c/d/e/f/package.json`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.json`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.yaml`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.yml`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.js`,
+  ];
+
+  const checkResult = (readFileSpy: any, result: any, files: any) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+
+    expect(filesChecked).toEqual(files);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f/.foorc.js`),
+    });
+  };
+
+  test('async', async () => {
+    temp.createDir(`${dirPrefix}/a/b/c/d/e/f`);
+    temp.createFile(
+      `${dirPrefix}/a/b/c/d/e/f/.foorc.js`,
+      'export default { found: true };',
+    );
+    temp.createFile(
+      `${dirPrefix}/a/b/c/d/e/f/package.json`,
+      '{ "type": "module" }',
+    );
+
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result, expectedFilesChecked);
   });
 });
 

@@ -20,8 +20,8 @@
     "format:md": "remark-preset-davidtheclark --format",
     "format:check": "prettier \"**/*.{js,ts,json,yml,yaml}\" --check",
     "typescript": "tsc",
-    "test": "jest --coverage",
-    "test:watch": "jest --watch",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --coverage",
+    "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watchAll",
     "check:all": "npm run test && npm run typescript && npm run lint && npm run format:check",
     "prepublishOnly": "npm run check:all && npm run build"
   },

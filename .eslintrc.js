@@ -112,6 +112,7 @@ module.exports = {
     // Many tests make assertions indirectly in a way the plugin
     // does not understand.
     'jest/expect-expect': 'off',
+    'jest/no-identical-title': 'off',
   },
   settings: {
     node: {
