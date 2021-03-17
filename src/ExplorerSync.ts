@@ -1,8 +1,8 @@
 import path from 'path';
-import { ExplorerBase } from './ExplorerBase';
-import { readFileSync } from './readFile';
 import { cacheWrapperSync } from './cacheWrapper';
+import { ExplorerBase } from './ExplorerBase';
 import { getDirectorySync } from './getDirectory';
+import { readFileSync } from './readFile';
 import {
   CosmiconfigResult,
   ExplorerOptionsSync,
@@ -14,7 +14,9 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     super(options);
   }
 
-  public searchSync(searchFrom: string = process.cwd()): CosmiconfigResult {
+  public searchSync(
+    searchFrom: string = process.cwd(),
+  ): CosmiconfigResult | null {
     const startDirectory = getDirectorySync(searchFrom);
     const result = this.searchFromDirectorySync(startDirectory);
 

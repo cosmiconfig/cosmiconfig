@@ -1,8 +1,8 @@
 import path from 'path';
-import { ExplorerBase } from './ExplorerBase';
-import { readFile } from './readFile';
 import { cacheWrapper } from './cacheWrapper';
+import { ExplorerBase } from './ExplorerBase';
 import { getDirectory } from './getDirectory';
+import { readFile } from './readFile';
 import { CosmiconfigResult, ExplorerOptions, LoadedFileContent } from './types';
 
 class Explorer extends ExplorerBase<ExplorerOptions> {
@@ -12,7 +12,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
 
   public async search(
     searchFrom: string = process.cwd(),
-  ): Promise<CosmiconfigResult> {
+  ): Promise<CosmiconfigResult | null> {
     const startDirectory = await getDirectory(searchFrom);
     const result = await this.searchFromDirectory(startDirectory);
 
