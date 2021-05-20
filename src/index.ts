@@ -118,6 +118,7 @@ function normalizeOptions(
       `.${moduleName}rc.cjs`,
       `${moduleName}.config.js`,
       `${moduleName}.config.cjs`,
+      `${moduleName}.config.json`,
     ],
     ignoreEmptySearchPlaces: true,
     stopDir: os.homedir(),
