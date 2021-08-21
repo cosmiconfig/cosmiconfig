@@ -780,7 +780,7 @@ describe('searchPlaces can include subdirectories', () => {
   });
 });
 
-describe('directories are not treated as files', () => {
+describe('directories with the same name as a search place are not treated as files', () => {
   beforeEach(() => {
     temp.createFile('a/.foorc.json', '{ "found": true }');
     temp.createDir('a/b/package.json/c');
