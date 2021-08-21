@@ -2,7 +2,7 @@ import fs from 'fs';
 
 async function fsReadFileAsync(
   pathname: string,
-  encoding: string,
+  encoding: BufferEncoding,
 ): Promise<string> {
   return new Promise((resolve, reject): void => {
     fs.readFile(pathname, encoding, (error, contents): void => {
