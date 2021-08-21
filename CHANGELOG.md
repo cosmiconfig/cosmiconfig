@@ -1,6 +1,6 @@
 # Changelog
 
-## HEAD
+## 7.0.1
 
 - Fixed: If there was a directory that had the same name as a search place (e.g. "package.json"), we would try to read it as a file, which would cause an exception.
 
