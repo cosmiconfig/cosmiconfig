@@ -1,5 +1,9 @@
 # Changelog
 
+## HEAD
+
+- Fixed: If there was a directory that had the same name as a search place (e.g. "package.json"), we would try to read it as a file, which would cause an exception.
+
 ## 7.0.0
 
 - **Breaking change:** Add `${moduleName}rc.cjs` and `${moduleName}.config.cjs` to the default `searchPlaces`, to support users of `"type": "module"` in recent versions of Node.
