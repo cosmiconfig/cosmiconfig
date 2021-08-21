@@ -780,6 +780,52 @@ describe('searchPlaces can include subdirectories', () => {
   });
 });
 
+describe('directories with the same name as a search place are not treated as files', () => {
+  beforeEach(() => {
+    temp.createFile('a/.foorc.json', '{ "found": true }');
+    temp.createDir('a/b/package.json/c');
+  });
+
+  const startDir = temp.absolutePath('a/b/package.json/c');
+  const explorerOptions = {
+    stopDir: temp.absolutePath('.'),
+    searchPlaces: ['package.json', '.foorc.json'],
+  };
+
+  const checkResult = (readFileSpy: any, result: any) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+    expect(filesChecked).toEqual([
+      'a/b/package.json/c/package.json',
+      'a/b/package.json/c/.foorc.json',
+      'a/b/package.json/package.json',
+      'a/b/package.json/.foorc.json',
+      'a/b/package.json',
+      'a/b/.foorc.json',
+      'a/package.json',
+      'a/.foorc.json',
+    ]);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/.foorc.json'),
+    });
+  };
+
+  test('async', async () => {
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
+  });
+
+  test('sync', () => {
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+
+    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result);
+  });
+});
+
 describe('custom loaders allow non-default file types', () => {
   const loadThings = (filepath: any, content: any) => {
     return {
