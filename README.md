@@ -374,7 +374,7 @@ If you want to load files that are not handled by the loader functions Cosmiconf
 
 **Third-party loaders:**
 
-- [@endemolshinegroup/cosmiconfig-typescript-loader](https://github.com/EndemolShineGroup/cosmiconfig-typescript-loader)
+- [cosmiconfig-typescript-loader](https://github.com/codex-/cosmiconfig-typescript-loader)
 
 **Use cases for custom loader function:**
 
