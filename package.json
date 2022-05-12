@@ -110,7 +110,7 @@
     "import-fresh": "^3.2.1",
     "parse-json": "^5.0.0",
     "path-type": "^4.0.0",
-    "yaml": "^1.10.0"
+    "yaml": "^2.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.4",
