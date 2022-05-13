@@ -26,7 +26,9 @@ const loadJson: LoaderSync = function loadJson(filepath, content) {
     const result = parseJson(content);
     return result;
   } catch (error) {
-    error.message = `JSON Error in ${filepath}:\n${error.message}`;
+    (error as Error).message = `JSON Error in ${filepath}:\n${
+      (error as Error).message
+    }`;
     throw error;
   }
 };
@@ -41,7 +43,9 @@ const loadYaml: LoaderSync = function loadYaml(filepath, content) {
     const result = yaml.parse(content, { prettyErrors: true });
     return result;
   } catch (error) {
-    error.message = `YAML Error in ${filepath}:\n${error.message}`;
+    (error as Error).message = `YAML Error in ${filepath}:\n${
+      (error as Error).message
+    }`;
     throw error;
   }
 };
