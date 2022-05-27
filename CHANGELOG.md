@@ -3,6 +3,7 @@
 ## HEAD
 
 - **Breaking change:** Drop support for Node 10.
+- **Breaking change:** Use npm package [js-yaml](https://www.npmjs.com/package/js-yaml) to parse YAML instead of npm package [yaml](https://www.npmjs.com/package/yaml).
 
 ## 7.0.1
 
