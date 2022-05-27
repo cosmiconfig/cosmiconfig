@@ -1,6 +1,5 @@
 # cosmiconfig
 
-[![Build Status](https://img.shields.io/travis/davidtheclark/cosmiconfig/main.svg?label=unix%20build)](https://travis-ci.org/davidtheclark/cosmiconfig) [![Build status](https://img.shields.io/appveyor/ci/davidtheclark/cosmiconfig/main.svg?label=windows%20build)](https://ci.appveyor.com/project/davidtheclark/cosmiconfig/branch/main)
 [![codecov](https://codecov.io/gh/davidtheclark/cosmiconfig/branch/main/graph/badge.svg)](https://codecov.io/gh/davidtheclark/cosmiconfig)
 
 Cosmiconfig searches for and loads configuration for your program.
