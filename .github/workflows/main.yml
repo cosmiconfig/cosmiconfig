@@ -20,9 +20,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        node: [10, 12, 14, 16, 18]
+        node: [12, 14, 16, 18]
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
