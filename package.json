@@ -98,7 +98,7 @@
         "@babel/preset-env",
         {
           "targets": {
-            "node": "10"
+            "node": "12"
           }
         }
       ],
@@ -140,6 +140,6 @@
     "typescript": "^3.9.6"
   },
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   }
 }
