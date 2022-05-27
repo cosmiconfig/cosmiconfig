@@ -1,6 +1,8 @@
 # Changelog
 
-## HEAD
+## 8.0.0
+
+**No interface or functionality changes!** We dropped support for Node 10 -- which you're probably not using. And we swapped out the YAML parser -- which you probably won't notice.
 
 - **Breaking change:** Drop support for Node 10.
 - **Breaking change:** Use npm package [js-yaml](https://www.npmjs.com/package/js-yaml) to parse YAML instead of npm package [yaml](https://www.npmjs.com/package/yaml).
