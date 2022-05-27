@@ -107,9 +107,9 @@
   },
   "dependencies": {
     "import-fresh": "^3.2.1",
+    "js-yaml": "^4.1.0",
     "parse-json": "^5.0.0",
-    "path-type": "^4.0.0",
-    "js-yaml": "^4.1.0"
+    "path-type": "^4.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.4",
@@ -117,6 +117,7 @@
     "@babel/preset-env": "^7.10.4",
     "@babel/preset-typescript": "^7.10.4",
     "@types/jest": "^26.0.4",
+    "@types/js-yaml": "^4.0.5",
     "@types/node": "^14.0.22",
     "@types/parse-json": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^3.6.0",
