@@ -11,12 +11,20 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
   }
 
   public async search(
-    searchFrom: string = process.cwd(),
+    searchFrom: string | string[] = process.cwd(),
   ): Promise<CosmiconfigResult> {
-    const startDirectory = await getDirectory(searchFrom);
-    const result = await this.searchFromDirectory(startDirectory);
+    if (typeof searchFrom === "string") {
+      searchFrom = [searchFrom]
+    }
 
-    return result;
+    for (const dir of searchFrom) {
+      const startDirectory = await getDirectory(dir);
+      const result = this.searchFromDirectory(startDirectory);
+
+      if (result) return result
+    }
+    
+    return null
   }
 
   private async searchFromDirectory(dir: string): Promise<CosmiconfigResult> {

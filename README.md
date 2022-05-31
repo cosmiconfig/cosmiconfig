@@ -157,7 +157,7 @@ Use the cosmiconfig options [`searchPlaces`] and [`loaders`] to precisely define
 
 #### searchFrom
 
-Type: `string`.
+Type: `string | string[]`.
 Default: `process.cwd()`.
 
 A filename.
