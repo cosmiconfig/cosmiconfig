@@ -19,7 +19,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
 
     for (const dir of searchFrom) {
       const startDirectory = await getDirectory(dir);
-      const result = this.searchFromDirectory(startDirectory);
+      const result = await this.searchFromDirectory(startDirectory);
 
       if (result) return result
     }
