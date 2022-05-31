@@ -11,7 +11,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
   }
 
   public async search(
-    searchFrom: string | string[] = process.cwd(),
+    searchFrom: string | Array<string> = process.cwd(),
   ): Promise<CosmiconfigResult> {
     if (typeof searchFrom === "string") {
       searchFrom = [searchFrom];

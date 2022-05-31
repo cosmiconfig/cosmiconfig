@@ -14,13 +14,13 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     super(options);
   }
 
-  public searchSync(searchFrom: string | string [] = process.cwd()): CosmiconfigResult {
+  public searchSync(searchFrom: string | Array<string> = process.cwd()): CosmiconfigResult {
     if(typeof searchFrom === 'string'){
       searchFrom = [searchFrom];
     }
     
     for(const dir of searchFrom){
-      const startDirectory = getDirectorySync(searchFrom);
+      const startDirectory = getDirectorySync(dir);
       const result = this.searchFromDirectorySync(startDirectory);
       
       if(result) return result;
