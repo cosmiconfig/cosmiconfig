@@ -22,7 +22,7 @@ For example, if your module's name is "myapp", cosmiconfig will search up the di
 - a `myapp` property in `package.json`
 - a `.myapprc` file in JSON or YAML format
 - a `.myapprc.json`, `.myapprc.yaml`, `.myapprc.yml`, `.myapprc.js`, or `.myapprc.cjs` file
-- a `myapprc`, `myapprc.json`, `myapprc.yaml`, `myapprc.yml`, `myapprc.js` or `myapprc.cjs` file inside a `.config` subdirectory\`
+- a `myapprc`, `myapprc.json`, `myapprc.yaml`, `myapprc.yml`, `myapprc.js` or `myapprc.cjs` file inside a `.config` subdirectory
 - a `myapp.config.js` or `myapp.config.cjs` CommonJS module exporting an object
 
 Cosmiconfig continues to search up the directory tree, checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
