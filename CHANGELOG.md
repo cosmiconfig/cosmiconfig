@@ -1,6 +1,6 @@
 # Changelog
 
-## HEAD
+## 7.1.0
 
 - Added: additional default `searchPlaces` within a .config subdirectory (without leading dot in the file name)
 
