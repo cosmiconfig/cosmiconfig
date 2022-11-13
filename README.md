@@ -2,6 +2,8 @@
 
 [![codecov](https://codecov.io/gh/davidtheclark/cosmiconfig/branch/main/graph/badge.svg)](https://codecov.io/gh/davidtheclark/cosmiconfig)
 
+> **MAINTAINERS WANTED!** If you're interested in taking over and maintaining Cosmiconfig, please let @davidtheclark know (with an issue or email). I'd like to hand over the keys completely, so I'm looking for **owners**, not people who just want to merge a PR or two! You can make the decisions about what happens in v8 and subsequent versions, how the package balances stability and opinionated features, and so on. Take a look at open issues and PRs to learn about possibilities that have been on people's minds over the years.
+
 Cosmiconfig searches for and loads configuration for your program.
 
 It features smart defaults based on conventional expectations in the JavaScript ecosystem.
@@ -12,6 +14,7 @@ By default, Cosmiconfig will start where you tell it to start and search up the 
 - a `package.json` property
 - a JSON or YAML, extensionless "rc file"
 - an "rc file" with the extensions `.json`, `.yaml`, `.yml`, `.js`, or `.cjs`
+- any of the above two inside a `.config` subdirectory
 - a `.config.js` or `.config.cjs` CommonJS module
 
 For example, if your module's name is "myapp", cosmiconfig will search up the directory tree for configuration in the following places:
@@ -19,6 +22,7 @@ For example, if your module's name is "myapp", cosmiconfig will search up the di
 - a `myapp` property in `package.json`
 - a `.myapprc` file in JSON or YAML format
 - a `.myapprc.json`, `.myapprc.yaml`, `.myapprc.yml`, `.myapprc.js`, or `.myapprc.cjs` file
+- a `myapprc`, `myapprc.json`, `myapprc.yaml`, `myapprc.yml`, `myapprc.js` or `myapprc.cjs` file inside a `.config` subdirectory
 - a `myapp.config.js` or `myapp.config.cjs` CommonJS module exporting an object
 
 Cosmiconfig continues to search up the directory tree, checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
@@ -142,7 +146,8 @@ Here's how your default [`search()`] will work:
   1. A `goldengrahams` property in a `package.json` file.
   2. A `.goldengrahamsrc` file with JSON or YAML syntax.
   3. A `.goldengrahamsrc.json`, `.goldengrahamsrc.yaml`, `.goldengrahamsrc.yml`, `.goldengrahamsrc.js`, or `.goldengrahamsrc.cjs` file.
-  4. A `goldengrahams.config.js` or `goldengrahams.config.cjs` CommonJS module exporting the object.
+  4. A `goldengrahamsrc`, `goldengrahamsrc.json`, `goldengrahamsrc.yaml`, `goldengrahamsrc.yml`, `goldengrahamsrc.js`, or `goldengrahamsrc.cjs` file in the `.config` subdirectory.
+  5. A `goldengrahams.config.js` or `goldengrahams.config.cjs` CommonJS module exporting the object.
 - If none of those searches reveal a configuration object, move up one directory level and try again.
   So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking the same places in each directory.
 - Continue searching until arriving at your home directory (or some other directory defined by the cosmiconfig option [`stopDir`]).
@@ -266,6 +271,12 @@ Each place is relative to the directory being searched, and the places are check
   `.${moduleName}rc.yml`,
   `.${moduleName}rc.js`,
   `.${moduleName}rc.cjs`,
+  `.config/${moduleName}rc`,
+  `.config/${moduleName}rc.json`,
+  `.config/${moduleName}rc.yaml`,
+  `.config/${moduleName}rc.yml`,
+  `.config/${moduleName}rc.js`,
+  `.config/${moduleName}rc.cjs`,
   `${moduleName}.config.js`,
   `${moduleName}.config.cjs`,
 ]

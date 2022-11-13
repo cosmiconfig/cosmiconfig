@@ -36,6 +36,12 @@ describe('gives up if it cannot find the file', () => {
       'a/b/.foorc.yml',
       'a/b/.foorc.js',
       'a/b/.foorc.cjs',
+      'a/b/.config/foorc',
+      'a/b/.config/foorc.json',
+      'a/b/.config/foorc.yaml',
+      'a/b/.config/foorc.yml',
+      'a/b/.config/foorc.js',
+      'a/b/.config/foorc.cjs',
       'a/b/foo.config.js',
       'a/b/foo.config.cjs',
       'a/package.json',
@@ -45,6 +51,12 @@ describe('gives up if it cannot find the file', () => {
       'a/.foorc.yml',
       'a/.foorc.js',
       'a/.foorc.cjs',
+      'a/.config/foorc',
+      'a/.config/foorc.json',
+      'a/.config/foorc.yaml',
+      'a/.config/foorc.yml',
+      'a/.config/foorc.js',
+      'a/.config/foorc.cjs',
       'a/foo.config.js',
       'a/foo.config.cjs',
       'package.json',
@@ -54,6 +66,12 @@ describe('gives up if it cannot find the file', () => {
       '.foorc.yml',
       '.foorc.js',
       '.foorc.cjs',
+      '.config/foorc',
+      '.config/foorc.json',
+      '.config/foorc.yaml',
+      '.config/foorc.yml',
+      '.config/foorc.js',
+      '.config/foorc.cjs',
       'foo.config.js',
       'foo.config.cjs',
     ]);
@@ -92,6 +110,12 @@ describe('stops at stopDir and gives up', () => {
       'a/b/.foorc.yml',
       'a/b/.foorc.js',
       'a/b/.foorc.cjs',
+      'a/b/.config/foorc',
+      'a/b/.config/foorc.json',
+      'a/b/.config/foorc.yaml',
+      'a/b/.config/foorc.yml',
+      'a/b/.config/foorc.js',
+      'a/b/.config/foorc.cjs',
       'a/b/foo.config.js',
       'a/b/foo.config.cjs',
       'a/package.json',
@@ -101,6 +125,12 @@ describe('stops at stopDir and gives up', () => {
       'a/.foorc.yml',
       'a/.foorc.js',
       'a/.foorc.cjs',
+      'a/.config/foorc',
+      'a/.config/foorc.json',
+      'a/.config/foorc.yaml',
+      'a/.config/foorc.yml',
+      'a/.config/foorc.js',
+      'a/.config/foorc.cjs',
       'a/foo.config.js',
       'a/foo.config.cjs',
     ]);
@@ -133,7 +163,7 @@ describe('throws error for invalid YAML in rc file', () => {
 
   const expectedError = `YAML Error in ${temp.absolutePath(
     'a/b/.foorc',
-  )}:\nNested mappings are not allowed in compact mappings at line 1, column 8:`;
+  )}:\nbad indentation of a mapping entry (1:12)`;
 
   test('async', async () => {
     await expect(
@@ -260,7 +290,7 @@ describe('throws error for invalid YAML in .foorc.yml', () => {
 
   const expectedError = `YAML Error in ${temp.absolutePath(
     'a/b/c/d/e/f/.foorc.yml',
-  )}:\nNested mappings are not allowed in compact mappings at line 1, column 8:`;
+  )}:\nbad indentation of a mapping entry (1:13)`;
 
   test('async', async () => {
     await expect(
