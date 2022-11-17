@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
-import { pathToFileURL } from 'node:url';
+import { pathToFileURL } from 'url';
 import { LoaderAsync, LoaderSync } from './index';
 import { Loaders } from './types';
 
