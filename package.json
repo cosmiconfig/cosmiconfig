@@ -25,12 +25,6 @@
     "check:all": "npm run test && npm run typescript && npm run lint && npm run format:check",
     "prepublishOnly": "npm run check:all && npm run build"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged && npm run typescript && npm run test",
-      "pre-push": "npm run check:all"
-    }
-  },
   "lint-staged": {
     "*.{js,ts}": [
       "eslint --fix",
@@ -99,8 +93,11 @@
         "@babel/preset-env",
         {
           "targets": {
-            "node": "12"
-          }
+            "node": "14"
+          },
+          "exclude": [
+            "proposal-dynamic-import"
+          ]
         }
       ],
       "@babel/preset-typescript"
@@ -113,10 +110,10 @@
     "path-type": "^4.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.10.4",
-    "@babel/core": "^7.10.4",
-    "@babel/preset-env": "^7.10.4",
-    "@babel/preset-typescript": "^7.10.4",
+    "@babel/cli": "7.19.3",
+    "@babel/core": "7.20.2",
+    "@babel/preset-env": "7.20.2",
+    "@babel/preset-typescript": "7.18.6",
     "@types/jest": "^26.0.4",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^14.0.22",
@@ -140,9 +137,9 @@
     "parent-module": "^2.0.0",
     "prettier": "^2.0.5",
     "remark-preset-davidtheclark": "^0.12.0",
-    "typescript": "^3.9.6"
+    "typescript": "4.8.4"
   },
   "engines": {
-    "node": ">=12"
+    "node": ">=14"
   }
 }

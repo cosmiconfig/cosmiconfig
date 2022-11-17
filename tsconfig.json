@@ -19,8 +19,16 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "useUnknownInCatchVariables": false
   },
-  "include": ["src", "test", "global.d.ts"],
-  "exclude": ["dist", "node_modules"]
+  "include": [
+    "src",
+    "test",
+    "global.d.ts"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
 }
