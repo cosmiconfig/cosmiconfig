@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
-import { canUseDynamicImport } from './canUseDynamicImport';
+import { pathToFileURL } from 'node:url';
 import { LoaderAsync, LoaderSync } from './index';
 import { Loaders } from './types';
 
@@ -15,13 +15,10 @@ const loadJsSync: LoaderSync = function loadJsSync(filepath) {
 };
 
 const loadJs: LoaderAsync = async function loadJs(filepath) {
-  // This logic is validated by tests running in Node versions that don't
-  // support dynamic imports, like Node 10.
-  /* istanbul ignore else */
-  if (canUseDynamicImport()) {
-    const imported = await import(filepath);
-    return imported.default;
-  } else {
+  try {
+    const { href } = pathToFileURL(filepath);
+    return (await import(href)).default;
+  } catch (error) {
     return loadJsSync(filepath, null);
   }
 };
