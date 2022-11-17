@@ -1,6 +1,6 @@
 import fs from 'fs';
-import { TempDir, isNotMjs } from './util';
 import { cosmiconfig, cosmiconfigSync } from '../src';
+import { isNotMjs, TempDir } from './util';
 
 const temp = new TempDir();
 

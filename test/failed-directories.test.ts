@@ -1,11 +1,11 @@
 import fs from 'fs';
-import { TempDir, isNotMjs } from './util';
 import {
   cosmiconfig,
   cosmiconfigSync,
   defaultLoaders,
   OptionsSync,
 } from '../src';
+import { isNotMjs, TempDir } from './util';
 
 const temp = new TempDir();
 
@@ -157,7 +157,7 @@ describe('throws error for invalid YAML in rc file', () => {
 
   const expectedError = `YAML Error in ${temp.absolutePath(
     'a/b/.foorc',
-  )}:\nNested mappings are not allowed in compact mappings at line 1, column 8:`;
+  )}:\nbad indentation of a mapping entry (1:12)`;
 
   test('async', async () => {
     await expect(
@@ -284,7 +284,7 @@ describe('throws error for invalid YAML in .foorc.yml', () => {
 
   const expectedError = `YAML Error in ${temp.absolutePath(
     'a/b/c/d/e/f/.foorc.yml',
-  )}:\nNested mappings are not allowed in compact mappings at line 1, column 8:`;
+  )}:\nbad indentation of a mapping entry (1:13)`;
 
   test('async', async () => {
     await expect(

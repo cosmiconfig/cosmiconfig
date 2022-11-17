@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
-import parseJsonType from 'parse-json';
-import yamlType from 'yaml';
-import importFreshType from 'import-fresh';
 import { LoaderSync, LoaderAsync } from './index';
 import { Loaders } from './types';
 import { canUseDynamicImport } from './canUseDynamicImport';
 
-let importFresh: typeof importFreshType;
+let importFresh: typeof import('import-fresh');
 const loadJsSync: LoaderSync = function loadJsSync(filepath) {
   if (importFresh === undefined) {
     importFresh = require('import-fresh');
@@ -29,7 +26,7 @@ const loadJs: LoaderAsync = async function loadJs(filepath) {
   }
 };
 
-let parseJson: typeof parseJsonType;
+let parseJson: typeof import('parse-json');
 const loadJson: LoaderSync = function loadJson(filepath, content) {
   if (parseJson === undefined) {
     parseJson = require('parse-json');
@@ -44,14 +41,14 @@ const loadJson: LoaderSync = function loadJson(filepath, content) {
   }
 };
 
-let yaml: typeof yamlType;
+let yaml: typeof import('js-yaml');
 const loadYaml: LoaderSync = function loadYaml(filepath, content) {
   if (yaml === undefined) {
-    yaml = require('yaml');
+    yaml = require('js-yaml');
   }
 
   try {
-    const result = yaml.parse(content, { prettyErrors: true });
+    const result = yaml.load(content);
     return result;
   } catch (error) {
     error.message = `YAML Error in ${filepath}:\n${error.message}`;

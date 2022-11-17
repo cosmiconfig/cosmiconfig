@@ -2,7 +2,7 @@ import fs from 'fs';
 
 async function fsReadFileAsync(
   pathname: string,
-  encoding: string,
+  encoding: BufferEncoding,
 ): Promise<string> {
   return new Promise((resolve, reject): void => {
     fs.readFile(pathname, encoding, (error, contents): void => {
@@ -31,7 +31,10 @@ async function readFile(
 
     return content;
   } catch (error) {
-    if (throwNotFound === false && error.code === 'ENOENT') {
+    if (
+      throwNotFound === false &&
+      (error.code === 'ENOENT' || error.code === 'EISDIR')
+    ) {
       return null;
     }
 
@@ -47,7 +50,10 @@ function readFileSync(filepath: string, options: Options = {}): string | null {
 
     return content;
   } catch (error) {
-    if (throwNotFound === false && error.code === 'ENOENT') {
+    if (
+      throwNotFound === false &&
+      (error.code === 'ENOENT' || error.code === 'EISDIR')
+    ) {
       return null;
     }
 

@@ -1,7 +1,8 @@
 # cosmiconfig
 
-[![Build Status](https://img.shields.io/travis/davidtheclark/cosmiconfig/main.svg?label=unix%20build)](https://travis-ci.org/davidtheclark/cosmiconfig) [![Build status](https://img.shields.io/appveyor/ci/davidtheclark/cosmiconfig/main.svg?label=windows%20build)](https://ci.appveyor.com/project/davidtheclark/cosmiconfig/branch/main)
 [![codecov](https://codecov.io/gh/davidtheclark/cosmiconfig/branch/main/graph/badge.svg)](https://codecov.io/gh/davidtheclark/cosmiconfig)
+
+> **MAINTAINERS WANTED!** If you're interested in taking over and maintaining Cosmiconfig, please let @davidtheclark know (with an issue or email). I'd like to hand over the keys completely, so I'm looking for **owners**, not people who just want to merge a PR or two! You can make the decisions about what happens in v8 and subsequent versions, how the package balances stability and opinionated features, and so on. Take a look at open issues and PRs to learn about possibilities that have been on people's minds over the years.
 
 Cosmiconfig searches for and loads configuration for your program.
 
@@ -13,6 +14,7 @@ By default, Cosmiconfig will start where you tell it to start and search up the 
 - a `package.json` property
 - a JSON or YAML, extensionless "rc file"
 - an "rc file" with the extensions `.json`, `.yaml`, `.yml`, `.js`, `.mjs`, or `.cjs`
+- any of the above two inside a `.config` subdirectory
 - a `.config.js`, `.config.mjs`, or `.config.cjs` file
 
 For example, if your module's name is "myapp", cosmiconfig will search up the directory tree for configuration in the following places:
@@ -20,6 +22,7 @@ For example, if your module's name is "myapp", cosmiconfig will search up the di
 - a `myapp` property in `package.json`
 - a `.myapprc` file in JSON or YAML format
 - a `.myapprc.json`, `.myapprc.yaml`, `.myapprc.yml`, `.myapprc.js`, `.myapprc.mjs`, or `.myapprc.cjs` file
+- a `myapprc`, `myapprc.json`, `myapprc.yaml`, `myapprc.yml`, `myapprc.js` or `myapprc.cjs` file inside a `.config` subdirectory
 - a `myapp.config.js`, `myapp.config.mjs`, or `myapp.config.cjs` file
 
 Cosmiconfig continues to search up the directory tree, checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
@@ -62,7 +65,7 @@ Cosmiconfig continues to search up the directory tree, checking each of these pl
 npm install cosmiconfig
 ```
 
-Tested in Node 10+.
+Tested in Node 12+.
 
 ## Usage
 
@@ -144,7 +147,8 @@ Here's how your default [`search()`] will work:
   1. A `goldengrahams` property in a `package.json` file.
   2. A `.goldengrahamsrc` file with JSON or YAML syntax.
   3. A `.goldengrahamsrc.json`, `.goldengrahamsrc.yaml`, `.goldengrahamsrc.yml`, `.goldengrahamsrc.js`, or `.goldengrahamsrc.cjs` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
-  4. A `goldengrahams.config.js`, `goldengrahams.config.mjs`, or `goldengrahams.config.cjs` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
+  4. A `goldengrahamsrc`, `goldengrahamsrc.json`, `goldengrahamsrc.yaml`, `goldengrahamsrc.yml`, `goldengrahamsrc.js`, or `goldengrahamsrc.cjs` file in the `.config` subdirectory.
+  5. A `goldengrahams.config.js`, `goldengrahams.config.mjs`, or `goldengrahams.config.cjs` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
 - If none of those searches reveal a configuration object, move up one directory level and try again.
   So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking the same places in each directory.
 - Continue searching until arriving at your home directory (or some other directory defined by the cosmiconfig option [`stopDir`]).
@@ -210,7 +214,7 @@ const explorerSync = cosmiconfigSync(moduleName[, cosmiconfigOptions])
 
 Creates a *synchronous* cosmiconfig instance ("explorerSync") configured according to the arguments, and initializes its caches.
 
-See [`cosmiconfig()`].
+See [`cosmiconfig()`](#cosmiconfig-1).
 
 ### explorerSync.search()
 
@@ -272,6 +276,12 @@ For the [asynchronous API](#asynchronous-api), these are the default `searchPlac
   `.${moduleName}rc.js`,
   `.${moduleName}rc.mjs`,
   `.${moduleName}rc.cjs`,
+  `.config/${moduleName}rc`,
+  `.config/${moduleName}rc.json`,
+  `.config/${moduleName}rc.yaml`,
+  `.config/${moduleName}rc.yml`,
+  `.config/${moduleName}rc.js`,
+  `.config/${moduleName}rc.cjs`,
   `${moduleName}.config.js`,
   `${moduleName}.config.mjs`,
   `${moduleName}.config.cjs`,
@@ -383,7 +393,7 @@ If you want to load files that are not handled by the loader functions Cosmiconf
 
 **Third-party loaders:**
 
-- [@endemolshinegroup/cosmiconfig-typescript-loader](https://github.com/EndemolShineGroup/cosmiconfig-typescript-loader)
+- [cosmiconfig-typescript-loader](https://github.com/codex-/cosmiconfig-typescript-loader)
 
 **Use cases for custom loader function:**
 
