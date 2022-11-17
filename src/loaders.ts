@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
-import { LoaderSync, LoaderAsync } from './index';
-import { Loaders } from './types';
 import { canUseDynamicImport } from './canUseDynamicImport';
+import { LoaderAsync, LoaderSync } from './index';
+import { Loaders } from './types';
 
 let importFresh: typeof import('import-fresh');
 const loadJsSync: LoaderSync = function loadJsSync(filepath) {
@@ -48,7 +48,7 @@ const loadYaml: LoaderSync = function loadYaml(filepath, content) {
   }
 
   try {
-    const result = yaml.load(content);
+    const result = yaml.load(content!);
     return result;
   } catch (error) {
     error.message = `YAML Error in ${filepath}:\n${error.message}`;
