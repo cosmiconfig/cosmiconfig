@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function */
 import os from 'os';
-import { TempDir } from './util';
 import {
   cosmiconfig as cosmiconfigModule,
   cosmiconfigSync as cosmiconfigSyncModule,
@@ -8,6 +7,7 @@ import {
   LoaderSync,
 } from '../src';
 import { Loaders } from '../src/types';
+import { TempDir } from './util';
 
 const temp = new TempDir();
 
@@ -118,12 +118,6 @@ describe('cosmiconfig', () => {
           `.${moduleName}rc.js`,
           `.${moduleName}rc.mjs`,
           `.${moduleName}rc.cjs`,
-          `.config/${moduleName}rc`,
-          `.config/${moduleName}rc.json`,
-          `.config/${moduleName}rc.yaml`,
-          `.config/${moduleName}rc.yml`,
-          `.config/${moduleName}rc.js`,
-          `.config/${moduleName}rc.cjs`,
           `${moduleName}.config.js`,
           `${moduleName}.config.mjs`,
           `${moduleName}.config.cjs`,
@@ -151,6 +145,12 @@ describe('cosmiconfig', () => {
           `.${moduleName}rc.yml`,
           `.${moduleName}rc.js`,
           `.${moduleName}rc.cjs`,
+          `.config/${moduleName}rc`,
+          `.config/${moduleName}rc.json`,
+          `.config/${moduleName}rc.yaml`,
+          `.config/${moduleName}rc.yml`,
+          `.config/${moduleName}rc.js`,
+          `.config/${moduleName}rc.cjs`,
           `${moduleName}.config.js`,
           `${moduleName}.config.cjs`,
         ],
