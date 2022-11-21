@@ -1,8 +1,8 @@
 import path from 'path';
-import { ExplorerBase } from './ExplorerBase';
-import { readFile } from './readFile';
 import { cacheWrapper } from './cacheWrapper';
+import { ExplorerBase } from './ExplorerBase';
 import { getDirectory } from './getDirectory';
+import { readFile } from './readFile';
 import { CosmiconfigResult, ExplorerOptions, LoadedFileContent } from './types';
 
 class Explorer extends ExplorerBase<ExplorerOptions> {
@@ -78,8 +78,12 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
       return undefined;
     }
     const loader = this.getLoaderEntryForFile(filepath);
-    const loaderResult = await loader(filepath, content);
-    return loaderResult;
+    try {
+      return await loader(filepath, content);
+    } catch (e) {
+      e.filepath = filepath;
+      throw e;
+    }
   }
 
   private async createCosmiconfigResult(

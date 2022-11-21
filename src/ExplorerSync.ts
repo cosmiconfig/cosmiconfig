@@ -1,8 +1,8 @@
 import path from 'path';
-import { ExplorerBase } from './ExplorerBase';
-import { readFileSync } from './readFile';
 import { cacheWrapperSync } from './cacheWrapper';
+import { ExplorerBase } from './ExplorerBase';
 import { getDirectorySync } from './getDirectory';
+import { readFileSync } from './readFile';
 import {
   CosmiconfigResult,
   ExplorerOptionsSync,
@@ -77,9 +77,12 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
       return undefined;
     }
     const loader = this.getLoaderEntryForFile(filepath);
-    const loaderResult = loader(filepath, content);
-
-    return loaderResult;
+    try {
+      return loader(filepath, content);
+    } catch (e) {
+      e.filepath = filepath;
+      throw e;
+    }
   }
 
   private createCosmiconfigResultSync(
