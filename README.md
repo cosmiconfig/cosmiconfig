@@ -212,7 +212,7 @@ const explorerSync = cosmiconfigSync(moduleName[, cosmiconfigOptions])
 
 Creates a *synchronous* cosmiconfig instance ("explorerSync") configured according to the arguments, and initializes its caches.
 
-See [`cosmiconfig()`].
+See [`cosmiconfig()`](#cosmiconfig-1).
 
 ### explorerSync.search()
 
