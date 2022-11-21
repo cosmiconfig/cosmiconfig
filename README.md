@@ -64,7 +64,7 @@ Cosmiconfig continues to search up the directory tree, checking each of these pl
 npm install cosmiconfig
 ```
 
-Tested in Node 12+.
+Tested in Node 14+.
 
 ## Usage
 

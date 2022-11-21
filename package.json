@@ -1,6 +1,6 @@
 {
   "name": "cosmiconfig",
-  "version": "7.1.0",
+  "version": "8.0.0",
   "description": "Find and load configuration from a package.json property, rc file, or CommonJS module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -98,7 +98,7 @@
         "@babel/preset-env",
         {
           "targets": {
-            "node": "12"
+            "node": "14"
           }
         }
       ],
@@ -141,6 +141,6 @@
     "typescript": "^3.9.6"
   },
   "engines": {
-    "node": ">=12"
+    "node": ">=14"
   }
 }
