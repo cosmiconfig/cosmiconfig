@@ -15,10 +15,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
   }
 
   public searchSync(searchFrom: string = process.cwd()): CosmiconfigResult {
-    const startDirectory = getDirectorySync(searchFrom);
-    const result = this.searchFromDirectorySync(startDirectory);
-
-    return result;
+    return this.searchFromDirectorySync(getDirectorySync(searchFrom));
   }
 
   private searchFromDirectorySync(dir: string): CosmiconfigResult {
@@ -32,9 +29,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
         return this.searchFromDirectorySync(nextDir);
       }
 
-      const transformResult = this.config.transform(result);
-
-      return transformResult;
+      return this.config.transform(result);
     };
 
     if (this.searchCache) {
@@ -48,7 +43,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     for (const place of this.config.searchPlaces) {
       const placeResult = this.loadSearchPlaceSync(dir, place);
 
-      if (this.shouldSearchStopWithResult(placeResult) === true) {
+      if (this.shouldSearchStopWithResult(placeResult)) {
         return placeResult;
       }
     }
@@ -61,9 +56,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     const filepath = path.join(dir, place);
     const content = readFileSync(filepath);
 
-    const result = this.createCosmiconfigResultSync(filepath, content);
-
-    return result;
+    return this.createCosmiconfigResultSync(filepath, content);
   }
 
   private loadFileContentSync(
@@ -90,9 +83,8 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     content: string | null,
   ): CosmiconfigResult {
     const fileContent = this.loadFileContentSync(filepath, content);
-    const result = this.loadedContentToCosmiconfigResult(filepath, fileContent);
 
-    return result;
+    return this.loadedContentToCosmiconfigResult(filepath, fileContent);
   }
 
   public loadSync(filepath: string): CosmiconfigResult {
@@ -106,9 +98,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
         content,
       );
 
-      const transformResult = this.config.transform(cosmiconfigResult);
-
-      return transformResult;
+      return this.config.transform(cosmiconfigResult);
     };
 
     if (this.loadCache) {

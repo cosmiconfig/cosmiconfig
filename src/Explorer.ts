@@ -13,10 +13,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
   public async search(
     searchFrom: string = process.cwd(),
   ): Promise<CosmiconfigResult> {
-    const startDirectory = await getDirectory(searchFrom);
-    const result = await this.searchFromDirectory(startDirectory);
-
-    return result;
+    return await this.searchFromDirectory(await getDirectory(searchFrom));
   }
 
   private async searchFromDirectory(dir: string): Promise<CosmiconfigResult> {
@@ -30,9 +27,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
         return this.searchFromDirectory(nextDir);
       }
 
-      const transformResult = await this.config.transform(result);
-
-      return transformResult;
+      return await this.config.transform(result);
     };
 
     if (this.searchCache) {
@@ -46,7 +41,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
     for await (const place of this.config.searchPlaces) {
       const placeResult = await this.loadSearchPlace(dir, place);
 
-      if (this.shouldSearchStopWithResult(placeResult) === true) {
+      if (this.shouldSearchStopWithResult(placeResult)) {
         return placeResult;
       }
     }
@@ -62,9 +57,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
     const filepath = path.join(dir, place);
     const fileContents = await readFile(filepath);
 
-    const result = await this.createCosmiconfigResult(filepath, fileContents);
-
-    return result;
+    return await this.createCosmiconfigResult(filepath, fileContents);
   }
 
   private async loadFileContent(
@@ -91,9 +84,8 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
     content: string | null,
   ): Promise<CosmiconfigResult> {
     const fileContent = await this.loadFileContent(filepath, content);
-    const result = this.loadedContentToCosmiconfigResult(filepath, fileContent);
 
-    return result;
+    return this.loadedContentToCosmiconfigResult(filepath, fileContent);
   }
 
   public async load(filepath: string): Promise<CosmiconfigResult> {
@@ -110,9 +102,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
         fileContents,
       );
 
-      const transformResult = await this.config.transform(result);
-
-      return transformResult;
+      return await this.config.transform(result);
     };
 
     if (this.loadCache) {

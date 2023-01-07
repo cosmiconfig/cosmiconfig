@@ -74,11 +74,13 @@ describe('cosmiconfig', () => {
   });
 
   describe('creates explorer with default options if not specified', () => {
-    const checkResult = (mock: jest.SpyInstance) => {
-      expect(mock.mock.calls.length).toEqual(1);
-      expect(mock.mock.calls[0].length).toEqual(1);
+    const checkResult = (mock: jest.SpyInstance, instanceNum: number) => {
+      const instanceIndex = instanceNum - 1;
+      expect(mock.mock.calls.length).toEqual(instanceNum);
+      expect(mock.mock.calls[instanceIndex].length).toEqual(1);
 
-      const { transform, loaders, ...explorerOptions } = mock.mock.calls[0][0];
+      const { transform, loaders, ...explorerOptions } =
+        mock.mock.calls[instanceIndex][0];
       expect(transform.name).toBe('identity');
       const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
       expect(loaderFunctionsByName).toEqual({
@@ -117,12 +119,12 @@ describe('cosmiconfig', () => {
 
     test('async', () => {
       cosmiconfig(moduleName);
-      checkResult(createExplorerMock);
+      checkResult(createExplorerMock, 1);
     });
 
     test('sync', () => {
       cosmiconfigSync(moduleName);
-      checkResult(createExplorerSyncMock);
+      checkResult(createExplorerSyncMock, 2);
     });
   });
 
@@ -171,10 +173,12 @@ describe('cosmiconfig', () => {
       },
     };
 
-    const checkResult = (mock: jest.SpyInstance) => {
-      expect(mock.mock.calls.length).toEqual(1);
-      expect(mock.mock.calls[0].length).toEqual(1);
-      const { transform, loaders, ...explorerOptions } = mock.mock.calls[0][0];
+    const checkResult = (mock: jest.SpyInstance, instanceNum: number) => {
+      const instanceIndex = instanceNum - 1;
+      expect(mock.mock.calls.length).toEqual(instanceNum);
+      expect(mock.mock.calls[instanceIndex].length).toEqual(1);
+      const { transform, loaders, metaConfig, ...explorerOptions } =
+        mock.mock.calls[instanceIndex][0];
 
       expect(transform.name).toBe('identity');
       const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
@@ -198,12 +202,12 @@ describe('cosmiconfig', () => {
 
     test('async', () => {
       cosmiconfig(moduleName, options);
-      checkResult(createExplorerMock);
+      checkResult(createExplorerMock, 1);
     });
 
     test('sync', () => {
       cosmiconfigSync(moduleName, options);
-      checkResult(createExplorerSyncMock);
+      checkResult(createExplorerSyncMock, 2);
     });
   });
 

@@ -1,14 +1,14 @@
 import path from 'path';
-import { loaders } from './loaders';
 import { getPropertyByPath } from './getPropertyByPath';
+import { Loader } from './index';
+import { loaders } from './loaders';
 import {
+  Cache,
   CosmiconfigResult,
   ExplorerOptions,
   ExplorerOptionsSync,
-  Cache,
   LoadedFileContent,
 } from './types';
-import { Loader } from './index';
 
 class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
   protected readonly loadCache?: Cache;
@@ -16,7 +16,7 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
   protected readonly config: T;
 
   public constructor(options: T) {
-    if (options.cache === true) {
+    if (options.cache) {
       this.loadCache = new Map();
       this.searchCache = new Map();
     }
@@ -68,8 +68,7 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
 
   protected shouldSearchStopWithResult(result: CosmiconfigResult): boolean {
     if (result === null) return false;
-    if (result.isEmpty && this.config.ignoreEmptySearchPlaces) return false;
-    return true;
+    return !(result.isEmpty && this.config.ignoreEmptySearchPlaces);
   }
 
   protected nextDirectoryToSearch(
@@ -97,8 +96,7 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
 
   protected getLoaderEntryForFile(filepath: string): Loader {
     if (path.basename(filepath) === 'package.json') {
-      const loader = this.loadPackageProp.bind(this);
-      return loader;
+      return this.loadPackageProp.bind(this);
     }
 
     const loaderKey = path.extname(filepath) || 'noExt';
@@ -120,6 +118,12 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
   ): CosmiconfigResult {
     if (loadedContent === null) {
       return null;
+    }
+    if (loadedContent === undefined) {
+      return { filepath, config: undefined, isEmpty: true };
+    }
+    if (this.config.usePackagePropInConfigFiles) {
+      loadedContent = getPropertyByPath(loadedContent, this.config.packageProp);
     }
     if (loadedContent === undefined) {
       return { filepath, config: undefined, isEmpty: true };

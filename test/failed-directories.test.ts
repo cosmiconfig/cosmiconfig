@@ -80,18 +80,22 @@ describe('gives up if it cannot find the file', () => {
   };
 
   test('async', async () => {
+    const explorer = cosmiconfig('foo', explorerOptions);
+
     const readFileSpy = jest.spyOn(fs, 'readFile');
     const statSpy = jest.spyOn(fs, 'stat');
 
-    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    const result = await explorer.search(startDir);
     checkResult(statSpy, readFileSpy, result);
   });
 
   test('sync', () => {
+    const explorer = cosmiconfigSync('foo', explorerOptions);
+
     const readFileSpy = jest.spyOn(fs, 'readFileSync');
     const statSpy = jest.spyOn(fs, 'statSync');
 
-    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
+    const result = explorer.search(startDir);
     checkResult(statSpy, readFileSpy, result);
   });
 });
@@ -139,16 +143,18 @@ describe('stops at stopDir and gives up', () => {
   };
 
   test('async', async () => {
-    const readFileSpy = jest.spyOn(fs, 'readFile');
+    const explorer = cosmiconfig('foo', explorerOptions);
 
-    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    const result = await explorer.search(startDir);
     checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
-    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = explorer.search(startDir);
     checkResult(readFileSpy, result);
   });
 });

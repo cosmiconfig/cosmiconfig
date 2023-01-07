@@ -9,11 +9,15 @@ export type CosmiconfigResult = {
   isEmpty?: boolean;
 } | null;
 
-// These are the user options with defaults applied.
-/* eslint-disable @typescript-eslint/no-empty-interface */
-export interface ExplorerOptions extends Required<Options> {}
-export interface ExplorerOptionsSync extends Required<OptionsSync> {}
-/* eslint-enable @typescript-eslint/no-empty-interface */
+export interface InternalOptions {
+  usePackagePropInConfigFiles?: boolean;
+}
+
+// These are the user options with defaults applied, plus internal options possibly inferred from meta config
+export interface ExplorerOptions extends Required<Options>, InternalOptions {}
+export interface ExplorerOptionsSync
+  extends Required<OptionsSync>,
+    InternalOptions {}
 
 export type Cache = Map<string, CosmiconfigResult>;
 
