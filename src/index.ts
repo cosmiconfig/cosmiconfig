@@ -29,6 +29,7 @@ export type TransformSync = (
 interface OptionsBase {
   packageProp?: string | Array<string>;
   searchPlaces?: Array<string>;
+  searchInThisFile?: boolean;
   ignoreEmptySearchPlaces?: boolean;
   stopDir?: string;
   cache?: boolean;
@@ -104,15 +105,16 @@ function getExplorerOptions(
   options: Options | OptionsSync,
 ): ExplorerOptions | ExplorerOptionsSync {
   const metaExplorer = new ExplorerSync({
-    // load whole package.json to be able to get all properties later
     packageProp: 'cosmiconfig',
     stopDir: process.cwd(),
     searchPlaces: metaSearchPlaces,
+    searchInThisFile: false,
     ignoreEmptySearchPlaces: true,
     usePackagePropInConfigFiles: true,
     loaders: defaultLoaders,
     transform: identity,
     cache: true,
+    metaConfigFilePath: null,
   });
   const metaConfig = metaExplorer.searchSync();
 
@@ -122,12 +124,6 @@ function getExplorerOptions(
 
   const config = metaConfig.config;
 
-  if (!config) {
-    return {
-      ...normalizeOptions(moduleName, options),
-    };
-  }
-
   if (config.searchPlaces) {
     config.searchPlaces = replaceMetaPlaceholders(
       config.searchPlaces,
@@ -135,7 +131,7 @@ function getExplorerOptions(
     );
   }
 
-  config.metaConfig = metaConfig;
+  config.metaConfigFilePath = metaConfig.filepath;
 
   return normalizeOptions(moduleName, config, false);
 }
@@ -220,6 +216,8 @@ function normalizeOptions(
     cache: true,
     transform: identity,
     loaders: defaultLoaders,
+    searchInThisFile: false,
+    metaConfigFilePath: null,
   };
 
   let loaders = {
@@ -227,6 +225,8 @@ function normalizeOptions(
   };
 
   if (options.loaders) {
+    // to be used for the upcoming loaders-in-config
+    /* istanbul ignore next */
     if (mergeLoaders) {
       Object.assign(loaders, options.loaders);
     } else {

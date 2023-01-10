@@ -115,6 +115,7 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
   protected loadedContentToCosmiconfigResult(
     filepath: string,
     loadedContent: LoadedFileContent,
+    forceProp: boolean,
   ): CosmiconfigResult {
     if (loadedContent === null) {
       return null;
@@ -122,7 +123,7 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
     if (loadedContent === undefined) {
       return { filepath, config: undefined, isEmpty: true };
     }
-    if (this.config.usePackagePropInConfigFiles) {
+    if (this.config.usePackagePropInConfigFiles || forceProp) {
       loadedContent = getPropertyByPath(loadedContent, this.config.packageProp);
     }
     if (loadedContent === undefined) {

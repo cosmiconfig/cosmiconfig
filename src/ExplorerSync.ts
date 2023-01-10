@@ -15,6 +15,12 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
   }
 
   public searchSync(searchFrom: string = process.cwd()): CosmiconfigResult {
+    if (this.config.searchInThisFile && this.config.metaConfigFilePath) {
+      const config = this._loadFileSync(this.config.metaConfigFilePath, true);
+      if (this.shouldSearchStopWithResult(config)) {
+        return config;
+      }
+    }
     return this.searchFromDirectorySync(getDirectorySync(searchFrom));
   }
 
@@ -56,7 +62,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     const filepath = path.join(dir, place);
     const content = readFileSync(filepath);
 
-    return this.createCosmiconfigResultSync(filepath, content);
+    return this.createCosmiconfigResultSync(filepath, content, false);
   }
 
   private loadFileContentSync(
@@ -81,13 +87,25 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
   private createCosmiconfigResultSync(
     filepath: string,
     content: string | null,
+    forceProp: boolean,
   ): CosmiconfigResult {
     const fileContent = this.loadFileContentSync(filepath, content);
 
-    return this.loadedContentToCosmiconfigResult(filepath, fileContent);
+    return this.loadedContentToCosmiconfigResult(
+      filepath,
+      fileContent,
+      forceProp,
+    );
   }
 
   public loadSync(filepath: string): CosmiconfigResult {
+    return this._loadFileSync(filepath, false);
+  }
+
+  private _loadFileSync(
+    filepath: string,
+    forceProp: boolean,
+  ): CosmiconfigResult {
     this.validateFilePath(filepath);
     const absoluteFilePath = path.resolve(process.cwd(), filepath);
 
@@ -96,6 +114,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
       const cosmiconfigResult = this.createCosmiconfigResultSync(
         absoluteFilePath,
         content,
+        forceProp,
       );
 
       return this.config.transform(cosmiconfigResult);

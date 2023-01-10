@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function */
 import os from 'os';
-import { TempDir } from './util';
 import {
   cosmiconfig as cosmiconfigModule,
   cosmiconfigSync as cosmiconfigSyncModule,
@@ -8,21 +7,17 @@ import {
   LoaderSync,
 } from '../src';
 import { Loaders } from '../src/types';
+import { TempDir } from './util';
 
 const temp = new TempDir();
 
 function getLoaderFunctionsByName(loaders: Loaders) {
-  const loaderFunctionsByName = Object.entries(loaders).reduce(
-    (acc, [extension, loader]) => {
-      return {
-        ...acc,
-        [extension]: loader.name,
-      };
-    },
-    {},
-  );
-
-  return loaderFunctionsByName;
+  return Object.entries(loaders).reduce((acc, [extension, loader]) => {
+    return {
+      ...acc,
+      [extension]: loader.name,
+    };
+  }, {});
 }
 
 let cosmiconfig: typeof cosmiconfigModule;
@@ -114,6 +109,8 @@ describe('cosmiconfig', () => {
         ignoreEmptySearchPlaces: true,
         stopDir: os.homedir(),
         cache: true,
+        metaConfigFilePath: null,
+        searchInThisFile: false,
       });
     };
 
@@ -177,7 +174,7 @@ describe('cosmiconfig', () => {
       const instanceIndex = instanceNum - 1;
       expect(mock.mock.calls.length).toEqual(instanceNum);
       expect(mock.mock.calls[instanceIndex].length).toEqual(1);
-      const { transform, loaders, metaConfig, ...explorerOptions } =
+      const { transform, loaders, ...explorerOptions } =
         mock.mock.calls[instanceIndex][0];
 
       expect(transform.name).toBe('identity');
@@ -197,6 +194,8 @@ describe('cosmiconfig', () => {
         ignoreEmptySearchPlaces: false,
         stopDir: __dirname,
         cache: false,
+        searchInThisFile: false,
+        metaConfigFilePath: null,
       });
     };
 

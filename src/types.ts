@@ -11,6 +11,7 @@ export type CosmiconfigResult = {
 
 export interface InternalOptions {
   usePackagePropInConfigFiles?: boolean;
+  metaConfigFilePath: string | null;
 }
 
 // These are the user options with defaults applied, plus internal options possibly inferred from meta config
