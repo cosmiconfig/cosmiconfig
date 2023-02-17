@@ -124,6 +124,10 @@ function getExplorerOptions(
 
   const config = metaConfig.config;
 
+  if (config.loaders) {
+    throw new Error('Can not specify loaders in meta config file');
+  }
+
   if (config.searchPlaces) {
     config.searchPlaces = replaceMetaPlaceholders(
       config.searchPlaces,

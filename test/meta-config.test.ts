@@ -14,6 +14,17 @@ describe('cosmiconfig meta config', () => {
     temp.deleteTempDir();
   });
 
+  test('throws when trying to supply loaders', () => {
+    temp.createFile('.config.yml', 'cosmiconfig:\n  loaders: []');
+
+    const currentDir = process.cwd();
+    process.chdir(temp.dir);
+
+    expect(() => cosmiconfigSync('foo')).toThrow();
+
+    process.chdir(currentDir);
+  });
+
   describe('uses user-configured searchPlaces without placeholders', () => {
     const currentDir = process.cwd();
 
