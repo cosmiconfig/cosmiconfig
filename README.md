@@ -2,8 +2,6 @@
 
 [![codecov](https://codecov.io/gh/davidtheclark/cosmiconfig/branch/main/graph/badge.svg)](https://codecov.io/gh/davidtheclark/cosmiconfig)
 
-> **MAINTAINERS WANTED!** If you're interested in taking over and maintaining Cosmiconfig, please let @davidtheclark know (with an issue or email). I'd like to hand over the keys completely, so I'm looking for **owners**, not people who just want to merge a PR or two! You can make the decisions about what happens in v8 and subsequent versions, how the package balances stability and opinionated features, and so on. Take a look at open issues and PRs to learn about possibilities that have been on people's minds over the years.
-
 Cosmiconfig searches for and loads configuration for your program.
 
 It features smart defaults based on conventional expectations in the JavaScript ecosystem.
