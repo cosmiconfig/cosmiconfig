@@ -594,7 +594,8 @@ with the contents of that property being the same as the file contents. To use t
 This has the advantage that you can put the configuration of all tools
 (at least the ones that use cosmiconfig) in one file.
 
-Lastly, you can also create one of the following files:
+You can also add a `cosmiconfig` key within your `package.json` file or create one of the following files
+to configure `cosmiconfig` itself:
 
 ```
 .config.json
@@ -604,9 +605,7 @@ Lastly, you can also create one of the following files:
 .config.cjs
 ```
 
-In this file, you can configure `cosmiconfig` itself.
-
-The following properties are currently actively supported in this file:
+The following properties are currently actively supported in these places:
 
 ```yaml
 cosmiconfig:
