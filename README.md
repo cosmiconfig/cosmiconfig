@@ -30,7 +30,7 @@ Cosmiconfig continues to search up the directory tree, checking each of these pl
 ## Table of contents
 
 - [Installation](#installation)
-- [Usage](#usage)
+- [Usage for tooling developers](#usage-for-tooling-developers)
 - [Result](#result)
 - [Asynchronous API](#asynchronous-api)
   - [cosmiconfig()](#cosmiconfig-1)
@@ -56,6 +56,7 @@ Cosmiconfig continues to search up the directory tree, checking each of these pl
   - [ignoreEmptySearchPlaces](#ignoreemptysearchplaces)
 - [Caching](#caching)
 - [Differences from rc](#differences-from-rc)
+- [Usage for end users](#usage-for-end-users)
 - [Contributing & Development](#contributing--development)
 
 ## Installation
@@ -66,7 +67,10 @@ npm install cosmiconfig
 
 Tested in Node 14+.
 
-## Usage
+## Usage for tooling developers
+
+*If you are an end user (i.e. a user of a tool that uses cosmiconfig),
+you can skip down to [the end user section](#usage-for-end-users).*
 
 Create a Cosmiconfig explorer, then either `search` for or directly `load` a configuration file.
 
@@ -538,6 +542,97 @@ To avoid or work around caching, you can do the following:
 - Stops at the first configuration found, instead of finding all that can be found up the directory tree and merging them automatically.
 - Options.
 - Asynchronous by default (though can be run synchronously).
+
+## Usage for end users
+
+When configuring a tool, you can use multiple file formats and put these in multiple places.
+
+Usually, a tool would mention this in its own README file,
+but by default, these are the following places, where the `moduleName` variable represents the name of the tool:
+
+```js
+[
+  'package.json',
+  `.${moduleName}rc`,
+  `.${moduleName}rc.json`,
+  `.${moduleName}rc.yaml`,
+  `.${moduleName}rc.yml`,
+  `.${moduleName}rc.js`,
+  `.${moduleName}rc.cjs`,
+  `.config/${moduleName}rc`,
+  `.config/${moduleName}rc.json`,
+  `.config/${moduleName}rc.yaml`,
+  `.config/${moduleName}rc.yml`,
+  `.config/${moduleName}rc.js`,
+  `.config/${moduleName}rc.cjs`,
+  `${moduleName}.config.js`,
+  `${moduleName}.config.cjs`,
+]
+```
+
+The contents of these files are defined by the tool.
+For example, you can configure prettier to enforce semicolons at the end of the line
+using a file named `.config/prettierrc.yml`:
+
+```yaml
+semi: true
+```
+
+Additionally, you have the option to put a property named after the tool in your `package.json` file,
+with the contents of that property being the same as the file contents. To use the same example as above:
+
+```json
+{
+  "name": "your-project",
+  "dependencies": {},
+  "prettier": {
+    "semi": true
+  }
+}
+```
+
+This has the advantage that you can put the configuration of all tools
+(at least the ones that use cosmiconfig) in one file.
+
+Lastly, you can also create one of the following files:
+
+```
+.config.json
+.config.yaml
+.config.yml
+.config.js
+.config.cjs
+```
+
+In this file, you can configure `cosmiconfig` itself.
+
+The following properties are currently actively supported in this file:
+
+```yaml
+cosmiconfig:
+  # overrides where configuration files are being searched, this might be a minor performance optimization
+  # if all your configuration files use the same naming convention and format
+  searchPlaces:
+    - .config/{name}.yml
+      
+  # enables configuration resolution in this same file, similarly to `package.json`, see below
+  searchInThisFile: true
+```
+
+> **Note:** technically, you can overwrite all options described in [cosmiconfigOptions](#cosmiconfigoptions) here,
+> but everything not listed above should be used at your own risk, as it has not been tested explicitly.
+
+When enabling `searchInThisFile`, you can also add more root properties outside the `cosmiconfig` property
+to configure your tools, entirely eliminating the need to look for additional configuration files:
+
+```yaml
+cosmiconfig:
+  searchInThisFile: true
+  searchPlaces: []
+
+prettier:
+  semi: true
+```
 
 ## Contributing & Development
 
