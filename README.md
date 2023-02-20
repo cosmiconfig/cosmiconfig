@@ -69,7 +69,7 @@ Tested in Node 14+.
 
 ## Usage for tooling developers
 
-*If you are an end user (i.e. a user of a tool that uses cosmiconfig),
+*If you are an end user (i.e. a user of a tool that uses cosmiconfig, like `prettier` or `stylelint`),
 you can skip down to [the end user section](#usage-for-end-users).*
 
 Create a Cosmiconfig explorer, then either `search` for or directly `load` a configuration file.
