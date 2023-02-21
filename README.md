@@ -548,26 +548,24 @@ To avoid or work around caching, you can do the following:
 When configuring a tool, you can use multiple file formats and put these in multiple places.
 
 Usually, a tool would mention this in its own README file,
-but by default, these are the following places, where the `moduleName` variable represents the name of the tool:
+but by default, these are the following places, where `{NAME}` represents the name of the tool:
 
-```js
-[
-  'package.json',
-  `.${moduleName}rc`,
-  `.${moduleName}rc.json`,
-  `.${moduleName}rc.yaml`,
-  `.${moduleName}rc.yml`,
-  `.${moduleName}rc.js`,
-  `.${moduleName}rc.cjs`,
-  `.config/${moduleName}rc`,
-  `.config/${moduleName}rc.json`,
-  `.config/${moduleName}rc.yaml`,
-  `.config/${moduleName}rc.yml`,
-  `.config/${moduleName}rc.js`,
-  `.config/${moduleName}rc.cjs`,
-  `${moduleName}.config.js`,
-  `${moduleName}.config.cjs`,
-]
+```
+package.json
+.{NAME}rc
+.{NAME}rc.json
+.{NAME}rc.yaml
+.{NAME}rc.yml
+.{NAME}rc.js
+.{NAME}rc.cjs
+.config/{NAME}rc
+.config/{NAME}rc.json
+.config/{NAME}rc.yaml
+.config/{NAME}rc.yml
+.config/{NAME}rc.js
+.config/{NAME}rc.cjs
+{NAME}.config.js
+{NAME}.config.cjs
 ```
 
 The contents of these files are defined by the tool.
@@ -610,7 +608,7 @@ The following properties are currently actively supported in these places:
 ```yaml
 cosmiconfig:
   # overrides where configuration files are being searched, this might be a minor performance optimization
-  # if all your configuration files use the same naming convention and format
+  # if all your configuration files use the same naming convention and format (defined by yourself)
   searchPlaces:
     - .config/{name}.yml
       
