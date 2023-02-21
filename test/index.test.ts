@@ -12,12 +12,7 @@ import { TempDir } from './util';
 const temp = new TempDir();
 
 function getLoaderFunctionsByName(loaders: Loaders) {
-  return Object.entries(loaders).reduce((acc, [extension, loader]) => {
-    return {
-      ...acc,
-      [extension]: loader.name,
-    };
-  }, {});
+  return Object.fromEntries(Object.entries(loaders).map(([extension, loader]) => [extension, loader.name]));
 }
 
 let cosmiconfig: typeof cosmiconfigModule;
