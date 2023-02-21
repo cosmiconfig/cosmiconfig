@@ -6,7 +6,7 @@ import {
   defaultLoaders,
   LoaderSync,
 } from '../src';
-import { Loaders } from '../src/types';
+import { ExplorerOptions, ExplorerOptionsSync, Loaders } from '../src/types';
 import { TempDir } from './util';
 
 const temp = new TempDir();
@@ -19,6 +19,27 @@ function getLoaderFunctionsByName(loaders: Loaders) {
     ]),
   );
 }
+
+const checkConfigResult = (
+  mock: jest.SpyInstance,
+  instanceNum: number,
+  expectedLoaderNames: Record<string, string>,
+  expectedExplorerOptions: Omit<
+    ExplorerOptions & ExplorerOptionsSync,
+    'transform' | 'loaders'
+  >,
+) => {
+  const instanceIndex = instanceNum - 1;
+  expect(mock.mock.calls.length).toEqual(instanceNum);
+  expect(mock.mock.calls[instanceIndex].length).toEqual(1);
+
+  const { transform, loaders, ...explorerOptions } =
+    mock.mock.calls[instanceIndex][0];
+  expect(transform.name).toBe('identity');
+  const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
+  expect(loaderFunctionsByName).toEqual(expectedLoaderNames);
+  expect(explorerOptions).toEqual(expectedExplorerOptions);
+};
 
 let cosmiconfig: typeof cosmiconfigModule;
 let cosmiconfigSync: typeof cosmiconfigSyncModule;
@@ -69,58 +90,58 @@ describe('cosmiconfig', () => {
   });
 
   describe('creates explorer with default options if not specified', () => {
-    const checkResult = (mock: jest.SpyInstance, instanceNum: number) => {
-      const instanceIndex = instanceNum - 1;
-      expect(mock.mock.calls.length).toEqual(instanceNum);
-      expect(mock.mock.calls[instanceIndex].length).toEqual(1);
+    const expectedLoaderNames = {
+      '.cjs': 'loadJs',
+      '.js': 'loadJs',
+      '.json': 'loadJson',
+      '.yaml': 'loadYaml',
+      '.yml': 'loadYaml',
+      noExt: 'loadYaml',
+    };
 
-      const { transform, loaders, ...explorerOptions } =
-        mock.mock.calls[instanceIndex][0];
-      expect(transform.name).toBe('identity');
-      const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
-      expect(loaderFunctionsByName).toEqual({
-        '.cjs': 'loadJs',
-        '.js': 'loadJs',
-        '.json': 'loadJson',
-        '.yaml': 'loadYaml',
-        '.yml': 'loadYaml',
-        noExt: 'loadYaml',
-      });
-
-      expect(explorerOptions).toEqual({
-        packageProp: moduleName,
-        searchPlaces: [
-          'package.json',
-          `.${moduleName}rc`,
-          `.${moduleName}rc.json`,
-          `.${moduleName}rc.yaml`,
-          `.${moduleName}rc.yml`,
-          `.${moduleName}rc.js`,
-          `.${moduleName}rc.cjs`,
-          `.config/${moduleName}rc`,
-          `.config/${moduleName}rc.json`,
-          `.config/${moduleName}rc.yaml`,
-          `.config/${moduleName}rc.yml`,
-          `.config/${moduleName}rc.js`,
-          `.config/${moduleName}rc.cjs`,
-          `${moduleName}.config.js`,
-          `${moduleName}.config.cjs`,
-        ],
-        ignoreEmptySearchPlaces: true,
-        stopDir: os.homedir(),
-        cache: true,
-        metaConfigFilePath: null,
-      });
+    const expectedExplorerOptions = {
+      packageProp: moduleName,
+      searchPlaces: [
+        'package.json',
+        `.${moduleName}rc`,
+        `.${moduleName}rc.json`,
+        `.${moduleName}rc.yaml`,
+        `.${moduleName}rc.yml`,
+        `.${moduleName}rc.js`,
+        `.${moduleName}rc.cjs`,
+        `.config/${moduleName}rc`,
+        `.config/${moduleName}rc.json`,
+        `.config/${moduleName}rc.yaml`,
+        `.config/${moduleName}rc.yml`,
+        `.config/${moduleName}rc.js`,
+        `.config/${moduleName}rc.cjs`,
+        `${moduleName}.config.js`,
+        `${moduleName}.config.cjs`,
+      ],
+      ignoreEmptySearchPlaces: true,
+      stopDir: os.homedir(),
+      cache: true,
+      metaConfigFilePath: null,
     };
 
     test('async', () => {
       cosmiconfig(moduleName);
-      checkResult(createExplorerMock, 1);
+      checkConfigResult(
+        createExplorerMock,
+        1,
+        expectedLoaderNames,
+        expectedExplorerOptions,
+      );
     });
 
     test('sync', () => {
       cosmiconfigSync(moduleName);
-      checkResult(createExplorerSyncMock, 2);
+      checkConfigResult(
+        createExplorerSyncMock,
+        2,
+        expectedLoaderNames,
+        expectedExplorerOptions,
+      );
     });
   });
 
@@ -169,42 +190,42 @@ describe('cosmiconfig', () => {
       },
     };
 
-    const checkResult = (mock: jest.SpyInstance, instanceNum: number) => {
-      const instanceIndex = instanceNum - 1;
-      expect(mock.mock.calls.length).toEqual(instanceNum);
-      expect(mock.mock.calls[instanceIndex].length).toEqual(1);
-      const { transform, loaders, ...explorerOptions } =
-        mock.mock.calls[instanceIndex][0];
+    const expectedLoaderNames = {
+      '.cjs': 'jsLoader',
+      '.js': 'jsLoader',
+      '.json': 'jsonLoader',
+      '.yaml': 'yamlLoader',
+      '.yml': 'loadYaml',
+      noExt: 'noExtLoader',
+    };
 
-      expect(transform.name).toBe('identity');
-      const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
-      expect(loaderFunctionsByName).toEqual({
-        '.cjs': 'jsLoader',
-        '.js': 'jsLoader',
-        '.json': 'jsonLoader',
-        '.yaml': 'yamlLoader',
-        '.yml': 'loadYaml',
-        noExt: 'noExtLoader',
-      });
-
-      expect(explorerOptions).toEqual({
-        packageProp: 'wildandfree',
-        searchPlaces: ['.foorc.json', 'wildandfree.js'],
-        ignoreEmptySearchPlaces: false,
-        stopDir: __dirname,
-        cache: false,
-        metaConfigFilePath: null,
-      });
+    const expectedExplorerOptions = {
+      packageProp: 'wildandfree',
+      searchPlaces: ['.foorc.json', 'wildandfree.js'],
+      ignoreEmptySearchPlaces: false,
+      stopDir: __dirname,
+      cache: false,
+      metaConfigFilePath: null,
     };
 
     test('async', () => {
       cosmiconfig(moduleName, options);
-      checkResult(createExplorerMock, 1);
+      checkConfigResult(
+        createExplorerMock,
+        1,
+        expectedLoaderNames,
+        expectedExplorerOptions,
+      );
     });
 
     test('sync', () => {
       cosmiconfigSync(moduleName, options);
-      checkResult(createExplorerSyncMock, 2);
+      checkConfigResult(
+        createExplorerSyncMock,
+        2,
+        expectedLoaderNames,
+        expectedExplorerOptions,
+      );
     });
   });
 
