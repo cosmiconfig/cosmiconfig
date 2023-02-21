@@ -13,9 +13,9 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
   public async search(
     searchFrom: string = process.cwd(),
   ): Promise<CosmiconfigResult> {
-    if (this.config.searchInThisFile && this.config.metaConfigFilePath) {
+    if (this.config.metaConfigFilePath) {
       const config = await this._loadFile(this.config.metaConfigFilePath, true);
-      if (this.shouldSearchStopWithResult(config)) {
+      if (config && !config.isEmpty) {
         return config;
       }
     }

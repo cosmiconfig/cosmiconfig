@@ -29,7 +29,6 @@ export type TransformSync = (
 interface OptionsBase {
   packageProp?: string | Array<string>;
   searchPlaces?: Array<string>;
-  searchInThisFile?: boolean;
   ignoreEmptySearchPlaces?: boolean;
   stopDir?: string;
   cache?: boolean;
@@ -108,8 +107,7 @@ function getExplorerOptions(
     packageProp: 'cosmiconfig',
     stopDir: process.cwd(),
     searchPlaces: metaSearchPlaces,
-    searchInThisFile: false,
-    ignoreEmptySearchPlaces: true,
+    ignoreEmptySearchPlaces: false,
     usePackagePropInConfigFiles: true,
     loaders: defaultLoaders,
     transform: identity,
@@ -122,7 +120,7 @@ function getExplorerOptions(
     return normalizeOptions(moduleName, options);
   }
 
-  const config = metaConfig.config;
+  const config = metaConfig.config ?? {};
 
   if (config.loaders) {
     throw new Error('Can not specify loaders in meta config file');
@@ -220,7 +218,6 @@ function normalizeOptions(
     cache: true,
     transform: identity,
     loaders: defaultLoaders,
-    searchInThisFile: false,
     metaConfigFilePath: null,
   };
 

@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { cosmiconfig, cosmiconfigSync } from '../src';
+import { cosmiconfig, cosmiconfigSync, Options, OptionsSync } from '../src';
 import { TempDir } from './util';
 import SpyInstance = jest.SpyInstance;
 
@@ -62,6 +62,7 @@ describe('cosmiconfig meta config', () => {
       const readFileSpy = jest.spyOn(fs, 'readFile');
       const result = await explorer.search(startDir);
       expect(temp.getSpyPathCalls(readFileSpy)).toEqual([
+        '.config.yml',
         'sub/.foo-config',
         'sub/.foo.config.yml',
         '.foo-config',
@@ -90,64 +91,6 @@ describe('cosmiconfig meta config', () => {
     });
   });
 
-  test('ignores meta file without cosmiconfig key', async () => {
-    temp.createFile('.config.yml', 'foo:\n  a: c');
-
-    temp.createDir('sub');
-    temp.createFile('.foorc', 'a: b');
-
-    const currentDir = process.cwd();
-    process.chdir(temp.dir);
-
-    const startDir = temp.absolutePath('sub');
-    const explorerOptions = { stopDir: temp.absolutePath('.') };
-
-    const readFileSyncSpy = jest.spyOn(fs, 'readFileSync');
-    const explorer = cosmiconfig('foo', explorerOptions);
-
-    expect(
-      temp
-        .getSpyPathCalls(readFileSyncSpy)
-        .filter((path) => !path.includes('/node_modules/')),
-    ).toEqual([
-      'package.json',
-      '.config.json',
-      '.config.yaml',
-      '.config.yml',
-      '.config.js',
-      '.config.cjs',
-    ]);
-
-    const readFileSpy = jest.spyOn(fs, 'readFile');
-    const result = await explorer.search(startDir);
-    expect(temp.getSpyPathCalls(readFileSpy)).toEqual([
-      'sub/package.json',
-      'sub/.foorc',
-      'sub/.foorc.json',
-      'sub/.foorc.yaml',
-      'sub/.foorc.yml',
-      'sub/.foorc.js',
-      'sub/.foorc.cjs',
-      'sub/.config/foorc',
-      'sub/.config/foorc.json',
-      'sub/.config/foorc.yaml',
-      'sub/.config/foorc.yml',
-      'sub/.config/foorc.js',
-      'sub/.config/foorc.cjs',
-      'sub/foo.config.js',
-      'sub/foo.config.cjs',
-      'package.json',
-      '.foorc',
-    ]);
-
-    expect(result).toEqual({
-      config: { a: 'b' },
-      filepath: temp.absolutePath('.foorc'),
-    });
-
-    process.chdir(currentDir);
-  });
-
   describe('checks config in meta file', () => {
     const currentDir = process.cwd();
 
@@ -165,12 +108,15 @@ describe('cosmiconfig meta config', () => {
       beforeEach(() => {
         temp.createFile(
           '.config.yml',
-          'cosmiconfig:\n  searchPlaces: [".foo-config"]\n  searchInThisFile: true',
+          'cosmiconfig:\n  searchPlaces: [".foo-config"]',
         );
       });
 
       const file = temp.absolutePath('.foo-config');
-      const explorerOptions = { stopDir: temp.absolutePath('.') };
+      const explorerOptions: Options & OptionsSync = {
+        stopDir: temp.absolutePath('.'),
+        ignoreEmptySearchPlaces: false,
+      };
 
       function checkResult(
         constructFiles: Array<string>,
@@ -221,10 +167,7 @@ describe('cosmiconfig meta config', () => {
 
     describe('existing', () => {
       beforeEach(() => {
-        temp.createFile(
-          '.config.yml',
-          'cosmiconfig:\n  searchInThisFile: true\nfoo:\n  a: d',
-        );
+        temp.createFile('.config.yml', 'foo:\n  a: d');
       });
 
       function checkResult(readFileSpy: SpyInstance, result: any) {

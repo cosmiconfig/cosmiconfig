@@ -603,7 +603,7 @@ to configure `cosmiconfig` itself:
 .config.cjs
 ```
 
-The following properties are currently actively supported in these places:
+The following property is currently actively supported in these places:
 
 ```yaml
 cosmiconfig:
@@ -611,20 +611,16 @@ cosmiconfig:
   # if all your configuration files use the same naming convention and format (defined by yourself)
   searchPlaces:
     - .config/{name}.yml
-      
-  # enables configuration resolution in this same file, similarly to `package.json`, see below
-  searchInThisFile: true
 ```
 
 > **Note:** technically, you can overwrite all options described in [cosmiconfigOptions](#cosmiconfigoptions) here,
 > but everything not listed above should be used at your own risk, as it has not been tested explicitly.
 
-When enabling `searchInThisFile`, you can also add more root properties outside the `cosmiconfig` property
+You can also add more root properties outside the `cosmiconfig` property
 to configure your tools, entirely eliminating the need to look for additional configuration files:
 
 ```yaml
 cosmiconfig:
-  searchInThisFile: true
   searchPlaces: []
 
 prettier:

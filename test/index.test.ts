@@ -12,7 +12,12 @@ import { TempDir } from './util';
 const temp = new TempDir();
 
 function getLoaderFunctionsByName(loaders: Loaders) {
-  return Object.fromEntries(Object.entries(loaders).map(([extension, loader]) => [extension, loader.name]));
+  return Object.fromEntries(
+    Object.entries(loaders).map(([extension, loader]) => [
+      extension,
+      loader.name,
+    ]),
+  );
 }
 
 let cosmiconfig: typeof cosmiconfigModule;
@@ -105,7 +110,6 @@ describe('cosmiconfig', () => {
         stopDir: os.homedir(),
         cache: true,
         metaConfigFilePath: null,
-        searchInThisFile: false,
       });
     };
 
@@ -189,7 +193,6 @@ describe('cosmiconfig', () => {
         ignoreEmptySearchPlaces: false,
         stopDir: __dirname,
         cache: false,
-        searchInThisFile: false,
         metaConfigFilePath: null,
       });
     };

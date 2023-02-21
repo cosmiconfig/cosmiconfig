@@ -15,9 +15,9 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
   }
 
   public searchSync(searchFrom: string = process.cwd()): CosmiconfigResult {
-    if (this.config.searchInThisFile && this.config.metaConfigFilePath) {
+    if (this.config.metaConfigFilePath) {
       const config = this._loadFileSync(this.config.metaConfigFilePath, true);
-      if (this.shouldSearchStopWithResult(config)) {
+      if (config && !config.isEmpty) {
         return config;
       }
     }
