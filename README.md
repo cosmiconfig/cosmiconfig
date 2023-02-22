@@ -607,8 +607,7 @@ The following property is currently actively supported in these places:
 
 ```yaml
 cosmiconfig:
-  # overrides where configuration files are being searched to enforce a common naming convention and format
-  # (which are defined by yourself)
+  # overrides where configuration files are being searched to enforce a custom naming convention and format
   searchPlaces:
     - .config/{name}.yml
 ```
