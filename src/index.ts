@@ -44,41 +44,31 @@ export interface OptionsSync extends OptionsBase {
   transform?: TransformSync;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function cosmiconfig(moduleName: string, options: Options = {}) {
-  const normalizedOptions: ExplorerOptions = normalizeOptions(
-    moduleName,
-    options,
-  );
-
-  const explorer = new Explorer(normalizedOptions);
-
-  return {
-    search: explorer.search.bind(explorer),
-    load: explorer.load.bind(explorer),
-    clearLoadCache: explorer.clearLoadCache.bind(explorer),
-    clearSearchCache: explorer.clearSearchCache.bind(explorer),
-    clearCaches: explorer.clearCaches.bind(explorer),
-  } as const;
+export interface PublicExplorerBase {
+  clearLoadCache: () => void;
+  clearSearchCache: () => void;
+  clearCaches: () => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function cosmiconfigSync(moduleName: string, options: OptionsSync = {}) {
-  const normalizedOptions: ExplorerOptionsSync = normalizeOptions(
-    moduleName,
-    options,
-  );
-
-  const explorerSync = new ExplorerSync(normalizedOptions);
-
-  return {
-    search: explorerSync.searchSync.bind(explorerSync),
-    load: explorerSync.loadSync.bind(explorerSync),
-    clearLoadCache: explorerSync.clearLoadCache.bind(explorerSync),
-    clearSearchCache: explorerSync.clearSearchCache.bind(explorerSync),
-    clearCaches: explorerSync.clearCaches.bind(explorerSync),
-  } as const;
+export interface PublicExplorer extends PublicExplorerBase {
+  search: (searchFrom?: string) => Promise<CosmiconfigResult>;
+  load: (filepath: string) => Promise<CosmiconfigResult>;
 }
+
+export interface PublicExplorerSync extends PublicExplorerBase {
+  search: (searchFrom?: string) => CosmiconfigResult;
+  load: (filepath: string) => CosmiconfigResult;
+}
+
+// this needs to be hardcoded, as this is intended for end users, who can't supply options at this point
+export const metaSearchPlaces = [
+  'package.json',
+  '.config.json',
+  '.config.yaml',
+  '.config.yml',
+  '.config.js',
+  '.config.cjs',
+];
 
 // do not allow mutation of default loaders. Make sure it is set inside options
 const defaultLoaders = Object.freeze({
@@ -94,17 +84,115 @@ const identity: TransformSync = function identity(x) {
   return x;
 };
 
+function replaceMetaPlaceholders(
+  paths: Array<string>,
+  moduleName: string,
+): Array<string> {
+  return paths.map((path) => path.replace('{name}', moduleName));
+}
+
+function getExplorerOptions(
+  moduleName: string,
+  options: OptionsSync,
+): ExplorerOptionsSync;
+function getExplorerOptions(
+  moduleName: string,
+  options: Options,
+): ExplorerOptions;
+function getExplorerOptions(
+  moduleName: string,
+  options: Options | OptionsSync,
+): ExplorerOptions | ExplorerOptionsSync {
+  const metaExplorer = new ExplorerSync({
+    packageProp: 'cosmiconfig',
+    stopDir: process.cwd(),
+    searchPlaces: metaSearchPlaces,
+    ignoreEmptySearchPlaces: false,
+    usePackagePropInConfigFiles: true,
+    loaders: defaultLoaders,
+    transform: identity,
+    cache: true,
+    metaConfigFilePath: null,
+  });
+  const metaConfig = metaExplorer.searchSync();
+
+  if (!metaConfig) {
+    return normalizeOptions(moduleName, options);
+  }
+
+  const config = metaConfig.config ?? {};
+
+  if (config.loaders) {
+    throw new Error('Can not specify loaders in meta config file');
+  }
+
+  if (config.searchPlaces) {
+    config.searchPlaces = replaceMetaPlaceholders(
+      config.searchPlaces,
+      moduleName,
+    );
+  }
+
+  config.metaConfigFilePath = metaConfig.filepath;
+
+  return normalizeOptions(moduleName, config, false);
+}
+
+function cosmiconfig(
+  moduleName: string,
+  options: Options = {},
+): PublicExplorer {
+  const normalizedOptions: ExplorerOptions = getExplorerOptions(
+    moduleName,
+    options,
+  );
+
+  const explorer = new Explorer(normalizedOptions);
+
+  return {
+    search: explorer.search.bind(explorer),
+    load: explorer.load.bind(explorer),
+    clearLoadCache: explorer.clearLoadCache.bind(explorer),
+    clearSearchCache: explorer.clearSearchCache.bind(explorer),
+    clearCaches: explorer.clearCaches.bind(explorer),
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function cosmiconfigSync(
+  moduleName: string,
+  options: OptionsSync = {},
+): PublicExplorerSync {
+  const normalizedOptions: ExplorerOptionsSync = getExplorerOptions(
+    moduleName,
+    options,
+  );
+
+  const explorerSync = new ExplorerSync(normalizedOptions);
+
+  return {
+    search: explorerSync.searchSync.bind(explorerSync),
+    load: explorerSync.loadSync.bind(explorerSync),
+    clearLoadCache: explorerSync.clearLoadCache.bind(explorerSync),
+    clearSearchCache: explorerSync.clearSearchCache.bind(explorerSync),
+    clearCaches: explorerSync.clearCaches.bind(explorerSync),
+  };
+}
+
 function normalizeOptions(
   moduleName: string,
   options: OptionsSync,
+  mergeLoaders?: boolean,
 ): ExplorerOptionsSync;
 function normalizeOptions(
   moduleName: string,
   options: Options,
+  mergeLoaders?: boolean,
 ): ExplorerOptions;
 function normalizeOptions(
   moduleName: string,
   options: Options | OptionsSync,
+  mergeLoaders = true,
 ): ExplorerOptions | ExplorerOptionsSync {
   const defaults: ExplorerOptions | ExplorerOptionsSync = {
     packageProp: moduleName,
@@ -130,18 +218,30 @@ function normalizeOptions(
     cache: true,
     transform: identity,
     loaders: defaultLoaders,
+    metaConfigFilePath: null,
   };
 
-  const normalizedOptions: ExplorerOptions | ExplorerOptionsSync = {
+  let loaders = {
+    ...defaults.loaders,
+  };
+
+  if (options.loaders) {
+    // to be used for the upcoming loaders-in-config
+    /* istanbul ignore next */
+    if (mergeLoaders) {
+      Object.assign(loaders, options.loaders);
+    } else {
+      loaders = {
+        ...options.loaders,
+      };
+    }
+  }
+
+  return {
     ...defaults,
     ...options,
-    loaders: {
-      ...defaults.loaders,
-      ...options.loaders,
-    },
+    loaders,
   };
-
-  return normalizedOptions;
 }
 
 export { cosmiconfig, cosmiconfigSync, defaultLoaders };

@@ -1,6 +1,6 @@
 import fs from 'fs';
-import { TempDir } from './util';
 import { cosmiconfig, cosmiconfigSync } from '../src';
+import { TempDir } from './util';
 
 const temp = new TempDir();
 
@@ -52,15 +52,17 @@ describe('cache is not used initially', () => {
   };
 
   test('async', async () => {
+    const explorer = cosmiconfig('foo');
     const readFileSpy = jest.spyOn(fs, 'readFile');
-    const cachedSearch = cosmiconfig('foo').search;
+    const cachedSearch = explorer.search;
     const result = await cachedSearch(searchPath);
     checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
+    const explorer = cosmiconfigSync('foo');
     const readFileSpy = jest.spyOn(fs, 'readFileSync');
-    const cachedSearchSync = cosmiconfigSync('foo').search;
+    const cachedSearchSync = explorer.search;
     const result = cachedSearchSync(searchPath);
     checkResult(readFileSpy, result);
   });
@@ -260,24 +262,22 @@ describe('cache is not used in a new cosmiconfig instance', () => {
   };
 
   test('async', async () => {
-    const readFileSpy = jest.spyOn(fs, 'readFile');
     // First pass, prime the cache ...
     await cosmiconfig('foo').search(searchPath);
-    // Reset readFile mocks and search again.
-    readFileSpy.mockClear();
-
-    const result = await cosmiconfig('foo').search(searchPath);
+    // Search again.
+    const explorer = cosmiconfig('foo');
+    const readFileSpy = jest.spyOn(fs, 'readFile');
+    const result = await explorer.search(searchPath);
     checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
-    const readFileSpy = jest.spyOn(fs, 'readFileSync');
     // First pass, prime the cache ...
     cosmiconfigSync('foo').search(searchPath);
-    // Reset readFile mocks and search again.
-    readFileSpy.mockClear();
-
-    const result = cosmiconfigSync('foo').search(searchPath);
+    // Search again.
+    const explorer = cosmiconfigSync('foo');
+    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const result = explorer.search(searchPath);
     checkResult(readFileSpy, result);
   });
 });

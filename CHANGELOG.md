@@ -1,5 +1,10 @@
 # Changelog
 
+## 8.1.0
+
+- Added: always look at `.config.{yml,yaml,json,js,cjs}` file to configure cosmiconfig itself, and look for tool configuration in it using `packageProp` (similar to package.json)
+  - For more info on this, look at the [end user configuration section of the README](README.md#usage-for-end-users)
+
 ## 8.0.0
 
 **No major breaking changes!** We dropped support for Node 10 and 12 -- which you're probably not using. And we swapped out the YAML parser -- which you probably won't notice.
