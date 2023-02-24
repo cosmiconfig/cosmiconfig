@@ -219,4 +219,4 @@ More details:
 
 [parse-json-pr-12]: https://github.com/sindresorhus/parse-json/pull/12
 
-[pr-101]: https://github.com/davidtheclark/cosmiconfig/pull/101
+[pr-101]: https://github.com/cosmiconfig/cosmiconfig/pull/101

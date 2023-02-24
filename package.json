@@ -46,23 +46,25 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/davidtheclark/cosmiconfig.git"
+    "url": "git+https://github.com/cosmiconfig/cosmiconfig.git"
   },
   "keywords": [
     "load",
     "configuration",
     "config"
   ],
-  "author": "David Clark <david.dave.clark@gmail.com>",
+  "author": "Daniel Fischer <daniel@d-fischer.dev>",
   "contributors": [
+    "David Clark <david.dave.clark@gmail.com>",
     "Bogdan Chadkin <trysound@yandex.ru>",
     "Suhas Karanth <sudo.suhas@gmail.com>"
   ],
+  "funding": "https://github.com/sponsors/d-fischer",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/davidtheclark/cosmiconfig/issues"
+    "url": "https://github.com/cosmiconfig/cosmiconfig/issues"
   },
-  "homepage": "https://github.com/davidtheclark/cosmiconfig#readme",
+  "homepage": "https://github.com/cosmiconfig/cosmiconfig#readme",
   "prettier": {
     "trailingComma": "all",
     "arrowParens": "always",

@@ -1,6 +1,6 @@
 # cosmiconfig
 
-[![codecov](https://codecov.io/gh/davidtheclark/cosmiconfig/branch/main/graph/badge.svg)](https://codecov.io/gh/davidtheclark/cosmiconfig)
+[![codecov](https://codecov.io/gh/cosmiconfig/cosmiconfig/branch/main/graph/badge.svg)](https://codecov.io/gh/cosmiconfig/cosmiconfig)
 
 Cosmiconfig searches for and loads configuration for your program.
 

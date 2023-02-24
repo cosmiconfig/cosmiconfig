@@ -35,7 +35,7 @@ describe('returns the parent directory if it is a file', () => {
   });
 });
 
-// https://github.com/davidtheclark/cosmiconfig/issues/63
+// https://github.com/cosmiconfig/cosmiconfig/issues/63
 describe('handles process.cwd()/stdin', () => {
   const subject = path.join(process.cwd(), 'stdin');
   const checkResult = (result: string) => {
