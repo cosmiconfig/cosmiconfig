@@ -43,4 +43,4 @@ jobs:
         uses: codecov/codecov-action@v3
         if: startsWith(matrix.os, 'ubuntu-latest') && matrix.node == 18
         with:
-          files: ./.coverage/lcov.info
+          files: ./coverage/lcov.info
