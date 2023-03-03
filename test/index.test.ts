@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function */
 import {
   expect,
   describe,
@@ -6,17 +7,50 @@ import {
   test,
   vi,
   SpyInstance,
+  Mock,
 } from 'vitest';
-/* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function */
 import os from 'os';
-import {
-  cosmiconfig as cosmiconfigModule,
-  cosmiconfigSync as cosmiconfigSyncModule,
-  defaultLoaders,
-  LoaderSync,
-} from '../src';
+import { defaultLoaders, LoaderSync } from '../src';
 import { ExplorerOptions, ExplorerOptionsSync, Loaders } from '../src/types';
 import { TempDir } from './util';
+import { ExplorerSync } from '../src/ExplorerSync';
+import { Explorer } from '../src/Explorer';
+
+vi.mock('../src/ExplorerSync', async () => {
+  const { ExplorerSync } = await vi.importActual<any>('../src/ExplorerSync');
+
+  const mock = vi.fn();
+
+  return {
+    ExplorerSync: class FakeExplorerSync extends ExplorerSync {
+      static mock = mock;
+      constructor(options: ExplorerOptionsSync) {
+        mock(options);
+        super(options);
+      }
+    },
+  };
+});
+
+vi.mock('../src/Explorer', async () => {
+  const { Explorer } = await vi.importActual<any>('../src/Explorer');
+
+  const mock = vi.fn();
+
+  return {
+    Explorer: class FakeExplorer extends Explorer {
+      static mock = mock;
+      constructor(options: ExplorerOptions) {
+        mock(options);
+        super(options);
+      }
+    },
+  };
+});
+
+const { cosmiconfig, cosmiconfigSync } = await import('../src/index');
+const createExplorerSyncMock = (ExplorerSync as any).mock;
+const createExplorerMock = (Explorer as any).mock;
 
 const temp = new TempDir();
 
@@ -39,64 +73,31 @@ const checkConfigResult = (
   >,
 ) => {
   const instanceIndex = instanceNum - 1;
+
   expect(mock.mock.calls.length).toEqual(instanceNum);
   expect(mock.mock.calls[instanceIndex].length).toEqual(1);
 
-  console.log(JSON.stringify(mock.mock.calls, null, 2));
-
   const { transform, loaders, ...explorerOptions } =
     mock.mock.calls[instanceIndex][0];
-  console.log(JSON.stringify(transform));
-  // expect(transform.name).toBe('identity');
+  expect(transform.name).toMatch(/identity/);
   const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
-  expect(loaderFunctionsByName).toEqual(expectedLoaderNames);
+
+  // Vitest adds a number suffix to our functions names,
+  // so we can't compare them with strict equals
+  for (const [key, value] of Object.entries(loaderFunctionsByName)) {
+    expect(value).toContain(expectedLoaderNames[key]);
+  }
+
   expect(explorerOptions).toEqual(expectedExplorerOptions);
 };
 
-let createExplorerMock: SpyInstance & typeof cosmiconfigModule;
-let createExplorerSyncMock: SpyInstance & typeof cosmiconfigSyncModule;
-
-const { cosmiconfig, cosmiconfigSync } = await vi.importActual<{
-  cosmiconfig: typeof cosmiconfigModule;
-  cosmiconfigSync: typeof cosmiconfigSyncModule;
-}>('../src/index');
-
-describe('cosmiconfig', async () => {
+describe('cosmiconfig', () => {
   const moduleName = 'foo';
 
   beforeEach(async () => {
-    vi.resetModules();
     temp.clean();
 
-    createExplorerMock = vi.fn();
-    vi.mock('../src/Explorer', async () => {
-      const { Explorer } = await vi.importActual<any>('../src/Explorer');
-      return {
-        Explorer: class FakeExplorer {
-          constructor(options: Parameters<typeof cosmiconfigModule>[0]) {
-            createExplorerMock(options);
-
-            return new Explorer(options);
-          }
-        },
-      };
-    });
-
-    createExplorerSyncMock = vi.fn();
-    vi.mock('../src/ExplorerSync', async () => {
-      const { ExplorerSync } = await vi.importActual<any>(
-        '../src/ExplorerSync',
-      );
-      return {
-        ExplorerSync: class FakeExplorerSync {
-          constructor(options: Parameters<typeof cosmiconfigSyncModule>[0]) {
-            createExplorerSyncMock(options);
-
-            return new ExplorerSync(options);
-          }
-        },
-      };
-    });
+    vi.resetAllMocks();
   });
 
   afterAll(() => {
@@ -161,7 +162,7 @@ describe('cosmiconfig', async () => {
   });
 
   describe('defaults transform to sync identity function', () => {
-    const checkResult = (mock: SpyInstance) => {
+    const checkResult = (mock: Mock) => {
       const explorerOptions = mock.mock.calls[0][0];
       const x = {};
       // @ts-ignore

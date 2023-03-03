@@ -8,7 +8,7 @@ const vitestConfig = defineConfig({
     mockReset: true,
     includeSource: ['src/**/*.{js,ts}'],
     coverage: {
-      provider: 'istanbul', // or 'c8'
+      provider: 'c8',
       reporter: ['text', 'html', 'lcov'],
       include: ['src/**/*.{js,ts}'],
     },
