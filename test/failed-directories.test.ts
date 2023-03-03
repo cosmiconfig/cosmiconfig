@@ -1,3 +1,4 @@
+import { beforeEach, afterAll, describe, expect, test, vi } from 'vitest';
 import fs from 'fs';
 import { TempDir } from './util';
 import {
@@ -82,8 +83,8 @@ describe('gives up if it cannot find the file', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = jest.spyOn(fs, 'readFile');
-    const statSpy = jest.spyOn(fs, 'stat');
+    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const statSpy = vi.spyOn(fs, 'stat');
 
     const result = await explorer.search(startDir);
     checkResult(statSpy, readFileSpy, result);
@@ -92,8 +93,8 @@ describe('gives up if it cannot find the file', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = jest.spyOn(fs, 'readFileSync');
-    const statSpy = jest.spyOn(fs, 'statSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
+    const statSpy = vi.spyOn(fs, 'statSync');
 
     const result = explorer.search(startDir);
     checkResult(statSpy, readFileSpy, result);
@@ -145,7 +146,7 @@ describe('stops at stopDir and gives up', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = jest.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fs, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result);
   });
@@ -153,7 +154,7 @@ describe('stops at stopDir and gives up', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result);
   });

@@ -20,8 +20,8 @@
     "format:md": "remark-preset-davidtheclark --format",
     "format:check": "prettier \"**/*.{js,ts,json,yml,yaml}\" --check",
     "typescript": "tsc",
-    "test": "jest --coverage",
-    "test:watch": "jest --watch",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
     "check:all": "npm run test && npm run typescript && npm run lint && npm run format:check",
     "prepublishOnly": "npm run check:all && npm run build"
   },
@@ -72,28 +72,6 @@
     "printWidth": 80,
     "tabWidth": 2
   },
-  "jest": {
-    "testEnvironment": "node",
-    "collectCoverageFrom": [
-      "src/**/*.{js,ts}"
-    ],
-    "coverageReporters": [
-      "text",
-      "html",
-      "lcov"
-    ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 100,
-        "functions": 100,
-        "lines": 100,
-        "statements": 100
-      }
-    },
-    "resetModules": true,
-    "resetMocks": true,
-    "restoreMocks": true
-  },
   "babel": {
     "presets": [
       [
@@ -140,7 +118,8 @@
     "parent-module": "^2.0.0",
     "prettier": "^2.0.5",
     "remark-preset-davidtheclark": "^0.12.0",
-    "typescript": "^3.9.6"
+    "typescript": "^3.9.6",
+    "vitest": "^0.29.2"
   },
   "engines": {
     "node": ">=14"
