@@ -72,8 +72,12 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     if (content === null) {
       return null;
     }
-    if (content.trim() === '') {
-      return undefined;
+    try {
+      if (content.trim() === '') {
+        return undefined;
+      }
+    } catch (err) {
+      console.log('loadFileContentSync', filepath, content);
     }
     const loader = this.getLoaderEntryForFile(filepath);
     try {

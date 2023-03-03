@@ -14,6 +14,7 @@ import { TempDir } from './util';
 
 describe('cosmiconfig meta config', () => {
   const temp = new TempDir();
+
   beforeEach(() => {
     temp.clean();
   });

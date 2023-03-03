@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 const vitestConfig = defineConfig({
   test: {
-    threads: false, // todo
+    threads: false,
     environment: 'node',
     restoreMocks: true,
     mockReset: true,
