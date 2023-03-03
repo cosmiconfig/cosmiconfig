@@ -2,6 +2,7 @@ import path from 'path';
 import { cacheWrapper } from './cacheWrapper';
 import { ExplorerBase } from './ExplorerBase';
 import { getDirectory } from './getDirectory';
+import { hasOwn, mergeAll } from './merge';
 import { readFile } from './readFile';
 import { CosmiconfigResult, ExplorerOptions, LoadedFileContent } from './types';
 
@@ -85,12 +86,54 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
     }
   }
 
+  private async loadFileContentWithImports(
+    filepath: string,
+    content: string | null,
+    importStack: Array<string>,
+  ): Promise<LoadedFileContent> {
+    const loadedContent = await this.loadFileContent(filepath, content);
+
+    if (!loadedContent || !hasOwn(loadedContent, '$import')) {
+      return loadedContent;
+    }
+
+    const fileDirectory = path.dirname(filepath);
+    const { $import: imports, ...ownContent } = loadedContent;
+    const importPaths = Array.isArray(imports) ? imports : [imports];
+
+    const importedConfigs = await Promise.all(
+      importPaths.map(async (importPath) => {
+        const fullPath = path.resolve(fileDirectory, importPath);
+        const importedContent = await readFile(fullPath, {
+          throwNotFound: true,
+        });
+        const result = await this.createCosmiconfigResult(
+          fullPath,
+          importedContent,
+          false,
+          [...importStack, filepath],
+        );
+
+        return result?.config;
+      }),
+    );
+
+    return mergeAll([...importedConfigs, ownContent], {
+      mergeArrays: this.config.mergeImportArrays,
+    });
+  }
+
   private async createCosmiconfigResult(
     filepath: string,
     content: string | null,
     forceProp: boolean,
+    importStack: Array<string> = [],
   ): Promise<CosmiconfigResult> {
-    const fileContent = await this.loadFileContent(filepath, content);
+    const fileContent = await this.loadFileContentWithImports(
+      filepath,
+      content,
+      importStack,
+    );
 
     return this.loadedContentToCosmiconfigResult(
       filepath,

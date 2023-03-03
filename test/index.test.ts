@@ -119,6 +119,7 @@ describe('cosmiconfig', () => {
         `${moduleName}.config.cjs`,
       ],
       ignoreEmptySearchPlaces: true,
+      mergeImportArrays: true,
       stopDir: os.homedir(),
       cache: true,
       metaConfigFilePath: null,
@@ -181,6 +182,7 @@ describe('cosmiconfig', () => {
       searchPlaces: ['.foorc.json', 'wildandfree.js'],
       packageProp: 'wildandfree',
       ignoreEmptySearchPlaces: false,
+      mergeImportArrays: true,
       loaders: {
         noExt: noExtLoader,
         '.cjs': jsLoader,
@@ -203,6 +205,7 @@ describe('cosmiconfig', () => {
       packageProp: 'wildandfree',
       searchPlaces: ['.foorc.json', 'wildandfree.js'],
       ignoreEmptySearchPlaces: false,
+      mergeImportArrays: true,
       stopDir: __dirname,
       cache: false,
       metaConfigFilePath: null,

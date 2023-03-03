@@ -32,6 +32,7 @@ interface OptionsBase {
   ignoreEmptySearchPlaces?: boolean;
   stopDir?: string;
   cache?: boolean;
+  mergeImportArrays?: boolean;
 }
 
 export interface Options extends OptionsBase {
@@ -113,6 +114,7 @@ function getExplorerOptions(
     transform: identity,
     cache: true,
     metaConfigFilePath: null,
+    mergeImportArrays: false,
   });
   const metaConfig = metaExplorer.searchSync();
 
@@ -219,6 +221,7 @@ function normalizeOptions(
     transform: identity,
     loaders: defaultLoaders,
     metaConfigFilePath: null,
+    mergeImportArrays: true,
   };
 
   let loaders = {

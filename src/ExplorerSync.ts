@@ -2,6 +2,7 @@ import path from 'path';
 import { cacheWrapperSync } from './cacheWrapper';
 import { ExplorerBase } from './ExplorerBase';
 import { getDirectorySync } from './getDirectory';
+import { hasOwn, mergeAll } from './merge';
 import { readFileSync } from './readFile';
 import {
   CosmiconfigResult,
@@ -84,12 +85,52 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     }
   }
 
+  private loadFileContentWithImportsSync(
+    filepath: string,
+    content: string | null,
+    importStack: Array<string>,
+  ): LoadedFileContent {
+    const loadedContent = this.loadFileContentSync(filepath, content);
+
+    if (!loadedContent || !hasOwn(loadedContent, '$import')) {
+      return loadedContent;
+    }
+
+    const fileDirectory = path.dirname(filepath);
+    const { $import: imports, ...ownContent } = loadedContent;
+    const importPaths = Array.isArray(imports) ? imports : [imports];
+
+    const importedConfigs = importPaths.map((importPath) => {
+      const fullPath = path.resolve(fileDirectory, importPath);
+      const importedContent = readFileSync(fullPath, {
+        throwNotFound: true,
+      });
+      const result = this.createCosmiconfigResultSync(
+        fullPath,
+        importedContent,
+        false,
+        [...importStack, filepath],
+      );
+
+      return result?.config;
+    });
+
+    return mergeAll([...importedConfigs, ownContent], {
+      mergeArrays: this.config.mergeImportArrays,
+    });
+  }
+
   private createCosmiconfigResultSync(
     filepath: string,
     content: string | null,
     forceProp: boolean,
+    importStack: Array<string> = [],
   ): CosmiconfigResult {
-    const fileContent = this.loadFileContentSync(filepath, content);
+    const fileContent = this.loadFileContentWithImportsSync(
+      filepath,
+      content,
+      importStack,
+    );
 
     return this.loadedContentToCosmiconfigResult(
       filepath,
