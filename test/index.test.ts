@@ -270,11 +270,10 @@ describe('cosmiconfig', () => {
       'loader for extension ".things" is not a function (type provided: "number"), so searchPlaces item ".foorc.things" is invalid';
 
     test('async', () => {
-      cosmiconfig('foo', explorerOptions as any);
-      // expect(() =>
-      //   // @ts-ignore
-      //   cosmiconfig('foo', explorerOptions),
-      // ).toThrow(expectedError);
+      expect(() =>
+        // @ts-ignore
+        cosmiconfig('foo', explorerOptions),
+      ).toThrow(expectedError);
     });
 
     test('sync', () => {
