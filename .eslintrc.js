@@ -20,11 +20,10 @@ module.exports = {
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:import/typescript',
-    'plugin:jest/recommended',
     'prettier',
     'prettier/@typescript-eslint',
   ],
-  plugins: ['jest', '@typescript-eslint', 'import'],
+  plugins: ['@typescript-eslint', 'import'],
   rules: {
     'no-var': 'off',
     'prefer-const': 'off',
@@ -100,18 +99,6 @@ module.exports = {
     'import/no-default-export': 'error',
     'import/no-named-export': 'off',
     'import/prefer-default-export': 'off',
-
-    /**
-     * eslint-plugin-jest
-     */
-    'jest/consistent-test-it': ['error', { fn: 'test' }],
-    'jest/valid-title': 'error',
-    'jest/no-test-callback': 'error',
-    'jest/prefer-todo': 'error',
-    'jest/require-to-throw-message': 'off',
-    // Many tests make assertions indirectly in a way the plugin
-    // does not understand.
-    'jest/expect-expect': 'off',
   },
   settings: {
     node: {

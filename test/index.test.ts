@@ -100,8 +100,6 @@ describe('cosmiconfig', () => {
 
   beforeEach(async () => {
     temp.clean();
-
-    vi.resetAllMocks();
   });
 
   afterAll(() => {
@@ -251,7 +249,6 @@ describe('cosmiconfig', () => {
 
   describe('errors if loader is not passed a function', () => {
     beforeEach(() => {
-      vi.resetAllMocks();
       temp.createFile(
         'a/b/c/d/e/f/.foorc.things',
         'one\ntwo\nthree\t\t\n  four\n',
