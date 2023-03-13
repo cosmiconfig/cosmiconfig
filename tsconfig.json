@@ -18,8 +18,7 @@
     // Import non-ES modules as default imports.
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true
+    "skipLibCheck": true
   },
   "include": ["src", "test", "global.d.ts"],
   "exclude": ["dist", "node_modules"]

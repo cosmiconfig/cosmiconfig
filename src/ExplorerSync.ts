@@ -82,7 +82,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     const loader = this.getLoaderEntryForFile(filepath);
     try {
       return loader(filepath, content);
-    } catch (e) {
+    } catch (e: any) {
       e.filepath = filepath;
       throw e;
     }

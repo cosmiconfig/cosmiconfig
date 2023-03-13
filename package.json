@@ -119,7 +119,7 @@
     "parent-module": "^2.0.0",
     "prettier": "^2.0.5",
     "remark-preset-davidtheclark": "^0.12.0",
-    "typescript": "^3.9.6",
+    "typescript": "^4.9.5",
     "vitest": "^0.29.2"
   },
   "engines": {
