@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function,no-focused-test*/
+/* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function*/
 import {
   expect,
   describe,
@@ -249,7 +249,7 @@ describe('cosmiconfig', () => {
     });
   });
 
-  describe.only('errors if loader is not passed a function', () => {
+  describe('errors if loader is not passed a function', () => {
     beforeEach(() => {
       vi.resetAllMocks();
       temp.createFile(

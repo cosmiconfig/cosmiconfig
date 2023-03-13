@@ -1,12 +1,11 @@
 import path from 'path';
 import del from 'del';
-import * as fsType from 'fs';
 import makeDir from 'make-dir';
 import parentModule from 'parent-module';
 import os from 'os';
 import { Mock, SpyInstance, vi } from 'vitest';
 
-const fs = await vi.importActual<typeof fsType>('fs');
+const fs = await vi.importActual<typeof import('fs')>('fs');
 
 function normalizeDirectorySlash(pathname: string): string {
   const normalizeCrossPlatform = pathname.replace(/\\/g, '/');
