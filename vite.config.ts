@@ -9,9 +9,13 @@ const vitestConfig = defineConfig({
     mockReset: true,
     includeSource: ['src/**/*.{js,ts}'],
     coverage: {
-      provider: 'c8',
+      provider: 'istanbul',
       reporter: ['text', 'html', 'lcov'],
       include: ['src/**/*.{js,ts}'],
+      branches: 100,
+      functions: 100,
+      lines: 100,
+      statements: 100,
     },
   },
 });
