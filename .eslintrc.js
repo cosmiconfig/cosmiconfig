@@ -20,10 +20,11 @@ module.exports = {
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:import/typescript',
+    'plugin:vitest/recommended',
     'prettier',
     'prettier/@typescript-eslint',
   ],
-  plugins: ['@typescript-eslint', 'import'],
+  plugins: ['vitest', '@typescript-eslint', 'import'],
   rules: {
     'no-var': 'off',
     'prefer-const': 'off',
@@ -100,6 +101,15 @@ module.exports = {
     'import/no-default-export': 'error',
     'import/no-named-export': 'off',
     'import/prefer-default-export': 'off',
+
+    /**
+     * eslint-plugin-vitest
+     */
+    'vitest/consistent-test-it': ['error', { fn: 'test' }],
+    'vitest/valid-title': 'error',
+    // Many tests make assertions indirectly in a way the plugin
+    // does not understand.
+    'vitest/expect-expect': 'off',
   },
   settings: {
     node: {

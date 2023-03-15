@@ -77,7 +77,7 @@ describe('gives up if it cannot find the file', () => {
       'foo.config.cjs',
     ]);
 
-    expect(result).toBe(null);
+    expect(result).toBeNull();
   };
 
   test('async', async () => {
@@ -140,7 +140,7 @@ describe('stops at stopDir and gives up', () => {
       'a/foo.config.cjs',
     ]);
 
-    expect(result).toBe(null);
+    expect(result).toBeNull();
   };
 
   test('async', async () => {

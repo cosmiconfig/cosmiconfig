@@ -79,7 +79,7 @@ const checkConfigResult = (
   const instanceIndex = instanceNum - 1;
 
   expect(mock.mock.calls.length).toEqual(instanceNum);
-  expect(mock.mock.calls[instanceIndex].length).toEqual(1);
+  expect(mock.mock.calls[instanceIndex].length).toBe(1);
 
   const { transform, loaders, ...explorerOptions } =
     mock.mock.calls[instanceIndex][0];
