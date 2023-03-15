@@ -124,6 +124,7 @@ module.exports = {
       node: {
         extensions: allExtensions,
       },
+      typescript: {},
     },
     'import/extensions': allExtensions,
   },
