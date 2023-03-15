@@ -107,6 +107,7 @@ module.exports = {
      */
     'vitest/consistent-test-it': ['error', { fn: 'test' }],
     'vitest/valid-title': 'error',
+    'vitest/no-done-callback': 'error',
     // Many tests make assertions indirectly in a way the plugin
     // does not understand.
     'vitest/expect-expect': 'off',
