@@ -1,3 +1,12 @@
+import {
+  beforeEach,
+  afterAll,
+  describe,
+  expect,
+  test,
+  afterEach,
+  vi,
+} from 'vitest';
 import { TempDir } from './util';
 import { cosmiconfig, cosmiconfigSync } from '../src';
 
@@ -317,8 +326,8 @@ describe('custom loaders can be async', () => {
   let loadThingsAsync: any;
   beforeEach(() => {
     temp.createFile('.foorc.things', 'one\ntwo\nthree\t\t\n  four\n');
-    loadThingsSync = jest.fn(() => ({ things: true }));
-    loadThingsAsync = jest.fn(async () => ({ things: true }));
+    loadThingsSync = vi.fn(() => ({ things: true }));
+    loadThingsAsync = vi.fn(async () => ({ things: true }));
   });
 
   const file = temp.absolutePath('.foorc.things');

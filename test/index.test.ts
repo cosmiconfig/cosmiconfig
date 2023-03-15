@@ -1,13 +1,60 @@
-/* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function */
-import os from 'os';
+/* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function*/
 import {
-  cosmiconfig as cosmiconfigModule,
-  cosmiconfigSync as cosmiconfigSyncModule,
-  defaultLoaders,
-  LoaderSync,
-} from '../src';
+  expect,
+  describe,
+  beforeEach,
+  afterAll,
+  test,
+  vi,
+  SpyInstance,
+  Mock,
+} from 'vitest';
+import os from 'os';
+import { defaultLoaders, LoaderSync } from '../src';
 import { ExplorerOptions, ExplorerOptionsSync, Loaders } from '../src/types';
 import { TempDir } from './util';
+import { ExplorerSync } from '../src/ExplorerSync';
+import { Explorer } from '../src/Explorer';
+
+vi.mock('../src/ExplorerSync', async () => {
+  const { ExplorerSync } = await vi.importActual<
+    typeof import('../src/ExplorerSync')
+  >('../src/ExplorerSync');
+
+  const mock = vi.fn();
+
+  return {
+    ExplorerSync: class FakeExplorerSync extends ExplorerSync {
+      static mock = mock;
+      constructor(options: ExplorerOptionsSync) {
+        mock(options);
+        super(options);
+      }
+    },
+  };
+});
+
+vi.mock('../src/Explorer', async () => {
+  const { Explorer } = await vi.importActual<typeof import('../src/Explorer')>(
+    '../src/Explorer',
+  );
+
+  const mock = vi.fn();
+
+  return {
+    Explorer: class FakeExplorer extends Explorer {
+      static mock = mock;
+      constructor(options: ExplorerOptions) {
+        mock(options);
+        super(options);
+      }
+    },
+  };
+});
+
+const { cosmiconfig, cosmiconfigSync } = await import('../src/index');
+const createExplorerSyncMock = (ExplorerSync as any).mock;
+const createExplorerMock = (Explorer as any).mock;
 
 const temp = new TempDir();
 
@@ -21,7 +68,7 @@ function getLoaderFunctionsByName(loaders: Loaders) {
 }
 
 const checkConfigResult = (
-  mock: jest.SpyInstance,
+  mock: SpyInstance,
   instanceNum: number,
   expectedLoaderNames: Record<string, string>,
   expectedExplorerOptions: Omit<
@@ -30,58 +77,29 @@ const checkConfigResult = (
   >,
 ) => {
   const instanceIndex = instanceNum - 1;
+
   expect(mock.mock.calls.length).toEqual(instanceNum);
-  expect(mock.mock.calls[instanceIndex].length).toEqual(1);
+  expect(mock.mock.calls[instanceIndex].length).toBe(1);
 
   const { transform, loaders, ...explorerOptions } =
     mock.mock.calls[instanceIndex][0];
-  expect(transform.name).toBe('identity');
+  expect(transform.name).toMatch(/identity/);
   const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
-  expect(loaderFunctionsByName).toEqual(expectedLoaderNames);
+
+  // Vitest adds a number suffix to our functions names,
+  // so we can't compare them with strict equals
+  for (const [key, value] of Object.entries(loaderFunctionsByName)) {
+    expect(value).toContain(expectedLoaderNames[key]);
+  }
+
   expect(explorerOptions).toEqual(expectedExplorerOptions);
 };
 
-let cosmiconfig: typeof cosmiconfigModule;
-let cosmiconfigSync: typeof cosmiconfigSyncModule;
-let createExplorerMock: jest.SpyInstance & typeof cosmiconfigModule;
-let createExplorerSyncMock: jest.SpyInstance & typeof cosmiconfigSyncModule;
 describe('cosmiconfig', () => {
   const moduleName = 'foo';
 
-  beforeEach(() => {
+  beforeEach(async () => {
     temp.clean();
-
-    createExplorerMock = jest.fn();
-    jest.doMock('../src/Explorer', () => {
-      return {
-        Explorer: class FakeExplorer {
-          constructor(options: Parameters<typeof cosmiconfigModule>[0]) {
-            createExplorerMock(options);
-            const { Explorer } = jest.requireActual('../src/Explorer');
-
-            return new Explorer(options);
-          }
-        },
-      };
-    });
-
-    createExplorerSyncMock = jest.fn();
-    jest.doMock('../src/ExplorerSync', () => {
-      return {
-        ExplorerSync: class FakeExplorerSync {
-          constructor(options: Parameters<typeof cosmiconfigSyncModule>[0]) {
-            createExplorerSyncMock(options);
-            const { ExplorerSync } = jest.requireActual('../src/ExplorerSync');
-
-            return new ExplorerSync(options);
-          }
-        },
-      };
-    });
-
-    const index = require('../src/index');
-    cosmiconfig = index.cosmiconfig;
-    cosmiconfigSync = index.cosmiconfigSync;
   });
 
   afterAll(() => {
@@ -147,7 +165,7 @@ describe('cosmiconfig', () => {
   });
 
   describe('defaults transform to sync identity function', () => {
-    const checkResult = (mock: jest.SpyInstance) => {
+    const checkResult = (mock: Mock) => {
       const explorerOptions = mock.mock.calls[0][0];
       const x = {};
       // @ts-ignore
@@ -250,6 +268,7 @@ describe('cosmiconfig', () => {
 
     const expectedError =
       'loader for extension ".things" is not a function (type provided: "number"), so searchPlaces item ".foorc.things" is invalid';
+
     test('async', () => {
       expect(() =>
         // @ts-ignore
