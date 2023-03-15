@@ -227,7 +227,7 @@ function normalizeOptions(
 
   if (options.loaders) {
     // to be used for the upcoming loaders-in-config
-    /* istanbul ignore next */
+    /* istanbul ignore next -- @preserve */
     if (mergeLoaders) {
       Object.assign(loaders, options.loaders);
     } else {

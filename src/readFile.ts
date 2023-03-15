@@ -30,7 +30,7 @@ async function readFile(
     const content = await fsReadFileAsync(filepath, 'utf8');
 
     return content;
-  } catch (error) {
+  } catch (error: any) {
     if (
       throwNotFound === false &&
       (error.code === 'ENOENT' || error.code === 'EISDIR')
@@ -49,7 +49,7 @@ function readFileSync(filepath: string, options: Options = {}): string | null {
     const content = fs.readFileSync(filepath, 'utf8');
 
     return content;
-  } catch (error) {
+  } catch (error: any) {
     if (
       throwNotFound === false &&
       (error.code === 'ENOENT' || error.code === 'EISDIR')

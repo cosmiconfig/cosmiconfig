@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest';
 import path from 'path';
 import { getDirectory, getDirectorySync } from '../src/getDirectory';
 

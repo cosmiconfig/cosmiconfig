@@ -79,7 +79,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
     const loader = this.getLoaderEntryForFile(filepath);
     try {
       return await loader(filepath, content);
-    } catch (e) {
+    } catch (e: any) {
       e.filepath = filepath;
       throw e;
     }
