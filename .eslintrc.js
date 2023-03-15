@@ -31,6 +31,7 @@ module.exports = {
     'func-names': ['error', 'always'],
     'prefer-template': 'error',
     'no-prototype-builtins': 'error',
+    'no-use-before-define': 'off',
     'object-shorthand': [
       'error',
       'always',

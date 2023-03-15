@@ -13,17 +13,18 @@ import {
 } from './types';
 
 type LoaderResult = Config | null;
-export type LoaderSync = (filepath: string, content: string) => LoaderResult;
 export type Loader =
   | ((filepath: string, content: string) => Promise<LoaderResult>)
   | LoaderSync;
+export type LoaderSync = (filepath: string, content: string) => LoaderResult;
+
+export type Transform =
+  | ((CosmiconfigResult: CosmiconfigResult) => Promise<CosmiconfigResult>)
+  | TransformSync;
 
 export type TransformSync = (
   CosmiconfigResult: CosmiconfigResult,
 ) => CosmiconfigResult;
-export type Transform =
-  | ((CosmiconfigResult: CosmiconfigResult) => Promise<CosmiconfigResult>)
-  | TransformSync;
 
 interface OptionsBase {
   packageProp?: string | Array<string>;
@@ -133,6 +134,7 @@ function getExplorerOptions(
   }
 
   config.metaConfigFilePath = metaConfig.filepath;
+
   return normalizeOptions(moduleName, config, false);
 }
 
