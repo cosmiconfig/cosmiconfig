@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.1.2
+
+- Fixed: generation of TypeScript types going to the wrong output path
+
 ## 8.1.1
 
 - Fixed: meta config overriding original options completely (now merges correctly)
