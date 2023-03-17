@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.1.1
+
+- Fixed: meta config overriding original options completely (now merges correctly)
+
 ## 8.1.0
 
 - Added: always look at `.config.{yml,yaml,json,js,cjs}` file to configure cosmiconfig itself, and look for tool configuration in it using `packageProp` (similar to package.json)

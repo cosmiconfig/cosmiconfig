@@ -120,22 +120,24 @@ function getExplorerOptions(
     return normalizeOptions(moduleName, options);
   }
 
-  const config = metaConfig.config ?? {};
-
-  if (config.loaders) {
+  if (metaConfig.config?.loaders) {
     throw new Error('Can not specify loaders in meta config file');
   }
 
-  if (config.searchPlaces) {
-    config.searchPlaces = replaceMetaPlaceholders(
-      config.searchPlaces,
+  const overrideOptions = metaConfig.config ?? {};
+
+  if (overrideOptions.searchPlaces) {
+    overrideOptions.searchPlaces = replaceMetaPlaceholders(
+      overrideOptions.searchPlaces,
       moduleName,
     );
   }
 
-  config.metaConfigFilePath = metaConfig.filepath;
+  overrideOptions.metaConfigFilePath = metaConfig.filepath;
 
-  return normalizeOptions(moduleName, config, false);
+  const mergedOptions = { ...options, ...overrideOptions };
+
+  return normalizeOptions(moduleName, mergedOptions, false);
 }
 
 function cosmiconfig(

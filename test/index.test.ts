@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function*/
+import path from 'path';
 import {
   expect,
   describe,
@@ -8,6 +9,7 @@ import {
   vi,
   SpyInstance,
   Mock,
+  afterEach,
 } from 'vitest';
 import os from 'os';
 import { defaultLoaders, LoaderSync } from '../src';
@@ -184,10 +186,6 @@ describe('cosmiconfig', () => {
   });
 
   describe('creates explorer with preference for given options over defaults', () => {
-    beforeEach(() => {
-      temp.createFile('foo.json', '{ "foo": true }');
-    });
-
     const noExtLoader: LoaderSync = () => {};
     const jsLoader: LoaderSync = () => {};
     const jsonLoader: LoaderSync = () => {};
@@ -224,6 +222,77 @@ describe('cosmiconfig', () => {
       stopDir: __dirname,
       cache: false,
       metaConfigFilePath: null,
+    };
+
+    test('async', () => {
+      cosmiconfig(moduleName, options);
+      checkConfigResult(
+        createExplorerMock,
+        1,
+        expectedLoaderNames,
+        expectedExplorerOptions,
+      );
+    });
+
+    test('sync', () => {
+      cosmiconfigSync(moduleName, options);
+      checkConfigResult(
+        createExplorerSyncMock,
+        2,
+        expectedLoaderNames,
+        expectedExplorerOptions,
+      );
+    });
+  });
+
+  describe('creates explorer with preference of user options over consumer options', () => {
+    const currentDir = process.cwd();
+    beforeEach(() => {
+      temp.createFile(
+        '.config.json',
+        '{"cosmiconfig": {"searchPlaces": [".config/{name}.json"]}}',
+      );
+      process.chdir(temp.dir);
+    });
+
+    afterEach(() => process.chdir(currentDir));
+
+    const noExtLoader: LoaderSync = () => {};
+    const jsLoader: LoaderSync = () => {};
+    const jsonLoader: LoaderSync = () => {};
+    const yamlLoader: LoaderSync = () => {};
+
+    const options = {
+      stopDir: __dirname,
+      cache: false,
+      searchPlaces: ['.foorc.json', 'wildandfree.js'],
+      packageProp: 'wildandfree',
+      ignoreEmptySearchPlaces: false,
+      loaders: {
+        noExt: noExtLoader,
+        '.cjs': jsLoader,
+        '.js': jsLoader,
+        '.json': jsonLoader,
+        '.yaml': yamlLoader,
+      },
+    };
+
+    const expectedLoaderNames = {
+      '.cjs': 'jsLoader',
+      '.js': 'jsLoader',
+      '.json': 'jsonLoader',
+      '.yaml': 'yamlLoader',
+      '.yml': 'loadYaml',
+      noExt: 'noExtLoader',
+    };
+
+    const expectedExplorerOptions = {
+      packageProp: 'wildandfree',
+      searchPlaces: ['.config/foo.json'],
+      ignoreEmptySearchPlaces: false,
+      stopDir: __dirname,
+      cache: false,
+      metaConfigFilePath: path.join(temp.dir, '.config.json'),
     };
 
     test('async', () => {
