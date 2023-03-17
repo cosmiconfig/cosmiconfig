@@ -9,5 +9,5 @@
     "allowJs": false,
     "emitDeclarationOnly": true
   },
-  "exclude": ["**/*.test.ts", "./test/"]
+  "exclude": ["**/*.test.ts", "./test/", "vite.config.ts"]
 }
