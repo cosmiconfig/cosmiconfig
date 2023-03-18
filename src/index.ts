@@ -137,7 +137,7 @@ function getExplorerOptions(
 
   const mergedOptions = { ...options, ...overrideOptions };
 
-  return normalizeOptions(moduleName, mergedOptions, false);
+  return normalizeOptions(moduleName, mergedOptions, true);
 }
 
 function cosmiconfig(
