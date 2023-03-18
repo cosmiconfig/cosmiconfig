@@ -137,7 +137,7 @@ function getExplorerOptions(
 
   const mergedOptions = { ...options, ...overrideOptions };
 
-  return normalizeOptions(moduleName, mergedOptions, false);
+  return normalizeOptions(moduleName, mergedOptions);
 }
 
 function cosmiconfig(
@@ -184,17 +184,14 @@ function cosmiconfigSync(
 function normalizeOptions(
   moduleName: string,
   options: OptionsSync,
-  mergeLoaders?: boolean,
 ): ExplorerOptionsSync;
 function normalizeOptions(
   moduleName: string,
   options: Options,
-  mergeLoaders?: boolean,
 ): ExplorerOptions;
 function normalizeOptions(
   moduleName: string,
   options: Options | OptionsSync,
-  mergeLoaders = true,
 ): ExplorerOptions | ExplorerOptionsSync {
   const defaults: ExplorerOptions | ExplorerOptionsSync = {
     packageProp: moduleName,
@@ -228,15 +225,7 @@ function normalizeOptions(
   };
 
   if (options.loaders) {
-    // to be used for the upcoming loaders-in-config
-    /* istanbul ignore next -- @preserve */
-    if (mergeLoaders) {
-      Object.assign(loaders, options.loaders);
-    } else {
-      loaders = {
-        ...options.loaders,
-      };
-    }
+    Object.assign(loaders, options.loaders);
   }
 
   return {
