@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.1.3
+
+- Fixed: existence of meta config breaking default loaders
+
 ## 8.1.2
 
 - Fixed: generation of TypeScript types going to the wrong output path
