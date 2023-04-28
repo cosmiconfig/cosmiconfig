@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
 import { pathToFileURL } from 'url';
-import { LoaderAsync, LoaderSync } from './index';
+import { Loader, LoaderSync } from './index';
 import { Loaders } from './types';
 
 let importFresh: typeof import('import-fresh');
@@ -14,12 +14,12 @@ const loadJsSync: LoaderSync = function loadJsSync(filepath) {
   return result;
 };
 
-const loadJs: LoaderAsync = async function loadJs(filepath) {
+const loadJs: Loader = async function loadJs(filepath) {
   try {
     const { href } = pathToFileURL(filepath);
     return (await import(href)).default;
   } catch (error) {
-    return loadJsSync(filepath, null);
+    return loadJsSync(filepath, '');
   }
 };
 
@@ -45,7 +45,7 @@ const loadYaml: LoaderSync = function loadYaml(filepath, content) {
   }
 
   try {
-    const result = yaml.load(content!);
+    const result = yaml.load(content);
     return result;
   } catch (error: any) {
     error.message = `YAML Error in ${filepath}:\n${error.message}`;
