@@ -1,8 +1,6 @@
 # cosmiconfig
 
-[![codecov](https://codecov.io/gh/davidtheclark/cosmiconfig/branch/main/graph/badge.svg)](https://codecov.io/gh/davidtheclark/cosmiconfig)
-
-> **MAINTAINERS WANTED!** If you're interested in taking over and maintaining Cosmiconfig, please let @davidtheclark know (with an issue or email). I'd like to hand over the keys completely, so I'm looking for **owners**, not people who just want to merge a PR or two! You can make the decisions about what happens in v8 and subsequent versions, how the package balances stability and opinionated features, and so on. Take a look at open issues and PRs to learn about possibilities that have been on people's minds over the years.
+[![codecov](https://codecov.io/gh/cosmiconfig/cosmiconfig/branch/main/graph/badge.svg)](https://codecov.io/gh/cosmiconfig/cosmiconfig)
 
 Cosmiconfig searches for and loads configuration for your program.
 
@@ -30,7 +28,7 @@ Cosmiconfig continues to search up the directory tree, checking each of these pl
 ## Table of contents
 
 - [Installation](#installation)
-- [Usage](#usage)
+- [Usage for tooling developers](#usage-for-tooling-developers)
 - [Result](#result)
 - [Asynchronous API](#asynchronous-api)
   - [cosmiconfig()](#cosmiconfig-1)
@@ -57,6 +55,7 @@ Cosmiconfig continues to search up the directory tree, checking each of these pl
 - [Loading JS modules](#loading-js-modules)
 - [Caching](#caching)
 - [Differences from rc](#differences-from-rc)
+- [Usage for end users](#usage-for-end-users)
 - [Contributing & Development](#contributing--development)
 
 ## Installation
@@ -65,9 +64,12 @@ Cosmiconfig continues to search up the directory tree, checking each of these pl
 npm install cosmiconfig
 ```
 
-Tested in Node 12+.
+Tested in Node 14+.
 
-## Usage
+## Usage for tooling developers
+
+*If you are an end user (i.e. a user of a tool that uses cosmiconfig, like `prettier` or `stylelint`),
+you can skip down to [the end user section](#usage-for-end-users).*
 
 Create a Cosmiconfig explorer, then either `search` for or directly `load` a configuration file.
 
@@ -557,6 +559,89 @@ To avoid or work around caching, you can do the following:
 - Stops at the first configuration found, instead of finding all that can be found up the directory tree and merging them automatically.
 - Options.
 - Asynchronous by default (though can be run synchronously).
+
+## Usage for end users
+
+When configuring a tool, you can use multiple file formats and put these in multiple places.
+
+Usually, a tool would mention this in its own README file,
+but by default, these are the following places, where `{NAME}` represents the name of the tool:
+
+```
+package.json
+.{NAME}rc
+.{NAME}rc.json
+.{NAME}rc.yaml
+.{NAME}rc.yml
+.{NAME}rc.js
+.{NAME}rc.cjs
+.config/{NAME}rc
+.config/{NAME}rc.json
+.config/{NAME}rc.yaml
+.config/{NAME}rc.yml
+.config/{NAME}rc.js
+.config/{NAME}rc.cjs
+{NAME}.config.js
+{NAME}.config.cjs
+```
+
+The contents of these files are defined by the tool.
+For example, you can configure prettier to enforce semicolons at the end of the line
+using a file named `.config/prettierrc.yml`:
+
+```yaml
+semi: true
+```
+
+Additionally, you have the option to put a property named after the tool in your `package.json` file,
+with the contents of that property being the same as the file contents. To use the same example as above:
+
+```json
+{
+  "name": "your-project",
+  "dependencies": {},
+  "prettier": {
+    "semi": true
+  }
+}
+```
+
+This has the advantage that you can put the configuration of all tools
+(at least the ones that use cosmiconfig) in one file.
+
+You can also add a `cosmiconfig` key within your `package.json` file or create one of the following files
+to configure `cosmiconfig` itself:
+
+```
+.config.json
+.config.yaml
+.config.yml
+.config.js
+.config.cjs
+```
+
+The following property is currently actively supported in these places:
+
+```yaml
+cosmiconfig:
+  # overrides where configuration files are being searched to enforce a custom naming convention and format
+  searchPlaces:
+    - .config/{name}.yml
+```
+
+> **Note:** technically, you can overwrite all options described in [cosmiconfigOptions](#cosmiconfigoptions) here,
+> but everything not listed above should be used at your own risk, as it has not been tested explicitly.
+
+You can also add more root properties outside the `cosmiconfig` property
+to configure your tools, entirely eliminating the need to look for additional configuration files:
+
+```yaml
+cosmiconfig:
+  searchPlaces: []
+
+prettier:
+  semi: true
+```
 
 ## Contributing & Development
 

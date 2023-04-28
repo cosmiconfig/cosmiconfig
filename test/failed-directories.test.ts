@@ -1,3 +1,4 @@
+import { beforeEach, afterAll, describe, expect, test, vi } from 'vitest';
 import fs from 'fs';
 import {
   cosmiconfig,
@@ -92,22 +93,26 @@ describe('gives up if it cannot find the file', () => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(files);
 
-    expect(result).toBe(null);
+    expect(result).toBeNull();
   };
 
   test('async', async () => {
-    const readFileSpy = jest.spyOn(fs, 'readFile');
-    const statSpy = jest.spyOn(fs, 'stat');
+    const explorer = cosmiconfig('foo', explorerOptions);
 
-    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const statSpy = vi.spyOn(fs, 'stat');
+
+    const result = await explorer.search(startDir);
     checkResult(statSpy, readFileSpy, result, expectedFilesChecked);
   });
 
   test('sync', () => {
-    const readFileSpy = jest.spyOn(fs, 'readFileSync');
-    const statSpy = jest.spyOn(fs, 'statSync');
+    const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
+    const statSpy = vi.spyOn(fs, 'statSync');
+
+    const result = explorer.search(startDir);
     checkResult(
       statSpy,
       readFileSpy,
@@ -165,20 +170,22 @@ describe('stops at stopDir and gives up', () => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(files);
 
-    expect(result).toBe(null);
+    expect(result).toBeNull();
   };
 
   test('async', async () => {
-    const readFileSpy = jest.spyOn(fs, 'readFile');
+    const explorer = cosmiconfig('foo', explorerOptions);
 
-    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
 
   test('sync', () => {
-    const readFileSpy = jest.spyOn(fs, 'readFileSync');
+    const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const result = cosmiconfigSync('foo', explorerOptions).search(startDir);
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
+    const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
 });

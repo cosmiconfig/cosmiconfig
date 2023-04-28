@@ -1,8 +1,8 @@
 import path from 'path';
-import { ExplorerBase } from './ExplorerBase';
-import { readFileSync } from './readFile';
 import { cacheWrapperSync } from './cacheWrapper';
+import { ExplorerBase } from './ExplorerBase';
 import { getDirectorySync } from './getDirectory';
+import { readFileSync } from './readFile';
 import {
   CosmiconfigResult,
   ExplorerOptionsSync,
@@ -15,10 +15,13 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
   }
 
   public searchSync(searchFrom: string = process.cwd()): CosmiconfigResult {
-    const startDirectory = getDirectorySync(searchFrom);
-    const result = this.searchFromDirectorySync(startDirectory);
-
-    return result;
+    if (this.config.metaConfigFilePath) {
+      const config = this._loadFileSync(this.config.metaConfigFilePath, true);
+      if (config && !config.isEmpty) {
+        return config;
+      }
+    }
+    return this.searchFromDirectorySync(getDirectorySync(searchFrom));
   }
 
   private searchFromDirectorySync(dir: string): CosmiconfigResult {
@@ -32,9 +35,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
         return this.searchFromDirectorySync(nextDir);
       }
 
-      const transformResult = this.config.transform(result);
-
-      return transformResult;
+      return this.config.transform(result);
     };
 
     if (this.searchCache) {
@@ -48,7 +49,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     for (const place of this.config.searchPlaces) {
       const placeResult = this.loadSearchPlaceSync(dir, place);
 
-      if (this.shouldSearchStopWithResult(placeResult) === true) {
+      if (this.shouldSearchStopWithResult(placeResult)) {
         return placeResult;
       }
     }
@@ -61,9 +62,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     const filepath = path.join(dir, place);
     const content = readFileSync(filepath);
 
-    const result = this.createCosmiconfigResultSync(filepath, content);
-
-    return result;
+    return this.createCosmiconfigResultSync(filepath, content, false);
   }
 
   private loadFileContentSync(
@@ -77,22 +76,36 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
       return undefined;
     }
     const loader = this.getLoaderEntryForFile(filepath);
-    const loaderResult = loader(filepath, content);
-
-    return loaderResult;
+    try {
+      return loader(filepath, content);
+    } catch (e: any) {
+      e.filepath = filepath;
+      throw e;
+    }
   }
 
   private createCosmiconfigResultSync(
     filepath: string,
     content: string | null,
+    forceProp: boolean,
   ): CosmiconfigResult {
     const fileContent = this.loadFileContentSync(filepath, content);
-    const result = this.loadedContentToCosmiconfigResult(filepath, fileContent);
 
-    return result;
+    return this.loadedContentToCosmiconfigResult(
+      filepath,
+      fileContent,
+      forceProp,
+    );
   }
 
   public loadSync(filepath: string): CosmiconfigResult {
+    return this._loadFileSync(filepath, false);
+  }
+
+  private _loadFileSync(
+    filepath: string,
+    forceProp: boolean,
+  ): CosmiconfigResult {
     this.validateFilePath(filepath);
     const absoluteFilePath = path.resolve(process.cwd(), filepath);
 
@@ -101,11 +114,10 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
       const cosmiconfigResult = this.createCosmiconfigResultSync(
         absoluteFilePath,
         content,
+        forceProp,
       );
 
-      const transformResult = this.config.transform(cosmiconfigResult);
-
-      return transformResult;
+      return this.config.transform(cosmiconfigResult);
     };
 
     if (this.loadCache) {

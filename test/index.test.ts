@@ -1,71 +1,107 @@
-/* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function */
-import os from 'os';
+/* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function*/
+import path from 'path';
 import {
-  cosmiconfig as cosmiconfigModule,
-  cosmiconfigSync as cosmiconfigSyncModule,
-  defaultLoaders,
-  LoaderSync,
-} from '../src';
-import { Loaders } from '../src/types';
+  expect,
+  describe,
+  beforeEach,
+  afterAll,
+  test,
+  vi,
+  SpyInstance,
+  Mock,
+  afterEach,
+} from 'vitest';
+import os from 'os';
+import { defaultLoaders, LoaderSync } from '../src';
+import { ExplorerOptions, ExplorerOptionsSync, Loaders } from '../src/types';
 import { TempDir } from './util';
+import { ExplorerSync } from '../src/ExplorerSync';
+import { Explorer } from '../src/Explorer';
+
+vi.mock('../src/ExplorerSync', async () => {
+  const { ExplorerSync } = await vi.importActual<
+    typeof import('../src/ExplorerSync')
+  >('../src/ExplorerSync');
+
+  const mock = vi.fn();
+
+  return {
+    ExplorerSync: class FakeExplorerSync extends ExplorerSync {
+      static mock = mock;
+      constructor(options: ExplorerOptionsSync) {
+        mock(options);
+        super(options);
+      }
+    },
+  };
+});
+
+vi.mock('../src/Explorer', async () => {
+  const { Explorer } = await vi.importActual<typeof import('../src/Explorer')>(
+    '../src/Explorer',
+  );
+
+  const mock = vi.fn();
+
+  return {
+    Explorer: class FakeExplorer extends Explorer {
+      static mock = mock;
+      constructor(options: ExplorerOptions) {
+        mock(options);
+        super(options);
+      }
+    },
+  };
+});
+
+const { cosmiconfig, cosmiconfigSync } = await import('../src/index');
+const createExplorerSyncMock = (ExplorerSync as any).mock;
+const createExplorerMock = (Explorer as any).mock;
 
 const temp = new TempDir();
 
 function getLoaderFunctionsByName(loaders: Loaders) {
-  const loaderFunctionsByName = Object.entries(loaders).reduce(
-    (acc, [extension, loader]) => {
-      return {
-        ...acc,
-        [extension]: loader.name,
-      };
-    },
-    {},
+  return Object.fromEntries(
+    Object.entries(loaders).map(([extension, loader]) => [
+      extension,
+      loader.name,
+    ]),
   );
-
-  return loaderFunctionsByName;
 }
 
-let cosmiconfig: typeof cosmiconfigModule;
-let cosmiconfigSync: typeof cosmiconfigSyncModule;
-let createExplorerMock: jest.SpyInstance & typeof cosmiconfigModule;
-let createExplorerSyncMock: jest.SpyInstance & typeof cosmiconfigSyncModule;
+const checkConfigResult = (
+  mock: SpyInstance,
+  instanceNum: number,
+  expectedLoaderNames: Record<string, string>,
+  expectedExplorerOptions: Omit<
+    ExplorerOptions & ExplorerOptionsSync,
+    'transform' | 'loaders'
+  >,
+) => {
+  const instanceIndex = instanceNum - 1;
+
+  expect(mock.mock.calls.length).toEqual(instanceNum);
+  expect(mock.mock.calls[instanceIndex].length).toBe(1);
+
+  const { transform, loaders, ...explorerOptions } =
+    mock.mock.calls[instanceIndex][0];
+  expect(transform.name).toMatch(/identity/);
+  const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
+
+  // Vitest adds a number suffix to our functions names,
+  // so we can't compare them with strict equals
+  for (const [key, value] of Object.entries(loaderFunctionsByName)) {
+    expect(value).toContain(expectedLoaderNames[key]);
+  }
+
+  expect(explorerOptions).toEqual(expectedExplorerOptions);
+};
+
 describe('cosmiconfig', () => {
   const moduleName = 'foo';
 
-  beforeEach(() => {
+  beforeEach(async () => {
     temp.clean();
-
-    createExplorerMock = jest.fn();
-    jest.doMock('../src/Explorer', () => {
-      return {
-        Explorer: class FakeExplorer {
-          constructor(options: Parameters<typeof cosmiconfigModule>[0]) {
-            createExplorerMock(options);
-            const { Explorer } = jest.requireActual('../src/Explorer');
-
-            return new Explorer(options);
-          }
-        },
-      };
-    });
-
-    createExplorerSyncMock = jest.fn();
-    jest.doMock('../src/ExplorerSync', () => {
-      return {
-        ExplorerSync: class FakeExplorerSync {
-          constructor(options: Parameters<typeof cosmiconfigSyncModule>[0]) {
-            createExplorerSyncMock(options);
-            const { ExplorerSync } = jest.requireActual('../src/ExplorerSync');
-
-            return new ExplorerSync(options);
-          }
-        },
-      };
-    });
-
-    const index = require('../src/index');
-    cosmiconfig = index.cosmiconfig;
-    cosmiconfigSync = index.cosmiconfigSync;
   });
 
   afterAll(() => {
@@ -75,7 +111,7 @@ describe('cosmiconfig', () => {
 
   describe('creates explorer with default options if not specified', () => {
     const checkResult = (
-      mock: jest.SpyInstance,
+      mock: SpyInstance,
       expectedLoaders: any,
       expectedSearchPlaces: any,
     ) => {
@@ -166,7 +202,7 @@ describe('cosmiconfig', () => {
   });
 
   describe('defaults transform to sync identity function', () => {
-    const checkResult = (mock: jest.SpyInstance) => {
+    const checkResult = (mock: Mock) => {
       const explorerOptions = mock.mock.calls[0][0];
       const x = {};
       // @ts-ignore
@@ -186,9 +222,76 @@ describe('cosmiconfig', () => {
   });
 
   describe('creates explorer with preference for given options over defaults', () => {
-    beforeEach(() => {
-      temp.createFile('foo.json', '{ "foo": true }');
+    const noExtLoader: LoaderSync = () => {};
+    const jsLoader: LoaderSync = () => {};
+    const jsonLoader: LoaderSync = () => {};
+    const yamlLoader: LoaderSync = () => {};
+
+    const options = {
+      stopDir: __dirname,
+      cache: false,
+      searchPlaces: ['.foorc.json', 'wildandfree.js'],
+      packageProp: 'wildandfree',
+      ignoreEmptySearchPlaces: false,
+      loaders: {
+        noExt: noExtLoader,
+        '.cjs': jsLoader,
+        '.js': jsLoader,
+        '.json': jsonLoader,
+        '.yaml': yamlLoader,
+      },
+    };
+
+    const expectedLoaderNames = {
+      '.cjs': 'jsLoader',
+      '.js': 'jsLoader',
+      '.json': 'jsonLoader',
+      '.yaml': 'yamlLoader',
+      '.yml': 'loadYaml',
+      noExt: 'noExtLoader',
+    };
+
+    const expectedExplorerOptions = {
+      packageProp: 'wildandfree',
+      searchPlaces: ['.foorc.json', 'wildandfree.js'],
+      ignoreEmptySearchPlaces: false,
+      stopDir: __dirname,
+      cache: false,
+      metaConfigFilePath: null,
+    };
+
+    test('async', () => {
+      cosmiconfig(moduleName, options);
+      checkConfigResult(
+        createExplorerMock,
+        1,
+        expectedLoaderNames,
+        expectedExplorerOptions,
+      );
     });
+
+    test('sync', () => {
+      cosmiconfigSync(moduleName, options);
+      checkConfigResult(
+        createExplorerSyncMock,
+        2,
+        expectedLoaderNames,
+        expectedExplorerOptions,
+      );
+    });
+  });
+
+  describe('creates explorer with preference of user options over consumer options', () => {
+    const currentDir = process.cwd();
+    beforeEach(() => {
+      temp.createFile(
+        '.config.json',
+        '{"cosmiconfig": {"searchPlaces": [".config/{name}.json"]}}',
+      );
+      process.chdir(temp.dir);
+    });
+
+    afterEach(() => process.chdir(currentDir));
 
     const noExtLoader: LoaderSync = () => {};
     const jsLoader: LoaderSync = () => {};
@@ -211,7 +314,7 @@ describe('cosmiconfig', () => {
     };
 
     const checkResult = (
-      mock: jest.SpyInstance,
+      mock: SpyInstance,
       expectedLoaderFunctionNames: any,
     ) => {
       expect(mock.mock.calls.length).toEqual(1);
@@ -275,6 +378,7 @@ describe('cosmiconfig', () => {
 
     const expectedError =
       'loader for extension ".things" is not a function (type provided: "number"), so searchPlaces item ".foorc.things" is invalid';
+
     test('async', () => {
       expect(() =>
         // @ts-ignore

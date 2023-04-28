@@ -20,11 +20,11 @@ module.exports = {
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:import/typescript',
-    'plugin:jest/recommended',
+    'plugin:vitest/recommended',
     'prettier',
     'prettier/@typescript-eslint',
   ],
-  plugins: ['jest', '@typescript-eslint', 'import'],
+  plugins: ['vitest', '@typescript-eslint', 'import'],
   rules: {
     'no-var': 'off',
     'prefer-const': 'off',
@@ -32,6 +32,7 @@ module.exports = {
     'func-names': ['error', 'always'],
     'prefer-template': 'error',
     'no-prototype-builtins': 'error',
+    'no-use-before-define': 'off',
     'object-shorthand': [
       'error',
       'always',
@@ -102,17 +103,14 @@ module.exports = {
     'import/prefer-default-export': 'off',
 
     /**
-     * eslint-plugin-jest
+     * eslint-plugin-vitest
      */
-    'jest/consistent-test-it': ['error', { fn: 'test' }],
-    'jest/valid-title': 'error',
-    'jest/no-test-callback': 'error',
-    'jest/prefer-todo': 'error',
-    'jest/require-to-throw-message': 'off',
+    'vitest/consistent-test-it': ['error', { fn: 'test' }],
+    'vitest/valid-title': 'error',
+    'vitest/no-done-callback': 'error',
     // Many tests make assertions indirectly in a way the plugin
     // does not understand.
-    'jest/expect-expect': 'off',
-    'jest/no-identical-title': 'off',
+    'vitest/expect-expect': 'off',
   },
   settings: {
     node: {
@@ -126,6 +124,7 @@ module.exports = {
       node: {
         extensions: allExtensions,
       },
+      typescript: {},
     },
     'import/extensions': allExtensions,
   },

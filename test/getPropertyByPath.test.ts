@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import { getPropertyByPath } from '../src/getPropertyByPath';
 
 const source = {

@@ -1,8 +1,8 @@
 import path from 'path';
-import { ExplorerBase } from './ExplorerBase';
-import { readFile } from './readFile';
 import { cacheWrapper } from './cacheWrapper';
+import { ExplorerBase } from './ExplorerBase';
 import { getDirectory } from './getDirectory';
+import { readFile } from './readFile';
 import { CosmiconfigResult, ExplorerOptions, LoadedFileContent } from './types';
 
 class Explorer extends ExplorerBase<ExplorerOptions> {
@@ -13,10 +13,13 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
   public async search(
     searchFrom: string = process.cwd(),
   ): Promise<CosmiconfigResult> {
-    const startDirectory = await getDirectory(searchFrom);
-    const result = await this.searchFromDirectory(startDirectory);
-
-    return result;
+    if (this.config.metaConfigFilePath) {
+      const config = await this._loadFile(this.config.metaConfigFilePath, true);
+      if (config && !config.isEmpty) {
+        return config;
+      }
+    }
+    return await this.searchFromDirectory(await getDirectory(searchFrom));
   }
 
   private async searchFromDirectory(dir: string): Promise<CosmiconfigResult> {
@@ -30,9 +33,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
         return this.searchFromDirectory(nextDir);
       }
 
-      const transformResult = await this.config.transform(result);
-
-      return transformResult;
+      return await this.config.transform(result);
     };
 
     if (this.searchCache) {
@@ -46,7 +47,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
     for await (const place of this.config.searchPlaces) {
       const placeResult = await this.loadSearchPlace(dir, place);
 
-      if (this.shouldSearchStopWithResult(placeResult) === true) {
+      if (this.shouldSearchStopWithResult(placeResult)) {
         return placeResult;
       }
     }
@@ -62,9 +63,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
     const filepath = path.join(dir, place);
     const fileContents = await readFile(filepath);
 
-    const result = await this.createCosmiconfigResult(filepath, fileContents);
-
-    return result;
+    return await this.createCosmiconfigResult(filepath, fileContents, false);
   }
 
   private async loadFileContent(
@@ -78,21 +77,36 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
       return undefined;
     }
     const loader = this.getLoaderEntryForFile(filepath);
-    const loaderResult = await loader(filepath, content);
-    return loaderResult;
+    try {
+      return await loader(filepath, content);
+    } catch (e: any) {
+      e.filepath = filepath;
+      throw e;
+    }
   }
 
   private async createCosmiconfigResult(
     filepath: string,
     content: string | null,
+    forceProp: boolean,
   ): Promise<CosmiconfigResult> {
     const fileContent = await this.loadFileContent(filepath, content);
-    const result = this.loadedContentToCosmiconfigResult(filepath, fileContent);
 
-    return result;
+    return this.loadedContentToCosmiconfigResult(
+      filepath,
+      fileContent,
+      forceProp,
+    );
   }
 
   public async load(filepath: string): Promise<CosmiconfigResult> {
+    return this._loadFile(filepath, false);
+  }
+
+  private async _loadFile(
+    filepath: string,
+    forceProp: boolean,
+  ): Promise<CosmiconfigResult> {
     this.validateFilePath(filepath);
     const absoluteFilePath = path.resolve(process.cwd(), filepath);
 
@@ -104,11 +118,10 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
       const result = await this.createCosmiconfigResult(
         absoluteFilePath,
         fileContents,
+        forceProp,
       );
 
-      const transformResult = await this.config.transform(result);
-
-      return transformResult;
+      return await this.config.transform(result);
     };
 
     if (this.loadCache) {
