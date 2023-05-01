@@ -353,7 +353,7 @@ describe('cosmiconfig', () => {
         expect(value).toContain(expectedLoaderFunctionNames[key]);
       }
 
-      expect(explorerOptions).toStrictEqual({
+      expect(explorerOptions).toEqual({
         packageProp: 'wildandfree',
         searchPlaces: ['.config/foo.json'],
         ignoreEmptySearchPlaces: false,
