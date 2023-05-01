@@ -68,6 +68,7 @@ export const metaSearchPlaces = [
   '.config.yml',
   '.config.js',
   '.config.cjs',
+  '.config.mjs',
 ];
 
 // do not allow mutation of default loaders. Make sure it is set inside options
@@ -81,7 +82,6 @@ const defaultLoaders = Object.freeze({
   noExt: loaders.loadYaml,
 } as const);
 const defaultLoadersSync = Object.freeze({
-  '.mjs': loaders.loadJsSync,
   '.cjs': loaders.loadJsSync,
   '.js': loaders.loadJsSync,
   '.json': loaders.loadJson,
@@ -111,7 +111,7 @@ function getExplorerOptions<T extends Options | OptionsSync>(
     searchPlaces: metaSearchPlaces,
     ignoreEmptySearchPlaces: false,
     usePackagePropInConfigFiles: true,
-    loaders: defaultLoaders,
+    loaders: { ...defaultLoadersSync, ...defaultLoaders },
     transform: identity,
     cache: true,
     metaConfigFilePath: null,
@@ -188,10 +188,6 @@ function cosmiconfigSync(
 function normalizeOptions(
   moduleName: string,
   options: Options,
-): ExplorerOptions;
-function normalizeOptions(
-  moduleName: string,
-  options: Options,
 ): ExplorerOptions {
   const defaults: ExplorerOptions = {
     packageProp: moduleName,
@@ -202,18 +198,18 @@ function normalizeOptions(
       `.${moduleName}rc.yaml`,
       `.${moduleName}rc.yml`,
       `.${moduleName}rc.js`,
-      `.${moduleName}rc.mjs`,
       `.${moduleName}rc.cjs`,
+      `.${moduleName}rc.mjs`,
       `.config/${moduleName}rc`,
       `.config/${moduleName}rc.json`,
       `.config/${moduleName}rc.yaml`,
       `.config/${moduleName}rc.yml`,
       `.config/${moduleName}rc.js`,
-      `.config/${moduleName}rc.mjs`,
       `.config/${moduleName}rc.cjs`,
+      `.config/${moduleName}rc.mjs`,
       `${moduleName}.config.js`,
-      `${moduleName}.config.mjs`,
       `${moduleName}.config.cjs`,
+      `${moduleName}.config.mjs`,
     ].filter(Boolean),
     ignoreEmptySearchPlaces: true,
     stopDir: os.homedir(),
