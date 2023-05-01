@@ -16,6 +16,7 @@ import { ExplorerOptions, ExplorerOptionsSync, Loaders } from '../src/types';
 import { TempDir } from './util';
 import { ExplorerSync } from '../src/ExplorerSync';
 import { Explorer } from '../src/Explorer';
+import path from 'path';
 
 vi.mock('../src/ExplorerSync', async () => {
   const { ExplorerSync } = await vi.importActual<
@@ -353,13 +354,11 @@ describe('cosmiconfig', () => {
         expect(value).toContain(expectedLoaderFunctionNames[key]);
       }
 
-      console.log(temp.dir, explorerOptions.metaConfigFilePath);
-
       expect(explorerOptions).toEqual({
         packageProp: 'wildandfree',
         searchPlaces: ['.config/foo.json'],
         ignoreEmptySearchPlaces: false,
-        metaConfigFilePath: `${temp.dir}/.config.json`,
+        metaConfigFilePath: path.join(temp.dir, '.config.json'),
         stopDir: __dirname,
         cache: false,
       });
