@@ -1,4 +1,4 @@
-/* istanbul ignore file */
+/* istanbul ignore file -- @preserve */
 let result: boolean;
 function canUseDynamicImport(): boolean {
   if (result === undefined) {

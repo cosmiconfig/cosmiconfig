@@ -148,6 +148,7 @@ describe('cosmiconfig', () => {
         1,
         {
           '.cjs': 'loadJs',
+          '.mjs': 'loadJs',
           '.js': 'loadJs',
           '.json': 'loadJson',
           '.yaml': 'loadYaml',
@@ -162,14 +163,17 @@ describe('cosmiconfig', () => {
           `.${moduleName}rc.yml`,
           `.${moduleName}rc.js`,
           `.${moduleName}rc.cjs`,
+          `.${moduleName}rc.mjs`,
           `.config/${moduleName}rc`,
           `.config/${moduleName}rc.json`,
           `.config/${moduleName}rc.yaml`,
           `.config/${moduleName}rc.yml`,
           `.config/${moduleName}rc.js`,
           `.config/${moduleName}rc.cjs`,
+          `.config/${moduleName}rc.mjs`,
           `${moduleName}.config.js`,
           `${moduleName}.config.cjs`,
+          `${moduleName}.config.mjs`,
         ],
       );
     });
