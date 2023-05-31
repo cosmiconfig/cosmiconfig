@@ -111,7 +111,7 @@ function getExplorerOptions<T extends Options | OptionsSync>(
     searchPlaces: metaSearchPlaces,
     ignoreEmptySearchPlaces: false,
     usePackagePropInConfigFiles: true,
-    loaders: { ...defaultLoadersSync, ...defaultLoaders },
+    loaders: defaultLoaders,
     transform: identity,
     cache: true,
     metaConfigFilePath: null,

@@ -2,7 +2,7 @@
 
 ## 8.1.4
 
-- **Breaking change:** Add support for ECMAScript modules (ESM) to the [*asynchronous* API](./README.md#asynchronous-api). End users running Node versions that support ESM can provide `.mjs` files, or `.js` files whose nearest parent `package.json` file contains `"type": "module"`.
+- Add support for ECMAScript modules (ESM) to the [*asynchronous* API](./README.md#asynchronous-api). End users running Node versions that support ESM can provide `.mjs` files, or `.js` files whose nearest parent `package.json` file contains `"type": "module"`.
   - `${moduleName}rc.mjs` and `${moduleName}.config.mjs` are included in the default `searchPlaces` of the asynchronous API.
   - The [synchronous API](./README.md#synchronous-api) does not support ECMAScript modules, so does not look for `.mjs` files.
   - To learn more, read ["Loading JS modules"](./README.md#loading-js-modules).
@@ -31,6 +31,7 @@
 - **Breaking change:** Drop support for Node 10 and 12.
 
 - **Breaking change:** Use npm package [js-yaml](https://www.npmjs.com/package/js-yaml) to parse YAML instead of npm package [yaml](https://www.npmjs.com/package/yaml).
+
 - Added: Loader errors now include the path of the file that was tried to be loaded.
 
 ## 7.1.0

@@ -25,6 +25,12 @@
     "check:all": "npm run test && npm run typescript && npm run lint && npm run format:check",
     "prepublishOnly": "npm run check:all && npm run build"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && npm run typescript && npm run test",
+      "pre-push": "npm run check:all"
+    }
+  },
   "lint-staged": {
     "*.{js,ts}": [
       "eslint --fix",
@@ -89,10 +95,10 @@
     "path-type": "^4.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.19.3",
-    "@babel/core": "7.20.2",
-    "@babel/preset-env": "7.20.2",
-    "@babel/preset-typescript": "7.18.6",
+    "@babel/cli": "^7.19.3",
+    "@babel/core": "^7.20.2",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-typescript": "^7.18.6",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^14.0.22",
     "@types/parse-json": "^4.0.0",

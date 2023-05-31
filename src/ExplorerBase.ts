@@ -85,7 +85,7 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
     return nextDir;
   }
 
-  private loadPackageProp(filepath: string, content: string | null): unknown {
+  private loadPackageProp(filepath: string, content: string): unknown {
     const parsedContent = loaders.loadJson(filepath, content);
     const packagePropValue = getPropertyByPath(
       parsedContent,
