@@ -22,14 +22,6 @@
     "resolveJsonModule": true,
     "useUnknownInCatchVariables": false
   },
-  "include": [
-    "src",
-    "test",
-    "global.d.ts",
-    "vite.config.ts"
-  ],
-  "exclude": [
-    "dist",
-    "node_modules"
-  ]
+  "include": ["src", "test", "global.d.ts", "vite.config.ts"],
+  "exclude": ["dist", "node_modules"]
 }
