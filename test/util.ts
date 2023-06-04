@@ -72,18 +72,26 @@ class TempDir {
   public getSpyPathCalls(spy: Mock | SpyInstance): Array<string> {
     const calls = spy.mock.calls;
 
-    const result = calls.map((call): string => {
-      const filePath = call[0];
-      const relativePath = path.relative(this.dir, filePath);
+    const result = calls
+      .map((call): string => {
+        const filePath = call[0];
+        const relativePath = path.relative(this.dir, filePath);
 
-      /**
-       * Replace Windows backslash directory separators with forward slashes
-       * so expected paths will be consistent cross platform
-       */
-      const normalizeCrossPlatform = normalizeDirectorySlash(relativePath);
+        /**
+         * Replace Windows backslash directory separators with forward slashes
+         * so expected paths will be consistent cross platform
+         */
+        const normalizeCrossPlatform = normalizeDirectorySlash(relativePath);
 
-      return normalizeCrossPlatform;
-    });
+        return normalizeCrossPlatform;
+      })
+      .filter((filePath): boolean => {
+        /**
+         * Filter out `fs` calls that are made within cosmiconfig's dependency
+         * tree.
+         */
+        return !filePath.includes('/cosmiconfig/node_modules/');
+      });
 
     return result;
   }
@@ -108,4 +116,8 @@ class TempDir {
   }
 }
 
-export { TempDir };
+function isNotMjs(filePath: string): boolean {
+  return path.extname(filePath) !== '.mjs';
+}
+
+export { TempDir, isNotMjs };

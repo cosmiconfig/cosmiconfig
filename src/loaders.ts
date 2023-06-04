@@ -1,16 +1,26 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
-import { LoaderSync } from './index';
-import { LoadersSync } from './types';
+import { pathToFileURL } from 'url';
+import { Loader, LoaderSync } from './index';
+import { Loaders } from './types';
 
 let importFresh: typeof import('import-fresh');
-const loadJs: LoaderSync = function loadJs(filepath) {
+const loadJsSync: LoaderSync = function loadJsSync(filepath) {
   if (importFresh === undefined) {
     importFresh = require('import-fresh');
   }
 
   const result = importFresh(filepath);
   return result;
+};
+
+const loadJs: Loader = async function loadJs(filepath) {
+  try {
+    const { href } = pathToFileURL(filepath);
+    return (await import(href)).default;
+  } catch (error) {
+    return loadJsSync(filepath, '');
+  }
 };
 
 let parseJson: typeof import('parse-json');
@@ -43,6 +53,6 @@ const loadYaml: LoaderSync = function loadYaml(filepath, content) {
   }
 };
 
-const loaders: LoadersSync = { loadJs, loadJson, loadYaml };
+const loaders: Loaders = { loadJs, loadJsSync, loadJson, loadYaml };
 
 export { loaders };

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function*/
-import path from 'path';
 import {
   expect,
   describe,
@@ -12,11 +11,12 @@ import {
   afterEach,
 } from 'vitest';
 import os from 'os';
-import { defaultLoaders, LoaderSync } from '../src';
+import { defaultLoaders, Loader, LoaderSync } from '../src';
 import { ExplorerOptions, ExplorerOptionsSync, Loaders } from '../src/types';
 import { TempDir } from './util';
 import { ExplorerSync } from '../src/ExplorerSync';
 import { Explorer } from '../src/Explorer';
+import path from 'path';
 
 vi.mock('../src/ExplorerSync', async () => {
   const { ExplorerSync } = await vi.importActual<
@@ -80,7 +80,7 @@ const checkConfigResult = (
 ) => {
   const instanceIndex = instanceNum - 1;
 
-  expect(mock.mock.calls.length).toEqual(instanceNum);
+  expect(mock.mock.calls.length).toBe(instanceNum);
   expect(mock.mock.calls[instanceIndex].length).toBe(1);
 
   const { transform, loaders, ...explorerOptions } =
@@ -94,13 +94,13 @@ const checkConfigResult = (
     expect(value).toContain(expectedLoaderNames[key]);
   }
 
-  expect(explorerOptions).toEqual(expectedExplorerOptions);
+  expect(explorerOptions).toStrictEqual(expectedExplorerOptions);
 };
 
 describe('cosmiconfig', () => {
   const moduleName = 'foo';
 
-  beforeEach(async () => {
+  beforeEach(() => {
     temp.clean();
   });
 
@@ -110,57 +110,106 @@ describe('cosmiconfig', () => {
   });
 
   describe('creates explorer with default options if not specified', () => {
-    const expectedLoaderNames = {
-      '.cjs': 'loadJs',
-      '.js': 'loadJs',
-      '.json': 'loadJson',
-      '.yaml': 'loadYaml',
-      '.yml': 'loadYaml',
-      noExt: 'loadYaml',
-    };
+    const checkResult = (
+      mock: SpyInstance,
+      instanceNum: number,
+      expectedLoaders: any,
+      expectedSearchPlaces: any,
+    ) => {
+      const instanceIndex = instanceNum - 1;
 
-    const expectedExplorerOptions = {
-      packageProp: moduleName,
-      searchPlaces: [
-        'package.json',
-        `.${moduleName}rc`,
-        `.${moduleName}rc.json`,
-        `.${moduleName}rc.yaml`,
-        `.${moduleName}rc.yml`,
-        `.${moduleName}rc.js`,
-        `.${moduleName}rc.cjs`,
-        `.config/${moduleName}rc`,
-        `.config/${moduleName}rc.json`,
-        `.config/${moduleName}rc.yaml`,
-        `.config/${moduleName}rc.yml`,
-        `.config/${moduleName}rc.js`,
-        `.config/${moduleName}rc.cjs`,
-        `${moduleName}.config.js`,
-        `${moduleName}.config.cjs`,
-      ],
-      ignoreEmptySearchPlaces: true,
-      stopDir: os.homedir(),
-      cache: true,
-      metaConfigFilePath: null,
+      expect(mock.mock.calls.length).toBe(instanceNum);
+      expect(mock.mock.calls[instanceIndex].length).toBe(1);
+
+      const { transform, loaders, ...explorerOptions } =
+        mock.mock.calls[instanceIndex][0];
+      expect(transform.name).toMatch(/identity/);
+      const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
+
+      // Vitest adds a number suffix to our functions names,
+      // so we can't compare them with strict equals
+      for (const [key, value] of Object.entries(loaderFunctionsByName)) {
+        expect(value).toContain(expectedLoaders[key]);
+      }
+
+      expect(explorerOptions).toEqual({
+        packageProp: moduleName,
+        searchPlaces: expectedSearchPlaces,
+        ignoreEmptySearchPlaces: true,
+        metaConfigFilePath: null,
+        stopDir: os.homedir(),
+        cache: true,
+      });
     };
 
     test('async', () => {
       cosmiconfig(moduleName);
-      checkConfigResult(
+      checkResult(
         createExplorerMock,
         1,
-        expectedLoaderNames,
-        expectedExplorerOptions,
+        {
+          '.cjs': 'loadJs',
+          '.mjs': 'loadJs',
+          '.js': 'loadJs',
+          '.json': 'loadJson',
+          '.yaml': 'loadYaml',
+          '.yml': 'loadYaml',
+          noExt: 'loadYaml',
+        },
+        [
+          'package.json',
+          `.${moduleName}rc`,
+          `.${moduleName}rc.json`,
+          `.${moduleName}rc.yaml`,
+          `.${moduleName}rc.yml`,
+          `.${moduleName}rc.js`,
+          `.${moduleName}rc.cjs`,
+          `.${moduleName}rc.mjs`,
+          `.config/${moduleName}rc`,
+          `.config/${moduleName}rc.json`,
+          `.config/${moduleName}rc.yaml`,
+          `.config/${moduleName}rc.yml`,
+          `.config/${moduleName}rc.js`,
+          `.config/${moduleName}rc.cjs`,
+          `.config/${moduleName}rc.mjs`,
+          `${moduleName}.config.js`,
+          `${moduleName}.config.cjs`,
+          `${moduleName}.config.mjs`,
+        ],
       );
     });
 
     test('sync', () => {
       cosmiconfigSync(moduleName);
-      checkConfigResult(
+      checkResult(
         createExplorerSyncMock,
-        2,
-        expectedLoaderNames,
-        expectedExplorerOptions,
+        2, // ExplorerSync is called twice (once in getExplorerOptions)
+        {
+          '.mjs': 'loadJsSync',
+          '.cjs': 'loadJsSync',
+          '.js': 'loadJsSync',
+          '.json': 'loadJson',
+          '.yaml': 'loadYaml',
+          '.yml': 'loadYaml',
+          noExt: 'loadYaml',
+        },
+        [
+          'package.json',
+          `.${moduleName}rc`,
+          `.${moduleName}rc.json`,
+          `.${moduleName}rc.yaml`,
+          `.${moduleName}rc.yml`,
+          `.${moduleName}rc.js`,
+          `.${moduleName}rc.cjs`,
+          `.config/${moduleName}rc`,
+          `.config/${moduleName}rc.json`,
+          `.config/${moduleName}rc.yaml`,
+          `.config/${moduleName}rc.yml`,
+          `.config/${moduleName}rc.js`,
+          `.config/${moduleName}rc.cjs`,
+          `${moduleName}.config.js`,
+          `${moduleName}.config.cjs`,
+        ],
       );
     });
   });
@@ -186,38 +235,43 @@ describe('cosmiconfig', () => {
   });
 
   describe('creates explorer with preference for given options over defaults', () => {
-    const noExtLoader: LoaderSync = () => {};
-    const jsLoader: LoaderSync = () => {};
-    const jsonLoader: LoaderSync = () => {};
-    const yamlLoader: LoaderSync = () => {};
+    const noExtLoader: Loader = () => {};
+    const jsLoader: Loader = () => {};
+    const jsonLoader: Loader = () => {};
+    const yamlLoader: Loader = () => {};
+
+    const mjsLoader: Loader = () => {};
 
     const options = {
       stopDir: __dirname,
       cache: false,
-      searchPlaces: ['.foorc.json', 'wildandfree.js'],
+      searchPlaces: ['.config/foo.json'],
       packageProp: 'wildandfree',
       ignoreEmptySearchPlaces: false,
       loaders: {
         noExt: noExtLoader,
+        '.mjs': mjsLoader,
         '.cjs': jsLoader,
         '.js': jsLoader,
         '.json': jsonLoader,
         '.yaml': yamlLoader,
+        '.yml': yamlLoader,
       },
     };
 
     const expectedLoaderNames = {
+      '.mjs': 'mjsLoader',
       '.cjs': 'jsLoader',
       '.js': 'jsLoader',
       '.json': 'jsonLoader',
       '.yaml': 'yamlLoader',
-      '.yml': 'loadYaml',
+      '.yml': 'yamlLoader',
       noExt: 'noExtLoader',
     };
 
     const expectedExplorerOptions = {
       packageProp: 'wildandfree',
-      searchPlaces: ['.foorc.json', 'wildandfree.js'],
+      searchPlaces: ['.config/foo.json'],
       ignoreEmptySearchPlaces: false,
       stopDir: __dirname,
       cache: false,
@@ -265,11 +319,13 @@ describe('cosmiconfig', () => {
     const options = {
       stopDir: __dirname,
       cache: false,
-      searchPlaces: ['.foorc.json', 'wildandfree.js'],
+      searchPlaces: ['.foorc.json', 'wildandfree.js', '.config/foo.json'],
       packageProp: 'wildandfree',
       ignoreEmptySearchPlaces: false,
+      metaConfigFilePath: `${temp.dir}/.config.json`,
       loaders: {
         noExt: noExtLoader,
+        '.mjs': jsLoader,
         '.cjs': jsLoader,
         '.js': jsLoader,
         '.json': jsonLoader,
@@ -277,41 +333,64 @@ describe('cosmiconfig', () => {
       },
     };
 
-    const expectedLoaderNames = {
-      '.cjs': 'jsLoader',
-      '.js': 'jsLoader',
-      '.json': 'jsonLoader',
-      '.yaml': 'yamlLoader',
-      '.yml': 'loadYaml',
-      noExt: 'noExtLoader',
-    };
+    const checkResult = (
+      mock: SpyInstance,
+      instanceNum: number,
+      expectedLoaderFunctionNames: any,
+    ) => {
+      const instanceIndex = instanceNum - 1;
 
-    const expectedExplorerOptions = {
-      packageProp: 'wildandfree',
-      searchPlaces: ['.config/foo.json'],
-      ignoreEmptySearchPlaces: false,
-      stopDir: __dirname,
-      cache: false,
-      metaConfigFilePath: path.join(temp.dir, '.config.json'),
+      expect(mock.mock.calls.length).toBe(instanceNum);
+      expect(mock.mock.calls[instanceIndex].length).toBe(1);
+      const { transform, loaders, ...explorerOptions } =
+        mock.mock.calls[instanceIndex][0];
+
+      expect(transform.name).toMatch(/identity/);
+      const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
+
+      // Vitest adds a number suffix to our functions names,
+      // so we can't compare them with strict equals
+      for (const [key, value] of Object.entries(loaderFunctionsByName)) {
+        expect(value).toContain(expectedLoaderFunctionNames[key]);
+      }
+
+      expect(explorerOptions).toEqual({
+        packageProp: 'wildandfree',
+        searchPlaces: ['.config/foo.json'],
+        ignoreEmptySearchPlaces: false,
+        metaConfigFilePath: path.join(temp.dir, '.config.json'),
+        stopDir: __dirname,
+        cache: false,
+      });
     };
 
     test('async', () => {
       cosmiconfig(moduleName, options);
-      checkConfigResult(
-        createExplorerMock,
-        1,
-        expectedLoaderNames,
-        expectedExplorerOptions,
-      );
+      checkResult(createExplorerMock, 1, {
+        '.mjs': 'jsLoader',
+        '.cjs': 'jsLoader',
+        '.js': 'jsLoader',
+        '.json': 'jsonLoader',
+        '.yaml': 'yamlLoader',
+        '.yml': 'loadYaml',
+        noExt: 'noExtLoader',
+      });
     });
 
     test('sync', () => {
       cosmiconfigSync(moduleName, options);
-      checkConfigResult(
+      checkResult(
         createExplorerSyncMock,
-        2,
-        expectedLoaderNames,
-        expectedExplorerOptions,
+        2, // ExplorerSync is called twice (once in getExplorerOptions)
+        {
+          '.cjs': 'jsLoader',
+          '.mjs': 'jsLoader',
+          '.js': 'jsLoader',
+          '.json': 'jsonLoader',
+          '.yaml': 'yamlLoader',
+          '.yml': 'loadYaml',
+          noExt: 'noExtLoader',
+        },
       );
     });
   });

@@ -11,17 +11,17 @@ By default, Cosmiconfig will start where you tell it to start and search up the 
 
 - a `package.json` property
 - a JSON or YAML, extensionless "rc file"
-- an "rc file" with the extensions `.json`, `.yaml`, `.yml`, `.js`, or `.cjs`
+- an "rc file" with the extensions `.json`, `.yaml`, `.yml`, `.js`, `.mjs`, or `.cjs`
 - any of the above two inside a `.config` subdirectory
-- a `.config.js` or `.config.cjs` CommonJS module
+- a `.config.js`, `.config.mjs`, or `.config.cjs` file
 
 For example, if your module's name is "myapp", cosmiconfig will search up the directory tree for configuration in the following places:
 
 - a `myapp` property in `package.json`
 - a `.myapprc` file in JSON or YAML format
-- a `.myapprc.json`, `.myapprc.yaml`, `.myapprc.yml`, `.myapprc.js`, or `.myapprc.cjs` file
+- a `.myapprc.json`, `.myapprc.yaml`, `.myapprc.yml`, `.myapprc.js`, `.myapprc.mjs`, or `.myapprc.cjs` file
 - a `myapprc`, `myapprc.json`, `myapprc.yaml`, `myapprc.yml`, `myapprc.js` or `myapprc.cjs` file inside a `.config` subdirectory
-- a `myapp.config.js` or `myapp.config.cjs` CommonJS module exporting an object
+- a `myapp.config.js`, `myapp.config.mjs`, or `myapp.config.cjs` file
 
 Cosmiconfig continues to search up the directory tree, checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
 
@@ -52,6 +52,7 @@ Cosmiconfig continues to search up the directory tree, checking each of these pl
   - [cache](#cache)
   - [transform](#transform)
   - [ignoreEmptySearchPlaces](#ignoreemptysearchplaces)
+- [Loading JS modules](#loading-js-modules)
 - [Caching](#caching)
 - [Differences from rc](#differences-from-rc)
 - [Usage for end users](#usage-for-end-users)
@@ -147,12 +148,13 @@ Here's how your default [`search()`] will work:
 - Starting from `process.cwd()` (or some other directory defined by the `searchFrom` argument to [`search()`]), look for configuration objects in the following places:
   1. A `goldengrahams` property in a `package.json` file.
   2. A `.goldengrahamsrc` file with JSON or YAML syntax.
-  3. A `.goldengrahamsrc.json`, `.goldengrahamsrc.yaml`, `.goldengrahamsrc.yml`, `.goldengrahamsrc.js`, or `.goldengrahamsrc.cjs` file.
+  3. A `.goldengrahamsrc.json`, `.goldengrahamsrc.yaml`, `.goldengrahamsrc.yml`, `.goldengrahamsrc.js`, or `.goldengrahamsrc.cjs` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
   4. A `goldengrahamsrc`, `goldengrahamsrc.json`, `goldengrahamsrc.yaml`, `goldengrahamsrc.yml`, `goldengrahamsrc.js`, or `goldengrahamsrc.cjs` file in the `.config` subdirectory.
-  5. A `goldengrahams.config.js` or `goldengrahams.config.cjs` CommonJS module exporting the object.
+  5. A `goldengrahams.config.js`, `goldengrahams.config.mjs`, or `goldengrahams.config.cjs` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
 - If none of those searches reveal a configuration object, move up one directory level and try again.
   So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking the same places in each directory.
 - Continue searching until arriving at your home directory (or some other directory defined by the cosmiconfig option [`stopDir`]).
+- For JS files,
 - If at any point a parsable configuration is found, the [`search()`] Promise resolves with its [result] \(or, with [`explorerSync.search()`], the [result] is returned).
 - If no configuration object is found, the [`search()`] Promise resolves with `null` (or, with [`explorerSync.search()`], `null` is returned).
 - If a configuration object is found *but is malformed* (causing a parsing error), the [`search()`] Promise rejects with that error (so you should `.catch()` it). (Or, with [`explorerSync.search()`], the error is thrown.)
@@ -264,6 +266,8 @@ Each place is relative to the directory being searched, and the places are check
 
 **Default `searchPlaces`:**
 
+For the [asynchronous API](#asynchronous-api), these are the default `searchPlaces`:
+
 ```js
 [
   'package.json',
@@ -272,6 +276,7 @@ Each place is relative to the directory being searched, and the places are check
   `.${moduleName}rc.yaml`,
   `.${moduleName}rc.yml`,
   `.${moduleName}rc.js`,
+  `.${moduleName}rc.mjs`,
   `.${moduleName}rc.cjs`,
   `.config/${moduleName}rc`,
   `.config/${moduleName}rc.json`,
@@ -280,9 +285,12 @@ Each place is relative to the directory being searched, and the places are check
   `.config/${moduleName}rc.js`,
   `.config/${moduleName}rc.cjs`,
   `${moduleName}.config.js`,
+  `${moduleName}.config.mjs`,
   `${moduleName}.config.cjs`,
 ]
 ```
+
+For the [synchronous API](#synchronous-api), the only difference is that `.mjs` files are not included. See ["Loading JS modules"] for more information.
 
 Create your own array to search more, fewer, or altogether different places.
 
@@ -303,20 +311,10 @@ Examples, with a module named `porgy`:
   'porgy.config.js'
 ]
 
-// ESLint searches for configuration in these places:
-[
-  '.eslintrc.js',
-  '.eslintrc.yaml',
-  '.eslintrc.yml',
-  '.eslintrc.json',
-  '.eslintrc',
-  'package.json'
-]
-
-// Babel looks in fewer places:
+// Limit the options dramatically:
 [
   'package.json',
-  '.babelrc'
+  '.porgyrc'
 ]
 
 // Maybe you want to look for a wide variety of JS flavors:
@@ -327,7 +325,7 @@ Examples, with a module named `porgy`:
   'porgy.config.coffee'
 ]
 // ^^ You will need to designate custom loaders to tell
-// Cosmiconfig how to handle these special JS flavors.
+// Cosmiconfig how to handle `.ts` and `.coffee` files.
 
 // Look within a .config/ subdirectory of every searched directory:
 [
@@ -346,17 +344,28 @@ Default: See below.
 
 An object that maps extensions to the loader functions responsible for loading and parsing files with those extensions.
 
-Cosmiconfig exposes its default loaders on a named export `defaultLoaders`.
+Cosmiconfig exposes its default loaders on the named export `defaultLoaders` and `defaultLoadersSync`.
 
 **Default `loaders`:**
 
 ```js
-const { defaultLoaders } = require('cosmiconfig');
+const { defaultLoaders, defaultLoadersSync } = require('cosmiconfig');
 
 console.log(Object.entries(defaultLoaders))
 // [
+//   [ '.mjs', [Function: loadJs] ],
 //   [ '.cjs', [Function: loadJs] ],
 //   [ '.js', [Function: loadJs] ],
+//   [ '.json', [Function: loadJson] ],
+//   [ '.yaml', [Function: loadYaml] ],
+//   [ '.yml', [Function: loadYaml] ],
+//   [ 'noExt', [Function: loadYaml] ]
+// ]
+
+console.log(Object.entries(defaultLoadersSync))
+// [
+//   [ '.cjs', [Function: loadJsSync] ],
+//   [ '.js', [Function: loadJsSync] ],
 //   [ '.json', [Function: loadJson] ],
 //   [ '.yaml', [Function: loadYaml] ],
 //   [ '.yml', [Function: loadYaml] ],
@@ -429,14 +438,12 @@ Examples:
 
 // Allow many flavors of JS, using custom loaders:
 {
-  '.mjs': esmLoader,
   '.ts': typeScriptLoader,
   '.coffee': coffeeScriptLoader
 }
 
 // Allow many flavors of JS but rely on require hooks:
 {
-  '.mjs': defaultLoaders['.js'],
   '.ts': defaultLoaders['.js'],
   '.coffee': defaultLoaders['.js']
 }
@@ -520,6 +527,18 @@ If you'd like to load empty configuration files, instead, set this option to `fa
 
 Why might you want to load empty configuration files?
 If you want to throw an error, or if an empty configuration file means something to your program.
+
+## Loading JS modules
+
+Your end users can provide JS configuration files as ECMAScript modules (ESM) under the following conditions:
+
+- You (the cosmiconfig user) use cosmiconfig's [asynchronous API](#asynchronous-api).
+- Your end user runs a version of Node that supports ESM ([>=12.17.0](https://nodejs.org/en/blog/release/v12.17.0/), or earlier with the `--experimental-modules` flag).
+- Your end user provides an `.mjs` configuration file, or a `.js` file whose nearest parent `package.json` file contains `"type": "module"`. (See [Node's method for determining a file's module system](https://nodejs.org/api/packages.html#packages_determining_module_system).)
+
+With cosmiconfig's [asynchronous API](#asynchronous-api), the default [`searchPlaces`] include `.js`, `.mjs`, and `.cjs` files. Cosmiconfig loads all these file types with the [dynamic `import` function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#dynamic_imports).
+
+With the [synchronous API](#synchronous-api), JS configuration files are always treated as CommonJS, and `.mjs` files are ignored, because there is no synchronous API for the dynamic `import` function.
 
 ## Caching
 
@@ -665,3 +684,5 @@ And please do participate!
 [`explorer.search()`]: #explorersearch
 
 [`explorer.load()`]: #explorerload
+
+["Loading JS modules"]: #loading-js-modules

@@ -68,12 +68,22 @@ export const metaSearchPlaces = [
   '.config.yml',
   '.config.js',
   '.config.cjs',
+  '.config.mjs',
 ];
 
 // do not allow mutation of default loaders. Make sure it is set inside options
 const defaultLoaders = Object.freeze({
+  '.mjs': loaders.loadJs,
   '.cjs': loaders.loadJs,
   '.js': loaders.loadJs,
+  '.json': loaders.loadJson,
+  '.yaml': loaders.loadYaml,
+  '.yml': loaders.loadYaml,
+  noExt: loaders.loadYaml,
+} as const);
+const defaultLoadersSync = Object.freeze({
+  '.cjs': loaders.loadJsSync,
+  '.js': loaders.loadJsSync,
   '.json': loaders.loadJson,
   '.yaml': loaders.loadYaml,
   '.yml': loaders.loadYaml,
@@ -91,18 +101,10 @@ function replaceMetaPlaceholders(
   return paths.map((path) => path.replace('{name}', moduleName));
 }
 
-function getExplorerOptions(
+function getExplorerOptions<T extends Options | OptionsSync>(
   moduleName: string,
-  options: OptionsSync,
-): ExplorerOptionsSync;
-function getExplorerOptions(
-  moduleName: string,
-  options: Options,
-): ExplorerOptions;
-function getExplorerOptions(
-  moduleName: string,
-  options: Options | OptionsSync,
-): ExplorerOptions | ExplorerOptionsSync {
+  options: T,
+): T {
   const metaExplorer = new ExplorerSync({
     packageProp: 'cosmiconfig',
     stopDir: process.cwd(),
@@ -117,7 +119,7 @@ function getExplorerOptions(
   const metaConfig = metaExplorer.searchSync();
 
   if (!metaConfig) {
-    return normalizeOptions(moduleName, options);
+    return options;
   }
 
   if (metaConfig.config?.loaders) {
@@ -135,18 +137,18 @@ function getExplorerOptions(
 
   overrideOptions.metaConfigFilePath = metaConfig.filepath;
 
-  const mergedOptions = { ...options, ...overrideOptions };
-
-  return normalizeOptions(moduleName, mergedOptions);
+  return { ...options, ...overrideOptions };
 }
 
 function cosmiconfig(
   moduleName: string,
   options: Options = {},
 ): PublicExplorer {
-  const normalizedOptions: ExplorerOptions = getExplorerOptions(
+  const explorerOptions = getExplorerOptions(moduleName, options);
+
+  const normalizedOptions: ExplorerOptions = normalizeOptions(
     moduleName,
-    options,
+    explorerOptions,
   );
 
   const explorer = new Explorer(normalizedOptions);
@@ -165,9 +167,11 @@ function cosmiconfigSync(
   moduleName: string,
   options: OptionsSync = {},
 ): PublicExplorerSync {
-  const normalizedOptions: ExplorerOptionsSync = getExplorerOptions(
+  const explorerOptions = getExplorerOptions(moduleName, options);
+
+  const normalizedOptions: ExplorerOptionsSync = normalizeOptionsSync(
     moduleName,
-    options,
+    explorerOptions,
   );
 
   const explorerSync = new ExplorerSync(normalizedOptions);
@@ -183,17 +187,55 @@ function cosmiconfigSync(
 
 function normalizeOptions(
   moduleName: string,
-  options: OptionsSync,
-): ExplorerOptionsSync;
-function normalizeOptions(
-  moduleName: string,
   options: Options,
-): ExplorerOptions;
-function normalizeOptions(
+): ExplorerOptions {
+  const defaults: ExplorerOptions = {
+    packageProp: moduleName,
+    searchPlaces: [
+      'package.json',
+      `.${moduleName}rc`,
+      `.${moduleName}rc.json`,
+      `.${moduleName}rc.yaml`,
+      `.${moduleName}rc.yml`,
+      `.${moduleName}rc.js`,
+      `.${moduleName}rc.cjs`,
+      `.${moduleName}rc.mjs`,
+      `.config/${moduleName}rc`,
+      `.config/${moduleName}rc.json`,
+      `.config/${moduleName}rc.yaml`,
+      `.config/${moduleName}rc.yml`,
+      `.config/${moduleName}rc.js`,
+      `.config/${moduleName}rc.cjs`,
+      `.config/${moduleName}rc.mjs`,
+      `${moduleName}.config.js`,
+      `${moduleName}.config.cjs`,
+      `${moduleName}.config.mjs`,
+    ].filter(Boolean),
+    ignoreEmptySearchPlaces: true,
+    stopDir: os.homedir(),
+    cache: true,
+    transform: identity,
+    loaders: defaultLoaders,
+    metaConfigFilePath: null,
+  };
+
+  const normalizedOptions: ExplorerOptions = {
+    ...defaults,
+    ...options,
+    loaders: {
+      ...defaults.loaders,
+      ...options.loaders,
+    },
+  };
+
+  return normalizedOptions;
+}
+
+function normalizeOptionsSync(
   moduleName: string,
-  options: Options | OptionsSync,
-): ExplorerOptions | ExplorerOptionsSync {
-  const defaults: ExplorerOptions | ExplorerOptionsSync = {
+  options: OptionsSync,
+): ExplorerOptionsSync {
+  const defaults: ExplorerOptionsSync = {
     packageProp: moduleName,
     searchPlaces: [
       'package.json',
@@ -216,23 +258,20 @@ function normalizeOptions(
     stopDir: os.homedir(),
     cache: true,
     transform: identity,
-    loaders: defaultLoaders,
+    loaders: defaultLoadersSync,
     metaConfigFilePath: null,
   };
 
-  let loaders = {
-    ...defaults.loaders,
-  };
-
-  if (options.loaders) {
-    Object.assign(loaders, options.loaders);
-  }
-
-  return {
+  const normalizedOptions: ExplorerOptionsSync = {
     ...defaults,
     ...options,
-    loaders,
+    loaders: {
+      ...defaults.loaders,
+      ...options.loaders,
+    },
   };
+
+  return normalizedOptions;
 }
 
-export { cosmiconfig, cosmiconfigSync, defaultLoaders };
+export { cosmiconfig, cosmiconfigSync, defaultLoaders, defaultLoadersSync };
