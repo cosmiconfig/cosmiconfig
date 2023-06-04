@@ -18,7 +18,9 @@
     // Import non-ES modules as default imports.
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "useUnknownInCatchVariables": false
   },
   "include": ["src", "test", "global.d.ts", "vite.config.ts"],
   "exclude": ["dist", "node_modules"]

@@ -1,12 +1,12 @@
 import { beforeEach, afterAll, describe, expect, test, vi } from 'vitest';
 import fs from 'fs';
-import { TempDir } from './util';
 import {
   cosmiconfig,
   cosmiconfigSync,
   defaultLoaders,
   OptionsSync,
 } from '../src';
+import { isNotMjs, TempDir } from './util';
 
 const temp = new TempDir();
 
@@ -24,58 +24,74 @@ describe('gives up if it cannot find the file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('.') };
 
-  const checkResult = (statSpy: any, readFileSpy: any, result: any) => {
+  const expectedFilesChecked = [
+    'a/b/package.json',
+    'a/b/.foorc',
+    'a/b/.foorc.json',
+    'a/b/.foorc.yaml',
+    'a/b/.foorc.yml',
+    'a/b/.foorc.js',
+    'a/b/.foorc.cjs',
+    'a/b/.foorc.mjs',
+    'a/b/.config/foorc',
+    'a/b/.config/foorc.json',
+    'a/b/.config/foorc.yaml',
+    'a/b/.config/foorc.yml',
+    'a/b/.config/foorc.js',
+    'a/b/.config/foorc.cjs',
+    'a/b/.config/foorc.mjs',
+    'a/b/foo.config.js',
+    'a/b/foo.config.cjs',
+    'a/b/foo.config.mjs',
+    'a/package.json',
+    'a/.foorc',
+    'a/.foorc.json',
+    'a/.foorc.yaml',
+    'a/.foorc.yml',
+    'a/.foorc.js',
+    'a/.foorc.cjs',
+    'a/.foorc.mjs',
+    'a/.config/foorc',
+    'a/.config/foorc.json',
+    'a/.config/foorc.yaml',
+    'a/.config/foorc.yml',
+    'a/.config/foorc.js',
+    'a/.config/foorc.cjs',
+    'a/.config/foorc.mjs',
+    'a/foo.config.js',
+    'a/foo.config.cjs',
+    'a/foo.config.mjs',
+    'package.json',
+    '.foorc',
+    '.foorc.json',
+    '.foorc.yaml',
+    '.foorc.yml',
+    '.foorc.js',
+    '.foorc.cjs',
+    '.foorc.mjs',
+    '.config/foorc',
+    '.config/foorc.json',
+    '.config/foorc.yaml',
+    '.config/foorc.yml',
+    '.config/foorc.js',
+    '.config/foorc.cjs',
+    '.config/foorc.mjs',
+    'foo.config.js',
+    'foo.config.cjs',
+    'foo.config.mjs',
+  ];
+
+  const checkResult = (
+    statSpy: any,
+    readFileSpy: any,
+    result: any,
+    files: any,
+  ) => {
     const statPath = temp.getSpyPathCalls(statSpy);
     expect(statPath).toEqual(['a/b']);
 
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
-    expect(filesChecked).toEqual([
-      'a/b/package.json',
-      'a/b/.foorc',
-      'a/b/.foorc.json',
-      'a/b/.foorc.yaml',
-      'a/b/.foorc.yml',
-      'a/b/.foorc.js',
-      'a/b/.foorc.cjs',
-      'a/b/.config/foorc',
-      'a/b/.config/foorc.json',
-      'a/b/.config/foorc.yaml',
-      'a/b/.config/foorc.yml',
-      'a/b/.config/foorc.js',
-      'a/b/.config/foorc.cjs',
-      'a/b/foo.config.js',
-      'a/b/foo.config.cjs',
-      'a/package.json',
-      'a/.foorc',
-      'a/.foorc.json',
-      'a/.foorc.yaml',
-      'a/.foorc.yml',
-      'a/.foorc.js',
-      'a/.foorc.cjs',
-      'a/.config/foorc',
-      'a/.config/foorc.json',
-      'a/.config/foorc.yaml',
-      'a/.config/foorc.yml',
-      'a/.config/foorc.js',
-      'a/.config/foorc.cjs',
-      'a/foo.config.js',
-      'a/foo.config.cjs',
-      'package.json',
-      '.foorc',
-      '.foorc.json',
-      '.foorc.yaml',
-      '.foorc.yml',
-      '.foorc.js',
-      '.foorc.cjs',
-      '.config/foorc',
-      '.config/foorc.json',
-      '.config/foorc.yaml',
-      '.config/foorc.yml',
-      '.config/foorc.js',
-      '.config/foorc.cjs',
-      'foo.config.js',
-      'foo.config.cjs',
-    ]);
+    expect(filesChecked).toEqual(files);
 
     expect(result).toBeNull();
   };
@@ -87,7 +103,7 @@ describe('gives up if it cannot find the file', () => {
     const statSpy = vi.spyOn(fs, 'stat');
 
     const result = await explorer.search(startDir);
-    checkResult(statSpy, readFileSpy, result);
+    checkResult(statSpy, readFileSpy, result, expectedFilesChecked);
   });
 
   test('sync', () => {
@@ -97,7 +113,12 @@ describe('gives up if it cannot find the file', () => {
     const statSpy = vi.spyOn(fs, 'statSync');
 
     const result = explorer.search(startDir);
-    checkResult(statSpy, readFileSpy, result);
+    checkResult(
+      statSpy,
+      readFileSpy,
+      result,
+      expectedFilesChecked.filter(isNotMjs),
+    );
   });
 });
 
@@ -105,40 +126,48 @@ describe('stops at stopDir and gives up', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
 
-  const checkResult = (readFileSpy: any, result: any) => {
+  const expectedFilesChecked = [
+    'a/b/package.json',
+    'a/b/.foorc',
+    'a/b/.foorc.json',
+    'a/b/.foorc.yaml',
+    'a/b/.foorc.yml',
+    'a/b/.foorc.js',
+    'a/b/.foorc.cjs',
+    'a/b/.foorc.mjs',
+    'a/b/.config/foorc',
+    'a/b/.config/foorc.json',
+    'a/b/.config/foorc.yaml',
+    'a/b/.config/foorc.yml',
+    'a/b/.config/foorc.js',
+    'a/b/.config/foorc.cjs',
+    'a/b/.config/foorc.mjs',
+    'a/b/foo.config.js',
+    'a/b/foo.config.cjs',
+    'a/b/foo.config.mjs',
+    'a/package.json',
+    'a/.foorc',
+    'a/.foorc.json',
+    'a/.foorc.yaml',
+    'a/.foorc.yml',
+    'a/.foorc.js',
+    'a/.foorc.cjs',
+    'a/.foorc.mjs',
+    'a/.config/foorc',
+    'a/.config/foorc.json',
+    'a/.config/foorc.yaml',
+    'a/.config/foorc.yml',
+    'a/.config/foorc.js',
+    'a/.config/foorc.cjs',
+    'a/.config/foorc.mjs',
+    'a/foo.config.js',
+    'a/foo.config.cjs',
+    'a/foo.config.mjs',
+  ];
+
+  const checkResult = (readFileSpy: any, result: any, files: any) => {
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
-    expect(filesChecked).toEqual([
-      'a/b/package.json',
-      'a/b/.foorc',
-      'a/b/.foorc.json',
-      'a/b/.foorc.yaml',
-      'a/b/.foorc.yml',
-      'a/b/.foorc.js',
-      'a/b/.foorc.cjs',
-      'a/b/.config/foorc',
-      'a/b/.config/foorc.json',
-      'a/b/.config/foorc.yaml',
-      'a/b/.config/foorc.yml',
-      'a/b/.config/foorc.js',
-      'a/b/.config/foorc.cjs',
-      'a/b/foo.config.js',
-      'a/b/foo.config.cjs',
-      'a/package.json',
-      'a/.foorc',
-      'a/.foorc.json',
-      'a/.foorc.yaml',
-      'a/.foorc.yml',
-      'a/.foorc.js',
-      'a/.foorc.cjs',
-      'a/.config/foorc',
-      'a/.config/foorc.json',
-      'a/.config/foorc.yaml',
-      'a/.config/foorc.yml',
-      'a/.config/foorc.js',
-      'a/.config/foorc.cjs',
-      'a/foo.config.js',
-      'a/foo.config.cjs',
-    ]);
+    expect(filesChecked).toEqual(files);
 
     expect(result).toBeNull();
   };
@@ -148,7 +177,7 @@ describe('stops at stopDir and gives up', () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFile');
     const result = await explorer.search(startDir);
-    checkResult(readFileSpy, result);
+    checkResult(readFileSpy, result, expectedFilesChecked);
   });
 
   test('sync', () => {
@@ -156,7 +185,7 @@ describe('stops at stopDir and gives up', () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result);
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
 });
 

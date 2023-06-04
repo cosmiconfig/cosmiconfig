@@ -1,3 +1,4 @@
+import { afterAll, beforeEach, describe, expect, test } from 'vitest';
 import { cosmiconfig, cosmiconfigSync } from '../src';
 import { TempDir } from './util';
 
