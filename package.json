@@ -1,6 +1,6 @@
 {
   "name": "cosmiconfig",
-  "version": "8.1.3",
+  "version": "8.2.0",
   "description": "Find and load configuration from a package.json property, rc file, or CommonJS module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
