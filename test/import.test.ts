@@ -37,8 +37,8 @@ describe('imports', () => {
 
   describe('imports multiple files', () => {
     beforeEach(() => {
-      temp.createFile('foo.base.yml', 'bar: 3');
-      temp.createFile('foo.base2.yml', 'baz: 4');
+      temp.createFile('foo.base.yml', 'bar: 3\nbaz: 4');
+      temp.createFile('foo.base2.yml', 'baz: 5');
       temp.createFile(
         'foo.yml',
         '$import:\n  - foo.base.yml\n  - foo.base2.yml\nfoo: 1\nbar: 2',
@@ -47,7 +47,7 @@ describe('imports', () => {
 
     const file = temp.absolutePath('foo.yml');
     const checkResult = (result: any) => {
-      expect(result.config).toEqual({ foo: 1, bar: 2, baz: 4 });
+      expect(result.config).toEqual({ foo: 1, bar: 2, baz: 5 });
     };
 
     test('async', async () => {
@@ -121,6 +121,51 @@ describe('imports', () => {
     const file = temp.absolutePath('foo.yml');
     const checkResult = (result: any) => {
       expect(result.config).toEqual({ outer: { foo: 1, bar: 2, baz: 4 } });
+    };
+
+    test('async', async () => {
+      const result = await cosmiconfig('import-tests').load(file);
+      checkResult(result);
+    });
+
+    test('sync', () => {
+      const result = cosmiconfigSync('import-tests').load(file);
+      checkResult(result);
+    });
+  });
+
+  describe('merges different file formats', () => {
+    beforeEach(() => {
+      temp.createFile('foo.base.json', '{"bar": 3, "baz": 4}');
+      temp.createFile('foo.yml', '$import: foo.base.json\nfoo: 1\nbar: 2');
+    });
+
+    const file = temp.absolutePath('foo.yml');
+    const checkResult = (result: any) => {
+      expect(result.config).toEqual({ foo: 1, bar: 2, baz: 4 });
+    };
+
+    test('async', async () => {
+      const result = await cosmiconfig('import-tests').load(file);
+      checkResult(result);
+    });
+
+    test('sync', () => {
+      const result = cosmiconfigSync('import-tests').load(file);
+      checkResult(result);
+    });
+  });
+
+  describe('imports a file which in turn imports another file', () => {
+    beforeEach(() => {
+      temp.createFile('foo.base.base.yml', 'bar: 3\nbaz: 4');
+      temp.createFile('foo.base.yml', '$import: foo.base.base.yml\nbaz: 5');
+      temp.createFile('foo.yml', '$import: foo.base.yml\nfoo: 1');
+    });
+
+    const file = temp.absolutePath('foo.yml');
+    const checkResult = (result: any) => {
+      expect(result.config).toEqual({ foo: 1, bar: 3, baz: 5 });
     };
 
     test('async', async () => {
