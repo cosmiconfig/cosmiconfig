@@ -80,7 +80,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
     const loader = this.getLoaderEntryForFile(filepath);
     try {
       return await loader(filepath, content);
-    } catch (e: any) {
+    } catch (e) {
       e.filepath = filepath;
       throw e;
     }
@@ -100,6 +100,8 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
     const fileDirectory = path.dirname(filepath);
     const { $import: imports, ...ownContent } = loadedContent;
     const importPaths = Array.isArray(imports) ? imports : [imports];
+    const newImportStack = [...importStack, filepath];
+    this.validateImports(filepath, importPaths, newImportStack);
 
     const importedConfigs = await Promise.all(
       importPaths.map(async (importPath) => {
@@ -111,7 +113,7 @@ class Explorer extends ExplorerBase<ExplorerOptions> {
           fullPath,
           importedContent,
           false,
-          [...importStack, filepath],
+          newImportStack,
         );
 
         return result?.config;

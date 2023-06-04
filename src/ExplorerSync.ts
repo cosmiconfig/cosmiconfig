@@ -79,7 +79,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     const loader = this.getLoaderEntryForFile(filepath);
     try {
       return loader(filepath, content);
-    } catch (e: any) {
+    } catch (e) {
       e.filepath = filepath;
       throw e;
     }
@@ -99,6 +99,8 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     const fileDirectory = path.dirname(filepath);
     const { $import: imports, ...ownContent } = loadedContent;
     const importPaths = Array.isArray(imports) ? imports : [imports];
+    const newImportStack = [...importStack, filepath];
+    this.validateImports(filepath, importPaths, newImportStack);
 
     const importedConfigs = importPaths.map((importPath) => {
       const fullPath = path.resolve(fileDirectory, importPath);
@@ -109,7 +111,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
         fullPath,
         importedContent,
         false,
-        [...importStack, filepath],
+        newImportStack,
       );
 
       return result?.config;

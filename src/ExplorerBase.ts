@@ -137,6 +137,34 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
       throw new Error('load must pass a non-empty string');
     }
   }
+
+  protected validateImports(
+    containingFilePath: string,
+    imports: Array<unknown>,
+    importStack: Array<string>,
+  ): asserts imports is Array<string> {
+    const fileDirectory = path.dirname(containingFilePath);
+    for (const importPath of imports) {
+      if (typeof importPath !== 'string') {
+        throw new Error(
+          `${containingFilePath}: Key $import must contain a string or a list of strings`,
+        );
+      }
+      const fullPath = path.resolve(fileDirectory, importPath);
+      if (fullPath === containingFilePath) {
+        throw new Error(`Self-import detected in ${containingFilePath}`);
+      }
+      const idx = importStack.indexOf(fullPath);
+      if (idx !== -1) {
+        throw new Error(
+          `Circular import detected:
+${[...importStack, fullPath]
+  .map((path, i) => `${i + 1}. ${path}`)
+  .join('\n')} (same as ${idx + 1}.)`,
+        );
+      }
+    }
+  }
 }
 
 function nextDirUp(dir: string): string {
