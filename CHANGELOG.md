@@ -1,5 +1,11 @@
 # Changelog
 
+## HEAD
+
+- Add support for a special `$import` key which will import another configuration file
+  - The imported file will act as a base file - all properties from that file will be applied to the configuration, but can be overridden by the importing file
+  - For more information, read the [import section of the README](README.md#imports)
+
 ## 8.2.0
 
 - Add support for ECMAScript modules (ESM) to the [*asynchronous* API](./README.md#asynchronous-api). End users running Node versions that support ESM can provide `.mjs` files, or `.js` files whose nearest parent `package.json` file contains `"type": "module"`.
