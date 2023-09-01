@@ -1,8 +1,8 @@
-import path from 'path';
-import del from 'del';
+import { deleteSync } from 'del';
 import makeDir from 'make-dir';
-import parentModule from 'parent-module';
 import os from 'os';
+import parentModule from 'parent-module';
+import path from 'path';
 import { Mock, SpyInstance, vi } from 'vitest';
 
 const fs = await vi.importActual<typeof import('fs')>('fs');
@@ -98,7 +98,7 @@ class TempDir {
 
   public clean(): Array<string> {
     const cleanPattern = normalizeDirectorySlash(this.absolutePath('**/*'));
-    const removed = del.sync(cleanPattern, {
+    const removed = deleteSync(cleanPattern, {
       dot: true,
       force: true,
     });
@@ -107,7 +107,7 @@ class TempDir {
   }
 
   public deleteTempDir(): Array<string> {
-    const removed = del.sync(normalizeDirectorySlash(this.dir), {
+    const removed = deleteSync(normalizeDirectorySlash(this.dir), {
       force: true,
       dot: true,
     });
