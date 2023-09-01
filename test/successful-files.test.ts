@@ -7,9 +7,8 @@ import {
   afterEach,
   vi,
 } from 'vitest';
-import { TempDir } from './util';
+import { TempDir, canUseDynamicImport } from './util';
 import { cosmiconfig, cosmiconfigSync } from '../src';
-import { canUseDynamicImport } from '../src/canUseDynamicImport';
 
 const temp = new TempDir();
 

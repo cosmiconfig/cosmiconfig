@@ -1,18 +1,17 @@
 import fs from 'fs';
 import {
-  beforeEach,
   afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
   describe,
   expect,
   test,
-  afterEach,
   vi,
-  beforeAll,
 } from 'vitest';
-import { isNotMjs, TempDir } from './util';
 import { cosmiconfig, cosmiconfigSync, defaultLoaders } from '../src';
-import { canUseDynamicImport } from '../src/canUseDynamicImport';
 import * as readFile from '../src/readFile';
+import { TempDir, canUseDynamicImport, isNotMjs } from './util';
 
 const temp = new TempDir();
 
