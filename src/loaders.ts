@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
+import { rmSync, writeFileSync } from 'fs';
+import { rm, writeFile } from 'fs/promises';
 import { pathToFileURL } from 'url';
 import { Loader, LoaderSync } from './index';
 import { Loaders } from './types';
@@ -53,6 +55,60 @@ const loadYaml: LoaderSync = function loadYaml(filepath, content) {
   }
 };
 
-const loaders: Loaders = { loadJs, loadJsSync, loadJson, loadYaml };
+let typescript: typeof import('typescript');
+const loadTsSync: LoaderSync = function loadTsSync(filepath, content) {
+  if (typescript === undefined) {
+    typescript = require('typescript');
+  }
+  const compiledFilepath = `${filepath.slice(0, -2)}js`;
+  try {
+    content = typescript.transpileModule(content, {
+      compilerOptions: {
+        module: typescript.ModuleKind.CommonJS,
+        target: typescript.ScriptTarget.ES2021,
+      },
+    }).outputText;
+    writeFileSync(compiledFilepath, content);
+    const config = loadJsSync(compiledFilepath, content);
+    return config;
+  } catch (error: any) {
+    error.message = `TypeScript Error in ${filepath}:\n${error.message}`;
+    throw error;
+  } finally {
+    rmSync(compiledFilepath);
+  }
+};
+
+const loadTs: Loader = async function loadTs(filepath, content) {
+  if (typescript === undefined) {
+    typescript = await import('typescript');
+  }
+  const compiledFilepath = `${filepath.slice(0, -2)}js`;
+  try {
+    content = typescript.transpileModule(content, {
+      compilerOptions: {
+        module: typescript.ModuleKind.NodeNext,
+        target: typescript.ScriptTarget.ES2021,
+      },
+    }).outputText;
+    await writeFile(compiledFilepath, content);
+    const config = await loadJs(compiledFilepath, content);
+    return config;
+  } catch (error: any) {
+    error.message = `TypeScript Error in ${filepath}:\n${error.message}`;
+    throw error;
+  } finally {
+    await rm(compiledFilepath);
+  }
+};
+
+const loaders: Loaders = {
+  loadJs,
+  loadJsSync,
+  loadTs,
+  loadTsSync,
+  loadJson,
+  loadYaml,
+};
 
 export { loaders };

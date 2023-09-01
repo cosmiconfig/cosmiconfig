@@ -88,6 +88,14 @@
       "@babel/preset-typescript"
     ]
   },
+  "peerDependencies": {
+    "typescript": ">=4.9.5"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  },
   "dependencies": {
     "import-fresh": "^3.2.1",
     "js-yaml": "^4.1.0",

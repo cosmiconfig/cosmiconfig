@@ -89,6 +89,23 @@ describe('loads defined JS config path', () => {
   });
 });
 
+describe('loads defined TS config path', () => {
+  beforeEach(() => {
+    temp.createFile('foo.js', 'export default { foo: true } as any;');
+  });
+
+  const file = temp.absolutePath('foo.js');
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', async () => {
+    const result = await cosmiconfig('successful-files-tests').load(file);
+    checkResult(result);
+  });
+});
+
 describeEsmOnly(
   'loads ESM from defined .js config path (nearest package.json says it is ESM)',
   () => {
@@ -103,6 +120,29 @@ describeEsmOnly(
     beforeEach(() => {
       temp.createFile('package.json', '{ "type": "module" }');
       temp.createFile(fileBasename, 'export default { foo: true };');
+    });
+
+    test('async', async () => {
+      const result = await cosmiconfig('successful-files-tests').load(file);
+      checkResult(result);
+    });
+  },
+);
+
+describeEsmOnly(
+  'loads ESM from defined .ts config path (nearest package.json says it is ESM)',
+  () => {
+    // Random basename works around our inability to clear the ESM loader cache.
+    const fileBasename = `${randomString()}.ts`;
+    const file = temp.absolutePath(fileBasename);
+    const checkResult = (result: any) => {
+      expect(result.config).toEqual({ foo: true });
+      expect(result.filepath).toBe(file);
+    };
+
+    beforeEach(() => {
+      temp.createFile('package.json', '{ "type": "module" }');
+      temp.createFile(fileBasename, 'export default { foo: true } as any;');
     });
 
     test('async', async () => {
