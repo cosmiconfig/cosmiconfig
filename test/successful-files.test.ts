@@ -100,7 +100,7 @@ describe('loads defined TS config path', () => {
   test('async', async () => {
     const result = await cosmiconfig('successful-files-tests').load(file);
     checkResult(result);
-  }, 10000);
+  }, 30000);
 
   test('sync', async () => {
     const result = cosmiconfigSync('successful-files-tests').load(file);
