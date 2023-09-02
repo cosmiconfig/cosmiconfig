@@ -7,7 +7,8 @@ import {
   test,
   vi,
 } from 'vitest';
-import fs from 'fs';
+import fs from 'node:fs';
+import fsPromises from 'node:fs/promises';
 import { cosmiconfig, cosmiconfigSync } from '../src';
 import { isNotMjs, TempDir } from './util';
 
@@ -71,7 +72,7 @@ describe('cache is not used initially', () => {
 
   test('async', async () => {
     const explorer = cosmiconfig('foo');
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const cachedSearch = explorer.search;
     const result = await cachedSearch(searchPath);
     checkResult(readFileSpy, result, expectedFilesChecked);
@@ -99,7 +100,7 @@ describe('cache is used for already-visited directories', () => {
   };
 
   test('async', async () => {
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const cachedSearch = cosmiconfig('foo').search;
     // First pass, prime the cache ...
     await cachedSearch(searchPath);
@@ -136,25 +137,23 @@ describe('cache is used for already-loaded file', () => {
   };
 
   test('async', async () => {
-    const readFileSpy = vi.spyOn(fs, 'readFile');
     const cachedLoad = cosmiconfig('foo').load;
     // First pass, prime the cache ...
     await cachedLoad(loadPath);
-    // Reset readFile mocks and search again.
-    readFileSpy.mockClear();
 
+    // Mock and search again.
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await cachedLoad(loadPath);
     checkResult(readFileSpy, result);
   });
 
   test('sync', () => {
-    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const cachedLoadSync = cosmiconfigSync('foo').load;
     // First pass, prime the cache ...
     cachedLoadSync(loadPath);
-    // Reset readFile mocks and search again.
-    readFileSpy.mockClear();
 
+    // Mock and search again.
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = cachedLoadSync(loadPath);
     checkResult(readFileSpy, result);
   });
@@ -199,7 +198,7 @@ describe('cache is used when some directories in search are already visted', () 
   };
 
   test('async', async () => {
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const cachedSearch = cosmiconfig('foo').search;
     // First pass, prime the cache ...
     await cachedSearch(firstSearchPath);
@@ -237,7 +236,7 @@ describe('cache is not used when directly loading an unvisited file', () => {
   };
 
   test('async', async () => {
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const explorer = cosmiconfig('foo');
     // First pass, prime the cache ...
     await explorer.search(firstSearchPath);
@@ -305,7 +304,7 @@ describe('cache is not used in a new cosmiconfig instance', () => {
     await cosmiconfig('foo').search(searchPath);
     // Search again.
     const explorer = cosmiconfig('foo');
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(searchPath);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -335,7 +334,7 @@ describe('clears file cache on calling clearLoadCache', () => {
   };
 
   test('async', async () => {
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const explorer = cosmiconfig('foo');
     await explorer.load(loadPath);
     readFileSpy.mockClear();
@@ -372,7 +371,7 @@ describe('clears file cache on calling clearCaches', () => {
   };
 
   test('async', async () => {
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const explorer = cosmiconfig('foo');
     await explorer.load(loadPath);
     readFileSpy.mockClear();
@@ -434,7 +433,7 @@ describe('clears directory cache on calling clearSearchCache', () => {
   };
 
   test('async', async () => {
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const explorer = cosmiconfig('foo');
     await explorer.search(searchPath);
     readFileSpy.mockClear();
@@ -497,7 +496,7 @@ describe('clears directory cache on calling clearCaches', () => {
   };
 
   test('async', async () => {
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const explorer = cosmiconfig('foo');
     await explorer.search(searchPath);
     readFileSpy.mockClear();
@@ -576,7 +575,7 @@ describe('with cache disabled, does not cache directory results', () => {
   };
 
   test('async', async () => {
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const explorer = cosmiconfig('foo', { cache: false });
     await explorer.search(searchPath);
     readFileSpy.mockClear();
@@ -610,7 +609,7 @@ describe('with cache disabled, does not cache file results', () => {
   };
 
   test('async', async () => {
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const explorer = cosmiconfig('foo', { cache: false });
     await explorer.load(loadPath);
     readFileSpy.mockClear();

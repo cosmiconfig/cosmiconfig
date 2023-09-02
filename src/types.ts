@@ -10,23 +10,19 @@ export type CosmiconfigResult = {
 } | null;
 
 export interface InternalOptions {
-  usePackagePropInConfigFiles?: boolean;
+  applyPackagePropertyPathToConfiguration?: boolean;
   metaConfigFilePath: string | null;
 }
 
 // These are the user options with defaults applied, plus internal options possibly inferred from meta config
 export interface ExplorerOptions extends Required<Options>, InternalOptions {}
+
 export interface ExplorerOptionsSync
   extends Required<OptionsSync>,
     InternalOptions {}
 
 export type Cache = Map<string, CosmiconfigResult>;
-
-// An object value represents a config object.
-// null represents that the loader did not find anything relevant.
-// undefined represents that the loader found something relevant
-// but it was empty.
-export type LoadedFileContent = Config | null | undefined;
+export type AsyncCache = Map<string, Promise<CosmiconfigResult>>;
 
 export interface Loaders {
   [key: string]: Loader;

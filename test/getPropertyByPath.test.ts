@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { getPropertyByPath } from '../src/getPropertyByPath';
+import { getPropertyByPath } from '../src/util';
 
 const source = {
   ant: {

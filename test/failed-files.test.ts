@@ -168,24 +168,6 @@ describe('returns an empty config result for empty file, format YAML', () => {
   });
 });
 
-describe('throws an error if no configPath was specified and load is called without an argument', () => {
-  const expectedError = 'load must pass a non-empty string';
-
-  test('async', async () => {
-    // @ts-ignore
-    await expect(cosmiconfig('not_exist_rc_name').load()).rejects.toThrow(
-      expectedError,
-    );
-  });
-
-  test('sync', () => {
-    // @ts-ignore
-    expect(() => cosmiconfigSync('not_exist_rc_name').load()).toThrow(
-      expectedError,
-    );
-  });
-});
-
 describe('errors not swallowed when async custom loader throws them', () => {
   const file = temp.absolutePath('.foorc.things');
   beforeEach(() => {

@@ -120,13 +120,13 @@ function getExplorerOptions<T extends Options | OptionsSync>(
     stopDir: process.cwd(),
     searchPlaces: metaSearchPlaces,
     ignoreEmptySearchPlaces: false,
-    usePackagePropInConfigFiles: true,
+    applyPackagePropertyPathToConfiguration: true,
     loaders: defaultLoaders,
     transform: identity,
     cache: true,
     metaConfigFilePath: null,
   });
-  const metaConfig = metaExplorer.searchSync();
+  const metaConfig = metaExplorer.search();
 
   if (!metaConfig) {
     return options;
@@ -135,6 +135,8 @@ function getExplorerOptions<T extends Options | OptionsSync>(
   if (metaConfig.config?.loaders) {
     throw new Error('Can not specify loaders in meta config file');
   }
+
+  console.log(metaConfig.config);
 
   const overrideOptions = metaConfig.config ?? {};
 
@@ -187,8 +189,8 @@ function cosmiconfigSync(
   const explorerSync = new ExplorerSync(normalizedOptions);
 
   return {
-    search: explorerSync.searchSync.bind(explorerSync),
-    load: explorerSync.loadSync.bind(explorerSync),
+    search: explorerSync.search.bind(explorerSync),
+    load: explorerSync.load.bind(explorerSync),
     clearLoadCache: explorerSync.clearLoadCache.bind(explorerSync),
     clearSearchCache: explorerSync.clearSearchCache.bind(explorerSync),
     clearCaches: explorerSync.clearCaches.bind(explorerSync),

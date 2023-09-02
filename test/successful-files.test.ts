@@ -144,6 +144,7 @@ describeEsmOnly(
       temp.createFile(fileBasename, 'export default { foo: true } as any;');
     });
 
+    // eslint-disable-next-line vitest/no-identical-title
     test('async', async () => {
       const result = await cosmiconfig('successful-files-tests').load(file);
       checkResult(result);
@@ -192,6 +193,7 @@ describeEsmOnly('loads ESM with its own dependency', () => {
     );
   });
 
+  // eslint-disable-next-line vitest/no-identical-title
   test('async', async () => {
     const result = await cosmiconfig('successful-files-tests').load(file);
     checkResult(result);

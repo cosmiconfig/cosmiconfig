@@ -9,6 +9,7 @@ import {
   SpyInstance,
 } from 'vitest';
 import fs from 'fs';
+import fsPromises from 'fs/promises';
 import { cosmiconfig, cosmiconfigSync, Options, OptionsSync } from '../src';
 import { TempDir } from './util';
 
@@ -69,7 +70,7 @@ describe('cosmiconfig meta config', () => {
       ]);
       readFileSyncSpy.mockClear();
 
-      const readFileSpy = vi.spyOn(fs, 'readFile');
+      const readFileSpy = vi.spyOn(fsPromises, 'readFile');
       const result = await explorer.search(startDir);
       expect(temp.getSpyPathCalls(readFileSpy)).toEqual([
         '.config.yml',
@@ -159,7 +160,7 @@ describe('cosmiconfig meta config', () => {
         const constructFiles = temp.getSpyPathCalls(readFileSyncSpy);
         readFileSyncSpy.mockClear();
 
-        const readFileSpy = vi.spyOn(fs, 'readFile');
+        const readFileSpy = vi.spyOn(fsPromises, 'readFile');
         const result = await explorer.search(temp.dir);
         checkResult(constructFiles, readFileSpy, result);
       });
@@ -168,8 +169,8 @@ describe('cosmiconfig meta config', () => {
         const readFileSyncSpy = vi.spyOn(fs, 'readFileSync');
         const explorer = cosmiconfigSync('foo', explorerOptions);
         const constructFiles = temp.getSpyPathCalls(readFileSyncSpy);
-
         readFileSyncSpy.mockClear();
+
         const result = explorer.search(temp.dir);
         checkResult(constructFiles, readFileSyncSpy, result);
       });
@@ -192,7 +193,7 @@ describe('cosmiconfig meta config', () => {
 
       test('async', async () => {
         const explorer = cosmiconfig('foo', explorerOptions);
-        const readFileSpy = vi.spyOn(fs, 'readFile');
+        const readFileSpy = vi.spyOn(fsPromises, 'readFile');
         const result = await explorer.search(temp.dir);
         checkResult(readFileSpy, result);
       });

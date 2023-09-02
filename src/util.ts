@@ -1,9 +1,19 @@
+export function emplace<K, V>(map: Map<K, V>, key: K, fn: () => V): V {
+  const cached = map.get(key);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const result = fn();
+  map.set(key, result);
+  return result;
+}
+
 // Resolves property names or property paths defined with period-delimited
 // strings or arrays of strings. Property names that are found on the source
 // object are used directly (even if they include a period).
 // Nested property names that include periods, within a path, are only
 // understood in array paths.
-function getPropertyByPath(
+export function getPropertyByPath(
   source: { [key: string]: unknown },
   path: string | Array<string>,
 ): unknown {
@@ -23,5 +33,3 @@ function getPropertyByPath(
     return previous[key];
   }, source);
 }
-
-export { getPropertyByPath };

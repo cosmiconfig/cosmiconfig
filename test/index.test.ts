@@ -16,7 +16,7 @@ import { ExplorerOptions, ExplorerOptionsSync, Loaders } from '../src/types';
 import { TempDir } from './util';
 import { ExplorerSync } from '../src/ExplorerSync';
 import { Explorer } from '../src/Explorer';
-import path from 'path';
+import path from 'node:path';
 
 vi.mock('../src/ExplorerSync', async () => {
   const { ExplorerSync } = await vi.importActual<
@@ -37,9 +37,8 @@ vi.mock('../src/ExplorerSync', async () => {
 });
 
 vi.mock('../src/Explorer', async () => {
-  const { Explorer } = await vi.importActual<typeof import('../src/Explorer')>(
-    '../src/Explorer',
-  );
+  const { Explorer } =
+    await vi.importActual<typeof import('../src/Explorer')>('../src/Explorer');
 
   const mock = vi.fn();
 
@@ -427,7 +426,7 @@ describe('cosmiconfig', () => {
     };
 
     const expectedError =
-      'loader for extension ".things" is not a function (type provided: "number"), so searchPlaces item ".foorc.things" is invalid';
+      'Loader for extension ".foorc.things" is not a function: Received number.';
 
     test('async', () => {
       expect(() =>

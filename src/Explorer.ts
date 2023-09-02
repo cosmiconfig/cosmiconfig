@@ -1,135 +1,133 @@
-import path from 'path';
-import { cacheWrapper } from './cacheWrapper';
-import { ExplorerBase } from './ExplorerBase';
-import { getDirectory } from './getDirectory';
-import { readFile } from './readFile';
-import { CosmiconfigResult, ExplorerOptions, LoadedFileContent } from './types';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { isDirectory } from 'path-type';
+import { ExplorerBase, getExtensionDescription } from './ExplorerBase';
+import { loadJson } from './loaders';
+import { Config, CosmiconfigResult, ExplorerOptions } from './types';
+import { emplace, getPropertyByPath } from './util';
 
-class Explorer extends ExplorerBase<ExplorerOptions> {
+export class Explorer extends ExplorerBase<ExplorerOptions> {
   public constructor(options: ExplorerOptions) {
     super(options);
   }
 
-  public async search(
-    searchFrom: string = process.cwd(),
-  ): Promise<CosmiconfigResult> {
+  public async load(filepath: string): Promise<CosmiconfigResult> {
+    filepath = path.resolve(filepath);
+
+    const load = async (): Promise<CosmiconfigResult> => {
+      return await this.config.transform(
+        await this.#readConfiguration(filepath),
+      );
+    };
+    if (this.loadCache) {
+      return await emplace(this.loadCache, filepath, load);
+    }
+    return await load();
+  }
+
+  #loadingMetaConfig = false;
+  public async search(from = ''): Promise<CosmiconfigResult> {
     if (this.config.metaConfigFilePath) {
-      const config = await this._loadFile(this.config.metaConfigFilePath, true);
+      this.#loadingMetaConfig = true;
+      const config = await this.load(this.config.metaConfigFilePath);
+      this.#loadingMetaConfig = false;
       if (config && !config.isEmpty) {
         return config;
       }
     }
-    return await this.searchFromDirectory(await getDirectory(searchFrom));
-  }
 
-  private async searchFromDirectory(dir: string): Promise<CosmiconfigResult> {
-    const absoluteDir = path.resolve(process.cwd(), dir);
-
-    const run = async (): Promise<CosmiconfigResult> => {
-      const result = await this.searchDirectory(absoluteDir);
-      const nextDir = this.nextDirectoryToSearch(absoluteDir, result);
-
-      if (nextDir) {
-        return this.searchFromDirectory(nextDir);
+    const stopDir = path.resolve(this.config.stopDir);
+    from = path.resolve(from);
+    const search = async (): Promise<CosmiconfigResult> => {
+      if (await isDirectory(from)) {
+        for (const place of this.config.searchPlaces) {
+          const filepath = path.join(from, place);
+          try {
+            const result = await this.#readConfiguration(filepath);
+            if (
+              result !== null &&
+              !(result.isEmpty && this.config.ignoreEmptySearchPlaces)
+            ) {
+              return await this.config.transform(result);
+            }
+          } catch (error) {
+            if (error.code === 'ENOENT' || error.code === 'EISDIR') {
+              continue;
+            }
+            throw error;
+          }
+        }
       }
-
-      return await this.config.transform(result);
+      const dir = path.dirname(from);
+      if (from !== stopDir && from !== dir) {
+        from = dir;
+        if (this.searchCache) {
+          return await emplace(this.searchCache, from, search);
+        }
+        return await search();
+      }
+      return null;
     };
 
     if (this.searchCache) {
-      return cacheWrapper(this.searchCache, absoluteDir, run);
+      return await emplace(this.searchCache, from, search);
     }
-
-    return run();
+    return await search();
   }
 
-  private async searchDirectory(dir: string): Promise<CosmiconfigResult> {
-    for await (const place of this.config.searchPlaces) {
-      const placeResult = await this.loadSearchPlace(dir, place);
-
-      if (this.shouldSearchStopWithResult(placeResult)) {
-        return placeResult;
-      }
-    }
-
-    // config not found
-    return null;
-  }
-
-  private async loadSearchPlace(
-    dir: string,
-    place: string,
-  ): Promise<CosmiconfigResult> {
-    const filepath = path.join(dir, place);
-    const fileContents = await readFile(filepath);
-
-    return await this.createCosmiconfigResult(filepath, fileContents, false);
-  }
-
-  private async loadFileContent(
-    filepath: string,
-    content: string | null,
-  ): Promise<LoadedFileContent> {
-    if (content === null) {
+  async #readConfiguration(filepath: string): Promise<CosmiconfigResult> {
+    const contents = await fs.readFile(filepath, { encoding: 'utf-8' });
+    let config = await this.#loadConfiguration(filepath, contents);
+    if (config === null) {
       return null;
     }
-    if (content.trim() === '') {
-      return undefined;
+    if (config === undefined) {
+      return { filepath, config: undefined, isEmpty: true };
     }
-    const loader = this.getLoaderEntryForFile(filepath);
-    try {
-      return await loader(filepath, content);
-    } catch (e: any) {
-      e.filepath = filepath;
-      throw e;
+    if (
+      this.config.applyPackagePropertyPathToConfiguration ||
+      this.#loadingMetaConfig
+    ) {
+      config = getPropertyByPath(config, this.config.packageProp);
     }
+    if (config === undefined) {
+      return { filepath, config: undefined, isEmpty: true };
+    }
+    return { config, filepath };
   }
 
-  private async createCosmiconfigResult(
+  async #loadConfiguration(
     filepath: string,
-    content: string | null,
-    forceProp: boolean,
-  ): Promise<CosmiconfigResult> {
-    const fileContent = await this.loadFileContent(filepath, content);
+    contents: string,
+  ): Promise<Config> {
+    if (contents.trim() === '') {
+      return;
+    }
 
-    return this.loadedContentToCosmiconfigResult(
-      filepath,
-      fileContent,
-      forceProp,
+    if (path.basename(filepath) === 'package.json') {
+      return (
+        getPropertyByPath(
+          loadJson(filepath, contents),
+          this.config.packageProp,
+        ) ?? null
+      );
+    }
+
+    const extension = path.extname(filepath);
+    try {
+      const loader =
+        this.config.loaders[extension || 'noExt'] ??
+        this.config.loaders['default'];
+      if (loader !== undefined) {
+        // eslint-disable-next-line @typescript-eslint/return-await
+        return await loader(filepath, contents);
+      }
+    } catch (error) {
+      error.filepath = filepath;
+      throw error;
+    }
+    throw new Error(
+      `No loader specified for ${getExtensionDescription(extension)}`,
     );
   }
-
-  public async load(filepath: string): Promise<CosmiconfigResult> {
-    return this._loadFile(filepath, false);
-  }
-
-  private async _loadFile(
-    filepath: string,
-    forceProp: boolean,
-  ): Promise<CosmiconfigResult> {
-    this.validateFilePath(filepath);
-    const absoluteFilePath = path.resolve(process.cwd(), filepath);
-
-    const runLoad = async (): Promise<CosmiconfigResult> => {
-      const fileContents = await readFile(absoluteFilePath, {
-        throwNotFound: true,
-      });
-
-      const result = await this.createCosmiconfigResult(
-        absoluteFilePath,
-        fileContents,
-        forceProp,
-      );
-
-      return await this.config.transform(result);
-    };
-
-    if (this.loadCache) {
-      return cacheWrapper(this.loadCache, absoluteFilePath, runLoad);
-    }
-
-    return runLoad();
-  }
 }
-
-export { Explorer };

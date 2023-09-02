@@ -1,6 +1,6 @@
 import { beforeEach, afterAll, describe, expect, test, vi } from 'vitest';
-import fs from 'fs';
-import fsPromises from 'fs/promises';
+import fs from 'node:fs';
+import fsPromises from 'node:fs/promises';
 import {
   cosmiconfig,
   cosmiconfigSync,
@@ -98,7 +98,7 @@ describe('gives up if it cannot find the file', () => {
     files: any,
   ) => {
     const statPath = temp.getSpyPathCalls(statSpy);
-    expect(statPath).toEqual(['a/b']);
+    expect(statPath).toEqual(['a/b', 'a', '']);
 
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(files);
@@ -109,7 +109,7 @@ describe('gives up if it cannot find the file', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const statSpy = vi.spyOn(fsPromises, 'stat');
 
     const result = await explorer.search(startDir);
@@ -191,7 +191,7 @@ describe('stops at stopDir and gives up', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -601,7 +601,7 @@ describe('throws error if a file in searchPlaces does not have a corresponding l
 
   test('on instantiation', () => {
     expect(() => cosmiconfigSync('foo', explorerOptions)).toThrow(
-      'No loader specified for extension ".things"',
+      'Missing loader for extension ".foorc.things"',
     );
   });
 });
@@ -622,7 +622,7 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
 
   test('on instantiation', () => {
     expect(() => cosmiconfigSync('foo', explorerOptions)).toThrow(
-      'No loader specified for files without extensions',
+      'Missing loader for extension ".foorc".',
     );
   });
 });

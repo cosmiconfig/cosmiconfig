@@ -1,130 +1,142 @@
-import path from 'path';
-import { cacheWrapperSync } from './cacheWrapper';
-import { ExplorerBase } from './ExplorerBase';
-import { getDirectorySync } from './getDirectory';
-import { readFileSync } from './readFile';
-import {
-  CosmiconfigResult,
-  ExplorerOptionsSync,
-  LoadedFileContent,
-} from './types';
+import fs from 'node:fs';
+import path from 'node:path';
+import { isDirectorySync } from 'path-type';
+import { ExplorerBase, getExtensionDescription } from './ExplorerBase';
+import { loadJson } from './loaders';
+import { Config, CosmiconfigResult, ExplorerOptionsSync } from './types';
+import { emplace, getPropertyByPath } from './util';
 
 class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
   public constructor(options: ExplorerOptionsSync) {
     super(options);
   }
 
-  public searchSync(searchFrom: string = process.cwd()): CosmiconfigResult {
+  public load(filepath: string): CosmiconfigResult {
+    filepath = path.resolve(filepath);
+
+    const load = (): CosmiconfigResult => {
+      return this.config.transform(this.#readConfiguration(filepath));
+    };
+    if (this.loadCache) {
+      return emplace(this.loadCache, filepath, load);
+    }
+    return load();
+  }
+
+  #loadingMetaConfig = false;
+  public search(from = ''): CosmiconfigResult {
     if (this.config.metaConfigFilePath) {
-      const config = this._loadFileSync(this.config.metaConfigFilePath, true);
+      this.#loadingMetaConfig = true;
+      const config = this.load(this.config.metaConfigFilePath);
+      this.#loadingMetaConfig = false;
       if (config && !config.isEmpty) {
         return config;
       }
     }
-    return this.searchFromDirectorySync(getDirectorySync(searchFrom));
-  }
 
-  private searchFromDirectorySync(dir: string): CosmiconfigResult {
-    const absoluteDir = path.resolve(process.cwd(), dir);
-
-    const run = (): CosmiconfigResult => {
-      const result = this.searchDirectorySync(absoluteDir);
-      const nextDir = this.nextDirectoryToSearch(absoluteDir, result);
-
-      if (nextDir) {
-        return this.searchFromDirectorySync(nextDir);
+    const stopDir = path.resolve(this.config.stopDir);
+    from = path.resolve(from);
+    const search = (): CosmiconfigResult => {
+      if (isDirectorySync(from)) {
+        for (const place of this.config.searchPlaces) {
+          const filepath = path.join(from, place);
+          try {
+            const result = this.#readConfiguration(filepath);
+            if (
+              result !== null &&
+              !(result.isEmpty && this.config.ignoreEmptySearchPlaces)
+            ) {
+              return this.config.transform(result);
+            }
+          } catch (error) {
+            if (error.code === 'ENOENT' || error.code === 'EISDIR') {
+              continue;
+            }
+            throw error;
+          }
+        }
       }
-
-      return this.config.transform(result);
+      const dir = path.dirname(from);
+      if (from !== stopDir && from !== dir) {
+        from = dir;
+        if (this.searchCache) {
+          return emplace(this.searchCache, from, search);
+        }
+        return search();
+      }
+      return null;
     };
 
     if (this.searchCache) {
-      return cacheWrapperSync(this.searchCache, absoluteDir, run);
+      return emplace(this.searchCache, from, search);
     }
-
-    return run();
+    return search();
   }
 
-  private searchDirectorySync(dir: string): CosmiconfigResult {
-    for (const place of this.config.searchPlaces) {
-      const placeResult = this.loadSearchPlaceSync(dir, place);
-
-      if (this.shouldSearchStopWithResult(placeResult)) {
-        return placeResult;
-      }
-    }
-
-    // config not found
-    return null;
-  }
-
-  private loadSearchPlaceSync(dir: string, place: string): CosmiconfigResult {
-    const filepath = path.join(dir, place);
-    const content = readFileSync(filepath);
-
-    return this.createCosmiconfigResultSync(filepath, content, false);
-  }
-
-  private loadFileContentSync(
-    filepath: string,
-    content: string | null,
-  ): LoadedFileContent {
-    if (content === null) {
+  #readConfiguration(filepath: string): CosmiconfigResult {
+    const contents = fs.readFileSync(filepath, 'utf8');
+    let config = this.#loadConfiguration(filepath, contents);
+    if (config === null) {
       return null;
     }
-    if (content.trim() === '') {
-      return undefined;
+    if (config === undefined) {
+      return { filepath, config: undefined, isEmpty: true };
     }
-    const loader = this.getLoaderEntryForFile(filepath);
-    try {
-      return loader(filepath, content);
-    } catch (e: any) {
-      e.filepath = filepath;
-      throw e;
+    if (
+      this.config.applyPackagePropertyPathToConfiguration ||
+      this.#loadingMetaConfig
+    ) {
+      config = getPropertyByPath(config, this.config.packageProp);
     }
+    if (config === undefined) {
+      return { filepath, config: undefined, isEmpty: true };
+    }
+    return { config, filepath };
   }
 
-  private createCosmiconfigResultSync(
-    filepath: string,
-    content: string | null,
-    forceProp: boolean,
-  ): CosmiconfigResult {
-    const fileContent = this.loadFileContentSync(filepath, content);
+  #loadConfiguration(filepath: string, contents: string): Config {
+    if (contents.trim() === '') {
+      return;
+    }
 
-    return this.loadedContentToCosmiconfigResult(
-      filepath,
-      fileContent,
-      forceProp,
+    if (path.basename(filepath) === 'package.json') {
+      return (
+        getPropertyByPath(
+          loadJson(filepath, contents),
+          this.config.packageProp,
+        ) ?? null
+      );
+    }
+
+    const extension = path.extname(filepath);
+    try {
+      const loader =
+        this.config.loaders[extension || 'noExt'] ??
+        this.config.loaders['default'];
+      if (loader !== undefined) {
+        return loader(filepath, contents);
+      }
+    } catch (error) {
+      error.filepath = filepath;
+      throw error;
+    }
+    throw new Error(
+      `No loader specified for ${getExtensionDescription(extension)}`,
     );
   }
 
+  /**
+   * @deprecated Use {@link ExplorerSync.prototype.load}.
+   */
   public loadSync(filepath: string): CosmiconfigResult {
-    return this._loadFileSync(filepath, false);
+    return this.load(filepath);
   }
 
-  private _loadFileSync(
-    filepath: string,
-    forceProp: boolean,
-  ): CosmiconfigResult {
-    this.validateFilePath(filepath);
-    const absoluteFilePath = path.resolve(process.cwd(), filepath);
-
-    const runLoadSync = (): CosmiconfigResult => {
-      const content = readFileSync(absoluteFilePath, { throwNotFound: true });
-      const cosmiconfigResult = this.createCosmiconfigResultSync(
-        absoluteFilePath,
-        content,
-        forceProp,
-      );
-
-      return this.config.transform(cosmiconfigResult);
-    };
-
-    if (this.loadCache) {
-      return cacheWrapperSync(this.loadCache, absoluteFilePath, runLoadSync);
-    }
-
-    return runLoadSync();
+  /**
+   * @deprecated Use {@link ExplorerSync.prototype.search}.
+   */
+  public searchSync(from = ''): CosmiconfigResult {
+    return this.search(from);
   }
 }
 
