@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.3.1](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.0...cosmiconfig-v8.3.1) (2023-09-02)
+
+
+### Bug Fixes
+
+* do not resolve `stopDir` when undefined ([59082e2](https://github.com/cosmiconfig/cosmiconfig/commit/59082e2968fe56f2d399632d951850f13a5383be)), closes [#317](https://github.com/cosmiconfig/cosmiconfig/issues/317)
+
 ## [8.3.0](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.2.0...cosmiconfig-v8.3.0) (2023-09-02)
 
 
