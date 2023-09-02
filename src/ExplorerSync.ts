@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { isDirectorySync } from 'path-type';
-import { ExplorerBase, getExtensionDescription } from './ExplorerBase';
-import { loadJson } from './loaders';
-import { Config, CosmiconfigResult, ExplorerOptionsSync } from './types';
-import { emplace, getPropertyByPath } from './util';
+import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
+import { loadJson } from './loaders.js';
+import { Config, CosmiconfigResult, ExplorerOptionsSync } from './types.js';
+import { emplace, getPropertyByPath } from './util.js';
 
 /**
  * @internal
@@ -26,12 +26,11 @@ export class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     return load();
   }
 
-  #loadingMetaConfig = false;
   public search(from = ''): CosmiconfigResult {
     if (this.config.metaConfigFilePath) {
-      this.#loadingMetaConfig = true;
+      this.loadingMetaConfig = true;
       const config = this.load(this.config.metaConfigFilePath);
-      this.#loadingMetaConfig = false;
+      this.loadingMetaConfig = false;
       if (config && !config.isEmpty) {
         return config;
       }
@@ -79,23 +78,10 @@ export class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
 
   #readConfiguration(filepath: string): CosmiconfigResult {
     const contents = fs.readFileSync(filepath, 'utf8');
-    let config = this.#loadConfiguration(filepath, contents);
-    if (config === null) {
-      return null;
-    }
-    if (config === undefined) {
-      return { filepath, config: undefined, isEmpty: true };
-    }
-    if (
-      this.config.applyPackagePropertyPathToConfiguration ||
-      this.#loadingMetaConfig
-    ) {
-      config = getPropertyByPath(config, this.config.packageProp);
-    }
-    if (config === undefined) {
-      return { filepath, config: undefined, isEmpty: true };
-    }
-    return { config, filepath };
+    return this.toCosmiconfigResult(
+      filepath,
+      this.#loadConfiguration(filepath, contents),
+    );
   }
 
   #loadConfiguration(filepath: string, contents: string): Config {

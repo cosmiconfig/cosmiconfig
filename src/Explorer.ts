@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { isDirectory } from 'path-type';
-import { ExplorerBase, getExtensionDescription } from './ExplorerBase';
-import { loadJson } from './loaders';
-import { Config, CosmiconfigResult, ExplorerOptions } from './types';
-import { emplace, getPropertyByPath } from './util';
+import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
+import { loadJson } from './loaders.js';
+import { Config, CosmiconfigResult, ExplorerOptions } from './types.js';
+import { emplace, getPropertyByPath } from './util.js';
 
 /**
  * @internal
@@ -28,12 +28,11 @@ export class Explorer extends ExplorerBase<ExplorerOptions> {
     return await load();
   }
 
-  #loadingMetaConfig = false;
   public async search(from = ''): Promise<CosmiconfigResult> {
     if (this.config.metaConfigFilePath) {
-      this.#loadingMetaConfig = true;
+      this.loadingMetaConfig = true;
       const config = await this.load(this.config.metaConfigFilePath);
-      this.#loadingMetaConfig = false;
+      this.loadingMetaConfig = false;
       if (config && !config.isEmpty) {
         return config;
       }
@@ -81,23 +80,10 @@ export class Explorer extends ExplorerBase<ExplorerOptions> {
 
   async #readConfiguration(filepath: string): Promise<CosmiconfigResult> {
     const contents = await fs.readFile(filepath, { encoding: 'utf-8' });
-    let config = await this.#loadConfiguration(filepath, contents);
-    if (config === null) {
-      return null;
-    }
-    if (config === undefined) {
-      return { filepath, config: undefined, isEmpty: true };
-    }
-    if (
-      this.config.applyPackagePropertyPathToConfiguration ||
-      this.#loadingMetaConfig
-    ) {
-      config = getPropertyByPath(config, this.config.packageProp);
-    }
-    if (config === undefined) {
-      return { filepath, config: undefined, isEmpty: true };
-    }
-    return { config, filepath };
+    return this.toCosmiconfigResult(
+      filepath,
+      await this.#loadConfiguration(filepath, contents),
+    );
   }
 
   async #loadConfiguration(

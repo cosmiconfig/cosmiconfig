@@ -2,9 +2,12 @@ import path from 'path';
 import {
   AsyncCache,
   Cache,
+  Config,
+  CosmiconfigResult,
   ExplorerOptions,
   ExplorerOptionsSync,
 } from './types.js';
+import { getPropertyByPath } from './util.js';
 
 /**
  * @internal
@@ -12,6 +15,8 @@ import {
 export abstract class ExplorerBase<
   T extends ExplorerOptions | ExplorerOptionsSync,
 > {
+  #loadingMetaConfig = false;
+
   protected readonly config: T;
   protected readonly loadCache?: T extends ExplorerOptionsSync
     ? Cache
@@ -27,6 +32,10 @@ export abstract class ExplorerBase<
       this.searchCache = new Map();
     }
     this.#validateConfig();
+  }
+
+  protected set loadingMetaConfig(value: boolean) {
+    this.#loadingMetaConfig = value;
   }
 
   #validateConfig(): void {
@@ -67,6 +76,28 @@ export abstract class ExplorerBase<
   public clearCaches(): void {
     this.clearLoadCache();
     this.clearSearchCache();
+  }
+
+  protected toCosmiconfigResult(
+    filepath: string,
+    config: Config,
+  ): CosmiconfigResult {
+    if (config === null) {
+      return null;
+    }
+    if (config === undefined) {
+      return { filepath, config: undefined, isEmpty: true };
+    }
+    if (
+      this.config.applyPackagePropertyPathToConfiguration ||
+      this.#loadingMetaConfig
+    ) {
+      config = getPropertyByPath(config, this.config.packageProp);
+    }
+    if (config === undefined) {
+      return { filepath, config: undefined, isEmpty: true };
+    }
+    return { config, filepath };
   }
 }
 
