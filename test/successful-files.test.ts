@@ -601,3 +601,15 @@ describe('[#313] config search does not fail if there is a file named .config', 
     expect(result).toBeNull();
   });
 });
+
+describe('[#317] `explorer.search(...)` should not crashes with `{stopDir: undefined}` option', () => {
+  test('sync', () => {
+    const result = cosmiconfigSync('tester', { stopDir: undefined }).search();
+    expect(result).toBeNull();
+  });
+
+  test('async', async () => {
+    const result = await cosmiconfig('tester', { stopDir: undefined }).search();
+    expect(result).toBeNull();
+  });
+});
