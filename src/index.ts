@@ -136,8 +136,6 @@ function getExplorerOptions<T extends Options | OptionsSync>(
     throw new Error('Can not specify loaders in meta config file');
   }
 
-  console.log(metaConfig.config);
-
   const overrideOptions = metaConfig.config ?? {};
 
   if (overrideOptions.searchPlaces) {

@@ -128,6 +128,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
   /**
    * @deprecated Use {@link ExplorerSync.prototype.load}.
    */
+  /* istanbul ignore next */
   public loadSync(filepath: string): CosmiconfigResult {
     return this.load(filepath);
   }
@@ -135,6 +136,7 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
   /**
    * @deprecated Use {@link ExplorerSync.prototype.search}.
    */
+  /* istanbul ignore next */
   public searchSync(from = ''): CosmiconfigResult {
     return this.search(from);
   }
