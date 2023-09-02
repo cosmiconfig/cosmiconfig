@@ -1,22 +1,20 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
-import { rmSync, writeFileSync } from 'fs';
-import { rm, writeFile } from 'fs/promises';
-import { pathToFileURL } from 'url';
+import { rmSync, writeFileSync } from 'node:fs';
+import { rm, writeFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import { Loader, LoaderSync } from './index';
-import { Loaders } from './types';
 
 let importFresh: typeof import('import-fresh');
-const loadJsSync: LoaderSync = function loadJsSync(filepath) {
+export const loadJsSync: LoaderSync = function loadJsSync(filepath) {
   if (importFresh === undefined) {
     importFresh = require('import-fresh');
   }
 
-  const result = importFresh(filepath);
-  return result;
+  return importFresh(filepath);
 };
 
-const loadJs: Loader = async function loadJs(filepath) {
+export const loadJs: Loader = async function loadJs(filepath) {
   try {
     const { href } = pathToFileURL(filepath);
     return (await import(href)).default;
@@ -26,37 +24,35 @@ const loadJs: Loader = async function loadJs(filepath) {
 };
 
 let parseJson: typeof import('parse-json');
-const loadJson: LoaderSync = function loadJson(filepath, content) {
+export const loadJson: LoaderSync = function loadJson(filepath, content) {
   if (parseJson === undefined) {
     parseJson = require('parse-json');
   }
 
   try {
-    const result = parseJson(content);
-    return result;
-  } catch (error: any) {
+    return parseJson(content);
+  } catch (error) {
     error.message = `JSON Error in ${filepath}:\n${error.message}`;
     throw error;
   }
 };
 
 let yaml: typeof import('js-yaml');
-const loadYaml: LoaderSync = function loadYaml(filepath, content) {
+export const loadYaml: LoaderSync = function loadYaml(filepath, content) {
   if (yaml === undefined) {
     yaml = require('js-yaml');
   }
 
   try {
-    const result = yaml.load(content);
-    return result;
-  } catch (error: any) {
+    return yaml.load(content);
+  } catch (error) {
     error.message = `YAML Error in ${filepath}:\n${error.message}`;
     throw error;
   }
 };
 
 let typescript: typeof import('typescript');
-const loadTsSync: LoaderSync = function loadTsSync(filepath, content) {
+export const loadTsSync: LoaderSync = function loadTsSync(filepath, content) {
   if (typescript === undefined) {
     typescript = require('typescript');
   }
@@ -69,9 +65,8 @@ const loadTsSync: LoaderSync = function loadTsSync(filepath, content) {
       },
     }).outputText;
     writeFileSync(compiledFilepath, content);
-    const config = loadJsSync(compiledFilepath, content);
-    return config;
-  } catch (error: any) {
+    return loadJsSync(compiledFilepath, content);
+  } catch (error) {
     error.message = `TypeScript Error in ${filepath}:\n${error.message}`;
     throw error;
   } finally {
@@ -79,7 +74,7 @@ const loadTsSync: LoaderSync = function loadTsSync(filepath, content) {
   }
 };
 
-const loadTs: Loader = async function loadTs(filepath, content) {
+export const loadTs: Loader = async function loadTs(filepath, content) {
   if (typescript === undefined) {
     typescript = await import('typescript');
   }
@@ -92,23 +87,12 @@ const loadTs: Loader = async function loadTs(filepath, content) {
       },
     }).outputText;
     await writeFile(compiledFilepath, content);
-    const config = await loadJs(compiledFilepath, content);
-    return config;
-  } catch (error: any) {
+    // eslint-disable-next-line @typescript-eslint/return-await
+    return await loadJs(compiledFilepath, content);
+  } catch (error) {
     error.message = `TypeScript Error in ${filepath}:\n${error.message}`;
     throw error;
   } finally {
     await rm(compiledFilepath);
   }
 };
-
-const loaders: Loaders = {
-  loadJs,
-  loadJsSync,
-  loadTs,
-  loadTsSync,
-  loadJson,
-  loadYaml,
-};
-
-export { loaders };

@@ -1,7 +1,6 @@
 import path from 'path';
 import { getPropertyByPath } from './getPropertyByPath';
 import { Loader } from './index';
-import { loaders } from './loaders';
 import {
   Cache,
   CosmiconfigResult,
@@ -9,6 +8,7 @@ import {
   ExplorerOptionsSync,
   LoadedFileContent,
 } from './types';
+import { loadJson } from './loaders';
 
 class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
   protected readonly loadCache?: Cache;
@@ -86,7 +86,7 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
   }
 
   private loadPackageProp(filepath: string, content: string): unknown {
-    const parsedContent = loaders.loadJson(filepath, content);
+    const parsedContent = loadJson(filepath, content);
     const packagePropValue = getPropertyByPath(
       parsedContent,
       this.config.packageProp,

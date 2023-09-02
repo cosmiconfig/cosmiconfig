@@ -2,7 +2,6 @@
 import os from 'os';
 import { Explorer } from './Explorer';
 import { ExplorerSync } from './ExplorerSync';
-import { loaders } from './loaders';
 import {
   Config,
   CosmiconfigResult,
@@ -11,6 +10,14 @@ import {
   Loaders,
   LoadersSync,
 } from './types';
+import {
+  loadJs,
+  loadJsSync,
+  loadJson,
+  loadTs,
+  loadTsSync,
+  loadYaml,
+} from './loaders';
 
 type LoaderResult = Config | null;
 export type Loader =
@@ -74,23 +81,23 @@ export const metaSearchPlaces = [
 
 // do not allow mutation of default loaders. Make sure it is set inside options
 const defaultLoaders = Object.freeze({
-  '.mjs': loaders.loadJs,
-  '.cjs': loaders.loadJs,
-  '.js': loaders.loadJs,
-  '.ts': loaders.loadTs,
-  '.json': loaders.loadJson,
-  '.yaml': loaders.loadYaml,
-  '.yml': loaders.loadYaml,
-  noExt: loaders.loadYaml,
+  '.mjs': loadJs,
+  '.cjs': loadJs,
+  '.js': loadJs,
+  '.ts': loadTs,
+  '.json': loadJson,
+  '.yaml': loadYaml,
+  '.yml': loadYaml,
+  noExt: loadYaml,
 } as const);
 const defaultLoadersSync = Object.freeze({
-  '.cjs': loaders.loadJsSync,
-  '.js': loaders.loadJsSync,
-  '.ts': loaders.loadTsSync,
-  '.json': loaders.loadJson,
-  '.yaml': loaders.loadYaml,
-  '.yml': loaders.loadYaml,
-  noExt: loaders.loadYaml,
+  '.cjs': loadJsSync,
+  '.js': loadJsSync,
+  '.ts': loadTsSync,
+  '.json': loadJson,
+  '.yaml': loadYaml,
+  '.yml': loadYaml,
+  noExt: loadYaml,
 } as const);
 
 const identity: TransformSync = function identity(x) {
