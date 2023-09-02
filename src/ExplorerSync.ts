@@ -39,7 +39,7 @@ export class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     const stopDir = path.resolve(this.config.stopDir);
     from = path.resolve(from);
     const search = (): CosmiconfigResult => {
-      /* istanbul ignore next -- @preserve */
+      /* istanbul ignore if -- @preserve */
       if (isDirectorySync(from)) {
         for (const place of this.config.searchPlaces) {
           const filepath = path.join(from, place);
