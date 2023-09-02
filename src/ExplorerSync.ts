@@ -3,17 +3,13 @@ import path from 'node:path';
 import { isDirectorySync } from 'path-type';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
 import { loadJson } from './loaders.js';
-import { Config, CosmiconfigResult, ExplorerOptionsSync } from './types.js';
+import { Config, CosmiconfigResult, InternalOptionsSync } from './types.js';
 import { emplace, getPropertyByPath } from './util.js';
 
 /**
  * @internal
  */
-export class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
-  public constructor(options: ExplorerOptionsSync) {
-    super(options);
-  }
-
+export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
   public load(filepath: string): CosmiconfigResult {
     filepath = path.resolve(filepath);
 

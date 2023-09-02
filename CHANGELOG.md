@@ -2,7 +2,7 @@
 
 ## 8.2.0
 
-- Add support for ECMAScript modules (ESM) to the [*asynchronous* API](./README.md#asynchronous-api). End users running Node versions that support ESM can provide `.mjs` files, or `.js` files whose nearest parent `package.json` file contains `"type": "module"`.
+- Add support for ECMAScript modules (ESM) to the [_asynchronous_ API](./README.md#asynchronous-api). End users running Node versions that support ESM can provide `.mjs` files, or `.js` files whose nearest parent `package.json` file contains `"type": "module"`.
   - `${moduleName}rc.mjs` and `${moduleName}.config.mjs` are included in the default `searchPlaces` of the asynchronous API.
   - The [synchronous API](./README.md#synchronous-api) does not support ECMAScript modules, so does not look for `.mjs` files.
   - To learn more, read ["Loading JS modules"](./README.md#loading-js-modules).
@@ -130,7 +130,7 @@
 
 ## 5.0.3
 
-- Docs: Minor corrections to documentation. *Released to update package documentation on npm*.
+- Docs: Minor corrections to documentation. _Released to update package documentation on npm_.
 
 ## 5.0.2
 
@@ -154,7 +154,7 @@ Additionally, the overloaded `load()` function has been split up into several cl
 
 More details:
 
-- The default JS loader uses `require`, instead of `require-from-string`. So you *could* use `require` hooks to control the loading of JS files (e.g. pass them through esm or Babel). In most cases it is probably preferable to use a custom loader.
+- The default JS loader uses `require`, instead of `require-from-string`. So you _could_ use `require` hooks to control the loading of JS files (e.g. pass them through esm or Babel). In most cases it is probably preferable to use a custom loader.
 - The options `rc`, `js`, and `rcExtensions` have all been removed. You can accomplish the same and more with `searchPlaces`.
 - The default `searchPlaces` include `rc` files with extensions, e.g. `.thingrc.json`, `.thingrc.yaml`, `.thingrc.yml`. This is the equivalent of switching the default value of the old `rcExtensions` option to `true`.
 - The option `rcStrictJson` has been removed. To get the same effect, you can specify `noExt: cosmiconfig.loadJson` in your `loaders` object.
@@ -245,5 +245,4 @@ More details:
 - Initial release.
 
 [parse-json-pr-12]: https://github.com/sindresorhus/parse-json/pull/12
-
 [pr-101]: https://github.com/cosmiconfig/cosmiconfig/pull/101

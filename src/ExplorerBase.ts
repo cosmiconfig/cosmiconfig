@@ -1,11 +1,11 @@
-import path from 'path';
+import path from 'node:path';
 import {
   AsyncCache,
   Cache,
   Config,
   CosmiconfigResult,
-  ExplorerOptions,
-  ExplorerOptionsSync,
+  InternalOptions,
+  InternalOptionsSync,
 } from './types.js';
 import { getPropertyByPath } from './util.js';
 
@@ -13,19 +13,19 @@ import { getPropertyByPath } from './util.js';
  * @internal
  */
 export abstract class ExplorerBase<
-  T extends ExplorerOptions | ExplorerOptionsSync,
+  T extends InternalOptions | InternalOptionsSync,
 > {
   #loadingMetaConfig = false;
 
   protected readonly config: T;
-  protected readonly loadCache?: T extends ExplorerOptionsSync
+  protected readonly loadCache?: T extends InternalOptionsSync
     ? Cache
     : AsyncCache;
-  protected readonly searchCache?: T extends ExplorerOptionsSync
+  protected readonly searchCache?: T extends InternalOptionsSync
     ? Cache
     : AsyncCache;
 
-  public constructor(options: T) {
+  public constructor(options: Readonly<T>) {
     this.config = options;
     if (options.cache) {
       this.loadCache = new Map();

@@ -2,9 +2,9 @@
 
 import { existsSync, rmSync, writeFileSync } from 'node:fs';
 import { rm, writeFile } from 'node:fs/promises';
-import { pathToFileURL } from 'node:url';
-import { Loader, LoaderSync } from './index';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { Loader, LoaderSync } from './types.js';
 
 let importFresh: typeof import('import-fresh');
 export const loadJsSync: LoaderSync = function loadJsSync(filepath) {
