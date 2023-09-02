@@ -433,13 +433,11 @@ Examples:
 
 // Allow many flavors of JS, using custom loaders:
 {
-  '.ts': typeScriptLoader,
   '.coffee': coffeeScriptLoader
 }
 
 // Allow many flavors of JS but rely on require hooks:
 {
-  '.ts': defaultLoaders['.js'],
   '.coffee': defaultLoaders['.js']
 }
 ```
