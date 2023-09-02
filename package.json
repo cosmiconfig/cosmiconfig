@@ -21,7 +21,8 @@
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "check:all": "npm run test && npm run lint && npm run format:check",
-    "prepublishOnly": "npm run check:all && npm run build"
+    "prepublishOnly": "npm run check:all && npm run build",
+    "prepare": "husky install"
   },
   "husky": {
     "hooks": {
