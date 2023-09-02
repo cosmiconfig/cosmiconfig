@@ -20,6 +20,7 @@ import {
 } from './loaders';
 
 type LoaderResult = Config | null;
+
 export type Loader =
   | ((filepath: string, content: string) => Promise<LoaderResult>)
   | LoaderSync;
@@ -80,7 +81,7 @@ export const metaSearchPlaces = [
 ];
 
 // do not allow mutation of default loaders. Make sure it is set inside options
-const defaultLoaders = Object.freeze({
+export const defaultLoaders = Object.freeze({
   '.mjs': loadJs,
   '.cjs': loadJs,
   '.js': loadJs,
@@ -90,7 +91,7 @@ const defaultLoaders = Object.freeze({
   '.yml': loadYaml,
   noExt: loadYaml,
 } as const);
-const defaultLoadersSync = Object.freeze({
+export const defaultLoadersSync = Object.freeze({
   '.cjs': loadJsSync,
   '.js': loadJsSync,
   '.ts': loadTsSync,
@@ -148,51 +149,6 @@ function getExplorerOptions<T extends Options | OptionsSync>(
   overrideOptions.metaConfigFilePath = metaConfig.filepath;
 
   return { ...options, ...overrideOptions };
-}
-
-function cosmiconfig(
-  moduleName: string,
-  options: Options = {},
-): PublicExplorer {
-  const explorerOptions = getExplorerOptions(moduleName, options);
-
-  const normalizedOptions: ExplorerOptions = normalizeOptions(
-    moduleName,
-    explorerOptions,
-  );
-
-  const explorer = new Explorer(normalizedOptions);
-
-  return {
-    search: explorer.search.bind(explorer),
-    load: explorer.load.bind(explorer),
-    clearLoadCache: explorer.clearLoadCache.bind(explorer),
-    clearSearchCache: explorer.clearSearchCache.bind(explorer),
-    clearCaches: explorer.clearCaches.bind(explorer),
-  };
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function cosmiconfigSync(
-  moduleName: string,
-  options: OptionsSync = {},
-): PublicExplorerSync {
-  const explorerOptions = getExplorerOptions(moduleName, options);
-
-  const normalizedOptions: ExplorerOptionsSync = normalizeOptionsSync(
-    moduleName,
-    explorerOptions,
-  );
-
-  const explorerSync = new ExplorerSync(normalizedOptions);
-
-  return {
-    search: explorerSync.search.bind(explorerSync),
-    load: explorerSync.load.bind(explorerSync),
-    clearLoadCache: explorerSync.clearLoadCache.bind(explorerSync),
-    clearSearchCache: explorerSync.clearSearchCache.bind(explorerSync),
-    clearCaches: explorerSync.clearCaches.bind(explorerSync),
-  };
 }
 
 function normalizeOptions(
@@ -290,4 +246,46 @@ function normalizeOptionsSync(
   return normalizedOptions;
 }
 
-export { cosmiconfig, cosmiconfigSync, defaultLoaders, defaultLoadersSync };
+export function cosmiconfig(
+  moduleName: string,
+  options: Options = {},
+): PublicExplorer {
+  const explorerOptions = getExplorerOptions(moduleName, options);
+
+  const normalizedOptions: ExplorerOptions = normalizeOptions(
+    moduleName,
+    explorerOptions,
+  );
+
+  const explorer = new Explorer(normalizedOptions);
+
+  return {
+    search: explorer.search.bind(explorer),
+    load: explorer.load.bind(explorer),
+    clearLoadCache: explorer.clearLoadCache.bind(explorer),
+    clearSearchCache: explorer.clearSearchCache.bind(explorer),
+    clearCaches: explorer.clearCaches.bind(explorer),
+  };
+}
+
+export function cosmiconfigSync(
+  moduleName: string,
+  options: OptionsSync = {},
+): PublicExplorerSync {
+  const explorerOptions = getExplorerOptions(moduleName, options);
+
+  const normalizedOptions: ExplorerOptionsSync = normalizeOptionsSync(
+    moduleName,
+    explorerOptions,
+  );
+
+  const explorerSync = new ExplorerSync(normalizedOptions);
+
+  return {
+    search: explorerSync.search.bind(explorerSync),
+    load: explorerSync.load.bind(explorerSync),
+    clearLoadCache: explorerSync.clearLoadCache.bind(explorerSync),
+    clearSearchCache: explorerSync.clearSearchCache.bind(explorerSync),
+    clearCaches: explorerSync.clearCaches.bind(explorerSync),
+  };
+}

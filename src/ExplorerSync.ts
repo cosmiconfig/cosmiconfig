@@ -6,7 +6,10 @@ import { loadJson } from './loaders';
 import { Config, CosmiconfigResult, ExplorerOptionsSync } from './types';
 import { emplace, getPropertyByPath } from './util';
 
-class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
+/**
+ * @internal
+ */
+export class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
   public constructor(options: ExplorerOptionsSync) {
     super(options);
   }
@@ -142,5 +145,3 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
     return this.search(from);
   }
 }
-
-export { ExplorerSync };

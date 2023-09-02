@@ -6,6 +6,9 @@ import { loadJson } from './loaders';
 import { Config, CosmiconfigResult, ExplorerOptions } from './types';
 import { emplace, getPropertyByPath } from './util';
 
+/**
+ * @internal
+ */
 export class Explorer extends ExplorerBase<ExplorerOptions> {
   public constructor(options: ExplorerOptions) {
     super(options);

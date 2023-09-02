@@ -6,6 +6,9 @@ import {
   ExplorerOptionsSync,
 } from './types.js';
 
+/**
+ * @internal
+ */
 export abstract class ExplorerBase<
   T extends ExplorerOptions | ExplorerOptionsSync,
 > {
@@ -67,6 +70,9 @@ export abstract class ExplorerBase<
   }
 }
 
+/**
+ * @internal
+ */
 export function getExtensionDescription(extension?: string): string {
   /* istanbul ignore next -- @preserve */
   return extension ? `extension "${extension}"` : 'files without extensions';

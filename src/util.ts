@@ -1,3 +1,6 @@
+/**
+ * @internal
+ */
 export function emplace<K, V>(map: Map<K, V>, key: K, fn: () => V): V {
   const cached = map.get(key);
   if (cached !== undefined) {
@@ -13,6 +16,9 @@ export function emplace<K, V>(map: Map<K, V>, key: K, fn: () => V): V {
 // object are used directly (even if they include a period).
 // Nested property names that include periods, within a path, are only
 // understood in array paths.
+/**
+ * @internal
+ */
 export function getPropertyByPath(
   source: { [key: string]: unknown },
   path: string | Array<string>,
