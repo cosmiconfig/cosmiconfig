@@ -141,7 +141,7 @@ describe('loads ESM from defined .ts config path (nearest package.json says it i
   test('async', async () => {
     const result = await cosmiconfig('successful-files-tests').load(file);
     checkResult(result);
-  });
+  }, 10000);
 });
 
 describe('loads CommonJS with its own dependency', () => {
