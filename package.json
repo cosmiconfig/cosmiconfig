@@ -76,7 +76,7 @@
     "import-fresh": "^3.3.0",
     "js-yaml": "^4.1.0",
     "parse-json": "^5.2.0",
-    "path-type": "^5.0.0"
+    "path-type": "^4.0.0"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",
