@@ -1,33 +1,31 @@
 {
   "name": "cosmiconfig",
   "version": "8.2.0",
-  "description": "Find and load configuration from a package.json property, rc file, or CommonJS module",
+  "description": "Find and load configuration from a package.json property, rc file, TypeScript module, and more!",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "clean": "del-cli --dot=true \"./dist/**/*\"",
-    "build": "npm run clean && npm run build:compile && npm run build:types",
-    "build:compile": "cross-env NODE_ENV=production babel src -d dist --verbose --extensions .js,.ts --ignore \"**/**/*.test.js\",\"**/**/*.test.ts\" --source-maps",
-    "build:types": "cross-env NODE_ENV=production tsc --project tsconfig.types.json",
-    "dev": "npm run clean && npm run build:compile -- --watch",
+    "clean": "git clean -Xdf -e '!node_modules' .",
+    "build": "npm run build:tsc",
+    "build:tsc": "cross-env NODE_ENV=production tsc -b",
+    "dev": "npm run build:tsc -- --watch",
     "lint": "eslint --ext .js,.ts . && npm run lint:md",
     "lint:fix": "eslint --ext .js,.ts . --fix",
     "lint:md": "remark-preset-davidtheclark",
-    "format": "prettier \"**/*.{js,ts,json,yml,yaml}\" --write",
+    "format": "prettier . --write",
     "format:md": "remark-preset-davidtheclark --format",
-    "format:check": "prettier \"**/*.{js,ts,json,yml,yaml}\" --check",
-    "typescript": "tsc",
+    "format:check": "prettier . --check",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
-    "check:all": "npm run test && npm run typescript && npm run lint && npm run format:check",
+    "check:all": "npm run test && npm run lint && npm run format:check",
     "prepublishOnly": "npm run check:all && npm run build"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && npm run typescript && npm run test",
+      "pre-commit": "lint-staged && && npm run test",
       "pre-push": "npm run check:all"
     }
   },
@@ -55,6 +53,7 @@
   ],
   "author": "Daniel Fischer <daniel@d-fischer.dev>",
   "contributors": [
+    "Randolf J <jrandolf@google.com>",
     "David Clark <david.dave.clark@gmail.com>",
     "Bogdan Chadkin <trysound@yandex.ru>",
     "Suhas Karanth <sudo.suhas@gmail.com>"
@@ -65,29 +64,6 @@
     "url": "https://github.com/cosmiconfig/cosmiconfig/issues"
   },
   "homepage": "https://github.com/cosmiconfig/cosmiconfig#readme",
-  "prettier": {
-    "trailingComma": "all",
-    "arrowParens": "always",
-    "singleQuote": true,
-    "printWidth": 80,
-    "tabWidth": 2
-  },
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "targets": {
-            "node": "14"
-          },
-          "exclude": [
-            "proposal-dynamic-import"
-          ]
-        }
-      ],
-      "@babel/preset-typescript"
-    ]
-  },
   "peerDependencies": {
     "typescript": ">=4.9.5"
   },
@@ -103,10 +79,6 @@
     "path-type": "^5.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.22.10",
-    "@babel/core": "^7.22.11",
-    "@babel/preset-env": "^7.22.14",
-    "@babel/preset-typescript": "^7.22.11",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "~18",
     "@types/parse-json": "^4.0.0",

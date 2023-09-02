@@ -1,14 +1,5 @@
 node_modules
-*.log
-.nyc_output
 coverage
-*.DS_Store
 dist
-.idea
-.vscode
-wallaby.config.js
-
-# lock files
 package-lock.json
-yarn.lock
-pnpm-lock.yaml
+tsconfig.tsbuildinfo

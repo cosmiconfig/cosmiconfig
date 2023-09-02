@@ -4,7 +4,7 @@ import {
   Cache,
   ExplorerOptions,
   ExplorerOptionsSync,
-} from './types';
+} from './types.js';
 
 export abstract class ExplorerBase<
   T extends ExplorerOptions | ExplorerOptionsSync,
