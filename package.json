@@ -12,23 +12,17 @@
     "build": "npm run build:tsc",
     "build:tsc": "cross-env NODE_ENV=production tsc -b",
     "dev": "npm run build:tsc -- --watch",
-    "lint": "eslint --ext .js,.ts . && npm run lint:md",
+    "lint": "eslint --ext .js,.ts .",
     "lint:fix": "eslint --ext .js,.ts . --fix",
     "lint:md": "remark-preset-davidtheclark",
-    "format": "prettier . --write",
+    "format": "prettier \"**/*.{js,ts,json,yml,yaml}\" --write",
     "format:md": "remark-preset-davidtheclark --format",
-    "format:check": "prettier . --check",
+    "format:check": "prettier \"**/*.{js,ts,json,yml,yaml}\" --check",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "check:all": "npm run test && npm run lint && npm run format:check",
     "prepublishOnly": "npm run check:all && npm run build",
     "prepare": "husky install"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged && && npm run test",
-      "pre-push": "npm run check:all"
-    }
   },
   "lint-staged": {
     "*.{js,ts}": [

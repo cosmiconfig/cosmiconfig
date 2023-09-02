@@ -68,8 +68,8 @@ Tested in Node 14+.
 
 ## Usage for tooling developers
 
-_If you are an end user (i.e. a user of a tool that uses cosmiconfig, like `prettier` or `stylelint`),
-you can skip down to [the end user section](#usage-for-end-users)._
+*If you are an end user (i.e. a user of a tool that uses cosmiconfig, like `prettier` or `stylelint`),
+you can skip down to [the end user section](#usage-for-end-users).*
 
 Create a Cosmiconfig explorer, then either `search` for or directly `load` a configuration file.
 
@@ -157,7 +157,7 @@ Here's how your default [`search()`] will work:
 - For JS files,
 - If at any point a parsable configuration is found, the [`search()`] Promise resolves with its [result] \(or, with [`explorerSync.search()`], the [result] is returned).
 - If no configuration object is found, the [`search()`] Promise resolves with `null` (or, with [`explorerSync.search()`], `null` is returned).
-- If a configuration object is found _but is malformed_ (causing a parsing error), the [`search()`] Promise rejects with that error (so you should `.catch()` it). (Or, with [`explorerSync.search()`], the error is thrown.)
+- If a configuration object is found *but is malformed* (causing a parsing error), the [`search()`] Promise rejects with that error (so you should `.catch()` it). (Or, with [`explorerSync.search()`], the error is thrown.)
 
 **If you know exactly where your configuration file should be, you can use [`load()`], instead.**
 
@@ -214,7 +214,7 @@ const { cosmiconfigSync } = require('cosmiconfig');
 const explorerSync = cosmiconfigSync(moduleName[, cosmiconfigOptions])
 ```
 
-Creates a _synchronous_ cosmiconfig instance ("explorerSync") configured according to the arguments, and initializes its caches.
+Creates a *synchronous* cosmiconfig instance ("explorerSync") configured according to the arguments, and initializes its caches.
 
 See [`cosmiconfig()`](#cosmiconfig-1).
 
@@ -368,16 +368,16 @@ console.log(Object.entries(defaultLoadersSync));
 // ]
 ```
 
-(YAML is a superset of JSON; which means YAML parsers can parse JSON; which is how extensionless files can be either YAML _or_ JSON with only one parser.)
+(YAML is a superset of JSON; which means YAML parsers can parse JSON; which is how extensionless files can be either YAML *or* JSON with only one parser.)
 
-**If you provide a `loaders` object, your object will be _merged_ with the defaults.**
+**If you provide a `loaders` object, your object will be *merged* with the defaults.**
 So you can override one or two without having to override them all.
 
-**Keys in `loaders`** are extensions (starting with a period), or `noExt` to specify the loader for files _without_ extensions, like `.myapprc`.
+**Keys in `loaders`** are extensions (starting with a period), or `noExt` to specify the loader for files *without* extensions, like `.myapprc`.
 
 **Values in `loaders`** are a loader function (described below) whose values are loader functions.
 
-**The most common use case for custom loaders value is to load extensionless `rc` files as strict JSON**, instead of JSON _or_ YAML (the default).
+**The most common use case for custom loaders value is to load extensionless `rc` files as strict JSON**, instead of JSON *or* YAML (the default).
 To accomplish that, provide the following `loaders` value:
 
 ```js
@@ -508,7 +508,7 @@ A function that transforms the parsed configuration. Receives the [result].
 If using [`search()`] or [`load()`] \(which are async), the transform function can return the transformed result or return a Promise that resolves with the transformed result.
 If using `cosmiconfigSync`, [`search()`] or [`load()`], the function must be synchronous and return the transformed result.
 
-The reason you might use this option — instead of simply applying your transform function some other way — is that _the transformed result will be cached_. If your transformation involves additional filesystem I/O or other potentially slow processing, you can use this option to avoid repeating those steps every time a given configuration is searched or loaded.
+The reason you might use this option — instead of simply applying your transform function some other way — is that *the transformed result will be cached*. If your transformation involves additional filesystem I/O or other potentially slow processing, you can use this option to avoid repeating those steps every time a given configuration is searched or loaded.
 
 ### ignoreEmptySearchPlaces
 
@@ -647,21 +647,39 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 And please do participate!
 
 [result]: #result
+
 [`load()`]: #explorerload
+
 [`search()`]: #explorersearch
+
 [`clearloadcache()`]: #explorerclearloadcache
+
 [`clearsearchcache()`]: #explorerclearsearchcache
+
 [`cosmiconfig()`]: #cosmiconfig
+
 [`cosmiconfigSync()`]: #cosmiconfigsync
+
 [`clearcaches()`]: #explorerclearcaches
+
 [`packageprop`]: #packageprop
+
 [`cache`]: #cache
+
 [`stopdir`]: #stopdir
+
 [`searchplaces`]: #searchplaces
+
 [`loaders`]: #loaders
+
 [`cosmiconfigoptions`]: #cosmiconfigoptions
+
 [`explorerSync.search()`]: #explorersyncsearch
+
 [`explorerSync.load()`]: #explorersyncload
+
 [`explorer.search()`]: #explorersearch
+
 [`explorer.load()`]: #explorerload
+
 ["Loading JS modules"]: #loading-js-modules
