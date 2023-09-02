@@ -1,5 +1,13 @@
 # Changelog
 
+## [8.3.2](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.1...cosmiconfig-v8.3.2) (2023-09-02)
+
+
+### Bug Fixes
+
+* use `.cjs` extension for sync compiled typescript ([0d76a9a](https://github.com/cosmiconfig/cosmiconfig/commit/0d76a9a013536e46daf55b1857366d14def40804))
+* use default for async TS loader ([5bed3e3](https://github.com/cosmiconfig/cosmiconfig/commit/5bed3e3c6c8b14222480a69210cb52da12d2d517))
+
 ## [8.3.1](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.0...cosmiconfig-v8.3.1) (2023-09-02)
 
 
