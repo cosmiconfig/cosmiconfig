@@ -1,5 +1,14 @@
 # Changelog
 
+## [8.3.0](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.2.0...cosmiconfig-v8.3.0) (2023-09-02)
+
+
+### Features
+
+* add support for TypeScript configuration files ([d88b1b4](https://github.com/cosmiconfig/cosmiconfig/commit/d88b1b45325935b0c2416c820b72ae66d8f103a3))
+* add support for TypeScript configuration files ([d88b1b4](https://github.com/cosmiconfig/cosmiconfig/commit/d88b1b45325935b0c2416c820b72ae66d8f103a3))
+* add support for TypeScript configuration files ([a9c7ada](https://github.com/cosmiconfig/cosmiconfig/commit/a9c7ada59fe0c10a0733b79b5922e6e434c97175))
+
 ## 8.2.0
 
 - Add support for ECMAScript modules (ESM) to the [*asynchronous* API](./README.md#asynchronous-api). End users running Node versions that support ESM can provide `.mjs` files, or `.js` files whose nearest parent `package.json` file contains `"type": "module"`.
