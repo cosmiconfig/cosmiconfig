@@ -58,7 +58,7 @@ export const loadTsSync: LoaderSync = function loadTsSync(filepath, content) {
   if (typescript === undefined) {
     typescript = require('typescript');
   }
-  const compiledFilepath = `${filepath.slice(0, -2)}js`;
+  const compiledFilepath = `${filepath.slice(0, -2)}cjs`;
   try {
     const config = resolveTsConfig(path.dirname(filepath)) ?? {};
     config.compilerOptions = {
