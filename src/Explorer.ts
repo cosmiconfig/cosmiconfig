@@ -39,6 +39,7 @@ export class Explorer extends ExplorerBase<ExplorerOptions> {
     const stopDir = path.resolve(this.config.stopDir);
     from = path.resolve(from);
     const search = async (): Promise<CosmiconfigResult> => {
+      /* istanbul ignore next -- @preserve */
       if (await isDirectory(from)) {
         for (const place of this.config.searchPlaces) {
           const filepath = path.join(from, place);

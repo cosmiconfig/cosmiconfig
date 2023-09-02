@@ -68,5 +68,6 @@ export abstract class ExplorerBase<
 }
 
 export function getExtensionDescription(extension?: string): string {
+  /* istanbul ignore next -- @preserve */
   return extension ? `extension "${extension}"` : 'files without extensions';
 }

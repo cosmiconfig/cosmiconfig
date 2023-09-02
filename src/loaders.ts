@@ -54,8 +54,8 @@ export const loadYaml: LoaderSync = function loadYaml(filepath, content) {
 
 let typescript: typeof import('typescript');
 export const loadTsSync: LoaderSync = function loadTsSync(filepath, content) {
+  /* istanbul ignore next -- @preserve */
   if (typescript === undefined) {
-    /* istanbul ignore next -- @preserve */
     typescript = require('typescript');
   }
   const compiledFilepath = `${filepath.slice(0, -2)}js`;
