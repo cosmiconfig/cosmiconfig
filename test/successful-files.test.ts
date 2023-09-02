@@ -585,3 +585,19 @@ describe('loads defined JS config relative path', () => {
     checkResult(result);
   });
 });
+
+describe('[#313] config search does not fail if there is a file named .config', () => {
+  beforeEach(() => {
+    temp.createFile('.config', '');
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('tester').search();
+    expect(result).toBeNull();
+  });
+
+  test('async', async () => {
+    const result = await cosmiconfig('tester').search();
+    expect(result).toBeNull();
+  });
+});
