@@ -83,7 +83,7 @@ export const loadTsSync: LoaderSync = function loadTsSync(filepath, content) {
 
 export const loadTs: Loader = async function loadTs(filepath, content) {
   if (typescript === undefined) {
-    typescript = await import('typescript');
+    typescript = (await import('typescript')).default;
   }
   const compiledFilepath = `${filepath.slice(0, -2)}mjs`;
   try {
