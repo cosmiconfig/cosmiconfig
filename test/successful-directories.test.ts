@@ -11,11 +11,9 @@ import {
   vi,
 } from 'vitest';
 import { cosmiconfig, cosmiconfigSync, defaultLoaders } from '../src';
-import { TempDir, canUseDynamicImport, isNotMjs } from './util';
+import { TempDir, isNotMjs } from './util';
 
 const temp = new TempDir();
-
-const describeEsmOnly = canUseDynamicImport() ? describe : describe.skip;
 
 function randomString(): string {
   return Math.random().toString(36).substring(7);
@@ -377,7 +375,7 @@ describe('finds CJS file in first searched dir', () => {
   });
 });
 
-describeEsmOnly('finds ESM foo.config.mjs file in first searched dir', () => {
+describe('finds ESM foo.config.mjs file in first searched dir', () => {
   // This prefix works around our inability to clear the ESM loader cache.
   const dirPrefix = randomString();
   const startDir = temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f`);
@@ -432,7 +430,7 @@ describeEsmOnly('finds ESM foo.config.mjs file in first searched dir', () => {
   });
 });
 
-describeEsmOnly('finds ESM foo.config.js file in first searched dir', () => {
+describe('finds ESM foo.config.js file in first searched dir', () => {
   // This prefix works around our inability to clear the ESM loader cache.
   const dirPrefix = randomString();
   const startDir = temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f`);
@@ -539,7 +537,7 @@ describe('finds .foorc.js file in first searched dir', () => {
   });
 });
 
-describeEsmOnly('finds ESM .foorc.mjs file in first searched dir', () => {
+describe('finds ESM .foorc.mjs file in first searched dir', () => {
   // This prefix works around our inability to clear the ESM loader cache.
   const dirPrefix = randomString();
   const startDir = temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f`);
@@ -582,7 +580,7 @@ describeEsmOnly('finds ESM .foorc.mjs file in first searched dir', () => {
   });
 });
 
-describeEsmOnly('finds ESM .foorc.js file in first searched dir', () => {
+describe('finds ESM .foorc.js file in first searched dir', () => {
   // This prefix works around our inability to clear the ESM loader cache.
   const dirPrefix = randomString();
   const startDir = temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f`);

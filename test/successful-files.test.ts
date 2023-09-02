@@ -1,18 +1,16 @@
 import {
-  beforeEach,
   afterAll,
+  afterEach,
+  beforeEach,
   describe,
   expect,
   test,
-  afterEach,
   vi,
 } from 'vitest';
-import { TempDir, canUseDynamicImport } from './util';
 import { cosmiconfig, cosmiconfigSync } from '../src';
+import { TempDir } from './util';
 
 const temp = new TempDir();
-
-const describeEsmOnly = canUseDynamicImport() ? describe : describe.skip;
 
 function randomString(): string {
   return Math.random().toString(36).substring(7);
@@ -105,52 +103,46 @@ describe('loads defined TS config path', () => {
   });
 });
 
-describeEsmOnly(
-  'loads ESM from defined .js config path (nearest package.json says it is ESM)',
-  () => {
-    // Random basename works around our inability to clear the ESM loader cache.
-    const fileBasename = `${randomString()}.js`;
-    const file = temp.absolutePath(fileBasename);
-    const checkResult = (result: any) => {
-      expect(result.config).toEqual({ foo: true });
-      expect(result.filepath).toBe(file);
-    };
+describe('loads ESM from defined .js config path (nearest package.json says it is ESM)', () => {
+  // Random basename works around our inability to clear the ESM loader cache.
+  const fileBasename = `${randomString()}.js`;
+  const file = temp.absolutePath(fileBasename);
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
 
-    beforeEach(() => {
-      temp.createFile('package.json', '{ "type": "module" }');
-      temp.createFile(fileBasename, 'export default { foo: true };');
-    });
+  beforeEach(() => {
+    temp.createFile('package.json', '{ "type": "module" }');
+    temp.createFile(fileBasename, 'export default { foo: true };');
+  });
 
-    test('async', async () => {
-      const result = await cosmiconfig('successful-files-tests').load(file);
-      checkResult(result);
-    });
-  },
-);
+  test('async', async () => {
+    const result = await cosmiconfig('successful-files-tests').load(file);
+    checkResult(result);
+  });
+});
 
-describeEsmOnly(
-  'loads ESM from defined .ts config path (nearest package.json says it is ESM)',
-  () => {
-    // Random basename works around our inability to clear the ESM loader cache.
-    const fileBasename = `${randomString()}.ts`;
-    const file = temp.absolutePath(fileBasename);
-    const checkResult = (result: any) => {
-      expect(result.config).toEqual({ foo: true });
-      expect(result.filepath).toBe(file);
-    };
+describe('loads ESM from defined .ts config path (nearest package.json says it is ESM)', () => {
+  // Random basename works around our inability to clear the ESM loader cache.
+  const fileBasename = `${randomString()}.ts`;
+  const file = temp.absolutePath(fileBasename);
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
 
-    beforeEach(() => {
-      temp.createFile('package.json', '{ "type": "module" }');
-      temp.createFile(fileBasename, 'export default { foo: true } as any;');
-    });
+  beforeEach(() => {
+    temp.createFile('package.json', '{ "type": "module" }');
+    temp.createFile(fileBasename, 'export default { foo: true } as any;');
+  });
 
-    // eslint-disable-next-line vitest/no-identical-title
-    test('async', async () => {
-      const result = await cosmiconfig('successful-files-tests').load(file);
-      checkResult(result);
-    });
-  },
-);
+  // eslint-disable-next-line vitest/no-identical-title
+  test('async', async () => {
+    const result = await cosmiconfig('successful-files-tests').load(file);
+    checkResult(result);
+  });
+});
 
 describe('loads CommonJS with its own dependency', () => {
   beforeEach(() => {
@@ -175,7 +167,7 @@ describe('loads CommonJS with its own dependency', () => {
   });
 });
 
-describeEsmOnly('loads ESM with its own dependency', () => {
+describe('loads ESM with its own dependency', () => {
   // Random basename works around our inability to clear the ESM loader cache.
   const depFileBasename = `${randomString()}.mjs`;
   const fileBasename = `${randomString()}.mjs`;

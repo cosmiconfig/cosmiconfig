@@ -13,7 +13,7 @@ function normalizeDirectorySlash(pathname: string): string {
   return normalizeCrossPlatform;
 }
 
-class TempDir {
+export class TempDir {
   public dir: string;
 
   public constructor() {
@@ -116,22 +116,6 @@ class TempDir {
   }
 }
 
-function isNotMjs(filePath: string): boolean {
+export function isNotMjs(filePath: string): boolean {
   return path.extname(filePath) !== '.mjs';
 }
-
-/* istanbul ignore file -- @preserve */
-let result: boolean;
-export function canUseDynamicImport(): boolean {
-  if (result === undefined) {
-    try {
-      new Function('id', 'return import(id);');
-      result = true;
-    } catch (e) {
-      result = false;
-    }
-  }
-  return result;
-}
-
-export { TempDir, isNotMjs };
