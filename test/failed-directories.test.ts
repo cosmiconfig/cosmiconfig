@@ -110,7 +110,7 @@ describe('gives up if it cannot find the file', () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
     const readFileSpy = vi.spyOn(fsPromises, 'readFile');
-    const statSpy = vi.spyOn(fs, 'stat');
+    const statSpy = vi.spyOn(fsPromises, 'stat');
 
     const result = await explorer.search(startDir);
     checkResult(statSpy, readFileSpy, result, expectedFilesChecked);

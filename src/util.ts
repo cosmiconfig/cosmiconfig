@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import fsPromises from 'node:fs/promises';
+
 /**
  * @internal
  */
@@ -38,4 +41,35 @@ export function getPropertyByPath(
     }
     return previous[key];
   }, source);
+}
+
+/**
+ * @internal
+ */
+/* istanbul ignore next -- @preserve */
+export async function isDirectory(filepath: string): Promise<boolean> {
+  try {
+    return (await fsPromises.stat(filepath)).isDirectory();
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return false;
+    }
+
+    throw error;
+  }
+}
+
+/**
+ * @internal
+ */
+/* istanbul ignore next -- @preserve */
+export function isDirectorySync(filepath: string): boolean {
+  try {
+    return fs.statSync(filepath).isDirectory();
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return false;
+    }
+    throw error;
+  }
 }

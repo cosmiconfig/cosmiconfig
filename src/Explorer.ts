@@ -1,10 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { isDirectory } from 'path-type';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
 import { loadJson } from './loaders.js';
 import { Config, CosmiconfigResult, InternalOptions } from './types.js';
-import { emplace, getPropertyByPath } from './util.js';
+import { emplace, getPropertyByPath, isDirectory } from './util.js';
 
 /**
  * @internal
