@@ -39,3 +39,16 @@ export function getPropertyByPath(
     return previous[key];
   }, source);
 }
+
+/** @internal */
+export function removeUndefinedValuesFromObject(
+  options: Record<string, unknown> | undefined,
+): Record<string, unknown> | undefined {
+  /* istanbul ignore if -- @preserve */
+  if (!options) {
+    return undefined;
+  }
+  return Object.fromEntries(
+    Object.entries(options).filter(([, value]) => value !== undefined),
+  );
+}

@@ -34,7 +34,7 @@ export class Explorer extends ExplorerBase<InternalOptions> {
       }
     }
 
-    const stopDir = this.config.stopDir && path.resolve(this.config.stopDir);
+    const stopDir = path.resolve(this.config.stopDir);
     from = path.resolve(from);
     const search = async (): Promise<CosmiconfigResult> => {
       /* istanbul ignore if -- @preserve */

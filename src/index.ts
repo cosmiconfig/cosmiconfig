@@ -6,8 +6,8 @@ import { Explorer } from './Explorer.js';
 import { ExplorerSync } from './ExplorerSync.js';
 import {
   loadJs,
-  loadJsSync,
   loadJson,
+  loadJsSync,
   loadTs,
   loadTsSync,
   loadYaml,
@@ -21,6 +21,7 @@ import {
   PublicExplorerSync,
   TransformSync,
 } from './types.js';
+import { removeUndefinedValuesFromObject } from './util';
 
 // this needs to be hardcoded, as this is intended for end users, who can't supply options at this point
 export const metaSearchPlaces = [
@@ -94,7 +95,7 @@ function getInternalOptions<T extends Options | OptionsSync>(
 
   overrideOptions.metaConfigFilePath = metaConfig.filepath;
 
-  return { ...options, ...overrideOptions };
+  return { ...options, ...removeUndefinedValuesFromObject(overrideOptions) };
 }
 
 function normalizeOptions(
@@ -134,16 +135,14 @@ function normalizeOptions(
     metaConfigFilePath: null,
   } satisfies InternalOptions;
 
-  const normalizedOptions = {
+  return {
     ...defaults,
-    ...options,
+    ...removeUndefinedValuesFromObject(options),
     loaders: {
       ...defaults.loaders,
       ...options.loaders,
     },
   };
-
-  return normalizedOptions;
 }
 
 function normalizeOptionsSync(
@@ -180,16 +179,14 @@ function normalizeOptionsSync(
     metaConfigFilePath: null,
   } satisfies InternalOptionsSync;
 
-  const normalizedOptions = {
+  return {
     ...defaults,
-    ...options,
+    ...removeUndefinedValuesFromObject(options),
     loaders: {
       ...defaults.loaders,
       ...options.loaders,
     },
   };
-
-  return normalizedOptions;
 }
 
 export function cosmiconfig(

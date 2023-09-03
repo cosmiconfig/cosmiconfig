@@ -32,7 +32,7 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
       }
     }
 
-    const stopDir = this.config.stopDir && path.resolve(this.config.stopDir);
+    const stopDir = path.resolve(this.config.stopDir);
     from = path.resolve(from);
     const search = (): CosmiconfigResult => {
       /* istanbul ignore if -- @preserve */
