@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.3.3](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.2...cosmiconfig-v8.3.3) (2023-09-03)
+
+
+### Bug Fixes
+
+* add back node 14 compat ([7392541](https://github.com/cosmiconfig/cosmiconfig/commit/7392541527fbe71302cd3a6e42a343c928f3b2fb)), closes [#320](https://github.com/cosmiconfig/cosmiconfig/issues/320)
+
 ## [8.3.2](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.1...cosmiconfig-v8.3.2) (2023-09-02)
 
 
