@@ -1,5 +1,5 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import fs from 'fs/promises';
+import path from 'path';
 import { isDirectory } from 'path-type';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
 import { loadJson } from './loaders.js';

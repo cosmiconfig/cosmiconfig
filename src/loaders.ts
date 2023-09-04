@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
-import { existsSync, rmSync, writeFileSync } from 'node:fs';
-import { rm, writeFile } from 'node:fs/promises';
-import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { existsSync, rmSync, writeFileSync } from 'fs';
+import { rm, writeFile } from 'fs/promises';
+import path from 'path';
+import { pathToFileURL } from 'url';
 import { Loader, LoaderSync } from './types.js';
 
 let importFresh: typeof import('import-fresh');

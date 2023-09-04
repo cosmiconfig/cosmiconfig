@@ -16,7 +16,7 @@ import { ExplorerOptions, ExplorerOptionsSync, Loaders } from '../src/types';
 import { TempDir } from './util';
 import { ExplorerSync } from '../src/ExplorerSync';
 import { Explorer } from '../src/Explorer';
-import path from 'node:path';
+import path from 'path';
 
 vi.mock('../src/ExplorerSync', async () => {
   const { ExplorerSync } = await vi.importActual<

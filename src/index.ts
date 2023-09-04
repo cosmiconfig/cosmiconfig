@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 export * from './types.js';
 
-import os from 'node:os';
+import os from 'os';
 import { Explorer } from './Explorer.js';
 import { ExplorerSync } from './ExplorerSync.js';
 import {

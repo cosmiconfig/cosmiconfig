@@ -1,6 +1,6 @@
 import { beforeEach, afterAll, describe, expect, test, vi } from 'vitest';
-import fs from 'node:fs';
-import fsPromises from 'node:fs/promises';
+import fs from 'fs';
+import fsPromises from 'fs/promises';
 import {
   cosmiconfig,
   cosmiconfigSync,
