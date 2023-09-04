@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.3.4](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.3...cosmiconfig-v8.3.4) (2023-09-04)
+
+
+### Bug Fixes
+
+* remove node: prefix from imports ([f76484a](https://github.com/cosmiconfig/cosmiconfig/commit/f76484a9bb0136f1f42490cc3fa9126e688fbaba)), closes [#323](https://github.com/cosmiconfig/cosmiconfig/issues/323)
+
 ## [8.3.3](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.2...cosmiconfig-v8.3.3) (2023-09-03)
 
 
