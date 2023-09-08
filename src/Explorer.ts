@@ -65,7 +65,7 @@ export class Explorer extends ExplorerBase<InternalOptions> {
         }
         return await search();
       }
-      return null;
+      return await this.config.transform(null);
     };
 
     if (this.searchCache) {

@@ -63,7 +63,7 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
         }
         return search();
       }
-      return null;
+      return this.config.transform(null);
     };
 
     if (this.searchCache) {

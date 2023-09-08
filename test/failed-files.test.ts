@@ -1,4 +1,4 @@
-import { beforeEach, afterAll, describe, test, expect } from 'vitest';
+import { beforeEach, afterAll, describe, test, expect, vi } from 'vitest';
 import { TempDir } from './util';
 import { cosmiconfig, cosmiconfigSync } from '../src';
 
@@ -206,6 +206,43 @@ describe('returns an empty config result for empty file, format YAML', () => {
   test('sync', () => {
     const result = cosmiconfigSync('failed-files-tests').load(file);
     checkResult(result);
+  });
+});
+
+describe('[#325] transforms & returns null when no config file is found', () => {
+  beforeEach(() => {
+    // temp.createFile('package.json', '{"name": "failed-files-tests"}');
+  });
+  const checkTransformResult = vi.fn((result: any) =>
+    expect(result).toBeNull(),
+  );
+  const checkResult = (result: any) => expect(result).toBeNull();
+
+  const startAndStopDir = temp.absolutePath('.');
+  test('async', async () => {
+    const result = await cosmiconfig('failed-files-tests', {
+      searchPlaces: ['package.json'],
+      stopDir: startAndStopDir,
+      async transform(innerResult) {
+        checkTransformResult(innerResult);
+        return innerResult;
+      },
+    }).search(startAndStopDir);
+    checkResult(result);
+    expect(checkTransformResult).toHaveBeenCalledTimes(1);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('failed-files-tests', {
+      searchPlaces: ['package.json'],
+      stopDir: startAndStopDir,
+      transform(innerResult) {
+        checkTransformResult(innerResult);
+        return innerResult;
+      },
+    }).search(startAndStopDir);
+    checkResult(result);
+    expect(checkTransformResult).toHaveBeenCalledTimes(1);
   });
 });
 
