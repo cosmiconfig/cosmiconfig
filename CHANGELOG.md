@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.3.5](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.4...cosmiconfig-v8.3.5) (2023-09-08)
+
+
+### Bug Fixes
+
+* pass null to transform function for backwards compat ([2b38510](https://github.com/cosmiconfig/cosmiconfig/commit/2b38510ae2df5feedff75cc12114cc57da9cef3e))
+
 ## [8.3.4](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.3...cosmiconfig-v8.3.4) (2023-09-04)
 
 
