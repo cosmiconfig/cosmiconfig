@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.3.6](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.5...cosmiconfig-v8.3.6) (2023-09-13)
+
+
+### Bug Fixes
+
+* ignore search place if accessing it causes ENOTDIR (i.e. if access of a subpath of a file is attempted) ([5bd915a](https://github.com/cosmiconfig/cosmiconfig/commit/5bd915aa74bbb056a4f8a11679bae7d6cd67ca18))
+
 ## [8.3.5](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.4...cosmiconfig-v8.3.5) (2023-09-08)
 
 
