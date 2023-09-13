@@ -627,6 +627,29 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
   });
 });
 
+describe('does not throw error when trying to access a folder that is actually a file', () => {
+  beforeEach(() => {
+    temp.createFile('.config', '');
+  });
+
+  const tempDir = temp.absolutePath('.');
+  const explorerOptions = {
+    stopDir: tempDir,
+  };
+
+  test('async', async () => {
+    const result = await cosmiconfig('foo', explorerOptions).search(tempDir);
+
+    expect(result).toBeNull();
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('foo', explorerOptions).search(tempDir);
+
+    expect(result).toBeNull();
+  });
+});
+
 describe('does not swallow errors from custom loaders', () => {
   beforeEach(() => {
     temp.createFile('a/b/c/d/e/f/.foorc.js', 'module.exports = {};');

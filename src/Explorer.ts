@@ -50,7 +50,11 @@ export class Explorer extends ExplorerBase<InternalOptions> {
               return await this.config.transform(result);
             }
           } catch (error) {
-            if (error.code === 'ENOENT' || error.code === 'EISDIR') {
+            if (
+              error.code === 'ENOENT' ||
+              error.code === 'EISDIR' ||
+              error.code === 'ENOTDIR'
+            ) {
               continue;
             }
             throw error;
