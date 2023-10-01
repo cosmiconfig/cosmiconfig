@@ -56,6 +56,55 @@ export const defaultLoadersSync = Object.freeze({
   noExt: loadYaml,
 } as const);
 
+export function getDefaultSearchPlaces(moduleName: string): Array<string> {
+  return [
+    'package.json',
+    `.${moduleName}rc`,
+    `.${moduleName}rc.json`,
+    `.${moduleName}rc.yaml`,
+    `.${moduleName}rc.yml`,
+    `.${moduleName}rc.js`,
+    `.${moduleName}rc.ts`,
+    `.${moduleName}rc.cjs`,
+    `.${moduleName}rc.mjs`,
+    `.config/${moduleName}rc`,
+    `.config/${moduleName}rc.json`,
+    `.config/${moduleName}rc.yaml`,
+    `.config/${moduleName}rc.yml`,
+    `.config/${moduleName}rc.js`,
+    `.config/${moduleName}rc.ts`,
+    `.config/${moduleName}rc.cjs`,
+    `.config/${moduleName}rc.mjs`,
+    `${moduleName}.config.js`,
+    `${moduleName}.config.ts`,
+    `${moduleName}.config.cjs`,
+    `${moduleName}.config.mjs`,
+  ];
+}
+
+export function getDefaultSearchPlacesSync(moduleName: string): Array<string> {
+  return [
+    'package.json',
+    `.${moduleName}rc`,
+    `.${moduleName}rc.json`,
+    `.${moduleName}rc.yaml`,
+    `.${moduleName}rc.yml`,
+    `.${moduleName}rc.js`,
+    `.${moduleName}rc.ts`,
+    `.${moduleName}rc.cjs`,
+    `.config/${moduleName}rc`,
+    `.config/${moduleName}rc.json`,
+    `.config/${moduleName}rc.yaml`,
+    `.config/${moduleName}rc.yml`,
+    `.config/${moduleName}rc.js`,
+    `.config/${moduleName}rc.ts`,
+    `.config/${moduleName}rc.cjs`,
+    `${moduleName}.config.js`,
+    `${moduleName}.config.ts`,
+    `${moduleName}.config.cjs`,
+  ];
+}
+
 const identity: TransformSync = function identity(x) {
   return x;
 };
@@ -105,29 +154,7 @@ function normalizeOptions(
 ): InternalOptions {
   const defaults = {
     packageProp: moduleName,
-    searchPlaces: [
-      'package.json',
-      `.${moduleName}rc`,
-      `.${moduleName}rc.json`,
-      `.${moduleName}rc.yaml`,
-      `.${moduleName}rc.yml`,
-      `.${moduleName}rc.js`,
-      `.${moduleName}rc.ts`,
-      `.${moduleName}rc.cjs`,
-      `.${moduleName}rc.mjs`,
-      `.config/${moduleName}rc`,
-      `.config/${moduleName}rc.json`,
-      `.config/${moduleName}rc.yaml`,
-      `.config/${moduleName}rc.yml`,
-      `.config/${moduleName}rc.js`,
-      `.config/${moduleName}rc.ts`,
-      `.config/${moduleName}rc.cjs`,
-      `.config/${moduleName}rc.mjs`,
-      `${moduleName}.config.js`,
-      `${moduleName}.config.ts`,
-      `${moduleName}.config.cjs`,
-      `${moduleName}.config.mjs`,
-    ],
+    searchPlaces: getDefaultSearchPlaces(moduleName),
     ignoreEmptySearchPlaces: true,
     stopDir: os.homedir(),
     cache: true,
@@ -153,26 +180,7 @@ function normalizeOptionsSync(
 ): InternalOptionsSync {
   const defaults = {
     packageProp: moduleName,
-    searchPlaces: [
-      'package.json',
-      `.${moduleName}rc`,
-      `.${moduleName}rc.json`,
-      `.${moduleName}rc.yaml`,
-      `.${moduleName}rc.yml`,
-      `.${moduleName}rc.js`,
-      `.${moduleName}rc.ts`,
-      `.${moduleName}rc.cjs`,
-      `.config/${moduleName}rc`,
-      `.config/${moduleName}rc.json`,
-      `.config/${moduleName}rc.yaml`,
-      `.config/${moduleName}rc.yml`,
-      `.config/${moduleName}rc.js`,
-      `.config/${moduleName}rc.ts`,
-      `.config/${moduleName}rc.cjs`,
-      `${moduleName}.config.js`,
-      `${moduleName}.config.ts`,
-      `${moduleName}.config.cjs`,
-    ],
+    searchPlaces: getDefaultSearchPlacesSync(moduleName),
     ignoreEmptySearchPlaces: true,
     stopDir: os.homedir(),
     cache: true,
