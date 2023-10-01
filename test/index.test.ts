@@ -37,9 +37,8 @@ vi.mock('../src/ExplorerSync', async () => {
 });
 
 vi.mock('../src/Explorer', async () => {
-  const { Explorer } = await vi.importActual<typeof import('../src/Explorer')>(
-    '../src/Explorer',
-  );
+  const { Explorer } =
+    await vi.importActual<typeof import('../src/Explorer')>('../src/Explorer');
 
   const mock = vi.fn();
 
@@ -152,6 +151,7 @@ describe('cosmiconfig', () => {
           '.cjs': 'loadJs',
           '.mjs': 'loadJs',
           '.js': 'loadJs',
+          '.ts': 'loadTs',
           '.json': 'loadJson',
           '.yaml': 'loadYaml',
           '.yml': 'loadYaml',
@@ -164,6 +164,7 @@ describe('cosmiconfig', () => {
           `.${moduleName}rc.yaml`,
           `.${moduleName}rc.yml`,
           `.${moduleName}rc.js`,
+          `.${moduleName}rc.ts`,
           `.${moduleName}rc.cjs`,
           `.${moduleName}rc.mjs`,
           `.config/${moduleName}rc`,
@@ -171,9 +172,11 @@ describe('cosmiconfig', () => {
           `.config/${moduleName}rc.yaml`,
           `.config/${moduleName}rc.yml`,
           `.config/${moduleName}rc.js`,
+          `.config/${moduleName}rc.ts`,
           `.config/${moduleName}rc.cjs`,
           `.config/${moduleName}rc.mjs`,
           `${moduleName}.config.js`,
+          `${moduleName}.config.ts`,
           `${moduleName}.config.cjs`,
           `${moduleName}.config.mjs`,
         ],
@@ -189,6 +192,7 @@ describe('cosmiconfig', () => {
           '.mjs': 'loadJsSync',
           '.cjs': 'loadJsSync',
           '.js': 'loadJsSync',
+          '.ts': 'loadTsSync',
           '.json': 'loadJson',
           '.yaml': 'loadYaml',
           '.yml': 'loadYaml',
@@ -201,14 +205,17 @@ describe('cosmiconfig', () => {
           `.${moduleName}rc.yaml`,
           `.${moduleName}rc.yml`,
           `.${moduleName}rc.js`,
+          `.${moduleName}rc.ts`,
           `.${moduleName}rc.cjs`,
           `.config/${moduleName}rc`,
           `.config/${moduleName}rc.json`,
           `.config/${moduleName}rc.yaml`,
           `.config/${moduleName}rc.yml`,
           `.config/${moduleName}rc.js`,
+          `.config/${moduleName}rc.ts`,
           `.config/${moduleName}rc.cjs`,
           `${moduleName}.config.js`,
+          `${moduleName}.config.ts`,
           `${moduleName}.config.cjs`,
         ],
       );
@@ -238,6 +245,7 @@ describe('cosmiconfig', () => {
   describe('creates explorer with preference for given options over defaults', () => {
     const noExtLoader: Loader = () => {};
     const jsLoader: Loader = () => {};
+    const tsLoader: Loader = () => {};
     const jsonLoader: Loader = () => {};
     const yamlLoader: Loader = () => {};
 
@@ -255,6 +263,7 @@ describe('cosmiconfig', () => {
         '.mjs': mjsLoader,
         '.cjs': jsLoader,
         '.js': jsLoader,
+        '.ts': tsLoader,
         '.json': jsonLoader,
         '.yaml': yamlLoader,
         '.yml': yamlLoader,
@@ -265,6 +274,7 @@ describe('cosmiconfig', () => {
       '.mjs': 'mjsLoader',
       '.cjs': 'jsLoader',
       '.js': 'jsLoader',
+      '.ts': 'tsLoader',
       '.json': 'jsonLoader',
       '.yaml': 'yamlLoader',
       '.yml': 'yamlLoader',
@@ -316,6 +326,7 @@ describe('cosmiconfig', () => {
 
     const noExtLoader: LoaderSync = () => {};
     const jsLoader: LoaderSync = () => {};
+    const tsLoader: LoaderSync = () => {};
     const jsonLoader: LoaderSync = () => {};
     const yamlLoader: LoaderSync = () => {};
 
@@ -331,6 +342,7 @@ describe('cosmiconfig', () => {
         '.mjs': jsLoader,
         '.cjs': jsLoader,
         '.js': jsLoader,
+        '.ts': tsLoader,
         '.json': jsonLoader,
         '.yaml': yamlLoader,
       },
@@ -374,6 +386,7 @@ describe('cosmiconfig', () => {
         '.mjs': 'jsLoader',
         '.cjs': 'jsLoader',
         '.js': 'jsLoader',
+        '.ts': 'tsLoader',
         '.json': 'jsonLoader',
         '.yaml': 'yamlLoader',
         '.yml': 'loadYaml',
@@ -390,6 +403,7 @@ describe('cosmiconfig', () => {
           '.cjs': 'jsLoader',
           '.mjs': 'jsLoader',
           '.js': 'jsLoader',
+          '.ts': 'tsLoader',
           '.json': 'jsonLoader',
           '.yaml': 'yamlLoader',
           '.yml': 'loadYaml',
@@ -416,7 +430,7 @@ describe('cosmiconfig', () => {
     };
 
     const expectedError =
-      'loader for extension ".things" is not a function (type provided: "number"), so searchPlaces item ".foorc.things" is invalid';
+      'Loader for extension ".foorc.things" is not a function: Received number.';
 
     test('async', () => {
       expect(() =>

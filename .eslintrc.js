@@ -8,7 +8,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     sourceType: 'module',
-    project: './tsconfig.eslint.json',
+    project: './tsconfig.base.json',
   },
   extends: [
     'eslint-config-davidtheclark-node',
@@ -22,7 +22,6 @@ module.exports = {
     'plugin:import/typescript',
     'plugin:vitest/recommended',
     'prettier',
-    'prettier/@typescript-eslint',
   ],
   plugins: ['vitest', '@typescript-eslint', 'import'],
   rules: {
@@ -111,6 +110,10 @@ module.exports = {
     // Many tests make assertions indirectly in a way the plugin
     // does not understand.
     'vitest/expect-expect': 'off',
+    // This is more performant.
+    '@typescript-eslint/return-await': ['error', 'always'],
+    // No bikeshedding.
+    'arrow-parens': ['error', 'always'],
   },
   settings: {
     node: {
@@ -137,7 +140,6 @@ module.exports = {
         '@typescript-eslint/no-require-imports': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
-        '@typescript-eslint/require-await': 'off',
       },
     },
     {

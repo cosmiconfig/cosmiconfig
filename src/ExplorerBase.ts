@@ -1,28 +1,64 @@
 import path from 'path';
-import { getPropertyByPath } from './getPropertyByPath';
-import { Loader } from './index';
-import { loaders } from './loaders';
 import {
+  AsyncCache,
   Cache,
+  Config,
   CosmiconfigResult,
-  ExplorerOptions,
-  ExplorerOptionsSync,
-  LoadedFileContent,
-} from './types';
+  InternalOptions,
+  InternalOptionsSync,
+} from './types.js';
+import { getPropertyByPath } from './util.js';
 
-class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
-  protected readonly loadCache?: Cache;
-  protected readonly searchCache?: Cache;
+/**
+ * @internal
+ */
+export abstract class ExplorerBase<
+  T extends InternalOptions | InternalOptionsSync,
+> {
+  #loadingMetaConfig = false;
+
   protected readonly config: T;
+  protected readonly loadCache?: T extends InternalOptionsSync
+    ? Cache
+    : AsyncCache;
+  protected readonly searchCache?: T extends InternalOptionsSync
+    ? Cache
+    : AsyncCache;
 
-  public constructor(options: T) {
+  public constructor(options: Readonly<T>) {
+    this.config = options;
     if (options.cache) {
       this.loadCache = new Map();
       this.searchCache = new Map();
     }
+    this.#validateConfig();
+  }
 
-    this.config = options;
-    this.validateConfig();
+  protected set loadingMetaConfig(value: boolean) {
+    this.#loadingMetaConfig = value;
+  }
+
+  #validateConfig(): void {
+    const config = this.config;
+
+    for (const place of config.searchPlaces) {
+      const extension = path.extname(place);
+      const loader =
+        this.config.loaders[extension || 'noExt'] ??
+        this.config.loaders['default'];
+      if (loader === undefined) {
+        throw new Error(
+          `Missing loader for ${getExtensionDescription(place)}.`,
+        );
+      }
+      if (typeof loader !== 'function') {
+        throw new Error(
+          `Loader for ${getExtensionDescription(
+            place,
+          )} is not a function: Received ${typeof loader}.`,
+        );
+      }
+    }
   }
 
   public clearLoadCache(): void {
@@ -42,100 +78,26 @@ class ExplorerBase<T extends ExplorerOptions | ExplorerOptionsSync> {
     this.clearSearchCache();
   }
 
-  private validateConfig(): void {
-    const config = this.config;
-
-    config.searchPlaces.forEach((place): void => {
-      const loaderKey = path.extname(place) || 'noExt';
-      const loader = config.loaders[loaderKey];
-      if (!loader) {
-        throw new Error(
-          `No loader specified for ${getExtensionDescription(
-            place,
-          )}, so searchPlaces item "${place}" is invalid`,
-        );
-      }
-
-      if (typeof loader !== 'function') {
-        throw new Error(
-          `loader for ${getExtensionDescription(
-            place,
-          )} is not a function (type provided: "${typeof loader}"), so searchPlaces item "${place}" is invalid`,
-        );
-      }
-    });
-  }
-
-  protected shouldSearchStopWithResult(result: CosmiconfigResult): boolean {
-    if (result === null) return false;
-    return !(result.isEmpty && this.config.ignoreEmptySearchPlaces);
-  }
-
-  protected nextDirectoryToSearch(
-    currentDir: string,
-    currentResult: CosmiconfigResult,
-  ): string | null {
-    if (this.shouldSearchStopWithResult(currentResult)) {
-      return null;
-    }
-    const nextDir = nextDirUp(currentDir);
-    if (nextDir === currentDir || currentDir === this.config.stopDir) {
-      return null;
-    }
-    return nextDir;
-  }
-
-  private loadPackageProp(filepath: string, content: string): unknown {
-    const parsedContent = loaders.loadJson(filepath, content);
-    const packagePropValue = getPropertyByPath(
-      parsedContent,
-      this.config.packageProp,
-    );
-    return packagePropValue || null;
-  }
-
-  protected getLoaderEntryForFile(filepath: string): Loader {
-    if (path.basename(filepath) === 'package.json') {
-      return this.loadPackageProp.bind(this);
-    }
-
-    const loaderKey = path.extname(filepath) || 'noExt';
-
-    const loader = this.config.loaders[loaderKey];
-
-    if (!loader) {
-      throw new Error(
-        `No loader specified for ${getExtensionDescription(filepath)}`,
-      );
-    }
-
-    return loader;
-  }
-
-  protected loadedContentToCosmiconfigResult(
+  protected toCosmiconfigResult(
     filepath: string,
-    loadedContent: LoadedFileContent,
-    forceProp: boolean,
+    config: Config,
   ): CosmiconfigResult {
-    if (loadedContent === null) {
+    if (config === null) {
       return null;
     }
-    if (loadedContent === undefined) {
+    if (config === undefined) {
       return { filepath, config: undefined, isEmpty: true };
     }
-    if (this.config.usePackagePropInConfigFiles || forceProp) {
-      loadedContent = getPropertyByPath(loadedContent, this.config.packageProp);
+    if (
+      this.config.applyPackagePropertyPathToConfiguration ||
+      this.#loadingMetaConfig
+    ) {
+      config = getPropertyByPath(config, this.config.packageProp);
     }
-    if (loadedContent === undefined) {
+    if (config === undefined) {
       return { filepath, config: undefined, isEmpty: true };
     }
-    return { config: loadedContent, filepath };
-  }
-
-  protected validateFilePath(filepath: string): void {
-    if (!filepath) {
-      throw new Error('load must pass a non-empty string');
-    }
+    return { config, filepath };
   }
 
   protected validateImports(
@@ -167,13 +129,10 @@ ${[...importStack, fullPath]
   }
 }
 
-function nextDirUp(dir: string): string {
-  return path.dirname(dir);
+/**
+ * @internal
+ */
+export function getExtensionDescription(extension?: string): string {
+  /* istanbul ignore next -- @preserve */
+  return extension ? `extension "${extension}"` : 'files without extensions';
 }
-
-function getExtensionDescription(filepath: string): string {
-  const ext = path.extname(filepath);
-  return ext ? `extension "${ext}"` : 'files without extensions';
-}
-
-export { ExplorerBase, getExtensionDescription };

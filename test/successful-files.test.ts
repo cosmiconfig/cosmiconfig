@@ -1,19 +1,16 @@
 import {
-  beforeEach,
   afterAll,
+  afterEach,
+  beforeEach,
   describe,
   expect,
   test,
-  afterEach,
   vi,
 } from 'vitest';
-import { TempDir } from './util';
 import { cosmiconfig, cosmiconfigSync } from '../src';
-import { canUseDynamicImport } from '../src/canUseDynamicImport';
+import { TempDir } from './util';
 
 const temp = new TempDir();
-
-const describeEsmOnly = canUseDynamicImport() ? describe : describe.skip;
 
 function randomString(): string {
   return Math.random().toString(36).substring(7);
@@ -89,28 +86,91 @@ describe('loads defined JS config path', () => {
   });
 });
 
-describeEsmOnly(
-  'loads ESM from defined .js config path (nearest package.json says it is ESM)',
-  () => {
-    // Random basename works around our inability to clear the ESM loader cache.
-    const fileBasename = `${randomString()}.js`;
-    const file = temp.absolutePath(fileBasename);
-    const checkResult = (result: any) => {
-      expect(result.config).toEqual({ foo: true });
-      expect(result.filepath).toBe(file);
-    };
+describe('loads defined TS config path', () => {
+  beforeEach(() => {
+    temp.createFile('goo.ts', 'export default { foo: true } as any;');
+  });
 
-    beforeEach(() => {
-      temp.createFile('package.json', '{ "type": "module" }');
-      temp.createFile(fileBasename, 'export default { foo: true };');
-    });
+  const file = temp.absolutePath('goo.ts');
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
 
-    test('async', async () => {
-      const result = await cosmiconfig('successful-files-tests').load(file);
-      checkResult(result);
-    });
-  },
-);
+  test('async', async () => {
+    const result = await cosmiconfig('successful-files-tests').load(file);
+    checkResult(result);
+  }, 20000);
+
+  test('sync', async () => {
+    const result = cosmiconfigSync('successful-files-tests').load(file);
+    checkResult(result);
+  });
+});
+
+describe('loads defined TS config path with tsconfig.json', () => {
+  beforeEach(() => {
+    temp.createFile('goo.ts', 'export default { foo: true } as any;');
+    temp.createFile('tsconfig.json', '{}');
+  });
+
+  const file = temp.absolutePath('goo.ts');
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', async () => {
+    const result = await cosmiconfig('successful-files-tests').load(file);
+    checkResult(result);
+  });
+
+  test('sync', async () => {
+    const result = cosmiconfigSync('successful-files-tests').load(file);
+    checkResult(result);
+  });
+});
+
+describe('loads ESM from defined .js config path (nearest package.json says it is ESM)', () => {
+  // Random basename works around our inability to clear the ESM loader cache.
+  const fileBasename = `${randomString()}.js`;
+  const file = temp.absolutePath(fileBasename);
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  beforeEach(() => {
+    temp.createFile('package.json', '{ "type": "module" }');
+    temp.createFile(fileBasename, 'export default { foo: true };');
+  });
+
+  test('async', async () => {
+    const result = await cosmiconfig('successful-files-tests').load(file);
+    checkResult(result);
+  });
+});
+
+describe('loads ESM from defined .ts config path (nearest package.json says it is ESM)', () => {
+  // Random basename works around our inability to clear the ESM loader cache.
+  const fileBasename = `${randomString()}.ts`;
+  const file = temp.absolutePath(fileBasename);
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  beforeEach(() => {
+    temp.createFile('package.json', '{ "type": "module" }');
+    temp.createFile(fileBasename, 'export default { foo: true } as any;');
+  });
+
+  // eslint-disable-next-line vitest/no-identical-title
+  test('async', async () => {
+    const result = await cosmiconfig('successful-files-tests').load(file);
+    checkResult(result);
+  }, 20000);
+});
 
 describe('loads CommonJS with its own dependency', () => {
   beforeEach(() => {
@@ -135,7 +195,7 @@ describe('loads CommonJS with its own dependency', () => {
   });
 });
 
-describeEsmOnly('loads ESM with its own dependency', () => {
+describe('loads ESM with its own dependency', () => {
   // Random basename works around our inability to clear the ESM loader cache.
   const depFileBasename = `${randomString()}.mjs`;
   const fileBasename = `${randomString()}.mjs`;
@@ -153,6 +213,7 @@ describeEsmOnly('loads ESM with its own dependency', () => {
     );
   });
 
+  // eslint-disable-next-line vitest/no-identical-title
   test('async', async () => {
     const result = await cosmiconfig('successful-files-tests').load(file);
     checkResult(result);
@@ -522,5 +583,33 @@ describe('loads defined JS config relative path', () => {
   test('sync', () => {
     const result = cosmiconfigSync('successful-files-tests').load(relativeFile);
     checkResult(result);
+  });
+});
+
+describe('[#313] config search does not fail if there is a file named .config', () => {
+  beforeEach(() => {
+    temp.createFile('.config', '');
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('tester').search();
+    expect(result).toBeNull();
+  });
+
+  test('async', async () => {
+    const result = await cosmiconfig('tester').search();
+    expect(result).toBeNull();
+  });
+});
+
+describe('[#317] `explorer.search(...)` should not crashes with `{stopDir: undefined}` option', () => {
+  test('sync', () => {
+    const result = cosmiconfigSync('tester', { stopDir: undefined }).search();
+    expect(result).toBeNull();
+  });
+
+  test('async', async () => {
+    const result = await cosmiconfig('tester', { stopDir: undefined }).search();
+    expect(result).toBeNull();
   });
 });

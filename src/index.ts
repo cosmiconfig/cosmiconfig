@@ -1,65 +1,27 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+export * from './types.js';
+
 import os from 'os';
-import { Explorer } from './Explorer';
-import { ExplorerSync } from './ExplorerSync';
-import { loaders } from './loaders';
+import { Explorer } from './Explorer.js';
+import { ExplorerSync } from './ExplorerSync.js';
 import {
-  Config,
-  CosmiconfigResult,
-  ExplorerOptions,
-  ExplorerOptionsSync,
-  Loaders,
-  LoadersSync,
-} from './types';
-
-type LoaderResult = Config | null;
-export type Loader =
-  | ((filepath: string, content: string) => Promise<LoaderResult>)
-  | LoaderSync;
-export type LoaderSync = (filepath: string, content: string) => LoaderResult;
-
-export type Transform =
-  | ((CosmiconfigResult: CosmiconfigResult) => Promise<CosmiconfigResult>)
-  | TransformSync;
-
-export type TransformSync = (
-  CosmiconfigResult: CosmiconfigResult,
-) => CosmiconfigResult;
-
-interface OptionsBase {
-  packageProp?: string | Array<string>;
-  searchPlaces?: Array<string>;
-  ignoreEmptySearchPlaces?: boolean;
-  stopDir?: string;
-  cache?: boolean;
-  mergeImportArrays?: boolean;
-}
-
-export interface Options extends OptionsBase {
-  loaders?: Loaders;
-  transform?: Transform;
-}
-
-export interface OptionsSync extends OptionsBase {
-  loaders?: LoadersSync;
-  transform?: TransformSync;
-}
-
-export interface PublicExplorerBase {
-  clearLoadCache: () => void;
-  clearSearchCache: () => void;
-  clearCaches: () => void;
-}
-
-export interface PublicExplorer extends PublicExplorerBase {
-  search: (searchFrom?: string) => Promise<CosmiconfigResult>;
-  load: (filepath: string) => Promise<CosmiconfigResult>;
-}
-
-export interface PublicExplorerSync extends PublicExplorerBase {
-  search: (searchFrom?: string) => CosmiconfigResult;
-  load: (filepath: string) => CosmiconfigResult;
-}
+  loadJs,
+  loadJson,
+  loadJsSync,
+  loadTs,
+  loadTsSync,
+  loadYaml,
+} from './loaders.js';
+import {
+  InternalOptions,
+  InternalOptionsSync,
+  Options,
+  OptionsSync,
+  PublicExplorer,
+  PublicExplorerSync,
+  TransformSync,
+} from './types.js';
+import { removeUndefinedValuesFromObject } from './util';
 
 // this needs to be hardcoded, as this is intended for end users, who can't supply options at this point
 export const metaSearchPlaces = [
@@ -68,57 +30,53 @@ export const metaSearchPlaces = [
   '.config.yaml',
   '.config.yml',
   '.config.js',
+  '.config.ts',
   '.config.cjs',
   '.config.mjs',
 ];
 
 // do not allow mutation of default loaders. Make sure it is set inside options
-const defaultLoaders = Object.freeze({
-  '.mjs': loaders.loadJs,
-  '.cjs': loaders.loadJs,
-  '.js': loaders.loadJs,
-  '.json': loaders.loadJson,
-  '.yaml': loaders.loadYaml,
-  '.yml': loaders.loadYaml,
-  noExt: loaders.loadYaml,
+export const defaultLoaders = Object.freeze({
+  '.mjs': loadJs,
+  '.cjs': loadJs,
+  '.js': loadJs,
+  '.ts': loadTs,
+  '.json': loadJson,
+  '.yaml': loadYaml,
+  '.yml': loadYaml,
+  noExt: loadYaml,
 } as const);
-const defaultLoadersSync = Object.freeze({
-  '.cjs': loaders.loadJsSync,
-  '.js': loaders.loadJsSync,
-  '.json': loaders.loadJson,
-  '.yaml': loaders.loadYaml,
-  '.yml': loaders.loadYaml,
-  noExt: loaders.loadYaml,
+export const defaultLoadersSync = Object.freeze({
+  '.cjs': loadJsSync,
+  '.js': loadJsSync,
+  '.ts': loadTsSync,
+  '.json': loadJson,
+  '.yaml': loadYaml,
+  '.yml': loadYaml,
+  noExt: loadYaml,
 } as const);
 
 const identity: TransformSync = function identity(x) {
   return x;
 };
 
-function replaceMetaPlaceholders(
-  paths: Array<string>,
+function getInternalOptions<T extends Options | OptionsSync>(
   moduleName: string,
-): Array<string> {
-  return paths.map((path) => path.replace('{name}', moduleName));
-}
-
-function getExplorerOptions<T extends Options | OptionsSync>(
-  moduleName: string,
-  options: T,
+  options: Readonly<T>,
 ): T {
   const metaExplorer = new ExplorerSync({
     packageProp: 'cosmiconfig',
     stopDir: process.cwd(),
     searchPlaces: metaSearchPlaces,
     ignoreEmptySearchPlaces: false,
-    usePackagePropInConfigFiles: true,
+    applyPackagePropertyPathToConfiguration: true,
     loaders: defaultLoaders,
     transform: identity,
     cache: true,
     metaConfigFilePath: null,
-    mergeImportArrays: false,
+    mergeImportArrays: true,
   });
-  const metaConfig = metaExplorer.searchSync();
+  const metaConfig = metaExplorer.search();
 
   if (!metaConfig) {
     return options;
@@ -131,67 +89,21 @@ function getExplorerOptions<T extends Options | OptionsSync>(
   const overrideOptions = metaConfig.config ?? {};
 
   if (overrideOptions.searchPlaces) {
-    overrideOptions.searchPlaces = replaceMetaPlaceholders(
-      overrideOptions.searchPlaces,
-      moduleName,
+    overrideOptions.searchPlaces = overrideOptions.searchPlaces.map(
+      (path: string) => path.replace('{name}', moduleName),
     );
   }
 
   overrideOptions.metaConfigFilePath = metaConfig.filepath;
 
-  return { ...options, ...overrideOptions };
-}
-
-function cosmiconfig(
-  moduleName: string,
-  options: Options = {},
-): PublicExplorer {
-  const explorerOptions = getExplorerOptions(moduleName, options);
-
-  const normalizedOptions: ExplorerOptions = normalizeOptions(
-    moduleName,
-    explorerOptions,
-  );
-
-  const explorer = new Explorer(normalizedOptions);
-
-  return {
-    search: explorer.search.bind(explorer),
-    load: explorer.load.bind(explorer),
-    clearLoadCache: explorer.clearLoadCache.bind(explorer),
-    clearSearchCache: explorer.clearSearchCache.bind(explorer),
-    clearCaches: explorer.clearCaches.bind(explorer),
-  };
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function cosmiconfigSync(
-  moduleName: string,
-  options: OptionsSync = {},
-): PublicExplorerSync {
-  const explorerOptions = getExplorerOptions(moduleName, options);
-
-  const normalizedOptions: ExplorerOptionsSync = normalizeOptionsSync(
-    moduleName,
-    explorerOptions,
-  );
-
-  const explorerSync = new ExplorerSync(normalizedOptions);
-
-  return {
-    search: explorerSync.searchSync.bind(explorerSync),
-    load: explorerSync.loadSync.bind(explorerSync),
-    clearLoadCache: explorerSync.clearLoadCache.bind(explorerSync),
-    clearSearchCache: explorerSync.clearSearchCache.bind(explorerSync),
-    clearCaches: explorerSync.clearCaches.bind(explorerSync),
-  };
+  return { ...options, ...removeUndefinedValuesFromObject(overrideOptions) };
 }
 
 function normalizeOptions(
   moduleName: string,
-  options: Options,
-): ExplorerOptions {
-  const defaults: ExplorerOptions = {
+  options: Readonly<Options>,
+): InternalOptions {
+  const defaults = {
     packageProp: moduleName,
     searchPlaces: [
       'package.json',
@@ -200,6 +112,7 @@ function normalizeOptions(
       `.${moduleName}rc.yaml`,
       `.${moduleName}rc.yml`,
       `.${moduleName}rc.js`,
+      `.${moduleName}rc.ts`,
       `.${moduleName}rc.cjs`,
       `.${moduleName}rc.mjs`,
       `.config/${moduleName}rc`,
@@ -207,38 +120,38 @@ function normalizeOptions(
       `.config/${moduleName}rc.yaml`,
       `.config/${moduleName}rc.yml`,
       `.config/${moduleName}rc.js`,
+      `.config/${moduleName}rc.ts`,
       `.config/${moduleName}rc.cjs`,
       `.config/${moduleName}rc.mjs`,
       `${moduleName}.config.js`,
+      `${moduleName}.config.ts`,
       `${moduleName}.config.cjs`,
       `${moduleName}.config.mjs`,
-    ].filter(Boolean),
+    ],
     ignoreEmptySearchPlaces: true,
-    mergeImportArrays: true,
     stopDir: os.homedir(),
     cache: true,
     transform: identity,
     loaders: defaultLoaders,
     metaConfigFilePath: null,
-  };
+    mergeImportArrays: true,
+  } satisfies InternalOptions;
 
-  const normalizedOptions: ExplorerOptions = {
+  return {
     ...defaults,
-    ...options,
+    ...removeUndefinedValuesFromObject(options),
     loaders: {
       ...defaults.loaders,
       ...options.loaders,
     },
   };
-
-  return normalizedOptions;
 }
 
 function normalizeOptionsSync(
   moduleName: string,
-  options: OptionsSync,
-): ExplorerOptionsSync {
-  const defaults: ExplorerOptionsSync = {
+  options: Readonly<OptionsSync>,
+): InternalOptionsSync {
+  const defaults = {
     packageProp: moduleName,
     searchPlaces: [
       'package.json',
@@ -247,14 +160,17 @@ function normalizeOptionsSync(
       `.${moduleName}rc.yaml`,
       `.${moduleName}rc.yml`,
       `.${moduleName}rc.js`,
+      `.${moduleName}rc.ts`,
       `.${moduleName}rc.cjs`,
       `.config/${moduleName}rc`,
       `.config/${moduleName}rc.json`,
       `.config/${moduleName}rc.yaml`,
       `.config/${moduleName}rc.yml`,
       `.config/${moduleName}rc.js`,
+      `.config/${moduleName}rc.ts`,
       `.config/${moduleName}rc.cjs`,
       `${moduleName}.config.js`,
+      `${moduleName}.config.ts`,
       `${moduleName}.config.cjs`,
     ],
     ignoreEmptySearchPlaces: true,
@@ -264,18 +180,46 @@ function normalizeOptionsSync(
     loaders: defaultLoadersSync,
     metaConfigFilePath: null,
     mergeImportArrays: true,
-  };
+  } satisfies InternalOptionsSync;
 
-  const normalizedOptions: ExplorerOptionsSync = {
+  return {
     ...defaults,
-    ...options,
+    ...removeUndefinedValuesFromObject(options),
     loaders: {
       ...defaults.loaders,
       ...options.loaders,
     },
   };
-
-  return normalizedOptions;
 }
 
-export { cosmiconfig, cosmiconfigSync, defaultLoaders, defaultLoadersSync };
+export function cosmiconfig(
+  moduleName: string,
+  options: Readonly<Options> = {},
+): PublicExplorer {
+  const internalOptions = getInternalOptions(moduleName, options);
+  const normalizedOptions = normalizeOptions(moduleName, internalOptions);
+  const explorer = new Explorer(normalizedOptions);
+  return {
+    search: explorer.search.bind(explorer),
+    load: explorer.load.bind(explorer),
+    clearLoadCache: explorer.clearLoadCache.bind(explorer),
+    clearSearchCache: explorer.clearSearchCache.bind(explorer),
+    clearCaches: explorer.clearCaches.bind(explorer),
+  };
+}
+
+export function cosmiconfigSync(
+  moduleName: string,
+  options: Readonly<OptionsSync> = {},
+): PublicExplorerSync {
+  const internalOptions = getInternalOptions(moduleName, options);
+  const normalizedOptions = normalizeOptionsSync(moduleName, internalOptions);
+  const explorerSync = new ExplorerSync(normalizedOptions);
+  return {
+    search: explorerSync.search.bind(explorerSync),
+    load: explorerSync.load.bind(explorerSync),
+    clearLoadCache: explorerSync.clearLoadCache.bind(explorerSync),
+    clearSearchCache: explorerSync.clearSearchCache.bind(explorerSync),
+    clearCaches: explorerSync.clearCaches.bind(explorerSync),
+  };
+}

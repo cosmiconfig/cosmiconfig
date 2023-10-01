@@ -1,22 +1,19 @@
 import fs from 'fs';
+import fsPromises from 'fs/promises';
 import {
-  beforeEach,
   afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
   describe,
   expect,
   test,
-  afterEach,
   vi,
-  beforeAll,
 } from 'vitest';
-import { isNotMjs, TempDir } from './util';
 import { cosmiconfig, cosmiconfigSync, defaultLoaders } from '../src';
-import { canUseDynamicImport } from '../src/canUseDynamicImport';
-import * as readFile from '../src/readFile';
+import { TempDir, isNotMjs } from './util';
 
 const temp = new TempDir();
-
-const describeEsmOnly = canUseDynamicImport() ? describe : describe.skip;
 
 function randomString(): string {
   return Math.random().toString(36).substring(7);
@@ -53,6 +50,7 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -60,9 +58,11 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
     'a/b/c/d/e/f/.config/foorc.yaml',
     'a/b/c/d/e/f/.config/foorc.yml',
     'a/b/c/d/e/f/.config/foorc.js',
+    'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
     'a/b/c/d/e/f/foo.config.js',
+    'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/foo.config.cjs',
     'a/b/c/d/e/f/foo.config.mjs',
     'a/b/c/d/e/package.json',
@@ -71,6 +71,7 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
     'a/b/c/d/e/.foorc.yaml',
     'a/b/c/d/e/.foorc.yml',
     'a/b/c/d/e/.foorc.js',
+    'a/b/c/d/e/.foorc.ts',
     'a/b/c/d/e/.foorc.cjs',
     'a/b/c/d/e/.foorc.mjs',
     'a/b/c/d/e/.config/foorc',
@@ -78,9 +79,11 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
     'a/b/c/d/e/.config/foorc.yaml',
     'a/b/c/d/e/.config/foorc.yml',
     'a/b/c/d/e/.config/foorc.js',
+    'a/b/c/d/e/.config/foorc.ts',
     'a/b/c/d/e/.config/foorc.cjs',
     'a/b/c/d/e/.config/foorc.mjs',
     'a/b/c/d/e/foo.config.js',
+    'a/b/c/d/e/foo.config.ts',
     'a/b/c/d/e/foo.config.cjs',
     'a/b/c/d/e/foo.config.mjs',
     'a/b/c/d/package.json',
@@ -100,7 +103,7 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -108,7 +111,7 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -132,6 +135,7 @@ describe('finds package.json prop in second searched dir', () => {
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -139,9 +143,11 @@ describe('finds package.json prop in second searched dir', () => {
     'a/b/c/d/e/f/.config/foorc.yaml',
     'a/b/c/d/e/f/.config/foorc.yml',
     'a/b/c/d/e/f/.config/foorc.js',
+    'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
     'a/b/c/d/e/f/foo.config.js',
+    'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/foo.config.cjs',
     'a/b/c/d/e/f/foo.config.mjs',
     'a/b/c/d/e/package.json',
@@ -160,7 +166,7 @@ describe('finds package.json prop in second searched dir', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -168,7 +174,7 @@ describe('finds package.json prop in second searched dir', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -200,6 +206,7 @@ describe('finds package.json with nested packageProp in second searched dir', ()
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -207,9 +214,11 @@ describe('finds package.json with nested packageProp in second searched dir', ()
     'a/b/c/d/e/f/.config/foorc.yaml',
     'a/b/c/d/e/f/.config/foorc.yml',
     'a/b/c/d/e/f/.config/foorc.js',
+    'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
     'a/b/c/d/e/f/foo.config.js',
+    'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/foo.config.cjs',
     'a/b/c/d/e/f/foo.config.mjs',
     'a/b/c/d/e/package.json',
@@ -227,14 +236,14 @@ describe('finds package.json with nested packageProp in second searched dir', ()
 
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
 
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -258,6 +267,7 @@ describe('finds JS file in first searched dir', () => {
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -265,6 +275,7 @@ describe('finds JS file in first searched dir', () => {
     'a/b/c/d/e/f/.config/foorc.yaml',
     'a/b/c/d/e/f/.config/foorc.yml',
     'a/b/c/d/e/f/.config/foorc.js',
+    'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
     'a/b/c/d/e/f/foo.config.js',
@@ -284,7 +295,7 @@ describe('finds JS file in first searched dir', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -292,8 +303,10 @@ describe('finds JS file in first searched dir', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
+    // Last call is from `require`.
+    readFileSpy.mock.calls.pop();
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
 });
@@ -316,6 +329,7 @@ describe('finds CJS file in first searched dir', () => {
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -323,9 +337,11 @@ describe('finds CJS file in first searched dir', () => {
     'a/b/c/d/e/f/.config/foorc.yaml',
     'a/b/c/d/e/f/.config/foorc.yml',
     'a/b/c/d/e/f/.config/foorc.js',
+    'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
     'a/b/c/d/e/f/foo.config.js',
+    'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/foo.config.cjs',
   ];
 
@@ -343,7 +359,7 @@ describe('finds CJS file in first searched dir', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -351,13 +367,15 @@ describe('finds CJS file in first searched dir', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
+    // Last call is from `require`.
+    readFileSpy.mock.calls.pop();
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
 });
 
-describeEsmOnly('finds ESM foo.config.mjs file in first searched dir', () => {
+describe('finds ESM foo.config.mjs file in first searched dir', () => {
   // This prefix works around our inability to clear the ESM loader cache.
   const dirPrefix = randomString();
   const startDir = temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f`);
@@ -370,6 +388,7 @@ describeEsmOnly('finds ESM foo.config.mjs file in first searched dir', () => {
     `${dirPrefix}/a/b/c/d/e/f/.foorc.yaml`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.yml`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.js`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.ts`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.cjs`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.mjs`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc`,
@@ -377,9 +396,11 @@ describeEsmOnly('finds ESM foo.config.mjs file in first searched dir', () => {
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.yaml`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.yml`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.js`,
+    `${dirPrefix}/a/b/c/d/e/f/.config/foorc.ts`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.cjs`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.mjs`,
     `${dirPrefix}/a/b/c/d/e/f/foo.config.js`,
+    `${dirPrefix}/a/b/c/d/e/f/foo.config.ts`,
     `${dirPrefix}/a/b/c/d/e/f/foo.config.cjs`,
     `${dirPrefix}/a/b/c/d/e/f/foo.config.mjs`,
   ];
@@ -402,14 +423,14 @@ describeEsmOnly('finds ESM foo.config.mjs file in first searched dir', () => {
       'export default { found: true };',
     );
 
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
 
     const result = await cosmiconfig('foo', explorerOptions).search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
 });
 
-describeEsmOnly('finds ESM foo.config.js file in first searched dir', () => {
+describe('finds ESM foo.config.js file in first searched dir', () => {
   // This prefix works around our inability to clear the ESM loader cache.
   const dirPrefix = randomString();
   const startDir = temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f`);
@@ -422,6 +443,7 @@ describeEsmOnly('finds ESM foo.config.js file in first searched dir', () => {
     `${dirPrefix}/a/b/c/d/e/f/.foorc.yaml`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.yml`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.js`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.ts`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.cjs`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.mjs`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc`,
@@ -429,6 +451,7 @@ describeEsmOnly('finds ESM foo.config.js file in first searched dir', () => {
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.yaml`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.yml`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.js`,
+    `${dirPrefix}/a/b/c/d/e/f/.config/foorc.ts`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.cjs`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.mjs`,
     `${dirPrefix}/a/b/c/d/e/f/foo.config.js`,
@@ -445,6 +468,7 @@ describeEsmOnly('finds ESM foo.config.js file in first searched dir', () => {
     });
   };
 
+  // eslint-disable-next-line vitest/no-identical-title
   test('async', async () => {
     temp.createDir(`${dirPrefix}/a/b/c/d/e/f`);
     temp.createFile(
@@ -456,7 +480,7 @@ describeEsmOnly('finds ESM foo.config.js file in first searched dir', () => {
       '{ "type": "module" }',
     );
 
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
 
     const result = await cosmiconfig('foo', explorerOptions).search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
@@ -497,7 +521,7 @@ describe('finds .foorc.js file in first searched dir', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -505,13 +529,15 @@ describe('finds .foorc.js file in first searched dir', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
+    // Last call is from `require`.
+    readFileSpy.mock.calls.pop();
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
 });
 
-describeEsmOnly('finds ESM .foorc.mjs file in first searched dir', () => {
+describe('finds ESM .foorc.mjs file in first searched dir', () => {
   // This prefix works around our inability to clear the ESM loader cache.
   const dirPrefix = randomString();
   const startDir = temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f`);
@@ -524,6 +550,7 @@ describeEsmOnly('finds ESM .foorc.mjs file in first searched dir', () => {
     `${dirPrefix}/a/b/c/d/e/f/.foorc.yaml`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.yml`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.js`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.ts`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.cjs`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.mjs`,
   ];
@@ -546,14 +573,14 @@ describeEsmOnly('finds ESM .foorc.mjs file in first searched dir', () => {
       'export default { found: true };',
     );
 
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
 
     const result = await cosmiconfig('foo', explorerOptions).search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
 });
 
-describeEsmOnly('finds ESM .foorc.js file in first searched dir', () => {
+describe('finds ESM .foorc.js file in first searched dir', () => {
   // This prefix works around our inability to clear the ESM loader cache.
   const dirPrefix = randomString();
   const startDir = temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f`);
@@ -590,7 +617,7 @@ describeEsmOnly('finds ESM .foorc.js file in first searched dir', () => {
       '{ "type": "module" }',
     );
 
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
 
     const result = await cosmiconfig('foo', explorerOptions).search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
@@ -615,6 +642,7 @@ describe('finds .foorc.cjs file in first searched dir', () => {
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
   ];
 
@@ -636,7 +664,7 @@ describe('finds .foorc.cjs file in first searched dir', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -644,8 +672,10 @@ describe('finds .foorc.cjs file in first searched dir', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
+    // Last call is from `require`.
+    readFileSpy.mock.calls.pop();
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
 });
@@ -665,6 +695,7 @@ describe("finds foorc file in first searched dir's .config subdir", () => {
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -688,7 +719,7 @@ describe("finds foorc file in first searched dir's .config subdir", () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -696,7 +727,7 @@ describe("finds foorc file in first searched dir's .config subdir", () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -717,6 +748,7 @@ describe("finds foorc.json file in first searched dir's .config subdir", () => {
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -741,7 +773,7 @@ describe("finds foorc.json file in first searched dir's .config subdir", () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -749,7 +781,7 @@ describe("finds foorc.json file in first searched dir's .config subdir", () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -770,6 +802,7 @@ describe("finds foorc.yaml file in first searched dir's .config subdir", () => {
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -795,7 +828,7 @@ describe("finds foorc.yaml file in first searched dir's .config subdir", () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -803,7 +836,7 @@ describe("finds foorc.yaml file in first searched dir's .config subdir", () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -824,6 +857,7 @@ describe("finds foorc.yml file in first searched dir's .config subdir", () => {
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -850,7 +884,7 @@ describe("finds foorc.yml file in first searched dir's .config subdir", () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -858,7 +892,7 @@ describe("finds foorc.yml file in first searched dir's .config subdir", () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -882,6 +916,7 @@ describe("finds foorc.js file in first searched dir's .config subdir", () => {
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -909,7 +944,7 @@ describe("finds foorc.js file in first searched dir's .config subdir", () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -917,8 +952,10 @@ describe("finds foorc.js file in first searched dir's .config subdir", () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
+    // Last call is from `require`.
+    readFileSpy.mock.calls.pop();
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
 });
@@ -941,6 +978,7 @@ describe("finds foorc.cjs file in first searched dir's .config subdir", () => {
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -948,6 +986,7 @@ describe("finds foorc.cjs file in first searched dir's .config subdir", () => {
     'a/b/c/d/e/f/.config/foorc.yaml',
     'a/b/c/d/e/f/.config/foorc.yml',
     'a/b/c/d/e/f/.config/foorc.js',
+    'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
   ];
 
@@ -969,7 +1008,7 @@ describe("finds foorc.cjs file in first searched dir's .config subdir", () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -977,8 +1016,10 @@ describe("finds foorc.cjs file in first searched dir's .config subdir", () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
+    // Last call is from `require`.
+    readFileSpy.mock.calls.pop();
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
 });
@@ -1002,6 +1043,7 @@ describe('skips over empty file to find JS file in first searched dir', () => {
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -1009,6 +1051,7 @@ describe('skips over empty file to find JS file in first searched dir', () => {
     'a/b/c/d/e/f/.config/foorc.yaml',
     'a/b/c/d/e/f/.config/foorc.yml',
     'a/b/c/d/e/f/.config/foorc.js',
+    'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
     'a/b/c/d/e/f/foo.config.js',
@@ -1028,7 +1071,7 @@ describe('skips over empty file to find JS file in first searched dir', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -1036,8 +1079,10 @@ describe('skips over empty file to find JS file in first searched dir', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
+    // Last call is from `require`.
+    readFileSpy.mock.calls.pop();
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
 });
@@ -1074,7 +1119,7 @@ describe('finds package.json in second dir searched, with alternate names', () =
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -1082,7 +1127,7 @@ describe('finds package.json in second dir searched, with alternate names', () =
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -1122,14 +1167,14 @@ describe('finds rc file in third searched dir, skipping packageProp, parsing ext
 
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
 
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -1166,7 +1211,7 @@ describe('finds package.json file in second searched dir, skipping JS and RC fil
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -1174,7 +1219,7 @@ describe('finds package.json file in second searched dir, skipping JS and RC fil
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -1197,6 +1242,7 @@ describe('finds .foorc.json in second searched dir', () => {
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -1204,9 +1250,11 @@ describe('finds .foorc.json in second searched dir', () => {
     'a/b/c/d/e/f/.config/foorc.yaml',
     'a/b/c/d/e/f/.config/foorc.yml',
     'a/b/c/d/e/f/.config/foorc.js',
+    'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
     'a/b/c/d/e/f/foo.config.js',
+    'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/foo.config.cjs',
     'a/b/c/d/e/f/foo.config.mjs',
     'a/b/c/d/e/package.json',
@@ -1227,7 +1275,7 @@ describe('finds .foorc.json in second searched dir', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -1235,7 +1283,7 @@ describe('finds .foorc.json in second searched dir', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -1271,7 +1319,7 @@ describe('finds .foorc.yaml in first searched dir', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -1279,7 +1327,7 @@ describe('finds .foorc.yaml in first searched dir', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -1316,7 +1364,7 @@ describe('finds .foorc.yml in first searched dir', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -1324,7 +1372,7 @@ describe('finds .foorc.yml in first searched dir', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -1380,15 +1428,17 @@ describe('adding myfooconfig.js to searchPlaces, finds it in first searched dir'
 
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
 
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
+    // Last call is from `require`.
+    readFileSpy.mock.calls.pop();
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
 });
@@ -1419,6 +1469,7 @@ describe('finds JS file traversing from cwd', () => {
     'a/b/c/d/e/f/.foorc.yaml',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
     'a/b/c/d/e/f/.config/foorc',
@@ -1426,9 +1477,11 @@ describe('finds JS file traversing from cwd', () => {
     'a/b/c/d/e/f/.config/foorc.yaml',
     'a/b/c/d/e/f/.config/foorc.yml',
     'a/b/c/d/e/f/.config/foorc.js',
+    'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
     'a/b/c/d/e/f/foo.config.js',
+    'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/foo.config.cjs',
     'a/b/c/d/e/f/foo.config.mjs',
     'a/b/c/d/e/package.json',
@@ -1437,6 +1490,7 @@ describe('finds JS file traversing from cwd', () => {
     'a/b/c/d/e/.foorc.yaml',
     'a/b/c/d/e/.foorc.yml',
     'a/b/c/d/e/.foorc.js',
+    'a/b/c/d/e/.foorc.ts',
     'a/b/c/d/e/.foorc.cjs',
     'a/b/c/d/e/.foorc.mjs',
     'a/b/c/d/e/.config/foorc',
@@ -1444,6 +1498,7 @@ describe('finds JS file traversing from cwd', () => {
     'a/b/c/d/e/.config/foorc.yaml',
     'a/b/c/d/e/.config/foorc.yml',
     'a/b/c/d/e/.config/foorc.js',
+    'a/b/c/d/e/.config/foorc.ts',
     'a/b/c/d/e/.config/foorc.cjs',
     'a/b/c/d/e/.config/foorc.mjs',
     'a/b/c/d/e/foo.config.js',
@@ -1462,7 +1517,7 @@ describe('finds JS file traversing from cwd', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search();
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -1470,8 +1525,10 @@ describe('finds JS file traversing from cwd', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search();
+    // Last call is from `require`.
+    readFileSpy.mock.calls.pop();
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
 });
@@ -1515,7 +1572,7 @@ describe('searchPlaces can include subdirectories', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -1523,7 +1580,7 @@ describe('searchPlaces can include subdirectories', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -1563,7 +1620,7 @@ describe('directories with the same name as a search place are not treated as fi
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result);
   });
@@ -1571,7 +1628,7 @@ describe('directories with the same name as a search place are not treated as fi
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result);
   });
@@ -1634,7 +1691,7 @@ describe('custom loaders allow non-default file types', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -1642,7 +1699,7 @@ describe('custom loaders allow non-default file types', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -1705,7 +1762,7 @@ describe('adding custom loaders allows for default and non-default file types', 
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -1713,7 +1770,7 @@ describe('adding custom loaders allows for default and non-default file types', 
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -1734,6 +1791,7 @@ describe('defaults loaders can be overridden', () => {
       '.foorc.json',
       'foo.config.cjs',
       'foo.config.js',
+      'foo.config.ts',
       '.foorc.yml',
     ],
     loaders: {
@@ -1746,6 +1804,7 @@ describe('defaults loaders can be overridden', () => {
     'a/b/c/d/e/f/.foorc.json',
     'a/b/c/d/e/f/foo.config.cjs',
     'a/b/c/d/e/f/foo.config.js',
+    'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/.foorc.yml',
     'a/b/c/d/e/package.json',
     'a/b/c/d/e/.foorc.json',
@@ -1766,7 +1825,7 @@ describe('defaults loaders can be overridden', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -1774,7 +1833,7 @@ describe('defaults loaders can be overridden', () => {
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
   });
@@ -1819,7 +1878,7 @@ describe('custom loaders can be async', () => {
     };
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     expect(loadThingsSync).not.toHaveBeenCalled();
     expect(loadThingsAsync).toHaveBeenCalled();
@@ -1835,7 +1894,7 @@ describe('custom loaders can be async', () => {
     };
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     expect(loadThingsSync).toHaveBeenCalled();
     expect(loadThingsAsync).not.toHaveBeenCalled();
@@ -1876,7 +1935,7 @@ describe('a custom loader entry can include just an async loader', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result);
   });
@@ -1917,7 +1976,7 @@ describe('a custom loader entry can include only a sync loader and work for both
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result);
   });
@@ -1925,7 +1984,7 @@ describe('a custom loader entry can include only a sync loader and work for both
   test('sync', () => {
     const explorer = cosmiconfigSync('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(readFile, 'readFileSync');
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
     checkResult(readFileSpy, result);
   });

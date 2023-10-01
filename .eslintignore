@@ -1,5 +1,6 @@
-test/fixtures
+.eslintrc.js
+node_modules
 coverage
-.nyc_output
-flow-typed
 dist
+package-lock.json
+tsconfig.tsbuildinfo

@@ -6,6 +6,51 @@
   - The imported file will act as a base file - all properties from that file will be applied to the configuration, but can be overridden by the importing file
   - For more information, read the [import section of the README](README.md#imports)
 
+## [8.3.6](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.5...cosmiconfig-v8.3.6) (2023-09-13)
+
+### Bug Fixes
+
+- ignore search place if accessing it causes ENOTDIR (i.e. if access of a subpath of a file is attempted) ([5bd915a](https://github.com/cosmiconfig/cosmiconfig/commit/5bd915aa74bbb056a4f8a11679bae7d6cd67ca18))
+
+## [8.3.5](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.4...cosmiconfig-v8.3.5) (2023-09-08)
+
+### Bug Fixes
+
+- pass null to transform function for backwards compat ([2b38510](https://github.com/cosmiconfig/cosmiconfig/commit/2b38510ae2df5feedff75cc12114cc57da9cef3e))
+
+## [8.3.4](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.3...cosmiconfig-v8.3.4) (2023-09-04)
+
+### Bug Fixes
+
+- remove node: prefix from imports ([f76484a](https://github.com/cosmiconfig/cosmiconfig/commit/f76484a9bb0136f1f42490cc3fa9126e688fbaba)), closes [#323](https://github.com/cosmiconfig/cosmiconfig/issues/323)
+
+## [8.3.3](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.2...cosmiconfig-v8.3.3) (2023-09-03)
+
+### Bug Fixes
+
+- add back node 14 compat ([7392541](https://github.com/cosmiconfig/cosmiconfig/commit/7392541527fbe71302cd3a6e42a343c928f3b2fb)), closes [#320](https://github.com/cosmiconfig/cosmiconfig/issues/320)
+
+## [8.3.2](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.1...cosmiconfig-v8.3.2) (2023-09-02)
+
+### Bug Fixes
+
+- use `.cjs` extension for sync compiled typescript ([0d76a9a](https://github.com/cosmiconfig/cosmiconfig/commit/0d76a9a013536e46daf55b1857366d14def40804))
+- use default for async TS loader ([5bed3e3](https://github.com/cosmiconfig/cosmiconfig/commit/5bed3e3c6c8b14222480a69210cb52da12d2d517))
+
+## [8.3.1](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.0...cosmiconfig-v8.3.1) (2023-09-02)
+
+### Bug Fixes
+
+- do not resolve `stopDir` when undefined ([59082e2](https://github.com/cosmiconfig/cosmiconfig/commit/59082e2968fe56f2d399632d951850f13a5383be)), closes [#317](https://github.com/cosmiconfig/cosmiconfig/issues/317)
+
+## [8.3.0](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.2.0...cosmiconfig-v8.3.0) (2023-09-02)
+
+### Features
+
+- add support for TypeScript configuration files ([d88b1b4](https://github.com/cosmiconfig/cosmiconfig/commit/d88b1b45325935b0c2416c820b72ae66d8f103a3))
+- add support for TypeScript configuration files ([d88b1b4](https://github.com/cosmiconfig/cosmiconfig/commit/d88b1b45325935b0c2416c820b72ae66d8f103a3))
+- add support for TypeScript configuration files ([a9c7ada](https://github.com/cosmiconfig/cosmiconfig/commit/a9c7ada59fe0c10a0733b79b5922e6e434c97175))
+
 ## 8.2.0
 
 - Add support for ECMAScript modules (ESM) to the [*asynchronous* API](./README.md#asynchronous-api). End users running Node versions that support ESM can provide `.mjs` files, or `.js` files whose nearest parent `package.json` file contains `"type": "module"`.
@@ -56,6 +101,7 @@
 ## 6.0.0
 
 - **Breaking change:** The package now has named exports. See examples below.
+
 - **Breaking change:** Separate async and sync APIs, accessible from different named exports. If you used `explorer.searchSync()` or `explorer.loadSync()`, you'll now create a sync explorer with `cosmiconfigSync()`, then use `explorerSync.search()` and `explorerSync.load()`.
 
   ```js
@@ -79,14 +125,17 @@
   const searchSyncResult = explorerSync.search();
   const loadSyncResult = explorerSync.load('./file/to/load');
   ```
+
 - **Breaking change:** Remove support for Node 4 and 6. Requires Node 8+.
+
 - **Breaking change:** Use npm package [yaml](https://www.npmjs.com/package/yaml) to parse YAML instead of npm package [js-yaml](https://www.npmjs.com/package/js-yaml).
+
 - **Breaking change:** Remove `cosmiconfig.loaders` and add named export `defaultLoaders` that exports the default loaders used for each extension.
 
   ```js
   import { defaultLoaders } from 'cosmiconfig';
 
-  console.log(Object.entries(defaultLoaders))
+  console.log(Object.entries(defaultLoaders));
   // [
   //   [ '.js', [Function: loadJs] ],
   //   [ '.json', [Function: loadJson] ],
@@ -95,7 +144,9 @@
   //   [ 'noExt', [Function: loadYaml] ]
   // ]
   ```
+
 - Migrate from Flowtype to Typescript.
+
 - Lazy load all default loaders.
 
 ## 5.2.1
@@ -161,7 +212,7 @@ More details:
 - `packageProp` no longer accepts `false`. If you don't want to look in `package.json`, write a `searchPlaces` array that does not include it.
 - By default, empty files are ignored by `search()`. The new option `ignoreEmptySearchPlaces` allows you to load them, instead, in case you want to do something with empty files.
 - The option `configPath` has been removed. Just pass your filepaths directory to `load()`.
-- Removed the `format` option.  Formats are now all handled via the file extensions specified in `loaders`.
+- Removed the `format` option. Formats are now all handled via the file extensions specified in `loaders`.
 
 (If you're wondering with happened to 5.0.0 ... it was a silly publishing mistake.)
 

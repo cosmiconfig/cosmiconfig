@@ -1,20 +1,21 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
+import { existsSync, rmSync, writeFileSync } from 'fs';
+import { rm, writeFile } from 'fs/promises';
+import path from 'path';
 import { pathToFileURL } from 'url';
-import { Loader, LoaderSync } from './index';
-import { Loaders } from './types';
+import { Loader, LoaderSync } from './types.js';
 
 let importFresh: typeof import('import-fresh');
-const loadJsSync: LoaderSync = function loadJsSync(filepath) {
+export const loadJsSync: LoaderSync = function loadJsSync(filepath) {
   if (importFresh === undefined) {
     importFresh = require('import-fresh');
   }
 
-  const result = importFresh(filepath);
-  return result;
+  return importFresh(filepath);
 };
 
-const loadJs: Loader = async function loadJs(filepath) {
+export const loadJs: Loader = async function loadJs(filepath) {
   try {
     const { href } = pathToFileURL(filepath);
     return (await import(href)).default;
@@ -24,35 +25,103 @@ const loadJs: Loader = async function loadJs(filepath) {
 };
 
 let parseJson: typeof import('parse-json');
-const loadJson: LoaderSync = function loadJson(filepath, content) {
+export const loadJson: LoaderSync = function loadJson(filepath, content) {
   if (parseJson === undefined) {
     parseJson = require('parse-json');
   }
 
   try {
-    const result = parseJson(content);
-    return result;
-  } catch (error: any) {
+    return parseJson(content);
+  } catch (error) {
     error.message = `JSON Error in ${filepath}:\n${error.message}`;
     throw error;
   }
 };
 
 let yaml: typeof import('js-yaml');
-const loadYaml: LoaderSync = function loadYaml(filepath, content) {
+export const loadYaml: LoaderSync = function loadYaml(filepath, content) {
   if (yaml === undefined) {
     yaml = require('js-yaml');
   }
 
   try {
-    const result = yaml.load(content);
-    return result;
-  } catch (error: any) {
+    return yaml.load(content);
+  } catch (error) {
     error.message = `YAML Error in ${filepath}:\n${error.message}`;
     throw error;
   }
 };
 
-const loaders: Loaders = { loadJs, loadJsSync, loadJson, loadYaml };
+let typescript: typeof import('typescript');
+export const loadTsSync: LoaderSync = function loadTsSync(filepath, content) {
+  /* istanbul ignore next -- @preserve */
+  if (typescript === undefined) {
+    typescript = require('typescript');
+  }
+  const compiledFilepath = `${filepath.slice(0, -2)}cjs`;
+  try {
+    const config = resolveTsConfig(path.dirname(filepath)) ?? {};
+    config.compilerOptions = {
+      ...config.compilerOptions,
+      module: typescript.ModuleKind.NodeNext,
+      moduleResolution: typescript.ModuleResolutionKind.NodeNext,
+      target: typescript.ScriptTarget.ES2022,
+      noEmit: false,
+    };
+    content = typescript.transpileModule(content, config).outputText;
+    writeFileSync(compiledFilepath, content);
+    return loadJsSync(compiledFilepath, content).default;
+  } catch (error) {
+    error.message = `TypeScript Error in ${filepath}:\n${error.message}`;
+    throw error;
+  } finally {
+    if (existsSync(compiledFilepath)) {
+      rmSync(compiledFilepath);
+    }
+  }
+};
 
-export { loaders };
+export const loadTs: Loader = async function loadTs(filepath, content) {
+  if (typescript === undefined) {
+    typescript = (await import('typescript')).default;
+  }
+  const compiledFilepath = `${filepath.slice(0, -2)}mjs`;
+  try {
+    const config = resolveTsConfig(path.dirname(filepath)) ?? {};
+    config.compilerOptions = {
+      ...config.compilerOptions,
+      module: typescript.ModuleKind.ES2022,
+      moduleResolution: typescript.ModuleResolutionKind.Bundler,
+      target: typescript.ScriptTarget.ES2022,
+      noEmit: false,
+    };
+    content = typescript.transpileModule(content, config).outputText;
+    await writeFile(compiledFilepath, content);
+    const { href } = pathToFileURL(compiledFilepath);
+    return (await import(href)).default;
+  } catch (error) {
+    error.message = `TypeScript Error in ${filepath}:\n${error.message}`;
+    throw error;
+  } finally {
+    if (existsSync(compiledFilepath)) {
+      await rm(compiledFilepath);
+    }
+  }
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function resolveTsConfig(directory: string): any {
+  const filePath = typescript.findConfigFile(directory, (fileName) => {
+    return typescript.sys.fileExists(fileName);
+  });
+  if (filePath !== undefined) {
+    const { config, error } = typescript.readConfigFile(filePath, (path) =>
+      typescript.sys.readFile(path),
+    );
+    if (error) {
+      throw new Error(`Error in ${filePath}: ${error.messageText.toString()}`);
+    }
+    return config;
+  }
+  return;
+}

@@ -1,4 +1,4 @@
-import { beforeEach, afterAll, describe, test, expect } from 'vitest';
+import { beforeEach, afterAll, describe, test, expect, vi } from 'vitest';
 import { TempDir } from './util';
 import { cosmiconfig, cosmiconfigSync } from '../src';
 
@@ -93,6 +93,47 @@ describe('throws error if defined JS file has syntax error', () => {
   });
 });
 
+describe('throws error if defined TS file has syntax error', () => {
+  beforeEach(() => {
+    temp.createFile('foo-invalid.ts', 'export default {--}');
+  });
+
+  const file = temp.absolutePath('foo-invalid.ts');
+
+  test('async', async () => {
+    await expect(cosmiconfig('failed-files-tests').load(file)).rejects.toThrow(
+      'Contents of line 1: export default {}--;',
+    );
+  });
+
+  test('sync', () => {
+    expect(() => cosmiconfigSync('failed-files-tests').load(file)).toThrow(
+      'Invalid left-hand side expression in postfix operation',
+    );
+  });
+});
+
+describe('throws error if defined tsconfig.json file has syntax error', () => {
+  beforeEach(() => {
+    temp.createFile('foo.ts', 'export default {}');
+    temp.createFile('tsconfig.json', 'fdsfko');
+  });
+
+  const file = temp.absolutePath('foo.ts');
+
+  test('async', async () => {
+    await expect(cosmiconfig('failed-files-tests').load(file)).rejects.toThrow(
+      "tsconfig.json: '{' expected.",
+    );
+  });
+
+  test('sync', () => {
+    expect(() => cosmiconfigSync('failed-files-tests').load(file)).toThrow(
+      "tsconfig.json: '{' expected.",
+    );
+  });
+});
+
 describe('returns an empty config result for empty file, format JS', () => {
   beforeEach(() => {
     temp.createFile('foo-empty.js', '');
@@ -168,21 +209,40 @@ describe('returns an empty config result for empty file, format YAML', () => {
   });
 });
 
-describe('throws an error if no configPath was specified and load is called without an argument', () => {
-  const expectedError = 'load must pass a non-empty string';
+describe('[#325] transforms & returns null when no config file is found', () => {
+  beforeEach(() => {
+    // temp.createFile('package.json', '{"name": "failed-files-tests"}');
+  });
+  const checkTransformResult = vi.fn((result: any) =>
+    expect(result).toBeNull(),
+  );
+  const checkResult = (result: any) => expect(result).toBeNull();
 
+  const startAndStopDir = temp.absolutePath('.');
   test('async', async () => {
-    // @ts-ignore
-    await expect(cosmiconfig('not_exist_rc_name').load()).rejects.toThrow(
-      expectedError,
-    );
+    const result = await cosmiconfig('failed-files-tests', {
+      searchPlaces: ['package.json'],
+      stopDir: startAndStopDir,
+      async transform(innerResult) {
+        checkTransformResult(innerResult);
+        return innerResult;
+      },
+    }).search(startAndStopDir);
+    checkResult(result);
+    expect(checkTransformResult).toHaveBeenCalledTimes(1);
   });
 
   test('sync', () => {
-    // @ts-ignore
-    expect(() => cosmiconfigSync('not_exist_rc_name').load()).toThrow(
-      expectedError,
-    );
+    const result = cosmiconfigSync('failed-files-tests', {
+      searchPlaces: ['package.json'],
+      stopDir: startAndStopDir,
+      transform(innerResult) {
+        checkTransformResult(innerResult);
+        return innerResult;
+      },
+    }).search(startAndStopDir);
+    checkResult(result);
+    expect(checkTransformResult).toHaveBeenCalledTimes(1);
   });
 });
 

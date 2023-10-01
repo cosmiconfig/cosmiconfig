@@ -187,8 +187,8 @@ describe('imports', () => {
     const file = temp.absolutePath('foo.yml');
 
     test('async', async () => {
-      await expect(async () =>
-        cosmiconfig('import-tests').load(file),
+      await expect(
+        async () => await cosmiconfig('import-tests').load(file),
       ).rejects.toThrow('a string or a list of strings');
     });
 
@@ -207,8 +207,8 @@ describe('imports', () => {
     const file = temp.absolutePath('foo.yml');
 
     test('async', async () => {
-      await expect(async () =>
-        cosmiconfig('import-tests').load(file),
+      await expect(
+        async () => await cosmiconfig('import-tests').load(file),
       ).rejects.toThrow('no such file or directory');
     });
 
@@ -227,8 +227,8 @@ describe('imports', () => {
     const file = temp.absolutePath('foo.yml');
 
     test('async', async () => {
-      await expect(async () =>
-        cosmiconfig('import-tests').load(file),
+      await expect(
+        async () => await cosmiconfig('import-tests').load(file),
       ).rejects.toThrow('Self-import detected');
     });
 
@@ -249,8 +249,8 @@ describe('imports', () => {
     const file = temp.absolutePath('foo.yml');
 
     test('async', async () => {
-      await expect(async () =>
-        cosmiconfig('import-tests').load(file),
+      await expect(
+        async () => await cosmiconfig('import-tests').load(file),
       ).rejects.toThrow('Circular import detected');
     });
 

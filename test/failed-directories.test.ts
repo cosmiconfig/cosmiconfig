@@ -1,5 +1,6 @@
 import { beforeEach, afterAll, describe, expect, test, vi } from 'vitest';
 import fs from 'fs';
+import fsPromises from 'fs/promises';
 import {
   cosmiconfig,
   cosmiconfigSync,
@@ -31,6 +32,7 @@ describe('gives up if it cannot find the file', () => {
     'a/b/.foorc.yaml',
     'a/b/.foorc.yml',
     'a/b/.foorc.js',
+    'a/b/.foorc.ts',
     'a/b/.foorc.cjs',
     'a/b/.foorc.mjs',
     'a/b/.config/foorc',
@@ -38,9 +40,11 @@ describe('gives up if it cannot find the file', () => {
     'a/b/.config/foorc.yaml',
     'a/b/.config/foorc.yml',
     'a/b/.config/foorc.js',
+    'a/b/.config/foorc.ts',
     'a/b/.config/foorc.cjs',
     'a/b/.config/foorc.mjs',
     'a/b/foo.config.js',
+    'a/b/foo.config.ts',
     'a/b/foo.config.cjs',
     'a/b/foo.config.mjs',
     'a/package.json',
@@ -49,6 +53,7 @@ describe('gives up if it cannot find the file', () => {
     'a/.foorc.yaml',
     'a/.foorc.yml',
     'a/.foorc.js',
+    'a/.foorc.ts',
     'a/.foorc.cjs',
     'a/.foorc.mjs',
     'a/.config/foorc',
@@ -56,9 +61,11 @@ describe('gives up if it cannot find the file', () => {
     'a/.config/foorc.yaml',
     'a/.config/foorc.yml',
     'a/.config/foorc.js',
+    'a/.config/foorc.ts',
     'a/.config/foorc.cjs',
     'a/.config/foorc.mjs',
     'a/foo.config.js',
+    'a/foo.config.ts',
     'a/foo.config.cjs',
     'a/foo.config.mjs',
     'package.json',
@@ -67,6 +74,7 @@ describe('gives up if it cannot find the file', () => {
     '.foorc.yaml',
     '.foorc.yml',
     '.foorc.js',
+    '.foorc.ts',
     '.foorc.cjs',
     '.foorc.mjs',
     '.config/foorc',
@@ -74,9 +82,11 @@ describe('gives up if it cannot find the file', () => {
     '.config/foorc.yaml',
     '.config/foorc.yml',
     '.config/foorc.js',
+    '.config/foorc.ts',
     '.config/foorc.cjs',
     '.config/foorc.mjs',
     'foo.config.js',
+    'foo.config.ts',
     'foo.config.cjs',
     'foo.config.mjs',
   ];
@@ -88,7 +98,7 @@ describe('gives up if it cannot find the file', () => {
     files: any,
   ) => {
     const statPath = temp.getSpyPathCalls(statSpy);
-    expect(statPath).toEqual(['a/b']);
+    expect(statPath).toEqual(['a/b', 'a', '']);
 
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(files);
@@ -99,7 +109,7 @@ describe('gives up if it cannot find the file', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const statSpy = vi.spyOn(fs, 'stat');
 
     const result = await explorer.search(startDir);
@@ -133,6 +143,7 @@ describe('stops at stopDir and gives up', () => {
     'a/b/.foorc.yaml',
     'a/b/.foorc.yml',
     'a/b/.foorc.js',
+    'a/b/.foorc.ts',
     'a/b/.foorc.cjs',
     'a/b/.foorc.mjs',
     'a/b/.config/foorc',
@@ -140,9 +151,11 @@ describe('stops at stopDir and gives up', () => {
     'a/b/.config/foorc.yaml',
     'a/b/.config/foorc.yml',
     'a/b/.config/foorc.js',
+    'a/b/.config/foorc.ts',
     'a/b/.config/foorc.cjs',
     'a/b/.config/foorc.mjs',
     'a/b/foo.config.js',
+    'a/b/foo.config.ts',
     'a/b/foo.config.cjs',
     'a/b/foo.config.mjs',
     'a/package.json',
@@ -151,6 +164,7 @@ describe('stops at stopDir and gives up', () => {
     'a/.foorc.yaml',
     'a/.foorc.yml',
     'a/.foorc.js',
+    'a/.foorc.ts',
     'a/.foorc.cjs',
     'a/.foorc.mjs',
     'a/.config/foorc',
@@ -158,9 +172,11 @@ describe('stops at stopDir and gives up', () => {
     'a/.config/foorc.yaml',
     'a/.config/foorc.yml',
     'a/.config/foorc.js',
+    'a/.config/foorc.ts',
     'a/.config/foorc.cjs',
     'a/.config/foorc.mjs',
     'a/foo.config.js',
+    'a/foo.config.ts',
     'a/foo.config.cjs',
     'a/foo.config.mjs',
   ];
@@ -175,7 +191,7 @@ describe('stops at stopDir and gives up', () => {
   test('async', async () => {
     const explorer = cosmiconfig('foo', explorerOptions);
 
-    const readFileSpy = vi.spyOn(fs, 'readFile');
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(startDir);
     checkResult(readFileSpy, result, expectedFilesChecked);
   });
@@ -585,7 +601,7 @@ describe('throws error if a file in searchPlaces does not have a corresponding l
 
   test('on instantiation', () => {
     expect(() => cosmiconfigSync('foo', explorerOptions)).toThrow(
-      'No loader specified for extension ".things"',
+      'Missing loader for extension ".foorc.things"',
     );
   });
 });
@@ -606,8 +622,31 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
 
   test('on instantiation', () => {
     expect(() => cosmiconfigSync('foo', explorerOptions)).toThrow(
-      'No loader specified for files without extensions',
+      'Missing loader for extension ".foorc".',
     );
+  });
+});
+
+describe('does not throw error when trying to access a folder that is actually a file', () => {
+  beforeEach(() => {
+    temp.createFile('.config', '');
+  });
+
+  const tempDir = temp.absolutePath('.');
+  const explorerOptions = {
+    stopDir: tempDir,
+  };
+
+  test('async', async () => {
+    const result = await cosmiconfig('foo', explorerOptions).search(tempDir);
+
+    expect(result).toBeNull();
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('foo', explorerOptions).search(tempDir);
+
+    expect(result).toBeNull();
   });
 });
 

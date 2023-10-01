@@ -1,96 +1,99 @@
+import fs from 'fs';
 import path from 'path';
-import { cacheWrapperSync } from './cacheWrapper';
-import { ExplorerBase } from './ExplorerBase';
-import { getDirectorySync } from './getDirectory';
+import { isDirectorySync } from 'path-type';
+import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
+import { loadJson } from './loaders.js';
 import { hasOwn, mergeAll } from './merge';
-import { readFileSync } from './readFile';
-import {
-  CosmiconfigResult,
-  ExplorerOptionsSync,
-  LoadedFileContent,
-} from './types';
+import { Config, CosmiconfigResult, InternalOptionsSync } from './types.js';
+import { emplace, getPropertyByPath } from './util.js';
 
-class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
-  public constructor(options: ExplorerOptionsSync) {
-    super(options);
+/**
+ * @internal
+ */
+export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
+  public load(filepath: string): CosmiconfigResult {
+    filepath = path.resolve(filepath);
+
+    const load = (): CosmiconfigResult => {
+      return this.config.transform(this.#readConfiguration(filepath));
+    };
+    if (this.loadCache) {
+      return emplace(this.loadCache, filepath, load);
+    }
+    return load();
   }
 
-  public searchSync(searchFrom: string = process.cwd()): CosmiconfigResult {
+  public search(from = ''): CosmiconfigResult {
     if (this.config.metaConfigFilePath) {
-      const config = this._loadFileSync(this.config.metaConfigFilePath, true);
+      this.loadingMetaConfig = true;
+      const config = this.load(this.config.metaConfigFilePath);
+      this.loadingMetaConfig = false;
       if (config && !config.isEmpty) {
         return config;
       }
     }
-    return this.searchFromDirectorySync(getDirectorySync(searchFrom));
-  }
 
-  private searchFromDirectorySync(dir: string): CosmiconfigResult {
-    const absoluteDir = path.resolve(process.cwd(), dir);
-
-    const run = (): CosmiconfigResult => {
-      const result = this.searchDirectorySync(absoluteDir);
-      const nextDir = this.nextDirectoryToSearch(absoluteDir, result);
-
-      if (nextDir) {
-        return this.searchFromDirectorySync(nextDir);
+    const stopDir = path.resolve(this.config.stopDir);
+    from = path.resolve(from);
+    const search = (): CosmiconfigResult => {
+      /* istanbul ignore if -- @preserve */
+      if (isDirectorySync(from)) {
+        for (const place of this.config.searchPlaces) {
+          const filepath = path.join(from, place);
+          try {
+            const result = this.#readConfiguration(filepath);
+            if (
+              result !== null &&
+              !(result.isEmpty && this.config.ignoreEmptySearchPlaces)
+            ) {
+              return this.config.transform(result);
+            }
+          } catch (error) {
+            if (
+              error.code === 'ENOENT' ||
+              error.code === 'EISDIR' ||
+              error.code === 'ENOTDIR'
+            ) {
+              continue;
+            }
+            throw error;
+          }
+        }
       }
-
-      return this.config.transform(result);
+      const dir = path.dirname(from);
+      if (from !== stopDir && from !== dir) {
+        from = dir;
+        if (this.searchCache) {
+          return emplace(this.searchCache, from, search);
+        }
+        return search();
+      }
+      return this.config.transform(null);
     };
 
     if (this.searchCache) {
-      return cacheWrapperSync(this.searchCache, absoluteDir, run);
+      return emplace(this.searchCache, from, search);
     }
-
-    return run();
+    return search();
   }
 
-  private searchDirectorySync(dir: string): CosmiconfigResult {
-    for (const place of this.config.searchPlaces) {
-      const placeResult = this.loadSearchPlaceSync(dir, place);
-
-      if (this.shouldSearchStopWithResult(placeResult)) {
-        return placeResult;
-      }
-    }
-
-    // config not found
-    return null;
-  }
-
-  private loadSearchPlaceSync(dir: string, place: string): CosmiconfigResult {
-    const filepath = path.join(dir, place);
-    const content = readFileSync(filepath);
-
-    return this.createCosmiconfigResultSync(filepath, content, false);
-  }
-
-  private loadFileContentSync(
+  #readConfiguration(
     filepath: string,
-    content: string | null,
-  ): LoadedFileContent {
-    if (content === null) {
-      return null;
-    }
-    if (content.trim() === '') {
-      return undefined;
-    }
-    const loader = this.getLoaderEntryForFile(filepath);
-    try {
-      return loader(filepath, content);
-    } catch (e) {
-      e.filepath = filepath;
-      throw e;
-    }
+    importStack: Array<string> = [],
+  ): CosmiconfigResult {
+    const contents = fs.readFileSync(filepath, 'utf8');
+    return this.toCosmiconfigResult(
+      filepath,
+      this.#loadConfigFileWithImports(filepath, contents, importStack),
+    );
   }
 
-  private loadFileContentWithImportsSync(
+  #loadConfigFileWithImports(
     filepath: string,
-    content: string | null,
+    contents: string,
     importStack: Array<string>,
-  ): LoadedFileContent {
-    const loadedContent = this.loadFileContentSync(filepath, content);
+  ): Config | null | undefined {
+    const loadedContent = this.#loadConfiguration(filepath, contents);
 
     if (!loadedContent || !hasOwn(loadedContent, '$import')) {
       return loadedContent;
@@ -104,71 +107,59 @@ class ExplorerSync extends ExplorerBase<ExplorerOptionsSync> {
 
     const importedConfigs = importPaths.map((importPath) => {
       const fullPath = path.resolve(fileDirectory, importPath);
-      const importedContent = readFileSync(fullPath, {
-        throwNotFound: true,
-      });
-      const result = this.createCosmiconfigResultSync(
-        fullPath,
-        importedContent,
-        false,
-        newImportStack,
-      );
+      const result = this.#readConfiguration(fullPath, newImportStack);
 
       return result?.config;
     });
-
     return mergeAll([...importedConfigs, ownContent], {
       mergeArrays: this.config.mergeImportArrays,
     });
   }
 
-  private createCosmiconfigResultSync(
-    filepath: string,
-    content: string | null,
-    forceProp: boolean,
-    importStack: Array<string> = [],
-  ): CosmiconfigResult {
-    const fileContent = this.loadFileContentWithImportsSync(
-      filepath,
-      content,
-      importStack,
-    );
-
-    return this.loadedContentToCosmiconfigResult(
-      filepath,
-      fileContent,
-      forceProp,
-    );
-  }
-
-  public loadSync(filepath: string): CosmiconfigResult {
-    return this._loadFileSync(filepath, false);
-  }
-
-  private _loadFileSync(
-    filepath: string,
-    forceProp: boolean,
-  ): CosmiconfigResult {
-    this.validateFilePath(filepath);
-    const absoluteFilePath = path.resolve(process.cwd(), filepath);
-
-    const runLoadSync = (): CosmiconfigResult => {
-      const content = readFileSync(absoluteFilePath, { throwNotFound: true });
-      const cosmiconfigResult = this.createCosmiconfigResultSync(
-        absoluteFilePath,
-        content,
-        forceProp,
-      );
-
-      return this.config.transform(cosmiconfigResult);
-    };
-
-    if (this.loadCache) {
-      return cacheWrapperSync(this.loadCache, absoluteFilePath, runLoadSync);
+  #loadConfiguration(filepath: string, contents: string): Config {
+    if (contents.trim() === '') {
+      return;
     }
 
-    return runLoadSync();
+    if (path.basename(filepath) === 'package.json') {
+      return (
+        getPropertyByPath(
+          loadJson(filepath, contents),
+          this.config.packageProp,
+        ) ?? null
+      );
+    }
+
+    const extension = path.extname(filepath);
+    try {
+      const loader =
+        this.config.loaders[extension || 'noExt'] ??
+        this.config.loaders['default'];
+      if (loader !== undefined) {
+        return loader(filepath, contents);
+      }
+    } catch (error) {
+      error.filepath = filepath;
+      throw error;
+    }
+    throw new Error(
+      `No loader specified for ${getExtensionDescription(extension)}`,
+    );
+  }
+
+  /**
+   * @deprecated Use {@link ExplorerSync.prototype.load}.
+   */
+  /* istanbul ignore next */
+  public loadSync(filepath: string): CosmiconfigResult {
+    return this.load(filepath);
+  }
+
+  /**
+   * @deprecated Use {@link ExplorerSync.prototype.search}.
+   */
+  /* istanbul ignore next */
+  public searchSync(from = ''): CosmiconfigResult {
+    return this.search(from);
   }
 }
-
-export { ExplorerSync };
