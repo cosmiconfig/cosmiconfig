@@ -56,6 +56,7 @@ Cosmiconfig continues to search up the directory tree, checking each of these pl
 - [Caching](#caching)
 - [Differences from rc](#differences-from-rc)
 - [Usage for end users](#usage-for-end-users)
+  - [Imports](#imports)
 - [Contributing & Development](#contributing--development)
 
 ## Installation
@@ -628,6 +629,7 @@ cosmiconfig:
 
 > **Note:** technically, you can overwrite all options described in [cosmiconfigOptions](#cosmiconfigoptions) here,
 > but everything not listed above should be used at your own risk, as it has not been tested explicitly.
+> The only exception to this is the `loaders` property, which is explicitly not supported at this time.
 
 You can also add more root properties outside the `cosmiconfig` property
 to configure your tools, entirely eliminating the need to look for additional configuration files:
@@ -638,6 +640,41 @@ cosmiconfig:
 
 prettier:
   semi: true
+```
+
+### Imports
+
+Wherever you put your configuration (the package.json file, a root config file or a package-specific config file),
+you can use the special `$import` key to import another file as a base.
+
+For example, you can import from an npm package (in this example, `@foocorp/config`).
+
+`.prettierrc.base.yml` in said npm package could define some company-wide defaults:
+
+```yaml
+printWidth: 120
+semi: true
+tabWidth: 2
+```
+
+And then, the `.prettierrc.yml` file in the project itself would just reference that file,
+optionally overriding the defaults with project-specific settings:
+
+```yaml
+$import: node_modules/@your-company/base-configs/.prettierrc.base.yml
+# we want more space!
+printWidth: 200
+```
+
+It is possible to import multiple base files by specifying an array of paths,
+which will be processed in declaration order;
+that means that the last entry will win if there are conflicting properties.
+
+It is also possible to import file formats other than the importing format
+as long as they are supported by the loaders specified by the developer of the tool you're configuring. 
+
+```yaml
+$import: [first.yml, second.json, third.config.js]
 ```
 
 ## Contributing & Development

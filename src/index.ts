@@ -74,6 +74,7 @@ function getInternalOptions<T extends Options | OptionsSync>(
     transform: identity,
     cache: true,
     metaConfigFilePath: null,
+    mergeImportArrays: true,
   });
   const metaConfig = metaExplorer.search();
 
@@ -133,6 +134,7 @@ function normalizeOptions(
     transform: identity,
     loaders: defaultLoaders,
     metaConfigFilePath: null,
+    mergeImportArrays: true,
   } satisfies InternalOptions;
 
   return {
@@ -177,6 +179,7 @@ function normalizeOptionsSync(
     transform: identity,
     loaders: defaultLoadersSync,
     metaConfigFilePath: null,
+    mergeImportArrays: true,
   } satisfies InternalOptionsSync;
 
   return {

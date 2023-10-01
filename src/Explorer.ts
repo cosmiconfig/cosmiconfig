@@ -3,6 +3,7 @@ import path from 'path';
 import { isDirectory } from 'path-type';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
 import { loadJson } from './loaders.js';
+import { hasOwn, mergeAll } from './merge';
 import { Config, CosmiconfigResult, InternalOptions } from './types.js';
 import { emplace, getPropertyByPath } from './util.js';
 
@@ -78,12 +79,46 @@ export class Explorer extends ExplorerBase<InternalOptions> {
     return await search();
   }
 
-  async #readConfiguration(filepath: string): Promise<CosmiconfigResult> {
+  async #readConfiguration(
+    filepath: string,
+    importStack: Array<string> = [],
+  ): Promise<CosmiconfigResult> {
     const contents = await fs.readFile(filepath, { encoding: 'utf-8' });
     return this.toCosmiconfigResult(
       filepath,
-      await this.#loadConfiguration(filepath, contents),
+      await this.#loadConfigFileWithImports(filepath, contents, importStack),
     );
+  }
+
+  async #loadConfigFileWithImports(
+    filepath: string,
+    contents: string,
+    importStack: Array<string>,
+  ): Promise<Config | null | undefined> {
+    const loadedContent = await this.#loadConfiguration(filepath, contents);
+
+    if (!loadedContent || !hasOwn(loadedContent, '$import')) {
+      return loadedContent;
+    }
+
+    const fileDirectory = path.dirname(filepath);
+    const { $import: imports, ...ownContent } = loadedContent;
+    const importPaths = Array.isArray(imports) ? imports : [imports];
+    const newImportStack = [...importStack, filepath];
+    this.validateImports(filepath, importPaths, newImportStack);
+
+    const importedConfigs = await Promise.all(
+      importPaths.map(async (importPath) => {
+        const fullPath = path.resolve(fileDirectory, importPath);
+        const result = await this.#readConfiguration(fullPath, newImportStack);
+
+        return result?.config;
+      }),
+    );
+
+    return mergeAll([...importedConfigs, ownContent], {
+      mergeArrays: this.config.mergeImportArrays,
+    });
   }
 
   async #loadConfiguration(

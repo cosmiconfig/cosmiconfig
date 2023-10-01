@@ -1,56 +1,55 @@
 # Changelog
 
-## [8.3.6](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.5...cosmiconfig-v8.3.6) (2023-09-13)
+## HEAD
 
+- Add support for a special `$import` key which will import another configuration file
+  - The imported file will act as a base file - all properties from that file will be applied to the configuration, but can be overridden by the importing file
+  - For more information, read the [import section of the README](README.md#imports)
+
+## [8.3.6](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.5...cosmiconfig-v8.3.6) (2023-09-13)
 
 ### Bug Fixes
 
-* ignore search place if accessing it causes ENOTDIR (i.e. if access of a subpath of a file is attempted) ([5bd915a](https://github.com/cosmiconfig/cosmiconfig/commit/5bd915aa74bbb056a4f8a11679bae7d6cd67ca18))
+- ignore search place if accessing it causes ENOTDIR (i.e. if access of a subpath of a file is attempted) ([5bd915a](https://github.com/cosmiconfig/cosmiconfig/commit/5bd915aa74bbb056a4f8a11679bae7d6cd67ca18))
 
 ## [8.3.5](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.4...cosmiconfig-v8.3.5) (2023-09-08)
 
-
 ### Bug Fixes
 
-* pass null to transform function for backwards compat ([2b38510](https://github.com/cosmiconfig/cosmiconfig/commit/2b38510ae2df5feedff75cc12114cc57da9cef3e))
+- pass null to transform function for backwards compat ([2b38510](https://github.com/cosmiconfig/cosmiconfig/commit/2b38510ae2df5feedff75cc12114cc57da9cef3e))
 
 ## [8.3.4](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.3...cosmiconfig-v8.3.4) (2023-09-04)
 
-
 ### Bug Fixes
 
-* remove node: prefix from imports ([f76484a](https://github.com/cosmiconfig/cosmiconfig/commit/f76484a9bb0136f1f42490cc3fa9126e688fbaba)), closes [#323](https://github.com/cosmiconfig/cosmiconfig/issues/323)
+- remove node: prefix from imports ([f76484a](https://github.com/cosmiconfig/cosmiconfig/commit/f76484a9bb0136f1f42490cc3fa9126e688fbaba)), closes [#323](https://github.com/cosmiconfig/cosmiconfig/issues/323)
 
 ## [8.3.3](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.2...cosmiconfig-v8.3.3) (2023-09-03)
 
-
 ### Bug Fixes
 
-* add back node 14 compat ([7392541](https://github.com/cosmiconfig/cosmiconfig/commit/7392541527fbe71302cd3a6e42a343c928f3b2fb)), closes [#320](https://github.com/cosmiconfig/cosmiconfig/issues/320)
+- add back node 14 compat ([7392541](https://github.com/cosmiconfig/cosmiconfig/commit/7392541527fbe71302cd3a6e42a343c928f3b2fb)), closes [#320](https://github.com/cosmiconfig/cosmiconfig/issues/320)
 
 ## [8.3.2](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.1...cosmiconfig-v8.3.2) (2023-09-02)
 
-
 ### Bug Fixes
 
-* use `.cjs` extension for sync compiled typescript ([0d76a9a](https://github.com/cosmiconfig/cosmiconfig/commit/0d76a9a013536e46daf55b1857366d14def40804))
-* use default for async TS loader ([5bed3e3](https://github.com/cosmiconfig/cosmiconfig/commit/5bed3e3c6c8b14222480a69210cb52da12d2d517))
+- use `.cjs` extension for sync compiled typescript ([0d76a9a](https://github.com/cosmiconfig/cosmiconfig/commit/0d76a9a013536e46daf55b1857366d14def40804))
+- use default for async TS loader ([5bed3e3](https://github.com/cosmiconfig/cosmiconfig/commit/5bed3e3c6c8b14222480a69210cb52da12d2d517))
 
 ## [8.3.1](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.3.0...cosmiconfig-v8.3.1) (2023-09-02)
 
-
 ### Bug Fixes
 
-* do not resolve `stopDir` when undefined ([59082e2](https://github.com/cosmiconfig/cosmiconfig/commit/59082e2968fe56f2d399632d951850f13a5383be)), closes [#317](https://github.com/cosmiconfig/cosmiconfig/issues/317)
+- do not resolve `stopDir` when undefined ([59082e2](https://github.com/cosmiconfig/cosmiconfig/commit/59082e2968fe56f2d399632d951850f13a5383be)), closes [#317](https://github.com/cosmiconfig/cosmiconfig/issues/317)
 
 ## [8.3.0](https://github.com/cosmiconfig/cosmiconfig/compare/cosmiconfig-v8.2.0...cosmiconfig-v8.3.0) (2023-09-02)
 
-
 ### Features
 
-* add support for TypeScript configuration files ([d88b1b4](https://github.com/cosmiconfig/cosmiconfig/commit/d88b1b45325935b0c2416c820b72ae66d8f103a3))
-* add support for TypeScript configuration files ([d88b1b4](https://github.com/cosmiconfig/cosmiconfig/commit/d88b1b45325935b0c2416c820b72ae66d8f103a3))
-* add support for TypeScript configuration files ([a9c7ada](https://github.com/cosmiconfig/cosmiconfig/commit/a9c7ada59fe0c10a0733b79b5922e6e434c97175))
+- add support for TypeScript configuration files ([d88b1b4](https://github.com/cosmiconfig/cosmiconfig/commit/d88b1b45325935b0c2416c820b72ae66d8f103a3))
+- add support for TypeScript configuration files ([d88b1b4](https://github.com/cosmiconfig/cosmiconfig/commit/d88b1b45325935b0c2416c820b72ae66d8f103a3))
+- add support for TypeScript configuration files ([a9c7ada](https://github.com/cosmiconfig/cosmiconfig/commit/a9c7ada59fe0c10a0733b79b5922e6e434c97175))
 
 ## 8.2.0
 

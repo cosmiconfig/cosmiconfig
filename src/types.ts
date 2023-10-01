@@ -53,6 +53,7 @@ export interface CommonOptions {
   ignoreEmptySearchPlaces?: boolean;
   stopDir?: string;
   cache?: boolean;
+  mergeImportArrays?: boolean;
 }
 
 /**

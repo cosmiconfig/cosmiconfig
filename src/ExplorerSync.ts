@@ -3,6 +3,7 @@ import path from 'path';
 import { isDirectorySync } from 'path-type';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
 import { loadJson } from './loaders.js';
+import { hasOwn, mergeAll } from './merge';
 import { Config, CosmiconfigResult, InternalOptionsSync } from './types.js';
 import { emplace, getPropertyByPath } from './util.js';
 
@@ -76,12 +77,43 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
     return search();
   }
 
-  #readConfiguration(filepath: string): CosmiconfigResult {
+  #readConfiguration(
+    filepath: string,
+    importStack: Array<string> = [],
+  ): CosmiconfigResult {
     const contents = fs.readFileSync(filepath, 'utf8');
     return this.toCosmiconfigResult(
       filepath,
-      this.#loadConfiguration(filepath, contents),
+      this.#loadConfigFileWithImports(filepath, contents, importStack),
     );
+  }
+
+  #loadConfigFileWithImports(
+    filepath: string,
+    contents: string,
+    importStack: Array<string>,
+  ): Config | null | undefined {
+    const loadedContent = this.#loadConfiguration(filepath, contents);
+
+    if (!loadedContent || !hasOwn(loadedContent, '$import')) {
+      return loadedContent;
+    }
+
+    const fileDirectory = path.dirname(filepath);
+    const { $import: imports, ...ownContent } = loadedContent;
+    const importPaths = Array.isArray(imports) ? imports : [imports];
+    const newImportStack = [...importStack, filepath];
+    this.validateImports(filepath, importPaths, newImportStack);
+
+    const importedConfigs = importPaths.map((importPath) => {
+      const fullPath = path.resolve(fileDirectory, importPath);
+      const result = this.#readConfiguration(fullPath, newImportStack);
+
+      return result?.config;
+    });
+    return mergeAll([...importedConfigs, ownContent], {
+      mergeArrays: this.config.mergeImportArrays,
+    });
   }
 
   #loadConfiguration(filepath: string, contents: string): Config {
