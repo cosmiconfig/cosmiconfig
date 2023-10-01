@@ -316,7 +316,7 @@ describe('cosmiconfig', () => {
     const currentDir = process.cwd();
     beforeEach(() => {
       temp.createFile(
-        '.config.json',
+        '.config/config.json',
         '{"cosmiconfig": {"searchPlaces": [".config/{name}.json"]}}',
       );
       process.chdir(temp.dir);
@@ -374,7 +374,7 @@ describe('cosmiconfig', () => {
         searchPlaces: ['.config/foo.json'],
         ignoreEmptySearchPlaces: false,
         mergeImportArrays: true,
-        metaConfigFilePath: path.join(temp.dir, '.config.json'),
+        metaConfigFilePath: path.join(temp.dir, '.config/config.json'),
         stopDir: __dirname,
         cache: false,
       });

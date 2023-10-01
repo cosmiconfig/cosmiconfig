@@ -26,7 +26,7 @@ describe('cosmiconfig meta config', () => {
   });
 
   test('throws when trying to supply loaders', () => {
-    temp.createFile('.config.yml', 'cosmiconfig:\n  loaders: []');
+    temp.createFile('.config/config.yml', 'cosmiconfig:\n  loaders: []');
 
     const currentDir = process.cwd();
     process.chdir(temp.dir);
@@ -64,16 +64,16 @@ describe('cosmiconfig meta config', () => {
           .filter((path) => !path.includes('/node_modules/')),
       ).toEqual([
         'package.json',
-        '.config.json',
-        '.config.yaml',
-        '.config.yml',
+        '.config/config.json',
+        '.config/config.yaml',
+        '.config/config.yml',
       ]);
       readFileSyncSpy.mockClear();
 
       const readFileSpy = vi.spyOn(fsPromises, 'readFile');
       const result = await explorer.search(startDir);
       expect(temp.getSpyPathCalls(readFileSpy)).toEqual([
-        '.config.yml',
+        '.config/config.yml',
         'sub/.foo-config',
         'sub/.foo.config.yml',
         '.foo-config',
@@ -87,7 +87,7 @@ describe('cosmiconfig meta config', () => {
 
     test('without placeholder', async () => {
       temp.createFile(
-        '.config.yml',
+        '.config/config.yml',
         'cosmiconfig:\n  searchPlaces: [".foo-config", ".foo.config.yml"]',
       );
       await runTest();
@@ -95,7 +95,7 @@ describe('cosmiconfig meta config', () => {
 
     test('with placeholder', async () => {
       temp.createFile(
-        '.config.yml',
+        '.config/config.yml',
         'cosmiconfig:\n  searchPlaces: [".{name}-config", ".{name}.config.yml"]',
       );
       await runTest();
@@ -118,7 +118,7 @@ describe('cosmiconfig meta config', () => {
     describe('not existing', () => {
       beforeEach(() => {
         temp.createFile(
-          '.config.yml',
+          '.config/config.yml',
           'cosmiconfig:\n  searchPlaces: [".foo-config"]',
         );
       });
@@ -138,16 +138,16 @@ describe('cosmiconfig meta config', () => {
           constructFiles.filter((path) => !path.includes('/node_modules/')),
         ).toEqual([
           'package.json',
-          '.config.json',
-          '.config.yaml',
-          '.config.yml',
+          '.config/config.json',
+          '.config/config.yaml',
+          '.config/config.yml',
         ]);
 
         expect(
           temp
             .getSpyPathCalls(readFileSpy)
             .filter((path) => !path.includes('/node_modules/')),
-        ).toEqual(['.config.yml', '.foo-config']);
+        ).toEqual(['.config/config.yml', '.foo-config']);
         expect(result).toEqual({
           config: { a: 'c' },
           filepath: file,
@@ -178,14 +178,16 @@ describe('cosmiconfig meta config', () => {
 
     describe('existing', () => {
       beforeEach(() => {
-        temp.createFile('.config.yml', 'foo:\n  a: d');
+        temp.createFile('.config/config.yml', 'foo:\n  a: d');
       });
 
       function checkResult(readFileSpy: SpyInstance, result: any) {
-        expect(temp.getSpyPathCalls(readFileSpy)).toEqual(['.config.yml']);
+        expect(temp.getSpyPathCalls(readFileSpy)).toEqual([
+          '.config/config.yml',
+        ]);
         expect(result).toEqual({
           config: { a: 'd' },
-          filepath: temp.absolutePath('.config.yml'),
+          filepath: temp.absolutePath('.config/config.yml'),
         });
       }
 

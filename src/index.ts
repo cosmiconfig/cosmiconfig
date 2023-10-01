@@ -26,13 +26,13 @@ import { removeUndefinedValuesFromObject } from './util';
 // this needs to be hardcoded, as this is intended for end users, who can't supply options at this point
 export const metaSearchPlaces = [
   'package.json',
-  '.config.json',
-  '.config.yaml',
-  '.config.yml',
-  '.config.js',
-  '.config.ts',
-  '.config.cjs',
-  '.config.mjs',
+  '.config/config.json',
+  '.config/config.yaml',
+  '.config/config.yml',
+  '.config/config.js',
+  '.config/config.ts',
+  '.config/config.cjs',
+  '.config/config.mjs',
 ];
 
 // do not allow mutation of default loaders. Make sure it is set inside options
