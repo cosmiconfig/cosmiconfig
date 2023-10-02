@@ -610,12 +610,12 @@ You can also add a `cosmiconfig` key within your `package.json` file or create o
 to configure `cosmiconfig` itself:
 
 ```
-.config.json
-.config.yaml
-.config.yml
-.config.js
-.config.ts
-.config.cjs
+.config/config.json
+.config/config.yaml
+.config/config.yml
+.config/config.js
+.config/config.ts
+.config/config.cjs
 ```
 
 The following property is currently actively supported in these places:

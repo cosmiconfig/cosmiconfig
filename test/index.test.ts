@@ -336,7 +336,7 @@ describe('cosmiconfig', () => {
       searchPlaces: ['.foorc.json', 'wildandfree.js', '.config/foo.json'],
       packageProp: 'wildandfree',
       ignoreEmptySearchPlaces: false,
-      metaConfigFilePath: `${temp.dir}/.config.json`,
+      metaConfigFilePath: `${temp.dir}/.config/config.json`,
       loaders: {
         noExt: noExtLoader,
         '.mjs': jsLoader,
