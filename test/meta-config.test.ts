@@ -88,7 +88,7 @@ describe('cosmiconfig meta config', () => {
     test('without placeholder', async () => {
       temp.createFile(
         '.config/config.yml',
-        'cosmiconfig:\n  searchPlaces: [".foo-config", ".foo.config.yml"]',
+        'cosmiconfig:\n  searchPlaces: [".foo-config", ".foo.config.yml"]\n  mergeSearchPlaces: false',
       );
       await runTest();
     });
@@ -96,7 +96,7 @@ describe('cosmiconfig meta config', () => {
     test('with placeholder', async () => {
       temp.createFile(
         '.config/config.yml',
-        'cosmiconfig:\n  searchPlaces: [".{name}-config", ".{name}.config.yml"]',
+        'cosmiconfig:\n  searchPlaces: [".{name}-config", ".{name}.config.yml"]\n  mergeSearchPlaces: false',
       );
       await runTest();
     });

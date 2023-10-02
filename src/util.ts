@@ -42,12 +42,8 @@ export function getPropertyByPath(
 
 /** @internal */
 export function removeUndefinedValuesFromObject(
-  options: Record<string, unknown> | undefined,
-): Record<string, unknown> | undefined {
-  /* istanbul ignore if -- @preserve */
-  if (!options) {
-    return undefined;
-  }
+  options: Record<string, unknown>,
+): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(options).filter(([, value]) => value !== undefined),
   );

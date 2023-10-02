@@ -94,7 +94,7 @@ explorer.search()
 // Load a configuration directly when you know where it should be.
 // The result object is the same as for search.
 // See documentation for load, below.
-explorer.load(pathToConfig).then(..);
+explorer.load(pathToConfig).then(/* ... */);
 
 // You can also search and load synchronously.
 const explorerSync = cosmiconfigSync(moduleName);
@@ -117,7 +117,7 @@ The result object you get from `search` or `load` has the following properties:
 
 ```js
 const { cosmiconfig } = require('cosmiconfig');
-const explorer = cosmiconfig(moduleName[, cosmiconfigOptions])
+const explorer = cosmiconfig(moduleName, /* optional */ cosmiconfigOptions)
 ```
 
 Creates a cosmiconfig instance ("explorer") configured according to the arguments, and initializes its caches.
@@ -136,7 +136,7 @@ You may not need them, and should first read about the functions you'll use.
 ### explorer.search()
 
 ```js
-explorer.search([searchFrom]).then(result => {..})
+explorer.search([searchFrom]).then(result => { /* ... */ })
 ```
 
 Searches for a configuration file. Returns a Promise that resolves with a [result] or with `null`, if no configuration file is found.
@@ -179,7 +179,7 @@ If it's a file, the search starts in that file's directory.
 ### explorer.load()
 
 ```js
-explorer.load(loadPath).then(result => {..})
+explorer.load(loadPath).then(result => { /* ... */ })
 ```
 
 Loads a configuration file. Returns a Promise that resolves with a [result] or rejects with an error (if the file does not exist or cannot be loaded).
@@ -212,7 +212,7 @@ Performs both [`clearLoadCache()`] and [`clearSearchCache()`].
 
 ```js
 const { cosmiconfigSync } = require('cosmiconfig');
-const explorerSync = cosmiconfigSync(moduleName[, cosmiconfigOptions])
+const explorerSync = cosmiconfigSync(moduleName, /* optional */ cosmiconfigOptions)
 ```
 
 Creates a *synchronous* cosmiconfig instance ("explorerSync") configured according to the arguments, and initializes its caches.
@@ -401,12 +401,12 @@ If you want to load files that are not handled by the loader functions Cosmiconf
 
 **Custom loader functions** have the following signature:
 
-```js
+```ts
 // Sync
-(filepath: string, content: string) => Object | null
+type SyncLoader = (filepath: string, content: string) => Object | null
 
 // Async
-(filepath: string, content: string) => Object | null | Promise<Object | null>
+type AsyncLoader = (filepath: string, content: string) => Object | null | Promise<Object | null>
 ```
 
 Cosmiconfig reads the file when it checks whether the file exists, so it will provide you with both the file's path and its content.
@@ -423,24 +423,32 @@ Examples:
 
 ```js
 // Allow JSON5 syntax:
-{
-  '.json': json5Loader
-}
+cosmiconfig('foo', {
+  loaders: {
+    '.json': json5Loader
+  }
+});
 
 // Allow a special configuration syntax of your own creation:
-{
-  '.special': specialLoader
-}
+cosmiconfig('foo', {
+  loaders: {
+    '.special': specialLoader
+  }
+});
 
 // Allow many flavors of JS, using custom loaders:
-{
-  '.coffee': coffeeScriptLoader
-}
+cosmiconfig('foo', {
+  loaders: {
+    '.coffee': coffeeScriptLoader
+  }
+});
 
 // Allow many flavors of JS but rely on require hooks:
-{
-  '.coffee': defaultLoaders['.js']
-}
+cosmiconfig('foo', {
+  loaders: {
+    '.coffee': defaultLoaders['.js']
+  }
+});
 ```
 
 ### packageProp
@@ -457,7 +465,7 @@ For example, the value `'configs.myPackage'` or `['configs', 'myPackage']` will 
 ```json
 {
   "configs": {
-    "myPackage": {..}
+    "myPackage": {"option":  "value"}
   }
 }
 ```
@@ -468,7 +476,7 @@ If nested property names within the path include periods, you need to use an arr
 {
   "configs": {
     "foo.bar": {
-      "baz": {..}
+      "baz": {"option":  "value"}
     }
   }
 }
@@ -618,13 +626,16 @@ to configure `cosmiconfig` itself:
 .config/config.cjs
 ```
 
-The following property is currently actively supported in these places:
+The following properties are currently actively supported in these places:
 
 ```yaml
 cosmiconfig:
-  # overrides where configuration files are being searched to enforce a custom naming convention and format
+  # adds places where configuration files are being searched
   searchPlaces:
     - .config/{name}.yml
+  # to enforce a custom naming convention and format, don't merge the above with the tool-defined search places
+  # (`true` is the default setting)
+  mergeSearchPlaces: false
 ```
 
 > **Note:** technically, you can overwrite all options described in [cosmiconfigOptions](#cosmiconfigoptions) here,

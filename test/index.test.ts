@@ -9,10 +9,17 @@ import {
   SpyInstance,
   Mock,
   afterEach,
+  MockInstance,
 } from 'vitest';
 import os from 'os';
-import { defaultLoaders, Loader, LoaderSync } from '../src';
-import { ExplorerOptions, ExplorerOptionsSync, Loaders } from '../src/types';
+import {
+  defaultLoaders,
+  InternalOptions,
+  InternalOptionsSync,
+  Loader,
+  Loaders,
+  LoaderSync,
+} from '../src';
 import { TempDir } from './util';
 import { ExplorerSync } from '../src/ExplorerSync';
 import { Explorer } from '../src/Explorer';
@@ -28,7 +35,7 @@ vi.mock('../src/ExplorerSync', async () => {
   return {
     ExplorerSync: class FakeExplorerSync extends ExplorerSync {
       static mock = mock;
-      constructor(options: ExplorerOptionsSync) {
+      constructor(options: InternalOptionsSync) {
         mock(options);
         super(options);
       }
@@ -45,7 +52,7 @@ vi.mock('../src/Explorer', async () => {
   return {
     Explorer: class FakeExplorer extends Explorer {
       static mock = mock;
-      constructor(options: ExplorerOptions) {
+      constructor(options: InternalOptions) {
         mock(options);
         super(options);
       }
@@ -53,7 +60,7 @@ vi.mock('../src/Explorer', async () => {
   };
 });
 
-const { cosmiconfig, cosmiconfigSync } = await import('../src/index');
+const { cosmiconfig, cosmiconfigSync } = await import('../src/index.js');
 const createExplorerSyncMock = (ExplorerSync as any).mock;
 const createExplorerMock = (Explorer as any).mock;
 
@@ -73,7 +80,7 @@ const checkConfigResult = (
   instanceNum: number,
   expectedLoaderNames: Record<string, string>,
   expectedExplorerOptions: Omit<
-    ExplorerOptions & ExplorerOptionsSync,
+    InternalOptions & InternalOptionsSync,
     'transform' | 'loaders'
   >,
 ) => {
@@ -136,6 +143,7 @@ describe('cosmiconfig', () => {
         searchPlaces: expectedSearchPlaces,
         ignoreEmptySearchPlaces: true,
         mergeImportArrays: true,
+        mergeSearchPlaces: true,
         metaConfigFilePath: null,
         stopDir: os.homedir(),
         cache: true,
@@ -258,6 +266,7 @@ describe('cosmiconfig', () => {
       packageProp: 'wildandfree',
       ignoreEmptySearchPlaces: false,
       mergeImportArrays: true,
+      mergeSearchPlaces: true,
       loaders: {
         noExt: noExtLoader,
         '.mjs': mjsLoader,
@@ -286,6 +295,7 @@ describe('cosmiconfig', () => {
       searchPlaces: ['.config/foo.json'],
       ignoreEmptySearchPlaces: false,
       mergeImportArrays: true,
+      mergeSearchPlaces: true,
       stopDir: __dirname,
       cache: false,
       metaConfigFilePath: null,
@@ -314,14 +324,10 @@ describe('cosmiconfig', () => {
 
   describe('creates explorer with preference of user options over consumer options', () => {
     const currentDir = process.cwd();
+
     beforeEach(() => {
-      temp.createFile(
-        '.config/config.json',
-        '{"cosmiconfig": {"searchPlaces": [".config/{name}.json"]}}',
-      );
       process.chdir(temp.dir);
     });
-
     afterEach(() => process.chdir(currentDir));
 
     const noExtLoader: LoaderSync = () => {};
@@ -348,17 +354,17 @@ describe('cosmiconfig', () => {
       },
     };
 
-    const checkResult = (
-      mock: SpyInstance,
+    const checkResultBase = (
+      mock: MockInstance,
       instanceNum: number,
       expectedLoaderFunctionNames: any,
     ) => {
       const instanceIndex = instanceNum - 1;
 
       expect(mock.mock.calls.length).toBe(instanceNum);
-      expect(mock.mock.calls[instanceIndex].length).toBe(1);
+      expect(mock.mock.calls[instanceIndex]!.length).toBe(1);
       const { transform, loaders, ...explorerOptions } =
-        mock.mock.calls[instanceIndex][0];
+        mock.mock.calls[instanceIndex]![0];
 
       expect(transform.name).toMatch(/identity/);
       const loaderFunctionsByName = getLoaderFunctionsByName(loaders);
@@ -369,47 +375,139 @@ describe('cosmiconfig', () => {
         expect(value).toContain(expectedLoaderFunctionNames[key]);
       }
 
-      expect(explorerOptions).toEqual({
-        packageProp: 'wildandfree',
-        searchPlaces: ['.config/foo.json'],
-        ignoreEmptySearchPlaces: false,
-        mergeImportArrays: true,
-        metaConfigFilePath: path.join(temp.dir, '.config/config.json'),
-        stopDir: __dirname,
-        cache: false,
-      });
+      return explorerOptions;
     };
 
-    test('async', () => {
-      cosmiconfig(moduleName, options);
-      checkResult(createExplorerMock, 1, {
-        '.mjs': 'jsLoader',
-        '.cjs': 'jsLoader',
-        '.js': 'jsLoader',
-        '.ts': 'tsLoader',
-        '.json': 'jsonLoader',
-        '.yaml': 'yamlLoader',
-        '.yml': 'loadYaml',
-        noExt: 'noExtLoader',
+    describe('merging search places', () => {
+      beforeEach(() => {
+        temp.createFile(
+          '.config/config.json',
+          '{"cosmiconfig": {"searchPlaces": [".config/{name}.json"]}}',
+        );
       });
-    });
 
-    test('sync', () => {
-      cosmiconfigSync(moduleName, options);
-      checkResult(
-        createExplorerSyncMock,
-        2, // ExplorerSync is called twice (once in getExplorerOptions)
-        {
-          '.cjs': 'jsLoader',
+      const checkResult = (
+        mock: SpyInstance,
+        instanceNum: number,
+        expectedLoaderFunctionNames: any,
+      ) => {
+        const explorerOptions = checkResultBase(
+          mock,
+          instanceNum,
+          expectedLoaderFunctionNames,
+        );
+        expect(explorerOptions).toEqual({
+          packageProp: 'wildandfree',
+          searchPlaces: [
+            '.config/foo.json',
+            '.foorc.json',
+            'wildandfree.js',
+            '.config/foo.json',
+          ],
+          ignoreEmptySearchPlaces: false,
+          mergeImportArrays: true,
+          mergeSearchPlaces: true,
+          metaConfigFilePath: path.join(temp.dir, '.config/config.json'),
+          stopDir: __dirname,
+          cache: false,
+        });
+      };
+
+      test('async', () => {
+        cosmiconfig(moduleName, options);
+        checkResult(createExplorerMock, 1, {
           '.mjs': 'jsLoader',
+          '.cjs': 'jsLoader',
           '.js': 'jsLoader',
           '.ts': 'tsLoader',
           '.json': 'jsonLoader',
           '.yaml': 'yamlLoader',
           '.yml': 'loadYaml',
           noExt: 'noExtLoader',
-        },
-      );
+        });
+      });
+
+      test('sync', () => {
+        cosmiconfigSync(moduleName, options);
+        checkResult(
+          createExplorerSyncMock,
+          2, // ExplorerSync is called twice (once in getExplorerOptions)
+          {
+            '.cjs': 'jsLoader',
+            '.mjs': 'jsLoader',
+            '.js': 'jsLoader',
+            '.ts': 'tsLoader',
+            '.json': 'jsonLoader',
+            '.yaml': 'yamlLoader',
+            '.yml': 'loadYaml',
+            noExt: 'noExtLoader',
+          },
+        );
+      });
+    });
+
+    describe('not merging search places', () => {
+      beforeEach(() => {
+        temp.createFile(
+          '.config/config.json',
+          '{"cosmiconfig": {"searchPlaces": [".config/{name}.json"], "mergeSearchPlaces": false}}',
+        );
+      });
+
+      const checkResult = (
+        mock: SpyInstance,
+        instanceNum: number,
+        expectedLoaderFunctionNames: any,
+      ) => {
+        const explorerOptions = checkResultBase(
+          mock,
+          instanceNum,
+          expectedLoaderFunctionNames,
+        );
+
+        expect(explorerOptions).toEqual({
+          packageProp: 'wildandfree',
+          searchPlaces: ['.config/foo.json'],
+          ignoreEmptySearchPlaces: false,
+          mergeImportArrays: true,
+          mergeSearchPlaces: false,
+          metaConfigFilePath: path.join(temp.dir, '.config/config.json'),
+          stopDir: __dirname,
+          cache: false,
+        });
+      };
+
+      test('async', () => {
+        cosmiconfig(moduleName, options);
+        checkResult(createExplorerMock, 1, {
+          '.mjs': 'jsLoader',
+          '.cjs': 'jsLoader',
+          '.js': 'jsLoader',
+          '.ts': 'tsLoader',
+          '.json': 'jsonLoader',
+          '.yaml': 'yamlLoader',
+          '.yml': 'loadYaml',
+          noExt: 'noExtLoader',
+        });
+      });
+
+      test('sync', () => {
+        cosmiconfigSync(moduleName, options);
+        checkResult(
+          createExplorerSyncMock,
+          2, // ExplorerSync is called twice (once in getExplorerOptions)
+          {
+            '.cjs': 'jsLoader',
+            '.mjs': 'jsLoader',
+            '.js': 'jsLoader',
+            '.ts': 'tsLoader',
+            '.json': 'jsonLoader',
+            '.yaml': 'yamlLoader',
+            '.yml': 'loadYaml',
+            noExt: 'noExtLoader',
+          },
+        );
+      });
     });
   });
 

@@ -54,6 +54,7 @@ export interface CommonOptions {
   stopDir?: string;
   cache?: boolean;
   mergeImportArrays?: boolean;
+  mergeSearchPlaces?: boolean;
 }
 
 /**

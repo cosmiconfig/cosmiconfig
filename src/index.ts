@@ -13,6 +13,7 @@ import {
   loadYaml,
 } from './loaders.js';
 import {
+  CosmiconfigResult,
   InternalOptions,
   InternalOptionsSync,
   Options,
@@ -109,10 +110,9 @@ const identity: TransformSync = function identity(x) {
   return x;
 };
 
-function getInternalOptions<T extends Options | OptionsSync>(
-  moduleName: string,
-  options: Readonly<T>,
-): T {
+function getUserDefinedOptionsFromMetaConfig<
+  T extends Options | OptionsSync,
+>(): CosmiconfigResult {
   const metaExplorer = new ExplorerSync({
     packageProp: 'cosmiconfig',
     stopDir: process.cwd(),
@@ -124,31 +124,86 @@ function getInternalOptions<T extends Options | OptionsSync>(
     cache: true,
     metaConfigFilePath: null,
     mergeImportArrays: true,
+    mergeSearchPlaces: true,
   });
   const metaConfig = metaExplorer.search();
 
   if (!metaConfig) {
-    return options;
+    return null;
   }
 
   if (metaConfig.config?.loaders) {
     throw new Error('Can not specify loaders in meta config file');
   }
 
-  const overrideOptions = metaConfig.config ?? {};
+  const overrideOptions: Partial<T> = {
+    mergeSearchPlaces: true,
+    ...(metaConfig.config ?? {}),
+  };
 
-  if (overrideOptions.searchPlaces) {
-    overrideOptions.searchPlaces = overrideOptions.searchPlaces.map(
-      (path: string) => path.replace('{name}', moduleName),
-    );
-  }
-
-  overrideOptions.metaConfigFilePath = metaConfig.filepath;
-
-  return { ...options, ...removeUndefinedValuesFromObject(overrideOptions) };
+  return {
+    config: removeUndefinedValuesFromObject(overrideOptions) as Partial<T>,
+    filepath: metaConfig.filepath,
+  };
 }
 
-function normalizeOptions(
+function getResolvedSearchPlaces<T extends Options | OptionsSync>(
+  moduleName: string,
+  toolDefinedSearchPlaces: Array<string>,
+  userConfiguredOptions: T,
+): Array<string> {
+  const userConfiguredSearchPlaces = userConfiguredOptions.searchPlaces?.map(
+    (path: string) => path.replace('{name}', moduleName),
+  );
+  if (userConfiguredOptions.mergeSearchPlaces) {
+    return [...(userConfiguredSearchPlaces ?? []), ...toolDefinedSearchPlaces];
+  }
+
+  return (
+    userConfiguredSearchPlaces ??
+    /* istanbul ignore next */ toolDefinedSearchPlaces
+  );
+}
+
+function mergeOptionsBase<
+  IntOpts extends InternalOptions | InternalOptionsSync,
+  Opts extends Options | OptionsSync,
+>(moduleName: string, defaults: IntOpts, options: Readonly<Opts>): IntOpts {
+  const userDefinedConfig = getUserDefinedOptionsFromMetaConfig<Opts>();
+
+  if (!userDefinedConfig) {
+    return {
+      ...defaults,
+      ...removeUndefinedValuesFromObject(options),
+      loaders: {
+        ...defaults.loaders,
+        ...options.loaders,
+      },
+    };
+  }
+
+  const userConfiguredOptions = userDefinedConfig.config as Readonly<Opts>;
+
+  const toolDefinedSearchPlaces = options.searchPlaces ?? defaults.searchPlaces;
+
+  return {
+    ...defaults,
+    ...removeUndefinedValuesFromObject(options),
+    metaConfigFilePath: userDefinedConfig.filepath,
+    ...userConfiguredOptions,
+    searchPlaces: getResolvedSearchPlaces(
+      moduleName,
+      toolDefinedSearchPlaces,
+      userConfiguredOptions,
+    ),
+    loaders: {
+      ...defaults.loaders,
+      ...options.loaders,
+    },
+  };
+}
+
+function mergeOptions(
   moduleName: string,
   options: Readonly<Options>,
 ): InternalOptions {
@@ -162,19 +217,13 @@ function normalizeOptions(
     loaders: defaultLoaders,
     metaConfigFilePath: null,
     mergeImportArrays: true,
+    mergeSearchPlaces: true,
   } satisfies InternalOptions;
 
-  return {
-    ...defaults,
-    ...removeUndefinedValuesFromObject(options),
-    loaders: {
-      ...defaults.loaders,
-      ...options.loaders,
-    },
-  };
+  return mergeOptionsBase(moduleName, defaults, options);
 }
 
-function normalizeOptionsSync(
+function mergeOptionsSync(
   moduleName: string,
   options: Readonly<OptionsSync>,
 ): InternalOptionsSync {
@@ -188,24 +237,17 @@ function normalizeOptionsSync(
     loaders: defaultLoadersSync,
     metaConfigFilePath: null,
     mergeImportArrays: true,
+    mergeSearchPlaces: true,
   } satisfies InternalOptionsSync;
 
-  return {
-    ...defaults,
-    ...removeUndefinedValuesFromObject(options),
-    loaders: {
-      ...defaults.loaders,
-      ...options.loaders,
-    },
-  };
+  return mergeOptionsBase(moduleName, defaults, options);
 }
 
 export function cosmiconfig(
   moduleName: string,
   options: Readonly<Options> = {},
 ): PublicExplorer {
-  const internalOptions = getInternalOptions(moduleName, options);
-  const normalizedOptions = normalizeOptions(moduleName, internalOptions);
+  const normalizedOptions = mergeOptions(moduleName, options);
   const explorer = new Explorer(normalizedOptions);
   return {
     search: explorer.search.bind(explorer),
@@ -220,8 +262,7 @@ export function cosmiconfigSync(
   moduleName: string,
   options: Readonly<OptionsSync> = {},
 ): PublicExplorerSync {
-  const internalOptions = getInternalOptions(moduleName, options);
-  const normalizedOptions = normalizeOptionsSync(moduleName, internalOptions);
+  const normalizedOptions = mergeOptionsSync(moduleName, options);
   const explorerSync = new ExplorerSync(normalizedOptions);
   return {
     search: explorerSync.search.bind(explorerSync),
