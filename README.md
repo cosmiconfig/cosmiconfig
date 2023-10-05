@@ -20,7 +20,7 @@ For example, if your module's name is "myapp", cosmiconfig will search up the di
 - a `myapp` property in `package.json`
 - a `.myapprc` file in JSON or YAML format
 - a `.myapprc.json`, `.myapprc.yaml`, `.myapprc.yml`, `.myapprc.js`, `.myapprc.ts`, `.myapprc.mjs`, or `.myapprc.cjs` file
-- a `myapprc`, `myapprc.json`, `myapprc.yaml`, `myapprc.yml`, `myapprc.js`, `myapprc.ts` or `myapprc.cjs` file inside a `.config` subdirectory
+- a `myapprc`, `myapprc.json`, `myapprc.yaml`, `myapprc.yml`, `myapprc.js`, `myapprc.ts`, `myapprc.mjs`, or `myapprc.cjs` file inside a `.config` subdirectory
 - a `myapp.config.js`, `myapp.config.ts`, `myapp.config.mjs`, or `myapp.config.cjs` file
 
 Cosmiconfig continues to search up the directory tree, checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
@@ -149,8 +149,8 @@ Here's how your default [`search()`] will work:
 - Starting from `process.cwd()` (or some other directory defined by the `searchFrom` argument to [`search()`]), look for configuration objects in the following places:
   1. A `goldengrahams` property in a `package.json` file.
   2. A `.goldengrahamsrc` file with JSON or YAML syntax.
-  3. A `.goldengrahamsrc.json`, `.goldengrahamsrc.yaml`, `.goldengrahamsrc.yml`, `.goldengrahamsrc.js`, `.goldengrahamsrc.ts`, or `.goldengrahamsrc.cjs` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
-  4. A `goldengrahamsrc`, `goldengrahamsrc.json`, `goldengrahamsrc.yaml`, `goldengrahamsrc.yml`, `goldengrahamsrc.js`, `goldengrahamsrc.ts`, or `goldengrahamsrc.cjs` file in the `.config` subdirectory.
+  3. A `.goldengrahamsrc.json`, `.goldengrahamsrc.yaml`, `.goldengrahamsrc.yml`, `.goldengrahamsrc.js`, `.goldengrahamsrc.ts`, `.goldengrahamsrc.mjs`, or `.goldengrahamsrc.cjs` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
+  4. A `goldengrahamsrc`, `goldengrahamsrc.json`, `goldengrahamsrc.yaml`, `goldengrahamsrc.yml`, `goldengrahamsrc.js`, `goldengrahamsrc.ts`, `goldengrahamsrc.mjs`, or `goldengrahamsrc.cjs` file in the `.config` subdirectory.
   5. A `goldengrahams.config.js`, `goldengrahams.config.ts`, `goldengrahams.config.mjs`, or `goldengrahams.config.cjs` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
 - If none of those searches reveal a configuration object, move up one directory level and try again.
   So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking the same places in each directory.
@@ -286,6 +286,7 @@ For the [asynchronous API](#asynchronous-api), these are the default `searchPlac
   `.config/${moduleName}rc.yml`,
   `.config/${moduleName}rc.js`,
   `.config/${moduleName}rc.ts`,
+  `.config/${moduleName}rc.mjs`,
   `.config/${moduleName}rc.cjs`,
   `${moduleName}.config.js`,
   `${moduleName}.config.ts`,
@@ -584,9 +585,11 @@ package.json
 .config/{NAME}rc.yml
 .config/{NAME}rc.js
 .config/{NAME}rc.ts
+.config/{NAME}rc.mjs
 .config/{NAME}rc.cjs
 {NAME}.config.js
 {NAME}.config.ts
+{NAME}.config.mjs
 {NAME}.config.cjs
 ```
 
