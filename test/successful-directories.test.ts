@@ -10,7 +10,8 @@ import {
   test,
   vi,
 } from 'vitest';
-import { cosmiconfig, cosmiconfigSync, defaultLoaders } from '../src';
+import { cosmiconfig, cosmiconfigSync, Options, OptionsSync } from '../src';
+import { defaultLoaders } from '../src/defaults';
 import { TempDir, isNotMjs } from './util';
 
 const temp = new TempDir();
@@ -1190,8 +1191,9 @@ describe('finds package.json file in second searched dir, skipping JS and RC fil
 
   const startDir = temp.absolutePath('a/b/c/d/e/f');
   const explorerOptions = {
+    searchStrategy: 'global',
     searchPlaces: ['package.json'],
-  };
+  } satisfies Partial<Options | OptionsSync>;
 
   const expectedFilesChecked = [
     'a/b/c/d/e/f/package.json',

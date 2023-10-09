@@ -1,120 +1,43 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-export * from './types.js';
-
-import os from 'os';
+import {
+  defaultLoaders,
+  defaultLoadersSync,
+  getDefaultSearchPlaces,
+  getDefaultSearchPlacesSync,
+  metaSearchPlaces,
+  globalConfigSearchPlaces,
+  globalConfigSearchPlacesSync,
+} from './defaults';
 import { Explorer } from './Explorer.js';
 import { ExplorerSync } from './ExplorerSync.js';
 import {
-  loadJs,
-  loadJson,
-  loadJsSync,
-  loadTs,
-  loadTsSync,
-  loadYaml,
-} from './loaders.js';
-import {
+  CommonOptions,
+  Config,
   CosmiconfigResult,
   InternalOptions,
   InternalOptionsSync,
+  Loader,
+  LoaderResult,
+  Loaders,
+  LoadersSync,
+  LoaderSync,
   Options,
   OptionsSync,
   PublicExplorer,
+  PublicExplorerBase,
   PublicExplorerSync,
+  SearchStrategy,
+  Transform,
   TransformSync,
 } from './types.js';
 import { removeUndefinedValuesFromObject } from './util';
-
-// this needs to be hardcoded, as this is intended for end users, who can't supply options at this point
-export const metaSearchPlaces = [
-  'package.json',
-  '.config/config.json',
-  '.config/config.yaml',
-  '.config/config.yml',
-  '.config/config.js',
-  '.config/config.ts',
-  '.config/config.cjs',
-  '.config/config.mjs',
-];
-
-// do not allow mutation of default loaders. Make sure it is set inside options
-export const defaultLoaders = Object.freeze({
-  '.mjs': loadJs,
-  '.cjs': loadJs,
-  '.js': loadJs,
-  '.ts': loadTs,
-  '.json': loadJson,
-  '.yaml': loadYaml,
-  '.yml': loadYaml,
-  noExt: loadYaml,
-} as const);
-export const defaultLoadersSync = Object.freeze({
-  '.cjs': loadJsSync,
-  '.js': loadJsSync,
-  '.ts': loadTsSync,
-  '.json': loadJson,
-  '.yaml': loadYaml,
-  '.yml': loadYaml,
-  noExt: loadYaml,
-} as const);
-
-export function getDefaultSearchPlaces(moduleName: string): Array<string> {
-  return [
-    'package.json',
-    `.${moduleName}rc`,
-    `.${moduleName}rc.json`,
-    `.${moduleName}rc.yaml`,
-    `.${moduleName}rc.yml`,
-    `.${moduleName}rc.js`,
-    `.${moduleName}rc.ts`,
-    `.${moduleName}rc.cjs`,
-    `.${moduleName}rc.mjs`,
-    `.config/${moduleName}rc`,
-    `.config/${moduleName}rc.json`,
-    `.config/${moduleName}rc.yaml`,
-    `.config/${moduleName}rc.yml`,
-    `.config/${moduleName}rc.js`,
-    `.config/${moduleName}rc.ts`,
-    `.config/${moduleName}rc.cjs`,
-    `.config/${moduleName}rc.mjs`,
-    `${moduleName}.config.js`,
-    `${moduleName}.config.ts`,
-    `${moduleName}.config.cjs`,
-    `${moduleName}.config.mjs`,
-  ];
-}
-
-export function getDefaultSearchPlacesSync(moduleName: string): Array<string> {
-  return [
-    'package.json',
-    `.${moduleName}rc`,
-    `.${moduleName}rc.json`,
-    `.${moduleName}rc.yaml`,
-    `.${moduleName}rc.yml`,
-    `.${moduleName}rc.js`,
-    `.${moduleName}rc.ts`,
-    `.${moduleName}rc.cjs`,
-    `.config/${moduleName}rc`,
-    `.config/${moduleName}rc.json`,
-    `.config/${moduleName}rc.yaml`,
-    `.config/${moduleName}rc.yml`,
-    `.config/${moduleName}rc.js`,
-    `.config/${moduleName}rc.ts`,
-    `.config/${moduleName}rc.cjs`,
-    `${moduleName}.config.js`,
-    `${moduleName}.config.ts`,
-    `${moduleName}.config.cjs`,
-  ];
-}
 
 const identity: TransformSync = function identity(x) {
   return x;
 };
 
-function getUserDefinedOptionsFromMetaConfig<
-  T extends Options | OptionsSync,
->(): CosmiconfigResult {
+function getUserDefinedOptionsFromMetaConfig(): CosmiconfigResult {
   const metaExplorer = new ExplorerSync({
-    packageProp: 'cosmiconfig',
+    moduleName: 'cosmiconfig',
     stopDir: process.cwd(),
     searchPlaces: metaSearchPlaces,
     ignoreEmptySearchPlaces: false,
@@ -125,6 +48,7 @@ function getUserDefinedOptionsFromMetaConfig<
     metaConfigFilePath: null,
     mergeImportArrays: true,
     mergeSearchPlaces: true,
+    searchStrategy: 'none',
   });
   const metaConfig = metaExplorer.search();
 
@@ -136,13 +60,19 @@ function getUserDefinedOptionsFromMetaConfig<
     throw new Error('Can not specify loaders in meta config file');
   }
 
-  const overrideOptions: Partial<T> = {
+  if (metaConfig.config?.searchStrategy) {
+    throw new Error('Can not specify searchStrategy in meta config file');
+  }
+
+  const overrideOptions: Partial<Options | OptionsSync> = {
     mergeSearchPlaces: true,
     ...(metaConfig.config ?? {}),
   };
 
   return {
-    config: removeUndefinedValuesFromObject(overrideOptions) as Partial<T>,
+    config: removeUndefinedValuesFromObject(overrideOptions) as Partial<
+      Options | OptionsSync
+    >,
     filepath: metaConfig.filepath,
   };
 }
@@ -168,8 +98,12 @@ function getResolvedSearchPlaces<T extends Options | OptionsSync>(
 function mergeOptionsBase<
   IntOpts extends InternalOptions | InternalOptionsSync,
   Opts extends Options | OptionsSync,
->(moduleName: string, defaults: IntOpts, options: Readonly<Opts>): IntOpts {
-  const userDefinedConfig = getUserDefinedOptionsFromMetaConfig<Opts>();
+>(
+  moduleName: string,
+  defaults: IntOpts,
+  options: Readonly<Partial<Opts>>,
+): IntOpts {
+  const userDefinedConfig = getUserDefinedOptionsFromMetaConfig();
 
   if (!userDefinedConfig) {
     return {
@@ -203,21 +137,36 @@ function mergeOptionsBase<
   };
 }
 
+function validateOptions(
+  options: Readonly<Partial<Options | OptionsSync>>,
+): void {
+  if (
+    options.searchStrategy != null &&
+    options.searchStrategy !== 'global' &&
+    options.stopDir
+  ) {
+    throw new Error(
+      'Can not supply `stopDir` option with `searchStrategy` other than "global"',
+    );
+  }
+}
+
 function mergeOptions(
   moduleName: string,
-  options: Readonly<Options>,
+  options: Readonly<Partial<Options>>,
 ): InternalOptions {
+  validateOptions(options);
   const defaults = {
-    packageProp: moduleName,
+    moduleName,
     searchPlaces: getDefaultSearchPlaces(moduleName),
     ignoreEmptySearchPlaces: true,
-    stopDir: os.homedir(),
     cache: true,
     transform: identity,
     loaders: defaultLoaders,
     metaConfigFilePath: null,
     mergeImportArrays: true,
     mergeSearchPlaces: true,
+    searchStrategy: options.stopDir ? 'global' : 'none',
   } satisfies InternalOptions;
 
   return mergeOptionsBase(moduleName, defaults, options);
@@ -225,19 +174,20 @@ function mergeOptions(
 
 function mergeOptionsSync(
   moduleName: string,
-  options: Readonly<OptionsSync>,
+  options: Readonly<Partial<OptionsSync>>,
 ): InternalOptionsSync {
+  validateOptions(options);
   const defaults = {
-    packageProp: moduleName,
+    moduleName,
     searchPlaces: getDefaultSearchPlacesSync(moduleName),
     ignoreEmptySearchPlaces: true,
-    stopDir: os.homedir(),
     cache: true,
     transform: identity,
     loaders: defaultLoadersSync,
     metaConfigFilePath: null,
     mergeImportArrays: true,
     mergeSearchPlaces: true,
+    searchStrategy: options.stopDir ? 'global' : 'none',
   } satisfies InternalOptionsSync;
 
   return mergeOptionsBase(moduleName, defaults, options);
@@ -245,7 +195,7 @@ function mergeOptionsSync(
 
 export function cosmiconfig(
   moduleName: string,
-  options: Readonly<Options> = {},
+  options: Readonly<Partial<Options>> = {},
 ): PublicExplorer {
   const normalizedOptions = mergeOptions(moduleName, options);
   const explorer = new Explorer(normalizedOptions);
@@ -260,7 +210,7 @@ export function cosmiconfig(
 
 export function cosmiconfigSync(
   moduleName: string,
-  options: Readonly<OptionsSync> = {},
+  options: Readonly<Partial<OptionsSync>> = {},
 ): PublicExplorerSync {
   const normalizedOptions = mergeOptionsSync(moduleName, options);
   const explorerSync = new ExplorerSync(normalizedOptions);
@@ -272,3 +222,26 @@ export function cosmiconfigSync(
     clearCaches: explorerSync.clearCaches.bind(explorerSync),
   };
 }
+
+export {
+  Config,
+  CosmiconfigResult,
+  LoaderResult,
+  Loader,
+  Loaders,
+  LoaderSync,
+  LoadersSync,
+  Transform,
+  TransformSync,
+  SearchStrategy,
+  CommonOptions,
+  Options,
+  OptionsSync,
+  PublicExplorerBase,
+  PublicExplorer,
+  PublicExplorerSync,
+  getDefaultSearchPlaces,
+  getDefaultSearchPlacesSync,
+  globalConfigSearchPlaces,
+  globalConfigSearchPlacesSync,
+};

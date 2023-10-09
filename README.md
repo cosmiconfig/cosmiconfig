@@ -643,7 +643,8 @@ cosmiconfig:
 
 > **Note:** technically, you can overwrite all options described in [cosmiconfigOptions](#cosmiconfigoptions) here,
 > but everything not listed above should be used at your own risk, as it has not been tested explicitly.
-> The only exception to this is the `loaders` property, which is explicitly not supported at this time.
+> The only exceptions to this are the `loaders` property, which is explicitly not supported at this time,
+> and the `searchStrategy` property, which is intentionally disallowed.
 
 You can also add more root properties outside the `cosmiconfig` property
 to configure your tools, entirely eliminating the need to look for additional configuration files:

@@ -1,10 +1,16 @@
 import fs from 'fs';
 import path from 'path';
 import { isDirectorySync } from 'path-type';
+import { globalConfigSearchPlacesSync } from './defaults';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
 import { loadJson } from './loaders.js';
 import { hasOwn, mergeAll } from './merge';
-import { Config, CosmiconfigResult, InternalOptionsSync } from './types.js';
+import {
+  Config,
+  CosmiconfigResult,
+  InternalOptionsSync,
+  DirToSearch,
+} from './types.js';
 import { emplace, getPropertyByPath } from './util.js';
 
 /**
@@ -33,13 +39,24 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
       }
     }
 
-    const stopDir = path.resolve(this.config.stopDir);
     from = path.resolve(from);
+    const dirs = this.#getDirs(from);
+    const firstDirIter = dirs.next();
+    /* istanbul ignore if -- @preserve */
+    if (firstDirIter.done) {
+      // this should never happen
+      throw new Error(
+        `Could not find any folders to iterate through (start from ${from})`,
+      );
+    }
+    let currentDir = firstDirIter.value;
     const search = (): CosmiconfigResult => {
       /* istanbul ignore if -- @preserve */
-      if (isDirectorySync(from)) {
-        for (const place of this.config.searchPlaces) {
-          const filepath = path.join(from, place);
+      if (isDirectorySync(currentDir.path)) {
+        for (const filepath of this.getSearchPlacesForDir(
+          currentDir,
+          globalConfigSearchPlacesSync,
+        )) {
           try {
             const result = this.#readConfiguration(filepath);
             if (
@@ -60,11 +77,11 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
           }
         }
       }
-      const dir = path.dirname(from);
-      if (from !== stopDir && from !== dir) {
-        from = dir;
+      const nextDirIter = dirs.next();
+      if (!nextDirIter.done) {
+        currentDir = nextDirIter.value;
         if (this.searchCache) {
-          return emplace(this.searchCache, from, search);
+          return emplace(this.searchCache, currentDir.path, search);
         }
         return search();
       }
@@ -125,7 +142,7 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
       return (
         getPropertyByPath(
           loadJson(filepath, contents),
-          this.config.packageProp,
+          this.config.packageProp ?? this.config.moduleName,
         ) ?? null
       );
     }
@@ -145,6 +162,45 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
     throw new Error(
       `No loader specified for ${getExtensionDescription(extension)}`,
     );
+  }
+
+  #fileExists(path: string): boolean {
+    try {
+      fs.statSync(path);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  *#getDirs(startDir: string): Iterator<DirToSearch> {
+    switch (this.config.searchStrategy) {
+      case 'none': {
+        // there is no next dir
+        yield { path: startDir, isGlobalConfig: false };
+        return;
+      }
+      case 'project': {
+        let currentDir = startDir;
+        while (true) {
+          yield { path: currentDir, isGlobalConfig: false };
+          if (this.#fileExists(path.join(currentDir, 'package.json'))) {
+            break;
+          }
+          const parentDir = path.dirname(currentDir);
+          /* istanbul ignore if -- @preserve */
+          if (parentDir === currentDir) {
+            // we're probably at the root of the directory structure
+            break;
+          }
+          currentDir = parentDir;
+        }
+        return;
+      }
+      case 'global': {
+        yield* this.getGlobalDirs(startDir);
+      }
+    }
   }
 
   /**

@@ -1,12 +1,10 @@
+import envPaths from 'env-paths';
+import path from 'path';
 import { beforeEach, afterAll, describe, expect, test, vi } from 'vitest';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
-import {
-  cosmiconfig,
-  cosmiconfigSync,
-  defaultLoaders,
-  OptionsSync,
-} from '../src';
+import { cosmiconfig, cosmiconfigSync, OptionsSync } from '../src';
+import { defaultLoaders } from '../src/defaults';
 import { isNotMjs, TempDir } from './util';
 
 const temp = new TempDir();
@@ -24,6 +22,11 @@ afterAll(() => {
 describe('gives up if it cannot find the file', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('.') };
+
+  const globalConfigPath = envPaths('foo', { suffix: '' }).config;
+  // sorry, we have to create this folder even on a testing system, so we can spy on the reads properly
+  fs.mkdirSync(globalConfigPath, { recursive: true });
+  const relativeGlobalConfigPath = path.relative(temp.dir, globalConfigPath);
 
   const expectedFilesChecked = [
     'a/b/package.json',
@@ -89,6 +92,16 @@ describe('gives up if it cannot find the file', () => {
     'foo.config.ts',
     'foo.config.cjs',
     'foo.config.mjs',
+    ...[
+      'config',
+      'config.json',
+      'config.yaml',
+      'config.yml',
+      'config.js',
+      'config.ts',
+      'config.cjs',
+      'config.mjs',
+    ].map((place) => path.join(relativeGlobalConfigPath, place)),
   ];
 
   const checkResult = (
@@ -98,7 +111,7 @@ describe('gives up if it cannot find the file', () => {
     files: any,
   ) => {
     const statPath = temp.getSpyPathCalls(statSpy);
-    expect(statPath).toEqual(['a/b', 'a', '']);
+    expect(statPath).toEqual(['a/b', 'a', '', relativeGlobalConfigPath]);
 
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(files);
@@ -135,6 +148,11 @@ describe('gives up if it cannot find the file', () => {
 describe('stops at stopDir and gives up', () => {
   const startDir = temp.absolutePath('a/b');
   const explorerOptions = { stopDir: temp.absolutePath('a') };
+
+  const globalConfigPath = envPaths('foo', { suffix: '' }).config;
+  // sorry, we have to create this folder even on a testing system, so we can spy on the reads properly
+  fs.mkdirSync(globalConfigPath, { recursive: true });
+  const relativeGlobalConfigPath = path.relative(temp.dir, globalConfigPath);
 
   const expectedFilesChecked = [
     'a/b/package.json',
@@ -179,6 +197,16 @@ describe('stops at stopDir and gives up', () => {
     'a/foo.config.ts',
     'a/foo.config.cjs',
     'a/foo.config.mjs',
+    ...[
+      'config',
+      'config.json',
+      'config.yaml',
+      'config.yml',
+      'config.js',
+      'config.ts',
+      'config.cjs',
+      'config.mjs',
+    ].map((place) => path.join(relativeGlobalConfigPath, place)),
   ];
 
   const checkResult = (readFileSpy: any, result: any, files: any) => {
@@ -611,14 +639,13 @@ describe('throws error if an extensionless file in searchPlaces does not have a 
     temp.createFile('a/b/c/d/e/f/.foorc', '{ "foo": "bar" }');
   });
 
-  const explorerOptions: OptionsSync = {
+  const explorerOptions = {
     stopDir: temp.absolutePath('.'),
     searchPlaces: ['package.json', '.foorc'],
     loaders: {
-      // @ts-ignore
       noExt: undefined,
     },
-  };
+  } as unknown as OptionsSync;
 
   test('on instantiation', () => {
     expect(() => cosmiconfigSync('foo', explorerOptions)).toThrow(

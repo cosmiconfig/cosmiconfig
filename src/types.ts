@@ -47,46 +47,54 @@ export type TransformSync = (
 /**
  * @public
  */
+export type SearchStrategy = 'none' | 'project' | 'global';
+
+/**
+ * @public
+ */
 export interface CommonOptions {
   packageProp?: string | Array<string>;
-  searchPlaces?: Array<string>;
-  ignoreEmptySearchPlaces?: boolean;
+  searchPlaces: Array<string>;
+  ignoreEmptySearchPlaces: boolean;
   stopDir?: string;
-  cache?: boolean;
-  mergeImportArrays?: boolean;
-  mergeSearchPlaces?: boolean;
+  cache: boolean;
+  mergeImportArrays: boolean;
+  mergeSearchPlaces: boolean;
+  searchStrategy: SearchStrategy;
 }
 
 /**
  * @public
  */
 export interface Options extends CommonOptions {
-  loaders?: Loaders;
-  transform?: Transform;
+  loaders: Loaders;
+  transform: Transform;
 }
 
 /**
  * @public
  */
 export interface OptionsSync extends CommonOptions {
-  loaders?: LoadersSync;
-  transform?: TransformSync;
+  loaders: LoadersSync;
+  transform: TransformSync;
 }
 
 /**
  * @internal
  */
-export interface InternalOptions extends Required<Options> {
+export interface InternalOptions extends Options {
   applyPackagePropertyPathToConfiguration?: boolean;
   metaConfigFilePath: string | null;
+  moduleName: string;
 }
 
 /**
  * @internal
  */
-export interface InternalOptionsSync extends Required<OptionsSync> {
+export interface InternalOptionsSync extends OptionsSync {
   applyPackagePropertyPathToConfiguration?: boolean;
   metaConfigFilePath: string | null;
+  moduleName: string;
 }
 
 /**
@@ -136,4 +144,12 @@ export interface PublicExplorer extends PublicExplorerBase {
 export interface PublicExplorerSync extends PublicExplorerBase {
   search: (searchFrom?: string) => CosmiconfigResult;
   load: (filepath: string) => CosmiconfigResult;
+}
+
+/**
+ * @internal
+ */
+export interface DirToSearch {
+  path: string;
+  isGlobalConfig: boolean;
 }

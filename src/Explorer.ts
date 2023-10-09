@@ -1,10 +1,16 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { isDirectory } from 'path-type';
+import { globalConfigSearchPlaces } from './defaults';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
 import { loadJson } from './loaders.js';
 import { hasOwn, mergeAll } from './merge';
-import { Config, CosmiconfigResult, InternalOptions } from './types.js';
+import {
+  Config,
+  CosmiconfigResult,
+  InternalOptions,
+  DirToSearch,
+} from './types.js';
 import { emplace, getPropertyByPath } from './util.js';
 
 /**
@@ -35,13 +41,24 @@ export class Explorer extends ExplorerBase<InternalOptions> {
       }
     }
 
-    const stopDir = path.resolve(this.config.stopDir);
     from = path.resolve(from);
+    const dirs = this.#getDirs(from);
+    const firstDirIter = await dirs.next();
+    /* istanbul ignore if -- @preserve */
+    if (firstDirIter.done) {
+      // this should never happen
+      throw new Error(
+        `Could not find any folders to iterate through (start from ${from})`,
+      );
+    }
+    let currentDir = firstDirIter.value;
     const search = async (): Promise<CosmiconfigResult> => {
       /* istanbul ignore if -- @preserve */
-      if (await isDirectory(from)) {
-        for (const place of this.config.searchPlaces) {
-          const filepath = path.join(from, place);
+      if (await isDirectory(currentDir.path)) {
+        for (const filepath of this.getSearchPlacesForDir(
+          currentDir,
+          globalConfigSearchPlaces,
+        )) {
           try {
             const result = await this.#readConfiguration(filepath);
             if (
@@ -62,11 +79,11 @@ export class Explorer extends ExplorerBase<InternalOptions> {
           }
         }
       }
-      const dir = path.dirname(from);
-      if (from !== stopDir && from !== dir) {
-        from = dir;
+      const nextDirIter = await dirs.next();
+      if (!nextDirIter.done) {
+        currentDir = nextDirIter.value;
         if (this.searchCache) {
-          return await emplace(this.searchCache, from, search);
+          return await emplace(this.searchCache, currentDir.path, search);
         }
         return await search();
       }
@@ -133,7 +150,7 @@ export class Explorer extends ExplorerBase<InternalOptions> {
       return (
         getPropertyByPath(
           loadJson(filepath, contents),
-          this.config.packageProp,
+          this.config.packageProp ?? this.config.moduleName,
         ) ?? null
       );
     }
@@ -154,5 +171,44 @@ export class Explorer extends ExplorerBase<InternalOptions> {
     throw new Error(
       `No loader specified for ${getExtensionDescription(extension)}`,
     );
+  }
+
+  async #fileExists(path: string): Promise<boolean> {
+    try {
+      await fs.stat(path);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async *#getDirs(startDir: string): AsyncIterableIterator<DirToSearch> {
+    switch (this.config.searchStrategy) {
+      case 'none': {
+        // only check in the passed directory (defaults to working directory)
+        yield { path: startDir, isGlobalConfig: false };
+        return;
+      }
+      case 'project': {
+        let currentDir = startDir;
+        while (true) {
+          yield { path: currentDir, isGlobalConfig: false };
+          if (await this.#fileExists(path.join(currentDir, 'package.json'))) {
+            break;
+          }
+          const parentDir = path.dirname(currentDir);
+          /* istanbul ignore if -- @preserve */
+          if (parentDir === currentDir) {
+            // we're probably at the root of the directory structure
+            break;
+          }
+          currentDir = parentDir;
+        }
+        return;
+      }
+      case 'global': {
+        yield* this.getGlobalDirs(startDir);
+      }
+    }
   }
 }

@@ -1,29 +1,23 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function*/
+import path from 'path';
 import {
-  expect,
-  describe,
-  beforeEach,
   afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  Mock,
+  MockInstance,
+  SpyInstance,
   test,
   vi,
-  SpyInstance,
-  Mock,
-  afterEach,
-  MockInstance,
 } from 'vitest';
-import os from 'os';
-import {
-  defaultLoaders,
-  InternalOptions,
-  InternalOptionsSync,
-  Loader,
-  Loaders,
-  LoaderSync,
-} from '../src';
-import { TempDir } from './util';
-import { ExplorerSync } from '../src/ExplorerSync';
+import { Loader, Loaders, LoaderSync, OptionsSync } from '../src';
+import { defaultLoaders } from '../src/defaults';
 import { Explorer } from '../src/Explorer';
-import path from 'path';
+import { ExplorerSync } from '../src/ExplorerSync';
+import { InternalOptions, InternalOptionsSync, Options } from '../src/types';
+import { TempDir } from './util';
 
 vi.mock('../src/ExplorerSync', async () => {
   const { ExplorerSync } = await vi.importActual<
@@ -139,13 +133,13 @@ describe('cosmiconfig', () => {
       }
 
       expect(explorerOptions).toEqual({
-        packageProp: moduleName,
+        moduleName,
         searchPlaces: expectedSearchPlaces,
         ignoreEmptySearchPlaces: true,
         mergeImportArrays: true,
         mergeSearchPlaces: true,
+        searchStrategy: 'none',
         metaConfigFilePath: null,
-        stopDir: os.homedir(),
         cache: true,
       });
     };
@@ -234,8 +228,6 @@ describe('cosmiconfig', () => {
     const checkResult = (mock: Mock) => {
       const explorerOptions = mock.mock.calls[0][0];
       const x = {};
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       expect(explorerOptions.transform(x)).toBe(x);
     };
 
@@ -263,7 +255,7 @@ describe('cosmiconfig', () => {
       stopDir: __dirname,
       cache: false,
       searchPlaces: ['.config/foo.json'],
-      packageProp: 'wildandfree',
+      moduleName: 'wildandfree',
       ignoreEmptySearchPlaces: false,
       mergeImportArrays: true,
       mergeSearchPlaces: true,
@@ -291,15 +283,16 @@ describe('cosmiconfig', () => {
     };
 
     const expectedExplorerOptions = {
-      packageProp: 'wildandfree',
+      moduleName: 'wildandfree',
       searchPlaces: ['.config/foo.json'],
       ignoreEmptySearchPlaces: false,
       mergeImportArrays: true,
       mergeSearchPlaces: true,
+      searchStrategy: 'global',
       stopDir: __dirname,
       cache: false,
       metaConfigFilePath: null,
-    };
+    } satisfies Partial<InternalOptions | InternalOptionsSync>;
 
     test('async', () => {
       cosmiconfig(moduleName, options);
@@ -340,7 +333,7 @@ describe('cosmiconfig', () => {
       stopDir: __dirname,
       cache: false,
       searchPlaces: ['.foorc.json', 'wildandfree.js', '.config/foo.json'],
-      packageProp: 'wildandfree',
+      moduleName: 'wildandfree',
       ignoreEmptySearchPlaces: false,
       metaConfigFilePath: `${temp.dir}/.config/config.json`,
       loaders: {
@@ -397,7 +390,7 @@ describe('cosmiconfig', () => {
           expectedLoaderFunctionNames,
         );
         expect(explorerOptions).toEqual({
-          packageProp: 'wildandfree',
+          moduleName: 'wildandfree',
           searchPlaces: [
             '.config/foo.json',
             '.foorc.json',
@@ -407,6 +400,7 @@ describe('cosmiconfig', () => {
           ignoreEmptySearchPlaces: false,
           mergeImportArrays: true,
           mergeSearchPlaces: true,
+          searchStrategy: 'global',
           metaConfigFilePath: path.join(temp.dir, '.config/config.json'),
           stopDir: __dirname,
           cache: false,
@@ -466,11 +460,12 @@ describe('cosmiconfig', () => {
         );
 
         expect(explorerOptions).toEqual({
-          packageProp: 'wildandfree',
+          moduleName: 'wildandfree',
           searchPlaces: ['.config/foo.json'],
           ignoreEmptySearchPlaces: false,
           mergeImportArrays: true,
           mergeSearchPlaces: false,
+          searchStrategy: 'global',
           metaConfigFilePath: path.join(temp.dir, '.config/config.json'),
           stopDir: __dirname,
           cache: false,
@@ -532,17 +527,29 @@ describe('cosmiconfig', () => {
 
     test('async', () => {
       expect(() =>
-        // @ts-ignore
-        cosmiconfig('foo', explorerOptions),
+        cosmiconfig('foo', explorerOptions as unknown as Partial<Options>),
       ).toThrow(expectedError);
     });
 
     test('sync', () => {
       expect(() =>
-        // @ts-ignore
-        cosmiconfigSync('foo', explorerOptions),
+        cosmiconfigSync(
+          'foo',
+          explorerOptions as unknown as Partial<OptionsSync>,
+        ),
       ).toThrow(expectedError);
     });
+  });
+
+  test('errors with invalid combination of searchStrategy and stopDir', () => {
+    expect(() =>
+      cosmiconfig('foo', {
+        searchStrategy: 'none',
+        stopDir: 'a',
+      }),
+    ).toThrow(
+      'Can not supply `stopDir` option with `searchStrategy` other than "global"',
+    );
   });
 
   test('cannot mutate default loaders', () => {

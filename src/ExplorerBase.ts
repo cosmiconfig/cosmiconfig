@@ -1,3 +1,5 @@
+import envPaths from 'env-paths';
+import os from 'os';
 import path from 'path';
 import {
   AsyncCache,
@@ -6,6 +8,7 @@ import {
   CosmiconfigResult,
   InternalOptions,
   InternalOptionsSync,
+  DirToSearch,
 } from './types.js';
 import { getPropertyByPath } from './util.js';
 
@@ -92,7 +95,8 @@ export abstract class ExplorerBase<
       this.config.applyPackagePropertyPathToConfiguration ||
       this.#loadingMetaConfig
     ) {
-      config = getPropertyByPath(config, this.config.packageProp);
+      const packageProp = this.config.packageProp ?? this.config.moduleName;
+      config = getPropertyByPath(config, packageProp);
     }
     if (config === undefined) {
       return { filepath, config: undefined, isEmpty: true };
@@ -126,6 +130,38 @@ ${[...importStack, fullPath]
         );
       }
     }
+  }
+
+  protected getSearchPlacesForDir(
+    dir: DirToSearch,
+    globalConfigPlaces: Array<string>,
+  ): Array<string> {
+    return (
+      dir.isGlobalConfig ? globalConfigPlaces : this.config.searchPlaces
+    ).map((place) => path.join(dir.path, place));
+  }
+
+  protected getGlobalConfigDir(): string {
+    return envPaths(this.config.moduleName, { suffix: '' }).config;
+  }
+
+  protected *getGlobalDirs(startDir: string): IterableIterator<DirToSearch> {
+    const stopDir = path.resolve(this.config.stopDir ?? os.homedir());
+    yield { path: startDir, isGlobalConfig: false };
+    let currentDir = startDir;
+    while (currentDir !== stopDir) {
+      const parentDir = path.dirname(currentDir);
+      /* istanbul ignore if -- @preserve */
+      if (parentDir === currentDir) {
+        // we're probably at the root of the directory structure
+        break;
+      }
+
+      yield { path: parentDir, isGlobalConfig: false };
+      currentDir = parentDir;
+    }
+
+    yield { path: this.getGlobalConfigDir(), isGlobalConfig: true };
   }
 }
 

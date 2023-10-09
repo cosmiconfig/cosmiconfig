@@ -71,7 +71,7 @@ describe('cache is not used initially', () => {
   };
 
   test('async', async () => {
-    const explorer = cosmiconfig('foo');
+    const explorer = cosmiconfig('foo', { searchStrategy: 'global' });
     const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const cachedSearch = explorer.search;
     const result = await cachedSearch(searchPath);
@@ -79,7 +79,7 @@ describe('cache is not used initially', () => {
   });
 
   test('sync', () => {
-    const explorer = cosmiconfigSync('foo');
+    const explorer = cosmiconfigSync('foo', { searchStrategy: 'global' });
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const cachedSearchSync = explorer.search;
     const result = cachedSearchSync(searchPath);
@@ -101,7 +101,9 @@ describe('cache is used for already-visited directories', () => {
 
   test('async', async () => {
     const readFileSpy = vi.spyOn(fsPromises, 'readFile');
-    const cachedSearch = cosmiconfig('foo').search;
+    const cachedSearch = cosmiconfig('foo', {
+      searchStrategy: 'global',
+    }).search;
     // First pass, prime the cache ...
     await cachedSearch(searchPath);
     // Reset readFile mocks and search again.
@@ -113,7 +115,9 @@ describe('cache is used for already-visited directories', () => {
 
   test('sync', () => {
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
-    const cachedSearchSync = cosmiconfigSync('foo').search;
+    const cachedSearchSync = cosmiconfigSync('foo', {
+      searchStrategy: 'global',
+    }).search;
     // First pass, prime the cache ...
     cachedSearchSync(searchPath);
     // Reset readFile mocks and search again.
@@ -199,7 +203,9 @@ describe('cache is used when some directories in search are already visted', () 
 
   test('async', async () => {
     const readFileSpy = vi.spyOn(fsPromises, 'readFile');
-    const cachedSearch = cosmiconfig('foo').search;
+    const cachedSearch = cosmiconfig('foo', {
+      searchStrategy: 'global',
+    }).search;
     // First pass, prime the cache ...
     await cachedSearch(firstSearchPath);
     // Reset readFile mocks and search again.
@@ -211,7 +217,9 @@ describe('cache is used when some directories in search are already visted', () 
 
   test('sync', () => {
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
-    const cachedSearchSync = cosmiconfigSync('foo').search;
+    const cachedSearchSync = cosmiconfigSync('foo', {
+      searchStrategy: 'global',
+    }).search;
     // First pass, prime the cache ...
     cachedSearchSync(firstSearchPath);
     // Reset readFile mocks and search again.
@@ -301,9 +309,9 @@ describe('cache is not used in a new cosmiconfig instance', () => {
 
   test('async', async () => {
     // First pass, prime the cache ...
-    await cosmiconfig('foo').search(searchPath);
+    await cosmiconfig('foo', { searchStrategy: 'global' }).search(searchPath);
     // Search again.
-    const explorer = cosmiconfig('foo');
+    const explorer = cosmiconfig('foo', { searchStrategy: 'global' });
     const readFileSpy = vi.spyOn(fsPromises, 'readFile');
     const result = await explorer.search(searchPath);
     checkResult(readFileSpy, result, expectedFilesChecked);
@@ -311,9 +319,9 @@ describe('cache is not used in a new cosmiconfig instance', () => {
 
   test('sync', () => {
     // First pass, prime the cache ...
-    cosmiconfigSync('foo').search(searchPath);
+    cosmiconfigSync('foo', { searchStrategy: 'global' }).search(searchPath);
     // Search again.
-    const explorer = cosmiconfigSync('foo');
+    const explorer = cosmiconfigSync('foo', { searchStrategy: 'global' });
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(searchPath);
     checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
@@ -434,7 +442,7 @@ describe('clears directory cache on calling clearSearchCache', () => {
 
   test('async', async () => {
     const readFileSpy = vi.spyOn(fsPromises, 'readFile');
-    const explorer = cosmiconfig('foo');
+    const explorer = cosmiconfig('foo', { searchStrategy: 'global' });
     await explorer.search(searchPath);
     readFileSpy.mockClear();
     explorer.clearSearchCache();
@@ -445,7 +453,7 @@ describe('clears directory cache on calling clearSearchCache', () => {
 
   test('sync', () => {
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
-    const explorer = cosmiconfigSync('foo');
+    const explorer = cosmiconfigSync('foo', { searchStrategy: 'global' });
     explorer.search(searchPath);
     // Reset readFile mocks and search again.
     readFileSpy.mockClear();
@@ -497,7 +505,7 @@ describe('clears directory cache on calling clearCaches', () => {
 
   test('async', async () => {
     const readFileSpy = vi.spyOn(fsPromises, 'readFile');
-    const explorer = cosmiconfig('foo');
+    const explorer = cosmiconfig('foo', { searchStrategy: 'global' });
     await explorer.search(searchPath);
     readFileSpy.mockClear();
     explorer.clearCaches();
@@ -508,7 +516,7 @@ describe('clears directory cache on calling clearCaches', () => {
 
   test('sync', () => {
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
-    const explorer = cosmiconfigSync('foo');
+    const explorer = cosmiconfigSync('foo', { searchStrategy: 'global' });
     explorer.search(searchPath);
     // Reset readFile mocks and search again.
     readFileSpy.mockClear();
@@ -576,7 +584,10 @@ describe('with cache disabled, does not cache directory results', () => {
 
   test('async', async () => {
     const readFileSpy = vi.spyOn(fsPromises, 'readFile');
-    const explorer = cosmiconfig('foo', { cache: false });
+    const explorer = cosmiconfig('foo', {
+      searchStrategy: 'global',
+      cache: false,
+    });
     await explorer.search(searchPath);
     readFileSpy.mockClear();
 
@@ -586,7 +597,10 @@ describe('with cache disabled, does not cache directory results', () => {
 
   test('sync', () => {
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
-    const explorer = cosmiconfigSync('foo', { cache: false });
+    const explorer = cosmiconfigSync('foo', {
+      searchStrategy: 'global',
+      cache: false,
+    });
     explorer.search(searchPath);
     readFileSpy.mockClear();
 

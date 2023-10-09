@@ -36,6 +36,20 @@ describe('cosmiconfig meta config', () => {
     process.chdir(currentDir);
   });
 
+  test('throws when trying to supply searchStrategy', () => {
+    temp.createFile(
+      '.config/config.yml',
+      'cosmiconfig:\n  searchStrategy: "global"',
+    );
+
+    const currentDir = process.cwd();
+    process.chdir(temp.dir);
+
+    expect(() => cosmiconfigSync('foo')).toThrow();
+
+    process.chdir(currentDir);
+  });
+
   describe('uses user-configured searchPlaces without placeholders', () => {
     const currentDir = process.cwd();
 
