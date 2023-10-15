@@ -7,7 +7,7 @@ Cosmiconfig searches for and loads configuration for your program.
 It features smart defaults based on conventional expectations in the JavaScript ecosystem.
 But it's also flexible enough to search wherever you'd like to search, and load whatever you'd like to load.
 
-By default, Cosmiconfig will start where you tell it to start and search up the directory tree for the following:
+By default, Cosmiconfig will check the current directory for the following:
 
 - a `package.json` property
 - a JSON or YAML, extensionless "rc file"
@@ -23,7 +23,8 @@ For example, if your module's name is "myapp", cosmiconfig will search up the di
 - a `myapprc`, `myapprc.json`, `myapprc.yaml`, `myapprc.yml`, `myapprc.js`, `myapprc.ts`, `myapprc.mjs`, or `myapprc.cjs` file inside a `.config` subdirectory
 - a `myapp.config.js`, `myapp.config.ts`, `myapp.config.mjs`, or `myapp.config.cjs` file
 
-Cosmiconfig continues to search up the directory tree, checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
+Optionally, you can tell it to search up the directory tree using [search strategies],
+checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
 
 ## Table of contents
 
@@ -45,6 +46,7 @@ Cosmiconfig continues to search up the directory tree, checking each of these pl
   - [explorerSync.clearSearchCache()](#explorersyncclearsearchcache)
   - [explorerSync.clearCaches()](#explorersyncclearcaches)
 - [cosmiconfigOptions](#cosmiconfigoptions)
+  - [searchStrategy](#searchstrategy)
   - [searchPlaces](#searchplaces)
   - [loaders](#loaders)
   - [packageProp](#packageprop)
@@ -152,10 +154,15 @@ Here's how your default [`search()`] will work:
   3. A `.goldengrahamsrc.json`, `.goldengrahamsrc.yaml`, `.goldengrahamsrc.yml`, `.goldengrahamsrc.js`, `.goldengrahamsrc.ts`, `.goldengrahamsrc.mjs`, or `.goldengrahamsrc.cjs` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
   4. A `goldengrahamsrc`, `goldengrahamsrc.json`, `goldengrahamsrc.yaml`, `goldengrahamsrc.yml`, `goldengrahamsrc.js`, `goldengrahamsrc.ts`, `goldengrahamsrc.mjs`, or `goldengrahamsrc.cjs` file in the `.config` subdirectory.
   5. A `goldengrahams.config.js`, `goldengrahams.config.ts`, `goldengrahams.config.mjs`, or `goldengrahams.config.cjs` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
-- If none of those searches reveal a configuration object, move up one directory level and try again.
-  So the search continues in `./`, `../`, `../../`, `../../../`, etc., checking the same places in each directory.
-- Continue searching until arriving at your home directory (or some other directory defined by the cosmiconfig option [`stopDir`]).
-- For JS files,
+- If none of those searches reveal a configuration object, continue depending on the current search strategy:
+  - If it's `none` (which is the default if you don't specify a [`stopDir`] option), stop here and return/resolve with `null`.
+  - If it's `global` (which is the default if you specify a [`stopDir`] option), move up one directory level and try again,
+    recursing until arriving at the configured [`stopDir`] option, which defaults to the user's home directory.
+    - After arriving at the [`stopDir`], the global configuration directory (as defined by [`env-paths`] without prefix) is also checked,
+      looking at the files `config`, `config.json`, `config.yaml`, `config.yml`, `config.js`, `config.ts`, `config.cjs`, and `config.mjs`
+      in the directory `~/.config/goldengrahams/` (on Linux; see [`env-paths`] documentation for other OSs).
+  - If it's `project`, check whether a `package.json` file is present in the current directory, and if not,
+    move up one directory level and try again, recursing until there is one.
 - If at any point a parsable configuration is found, the [`search()`] Promise resolves with its [result] \(or, with [`explorerSync.search()`], the [result] is returned).
 - If no configuration object is found, the [`search()`] Promise resolves with `null` (or, with [`explorerSync.search()`], `null` is returned).
 - If a configuration object is found *but is malformed* (causing a parsing error), the [`search()`] Promise rejects with that error (so you should `.catch()` it). (Or, with [`explorerSync.search()`], the error is thrown.)
@@ -257,6 +264,33 @@ Type: `Object`.
 
 Possible options are documented below.
 
+### searchStrategy
+
+Type: `string`
+Default: `global` if [`stopDir`] is specified, `none` otherwise.
+
+The strategy that should be used to determine which directories to check for configuration files.
+
+- `none`: Only checks in the current working directory.
+- `project`: Starts in the current working directory, traversing upwards until a `package.json` file is found.
+- `global`: Starts in the current working directory, traversing upwards until the configured [`stopDir`]
+  (or the current user's home directory if none is given). Then, if no configuration is found, also look in the
+  operating system's default configuration directory (according to [`env-paths`] without prefix),
+  where a different set of file names is checked:
+
+```js
+[
+  `config`,
+  `config.json`,
+  `config.yaml`,
+  `config.yml`,
+  `config.js`,
+  `config.ts`,
+  `config.cjs`,
+  `config.mjs`
+]
+```
+
 ### searchPlaces
 
 Type: `Array<string>`.
@@ -310,26 +344,35 @@ Examples, with a module named `porgy`:
 
 ```js
 // Disallow extensions on rc files:
-['package.json', '.porgyrc', 'porgy.config.js'][
-  // Limit the options dramatically:
-  ('package.json', '.porgyrc')
-][
-  // Maybe you want to look for a wide variety of JS flavors:
-  ('porgy.config.js',
+['package.json', '.porgyrc', 'porgy.config.js']
+```
+
+```js
+// Limit the options dramatically:
+['package.json', '.porgyrc']
+```
+
+```js
+// Maybe you want to look for a wide variety of JS flavors:
+[
+  'porgy.config.js',
   'porgy.config.mjs',
   'porgy.config.ts',
-  'porgy.config.coffee')
-][
-  // ^^ You will need to designate custom loaders to tell
-  // Cosmiconfig how to handle `.ts` and `.coffee` files.
+  'porgy.config.coffee'
+]
+// ^^ You will need to designate a custom loader to tell
+// Cosmiconfig how to handle `.coffee` files.
+```
 
-  // Look within a .config/ subdirectory of every searched directory:
-  ('package.json',
+```js
+// Look within a .config/ subdirectory of every searched directory:
+[
+  'package.json',
   '.porgyrc',
   '.config/.porgyrc',
   '.porgyrc.json',
-  '.config/.porgyrc.json')
-];
+  '.config/.porgyrc.json'
+]
 ```
 
 ### loaders
@@ -390,14 +433,9 @@ To accomplish that, provide the following `loaders` value:
 
 If you want to load files that are not handled by the loader functions Cosmiconfig exposes, you can write a custom loader function or use one from NPM if it exists.
 
-**Third-party loaders:**
-
-- [cosmiconfig-typescript-loader](https://github.com/codex-/cosmiconfig-typescript-loader)
-
 **Use cases for custom loader function:**
 
 - Allow configuration syntaxes that aren't handled by Cosmiconfig's defaults, like JSON5, INI, or XML.
-- Allow ES2015 modules from `.mjs` configuration files.
 - Parse JS files with Babel before deriving the configuration.
 
 **Custom loader functions** have the following signature:
@@ -676,7 +714,7 @@ And then, the `.prettierrc.yml` file in the project itself would just reference 
 optionally overriding the defaults with project-specific settings:
 
 ```yaml
-$import: node_modules/@your-company/base-configs/.prettierrc.base.yml
+$import: node_modules/@foocorp/config/.prettierrc.base.yml
 # we want more space!
 printWidth: 200
 ```
@@ -735,3 +773,7 @@ And please do participate!
 [`explorer.load()`]: #explorerload
 
 ["Loading JS modules"]: #loading-js-modules
+
+[`env-paths`]: https://github.com/sindresorhus/env-paths
+
+[search strategies]: #searchstrategy
