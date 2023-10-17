@@ -3,8 +3,12 @@ import path from 'path';
 import { beforeEach, afterAll, describe, expect, test, vi } from 'vitest';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
-import { cosmiconfig, cosmiconfigSync, OptionsSync } from '../src';
-import { defaultLoaders } from '../src/defaults';
+import {
+  cosmiconfig,
+  cosmiconfigSync,
+  OptionsSync,
+  defaultLoaders,
+} from '../src';
 import { isNotMjs, TempDir } from './util';
 
 const temp = new TempDir();

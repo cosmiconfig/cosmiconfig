@@ -12,8 +12,13 @@ import {
   test,
   vi,
 } from 'vitest';
-import { Loader, Loaders, LoaderSync, OptionsSync } from '../src';
-import { defaultLoaders } from '../src/defaults';
+import {
+  Loader,
+  Loaders,
+  LoaderSync,
+  OptionsSync,
+  defaultLoaders,
+} from '../src';
 import { Explorer } from '../src/Explorer';
 import { ExplorerSync } from '../src/ExplorerSync';
 import { InternalOptions, InternalOptionsSync, Options } from '../src/types';

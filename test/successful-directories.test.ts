@@ -10,8 +10,13 @@ import {
   test,
   vi,
 } from 'vitest';
-import { cosmiconfig, cosmiconfigSync, Options, OptionsSync } from '../src';
-import { defaultLoaders } from '../src/defaults';
+import {
+  cosmiconfig,
+  cosmiconfigSync,
+  Options,
+  OptionsSync,
+  defaultLoaders,
+} from '../src';
 import { TempDir, isNotMjs } from './util';
 
 const temp = new TempDir();
