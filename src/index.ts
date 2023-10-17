@@ -244,4 +244,6 @@ export {
   getDefaultSearchPlacesSync,
   globalConfigSearchPlaces,
   globalConfigSearchPlacesSync,
+  defaultLoaders,
+  defaultLoadersSync,
 };
