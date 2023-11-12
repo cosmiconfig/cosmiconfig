@@ -1,3 +1,5 @@
+import fs, { promises as fsp } from 'fs';
+
 /**
  * @internal
  */
@@ -47,4 +49,33 @@ export function removeUndefinedValuesFromObject(
   return Object.fromEntries(
     Object.entries(options).filter(([, value]) => value !== undefined),
   );
+}
+
+/** @internal */
+/* istanbul ignore next -- @preserve */
+export async function isDirectory(path: string): Promise<boolean> {
+  try {
+    const stat = await fsp.stat(path);
+    return stat.isDirectory();
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      return false;
+    }
+
+    throw e;
+  }
+}
+
+/** @internal */
+/* istanbul ignore next -- @preserve */
+export function isDirectorySync(path: string): boolean {
+  try {
+    const stat = fs.statSync(path);
+    return stat.isDirectory();
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      return false;
+    }
+    throw e;
+  }
 }

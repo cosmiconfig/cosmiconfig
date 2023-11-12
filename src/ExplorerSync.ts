@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { isDirectorySync } from 'path-type';
 import { globalConfigSearchPlacesSync } from './defaults';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
 import { hasOwn, mergeAll } from './merge';
@@ -10,7 +9,7 @@ import {
   InternalOptionsSync,
   DirToSearch,
 } from './types.js';
-import { emplace, getPropertyByPath } from './util.js';
+import { emplace, getPropertyByPath, isDirectorySync } from './util.js';
 
 /**
  * @internal

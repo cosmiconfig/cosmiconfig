@@ -1,6 +1,5 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { isDirectory } from 'path-type';
 import { globalConfigSearchPlaces } from './defaults';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
 import { hasOwn, mergeAll } from './merge';
@@ -10,7 +9,7 @@ import {
   InternalOptions,
   DirToSearch,
 } from './types.js';
-import { emplace, getPropertyByPath } from './util.js';
+import { emplace, getPropertyByPath, isDirectory } from './util.js';
 
 /**
  * @internal
