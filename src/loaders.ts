@@ -20,7 +20,21 @@ export const loadJs: Loader = async function loadJs(filepath) {
     const { href } = pathToFileURL(filepath);
     return (await import(href)).default;
   } catch (error) {
-    return loadJsSync(filepath, '');
+    try {
+      return loadJsSync(filepath, '');
+    } catch (requireError) {
+      if (
+        requireError.code === 'ERR_REQUIRE_ESM' ||
+        (requireError instanceof SyntaxError &&
+          requireError
+            .toString()
+            .includes('Cannot use import statement outside a module'))
+      ) {
+        throw error;
+      }
+
+      throw requireError;
+    }
   }
 };
 
@@ -86,22 +100,28 @@ export const loadTs: Loader = async function loadTs(filepath, content) {
     typescript = (await import('typescript')).default;
   }
   const compiledFilepath = `${filepath.slice(0, -2)}mjs`;
+  let transpiledContent;
   try {
-    const config = resolveTsConfig(path.dirname(filepath)) ?? {};
-    config.compilerOptions = {
-      ...config.compilerOptions,
-      module: typescript.ModuleKind.ES2022,
-      moduleResolution: typescript.ModuleResolutionKind.Bundler,
-      target: typescript.ScriptTarget.ES2022,
-      noEmit: false,
-    };
-    content = typescript.transpileModule(content, config).outputText;
-    await writeFile(compiledFilepath, content);
-    const { href } = pathToFileURL(compiledFilepath);
-    return (await import(href)).default;
-  } catch (error) {
-    error.message = `TypeScript Error in ${filepath}:\n${error.message}`;
-    throw error;
+    try {
+      const config = resolveTsConfig(path.dirname(filepath)) ?? {};
+      config.compilerOptions = {
+        ...config.compilerOptions,
+        module: typescript.ModuleKind.ES2022,
+        moduleResolution: typescript.ModuleResolutionKind.Bundler,
+        target: typescript.ScriptTarget.ES2022,
+        noEmit: false,
+      };
+      transpiledContent = typescript.transpileModule(
+        content,
+        config,
+      ).outputText;
+      await writeFile(compiledFilepath, transpiledContent);
+    } catch (error) {
+      error.message = `TypeScript Error in ${filepath}:\n${error.message}`;
+      throw error;
+    }
+    // eslint-disable-next-line @typescript-eslint/return-await
+    return await loadJs(compiledFilepath, transpiledContent);
   } finally {
     if (existsSync(compiledFilepath)) {
       await rm(compiledFilepath);
