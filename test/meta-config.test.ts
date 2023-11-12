@@ -78,6 +78,7 @@ describe('cosmiconfig meta config', () => {
           .filter((path) => !path.includes('/node_modules/')),
       ).toEqual([
         'package.json',
+        'package.yaml',
         '.config/config.json',
         '.config/config.yaml',
         '.config/config.yml',
@@ -138,7 +139,7 @@ describe('cosmiconfig meta config', () => {
       });
 
       const file = temp.absolutePath('.foo-config');
-      const explorerOptions: Options & OptionsSync = {
+      const explorerOptions: Partial<Options & OptionsSync> = {
         stopDir: temp.absolutePath('.'),
         ignoreEmptySearchPlaces: false,
       };
@@ -152,6 +153,7 @@ describe('cosmiconfig meta config', () => {
           constructFiles.filter((path) => !path.includes('/node_modules/')),
         ).toEqual([
           'package.json',
+          'package.yaml',
           '.config/config.json',
           '.config/config.yaml',
           '.config/config.yml',

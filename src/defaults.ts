@@ -79,6 +79,7 @@ export const globalConfigSearchPlacesSync = [
 // this needs to be hardcoded, as this is intended for end users, who can't supply options at this point
 export const metaSearchPlaces = [
   'package.json',
+  'package.yaml',
   '.config/config.json',
   '.config/config.yaml',
   '.config/config.yml',

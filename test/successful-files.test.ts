@@ -242,6 +242,42 @@ describe('loads yaml-like JS config path', () => {
   });
 });
 
+describe('loads package prop from package.yaml', () => {
+  beforeEach(() => {
+    temp.createFile(
+      'package.yaml',
+      `
+foo:
+  bar: baz
+otherPackage:
+  please: no
+`,
+    );
+  });
+
+  const configPath = temp.absolutePath('package.yaml');
+  const checkResult = (result: any, expectedConfig: any) => {
+    expect(result.config).toEqual(expectedConfig);
+    expect(result.filepath).toBe(configPath);
+  };
+
+  const expectedConfig = { bar: 'baz' };
+
+  test('async', async () => {
+    const result = await cosmiconfig('foo', {
+      searchPlaces: ['package.yaml'],
+    }).load(configPath);
+    checkResult(result, expectedConfig);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('foo', {
+      searchPlaces: ['package.yaml'],
+    }).load(configPath);
+    checkResult(result, expectedConfig);
+  });
+});
+
 describe('loads package prop when configPath is package.json', () => {
   beforeEach(() => {
     temp.createFile(

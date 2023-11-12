@@ -3,7 +3,6 @@ import path from 'path';
 import { isDirectorySync } from 'path-type';
 import { globalConfigSearchPlacesSync } from './defaults';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
-import { loadJson } from './loaders.js';
 import { hasOwn, mergeAll } from './merge';
 import {
   Config,
@@ -139,30 +138,34 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
       return;
     }
 
-    if (path.basename(filepath) === 'package.json') {
-      return (
-        getPropertyByPath(
-          loadJson(filepath, contents),
-          this.config.packageProp ?? this.config.moduleName,
-        ) ?? null
+    const extension = path.extname(filepath);
+    const loader =
+      this.config.loaders[extension || 'noExt'] ??
+      this.config.loaders['default'];
+
+    if (!loader) {
+      throw new Error(
+        `No loader specified for ${getExtensionDescription(extension)}`,
       );
     }
 
-    const extension = path.extname(filepath);
     try {
-      const loader =
-        this.config.loaders[extension || 'noExt'] ??
-        this.config.loaders['default'];
-      if (loader !== undefined) {
-        return loader(filepath, contents);
+      const loadedContents = loader(filepath, contents);
+
+      if (path.basename(filepath, extension) !== 'package') {
+        return loadedContents;
       }
+
+      return (
+        getPropertyByPath(
+          loadedContents,
+          this.config.packageProp ?? this.config.moduleName,
+        ) ?? null
+      );
     } catch (error) {
       error.filepath = filepath;
       throw error;
     }
-    throw new Error(
-      `No loader specified for ${getExtensionDescription(extension)}`,
-    );
   }
 
   #fileExists(path: string): boolean {
@@ -185,8 +188,11 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
         let currentDir = startDir;
         while (true) {
           yield { path: currentDir, isGlobalConfig: false };
-          if (this.#fileExists(path.join(currentDir, 'package.json'))) {
-            break;
+          for (const ext of ['json', 'yaml']) {
+            const packageFile = path.join(currentDir, `package.${ext}`);
+            if (this.#fileExists(packageFile)) {
+              break;
+            }
           }
           const parentDir = path.dirname(currentDir);
           /* istanbul ignore if -- @preserve */

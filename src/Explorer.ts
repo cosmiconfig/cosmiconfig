@@ -3,7 +3,6 @@ import path from 'path';
 import { isDirectory } from 'path-type';
 import { globalConfigSearchPlaces } from './defaults';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
-import { loadJson } from './loaders.js';
 import { hasOwn, mergeAll } from './merge';
 import {
   Config,
@@ -147,31 +146,34 @@ export class Explorer extends ExplorerBase<InternalOptions> {
       return;
     }
 
-    if (path.basename(filepath) === 'package.json') {
-      return (
-        getPropertyByPath(
-          loadJson(filepath, contents),
-          this.config.packageProp ?? this.config.moduleName,
-        ) ?? null
+    const extension = path.extname(filepath);
+    const loader =
+      this.config.loaders[extension || 'noExt'] ??
+      this.config.loaders['default'];
+
+    if (!loader) {
+      throw new Error(
+        `No loader specified for ${getExtensionDescription(extension)}`,
       );
     }
 
-    const extension = path.extname(filepath);
     try {
-      const loader =
-        this.config.loaders[extension || 'noExt'] ??
-        this.config.loaders['default'];
-      if (loader !== undefined) {
-        // eslint-disable-next-line @typescript-eslint/return-await
-        return await loader(filepath, contents);
+      const loadedContents = await loader(filepath, contents);
+
+      if (path.basename(filepath, extension) !== 'package') {
+        return loadedContents;
       }
+
+      return (
+        getPropertyByPath(
+          loadedContents,
+          this.config.packageProp ?? this.config.moduleName,
+        ) ?? null
+      );
     } catch (error) {
       error.filepath = filepath;
       throw error;
     }
-    throw new Error(
-      `No loader specified for ${getExtensionDescription(extension)}`,
-    );
   }
 
   async #fileExists(path: string): Promise<boolean> {
@@ -194,8 +196,11 @@ export class Explorer extends ExplorerBase<InternalOptions> {
         let currentDir = startDir;
         while (true) {
           yield { path: currentDir, isGlobalConfig: false };
-          if (await this.#fileExists(path.join(currentDir, 'package.json'))) {
-            break;
+          for (const ext of ['json', 'yaml']) {
+            const packageFile = path.join(currentDir, `package.${ext}`);
+            if (await this.#fileExists(packageFile)) {
+              break;
+            }
           }
           const parentDir = path.dirname(currentDir);
           /* istanbul ignore if -- @preserve */

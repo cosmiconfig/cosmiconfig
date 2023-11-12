@@ -198,6 +198,7 @@ explorer.load('load/this/file.json'); // Tries to load load/this/file.json.
 ```
 
 If you load a `package.json` file, the result will be derived from whatever property is specified as your [`packageProp`].
+`package.yaml` will work as well if you specify these file names in your [`searchPlaces`]. 
 
 You can do the same thing synchronously with [`explorerSync.load()`].
 
@@ -272,7 +273,7 @@ Default: `global` if [`stopDir`] is specified, `none` otherwise.
 The strategy that should be used to determine which directories to check for configuration files.
 
 - `none`: Only checks in the current working directory.
-- `project`: Starts in the current working directory, traversing upwards until a `package.json` file is found.
+- `project`: Starts in the current working directory, traversing upwards until a `package.{json,yaml}` file is found.
 - `global`: Starts in the current working directory, traversing upwards until the configured [`stopDir`]
   (or the current user's home directory if none is given). Then, if no configuration is found, also look in the
   operating system's default configuration directory (according to [`env-paths`] without prefix),
@@ -339,6 +340,8 @@ Read more about [`loaders`] below.
 
 `package.json` is a special value: When it is included in `searchPlaces`, Cosmiconfig will always parse it as JSON and load a property within it, not the whole file.
 That property is defined with the [`packageProp`] option, and defaults to your module name.
+
+`package.yaml` (used by pnpm) works the same way.
 
 Examples, with a module named `porgy`:
 
@@ -495,7 +498,7 @@ cosmiconfig('foo', {
 Type: `string | Array<string>`.
 Default: `` `${moduleName}` ``.
 
-Name of the property in `package.json` to look for.
+Name of the property in `package.json` (or `package.yaml`) to look for.
 
 Use a period-delimited string or an array of strings to describe a path to nested properties.
 
