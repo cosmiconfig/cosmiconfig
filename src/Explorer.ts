@@ -71,7 +71,8 @@ export class Explorer extends ExplorerBase<InternalOptions> {
             if (
               error.code === 'ENOENT' ||
               error.code === 'EISDIR' ||
-              error.code === 'ENOTDIR'
+              error.code === 'ENOTDIR' ||
+              error.code === 'EACCES'
             ) {
               continue;
             }

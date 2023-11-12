@@ -69,7 +69,8 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
             if (
               error.code === 'ENOENT' ||
               error.code === 'EISDIR' ||
-              error.code === 'ENOTDIR'
+              error.code === 'ENOTDIR' ||
+              error.code === 'EACCES'
             ) {
               continue;
             }
