@@ -1,5 +1,3 @@
-import { deleteSync } from 'del';
-import makeDir from 'make-dir';
 import os from 'os';
 import parentModule from 'parent-module';
 import path from 'path';
@@ -37,7 +35,7 @@ export class TempDir {
     this.dir = path.resolve(tempDir, 'cosmiconfig', `${relativeParent}-dir`);
 
     // create directory
-    makeDir.sync(this.dir);
+    fs.mkdirSync(this.dir, { recursive: true });
 
     // re-enable once: https://github.com/typescript-eslint/typescript-eslint/issues/636
     /* eslint-disable @typescript-eslint/unbound-method */
@@ -58,13 +56,13 @@ export class TempDir {
 
   public createDir(dir: string): void {
     const dirname = this.absolutePath(dir);
-    makeDir.sync(dirname);
+    fs.mkdirSync(dirname, { recursive: true });
   }
 
   public createFile(file: string, contents: string): void {
     const filePath = this.absolutePath(file);
     const fileDir = path.parse(filePath).dir;
-    makeDir.sync(fileDir);
+    fs.mkdirSync(fileDir, { recursive: true });
 
     fs.writeFileSync(filePath, `${contents}\n`);
   }
@@ -96,23 +94,16 @@ export class TempDir {
     return result;
   }
 
-  public clean(): Array<string> {
-    const cleanPattern = normalizeDirectorySlash(this.absolutePath('**/*'));
-    const removed = deleteSync(cleanPattern, {
-      dot: true,
+  public deleteTempDir(): void {
+    fs.rmSync(normalizeDirectorySlash(this.dir), {
       force: true,
+      recursive: true,
     });
-
-    return removed;
   }
 
-  public deleteTempDir(): Array<string> {
-    const removed = deleteSync(normalizeDirectorySlash(this.dir), {
-      force: true,
-      dot: true,
-    });
-
-    return removed;
+  public clean(): void {
+    this.deleteTempDir();
+    fs.mkdirSync(this.dir, { recursive: true });
   }
 }
 
