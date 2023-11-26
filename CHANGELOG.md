@@ -1,10 +1,21 @@
 # Changelog
 
-## HEAD
+## 9.0.0
 
-- Add support for a special `$import` key which will import another configuration file
+- Added `searchStrategy` option:
+  - The `none` value means that cosmiconfig does not traverse any directories upwards.
+    - **Breaking change:** This is the default value if you don't pass a `stopDir` option, which means that cosmiconfig no longer traverses directories by default, and instead just looks in the current working directory.
+      - If you want to achieve maximum backwards compatibility without adding an explicit `stopDir`, add the `searchStrategy: 'global'` option.
+  - The `project` value means that cosmiconfig traverses upwards until it finds a `package.json` (or `.yaml`) file.
+  - The `global` value means that cosmiconfig traverses upwards until the passed `stopDir`, or your home directory if no `stopDir` is given.
+- **Breaking change:** Meta config files (i.e. `config.js` and similar) are not looked for in the current working directory anymore. Instead, it looks in the `.config` subfolder.
+- **Breaking change:** When defining `searchPlaces` in a meta config file, the tool-defined `searchPlaces` are merged into this. Users may specify `mergeSearchPlaces: false` to disable this.
+- Added support for a special `$import` key which will import another configuration file
   - The imported file will act as a base file - all properties from that file will be applied to the configuration, but can be overridden by the importing file
   - For more information, read the [import section of the README](README.md#imports)
+- Added searching in OS conventional folders (XDG compatible on Linux, %APPDATA% on Windows, Library/Preferences on macOS) for `searchStrategy: 'global'`
+- Fixed crash when trying to load a file that is not readable due to file system permissions
+- Fixed wrong ERR_REQUIRE_ESM error being thrown when there is an issue loading an ESM file
 
 ## 8.3.6
 
