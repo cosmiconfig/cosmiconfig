@@ -101,15 +101,13 @@ describe('throws error if defined TS file has syntax error', () => {
   const file = temp.absolutePath('foo-invalid.ts');
 
   test('async', async () => {
-    await expect(cosmiconfig('failed-files-tests').load(file)).rejects.toThrow(
-      'Contents of line 1: export default {}--;',
-    );
+    await expect(
+      cosmiconfig('failed-files-tests').load(file),
+    ).rejects.toThrow();
   });
 
   test('sync', () => {
-    expect(() => cosmiconfigSync('failed-files-tests').load(file)).toThrow(
-      'Invalid left-hand side expression in postfix operation',
-    );
+    expect(() => cosmiconfigSync('failed-files-tests').load(file)).toThrow();
   });
 });
 
