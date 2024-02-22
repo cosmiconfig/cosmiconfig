@@ -25,8 +25,8 @@ import {
   defaultLoadersSync,
   getDefaultSearchPlaces,
   getDefaultSearchPlacesSync,
-  globalConfigSearchPlaces,
-  globalConfigSearchPlacesSync,
+  defaultGlobalConfigSearchPlaces,
+  defaultGlobalConfigSearchPlacesSync,
   metaSearchPlaces,
 } from './defaults';
 import { removeUndefinedValuesFromObject } from './util';
@@ -39,6 +39,7 @@ function getUserDefinedOptionsFromMetaConfig(): CosmiconfigResult {
   const metaExplorer = new ExplorerSync({
     moduleName: 'cosmiconfig',
     stopDir: process.cwd(),
+    globalConfigSearchPlaces: defaultGlobalConfigSearchPlacesSync,
     searchPlaces: metaSearchPlaces,
     ignoreEmptySearchPlaces: false,
     applyPackagePropertyPathToConfiguration: true,
@@ -158,6 +159,7 @@ function mergeOptions(
   validateOptions(options);
   const defaults = {
     moduleName,
+    globalConfigSearchPlaces: defaultGlobalConfigSearchPlaces,
     searchPlaces: getDefaultSearchPlaces(moduleName),
     ignoreEmptySearchPlaces: true,
     cache: true,
@@ -179,6 +181,7 @@ function mergeOptionsSync(
   validateOptions(options);
   const defaults = {
     moduleName,
+    globalConfigSearchPlaces: defaultGlobalConfigSearchPlacesSync,
     searchPlaces: getDefaultSearchPlacesSync(moduleName),
     ignoreEmptySearchPlaces: true,
     cache: true,
@@ -244,6 +247,8 @@ export {
   defaultLoadersSync,
   getDefaultSearchPlaces,
   getDefaultSearchPlacesSync,
-  globalConfigSearchPlaces,
-  globalConfigSearchPlacesSync,
+  defaultGlobalConfigSearchPlaces,
+  defaultGlobalConfigSearchPlacesSync,
+  defaultGlobalConfigSearchPlaces as globalConfigSearchPlaces,
+  defaultGlobalConfigSearchPlacesSync as globalConfigSearchPlacesSync,
 };

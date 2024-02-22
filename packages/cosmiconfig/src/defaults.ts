@@ -56,7 +56,7 @@ export function getDefaultSearchPlacesSync(moduleName: string): Array<string> {
   ];
 }
 
-export const globalConfigSearchPlaces = [
+export const defaultGlobalConfigSearchPlaces = [
   'config',
   'config.json',
   'config.yaml',
@@ -66,7 +66,7 @@ export const globalConfigSearchPlaces = [
   'config.cjs',
   'config.mjs',
 ];
-export const globalConfigSearchPlacesSync = [
+export const defaultGlobalConfigSearchPlacesSync = [
   'config',
   'config.json',
   'config.yaml',

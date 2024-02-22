@@ -1,7 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase';
-import { globalConfigSearchPlaces } from './defaults';
 import { hasOwn, mergeAll } from './merge';
 import {
   Config,
@@ -55,7 +54,7 @@ export class Explorer extends ExplorerBase<InternalOptions> {
       if (await isDirectory(currentDir.path)) {
         for (const filepath of this.getSearchPlacesForDir(
           currentDir,
-          globalConfigSearchPlaces,
+          this.config.globalConfigSearchPlaces,
         )) {
           try {
             const result = await this.#readConfiguration(filepath);

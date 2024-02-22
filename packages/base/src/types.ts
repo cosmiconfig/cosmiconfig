@@ -54,6 +54,7 @@ export type SearchStrategy = 'none' | 'project' | 'global';
  */
 export interface CommonOptions {
   packageProp?: string | Array<string>;
+  globalConfigSearchPlaces: Array<string>;
   searchPlaces: Array<string>;
   ignoreEmptySearchPlaces: boolean;
   stopDir?: string;

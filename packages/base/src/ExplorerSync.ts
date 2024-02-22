@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase';
-import { globalConfigSearchPlacesSync } from './defaults';
 import { hasOwn, mergeAll } from './merge';
 import {
   Config,
@@ -53,7 +52,7 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
       if (isDirectorySync(currentDir.path)) {
         for (const filepath of this.getSearchPlacesForDir(
           currentDir,
-          globalConfigSearchPlacesSync,
+          this.config.globalConfigSearchPlaces,
         )) {
           try {
             const result = this.#readConfiguration(filepath);

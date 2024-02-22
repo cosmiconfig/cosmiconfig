@@ -119,6 +119,7 @@ describe('cosmiconfig', () => {
       instanceNum: number,
       expectedLoaders: any,
       expectedSearchPlaces: any,
+      expectedGlobalConfigSearchPlaces: Array<string>,
     ) => {
       const instanceIndex = instanceNum - 1;
 
@@ -138,6 +139,7 @@ describe('cosmiconfig', () => {
 
       expect(explorerOptions).toEqual({
         moduleName,
+        globalConfigSearchPlaces: expectedGlobalConfigSearchPlaces,
         searchPlaces: expectedSearchPlaces,
         ignoreEmptySearchPlaces: true,
         mergeImportArrays: true,
@@ -186,6 +188,16 @@ describe('cosmiconfig', () => {
           `${moduleName}.config.cjs`,
           `${moduleName}.config.mjs`,
         ],
+        [
+          'config',
+          'config.json',
+          'config.yaml',
+          'config.yml',
+          'config.js',
+          'config.ts',
+          'config.cjs',
+          'config.mjs',
+        ],
       );
     });
 
@@ -223,6 +235,15 @@ describe('cosmiconfig', () => {
           `${moduleName}.config.js`,
           `${moduleName}.config.ts`,
           `${moduleName}.config.cjs`,
+        ],
+        [
+          'config',
+          'config.json',
+          'config.yaml',
+          'config.yml',
+          'config.js',
+          'config.ts',
+          'config.cjs',
         ],
       );
     });
@@ -286,17 +307,21 @@ describe('cosmiconfig', () => {
       noExt: 'noExtLoader',
     };
 
-    const expectedExplorerOptions = {
-      moduleName: 'wildandfree',
-      searchPlaces: ['.config/foo.json'],
-      ignoreEmptySearchPlaces: false,
-      mergeImportArrays: true,
-      mergeSearchPlaces: true,
-      searchStrategy: 'global',
-      stopDir: __dirname,
-      cache: false,
-      metaConfigFilePath: null,
-    } satisfies Partial<InternalOptions | InternalOptionsSync>;
+    const expectedExplorerOptions = (
+      expectedGlobalConfigSearchPlaces: Array<string>,
+    ) =>
+      ({
+        moduleName: 'wildandfree',
+        globalConfigSearchPlaces: expectedGlobalConfigSearchPlaces,
+        searchPlaces: ['.config/foo.json'],
+        ignoreEmptySearchPlaces: false,
+        mergeImportArrays: true,
+        mergeSearchPlaces: true,
+        searchStrategy: 'global',
+        stopDir: __dirname,
+        cache: false,
+        metaConfigFilePath: null,
+      }) satisfies Partial<InternalOptions | InternalOptionsSync>;
 
     test('async', () => {
       cosmiconfig(moduleName, options);
@@ -304,7 +329,16 @@ describe('cosmiconfig', () => {
         createExplorerMock,
         1,
         expectedLoaderNames,
-        expectedExplorerOptions,
+        expectedExplorerOptions([
+          'config',
+          'config.json',
+          'config.yaml',
+          'config.yml',
+          'config.js',
+          'config.ts',
+          'config.cjs',
+          'config.mjs',
+        ]),
       );
     });
 
@@ -314,7 +348,15 @@ describe('cosmiconfig', () => {
         createExplorerSyncMock,
         2,
         expectedLoaderNames,
-        expectedExplorerOptions,
+        expectedExplorerOptions([
+          'config',
+          'config.json',
+          'config.yaml',
+          'config.yml',
+          'config.js',
+          'config.ts',
+          'config.cjs',
+        ]),
       );
     });
   });
@@ -387,6 +429,7 @@ describe('cosmiconfig', () => {
         mock: SpyInstance,
         instanceNum: number,
         expectedLoaderFunctionNames: any,
+        expectedGlobalConfigSearchPlaces: Array<string>,
       ) => {
         const explorerOptions = checkResultBase(
           mock,
@@ -395,6 +438,7 @@ describe('cosmiconfig', () => {
         );
         expect(explorerOptions).toEqual({
           moduleName: 'wildandfree',
+          globalConfigSearchPlaces: expectedGlobalConfigSearchPlaces,
           searchPlaces: [
             '.config/foo.json',
             '.foorc.json',
@@ -413,16 +457,30 @@ describe('cosmiconfig', () => {
 
       test('async', () => {
         cosmiconfig(moduleName, options);
-        checkResult(createExplorerMock, 1, {
-          '.mjs': 'jsLoader',
-          '.cjs': 'jsLoader',
-          '.js': 'jsLoader',
-          '.ts': 'tsLoader',
-          '.json': 'jsonLoader',
-          '.yaml': 'yamlLoader',
-          '.yml': 'loadYaml',
-          noExt: 'noExtLoader',
-        });
+        checkResult(
+          createExplorerMock,
+          1,
+          {
+            '.mjs': 'jsLoader',
+            '.cjs': 'jsLoader',
+            '.js': 'jsLoader',
+            '.ts': 'tsLoader',
+            '.json': 'jsonLoader',
+            '.yaml': 'yamlLoader',
+            '.yml': 'loadYaml',
+            noExt: 'noExtLoader',
+          },
+          [
+            'config',
+            'config.json',
+            'config.yaml',
+            'config.yml',
+            'config.js',
+            'config.ts',
+            'config.cjs',
+            'config.mjs',
+          ],
+        );
       });
 
       test('sync', () => {
@@ -440,6 +498,15 @@ describe('cosmiconfig', () => {
             '.yml': 'loadYaml',
             noExt: 'noExtLoader',
           },
+          [
+            'config',
+            'config.json',
+            'config.yaml',
+            'config.yml',
+            'config.js',
+            'config.ts',
+            'config.cjs',
+          ],
         );
       });
     });
@@ -456,6 +523,7 @@ describe('cosmiconfig', () => {
         mock: SpyInstance,
         instanceNum: number,
         expectedLoaderFunctionNames: any,
+        expectedGlobalConfigSearchPlaces: Array<string>,
       ) => {
         const explorerOptions = checkResultBase(
           mock,
@@ -466,6 +534,7 @@ describe('cosmiconfig', () => {
         expect(explorerOptions).toEqual({
           moduleName: 'wildandfree',
           searchPlaces: ['.config/foo.json'],
+          globalConfigSearchPlaces: expectedGlobalConfigSearchPlaces,
           ignoreEmptySearchPlaces: false,
           mergeImportArrays: true,
           mergeSearchPlaces: false,
@@ -478,16 +547,30 @@ describe('cosmiconfig', () => {
 
       test('async', () => {
         cosmiconfig(moduleName, options);
-        checkResult(createExplorerMock, 1, {
-          '.mjs': 'jsLoader',
-          '.cjs': 'jsLoader',
-          '.js': 'jsLoader',
-          '.ts': 'tsLoader',
-          '.json': 'jsonLoader',
-          '.yaml': 'yamlLoader',
-          '.yml': 'loadYaml',
-          noExt: 'noExtLoader',
-        });
+        checkResult(
+          createExplorerMock,
+          1,
+          {
+            '.mjs': 'jsLoader',
+            '.cjs': 'jsLoader',
+            '.js': 'jsLoader',
+            '.ts': 'tsLoader',
+            '.json': 'jsonLoader',
+            '.yaml': 'yamlLoader',
+            '.yml': 'loadYaml',
+            noExt: 'noExtLoader',
+          },
+          [
+            'config',
+            'config.json',
+            'config.yaml',
+            'config.yml',
+            'config.js',
+            'config.ts',
+            'config.cjs',
+            'config.mjs',
+          ],
+        );
       });
 
       test('sync', () => {
@@ -505,6 +588,15 @@ describe('cosmiconfig', () => {
             '.yml': 'loadYaml',
             noExt: 'noExtLoader',
           },
+          [
+            'config',
+            'config.json',
+            'config.yaml',
+            'config.yml',
+            'config.js',
+            'config.ts',
+            'config.cjs',
+          ],
         );
       });
     });
