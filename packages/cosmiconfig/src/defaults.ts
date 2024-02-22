@@ -1,7 +1,7 @@
+import { loadJson } from '@cosmiconfig/better-json-loader';
 import { loadJs, loadJsSync } from '@cosmiconfig/js-loader';
 import { loadTs, loadTsSync } from '@cosmiconfig/typescript-loader';
 import { loadYaml } from '@cosmiconfig/yaml-loader';
-import { loadJson } from './loaders';
 
 export function getDefaultSearchPlaces(moduleName: string): Array<string> {
   return [
