@@ -7,5 +7,8 @@
     "stripInternal": true
   },
   "include": ["src"],
-  "references": [{ "path": "../base/tsconfig.build.json" }]
+  "references": [
+    { "path": "../base/tsconfig.build.json" },
+    { "path": "../yaml/tsconfig.build.json" }
+  ]
 }

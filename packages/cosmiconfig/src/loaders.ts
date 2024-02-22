@@ -20,20 +20,6 @@ export const loadJson: LoaderSync = function loadJson(filepath, content) {
   }
 };
 
-let yaml: typeof import('js-yaml');
-export const loadYaml: LoaderSync = function loadYaml(filepath, content) {
-  if (yaml === undefined) {
-    yaml = require('js-yaml');
-  }
-
-  try {
-    return yaml.load(content);
-  } catch (error) {
-    error.message = `YAML Error in ${filepath}:\n${error.message}`;
-    throw error;
-  }
-};
-
 let typescript: typeof import('typescript');
 export const loadTsSync: LoaderSync = function loadTsSync(filepath, content) {
   /* istanbul ignore next -- @preserve */

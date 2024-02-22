@@ -1,5 +1,6 @@
 import { loadJs, loadJsSync } from '@cosmiconfig/base/loaders';
-import { loadJson, loadTs, loadTsSync, loadYaml } from './loaders';
+import { loadYaml } from '@cosmiconfig/yaml';
+import { loadJson, loadTs, loadTsSync } from './loaders';
 
 export function getDefaultSearchPlaces(moduleName: string): Array<string> {
   return [
