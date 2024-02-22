@@ -1,11 +1,13 @@
 import {
-  CommonOptions,
-  Config,
-  CosmiconfigResult,
   Explorer,
   ExplorerSync,
   InternalOptions,
   InternalOptionsSync,
+} from '@cosmiconfig/base';
+import {
+  CommonOptions,
+  Config,
+  CosmiconfigResult,
   Loader,
   LoaderResult,
   LoaderSync,
@@ -19,14 +21,14 @@ import {
   SearchStrategy,
   Transform,
   TransformSync,
-} from '@cosmiconfig/base';
+} from '@cosmiconfig/types';
 import {
+  defaultGlobalConfigSearchPlaces,
+  defaultGlobalConfigSearchPlacesSync,
   defaultLoaders,
   defaultLoadersSync,
   getDefaultSearchPlaces,
   getDefaultSearchPlacesSync,
-  defaultGlobalConfigSearchPlaces,
-  defaultGlobalConfigSearchPlacesSync,
   metaSearchPlaces,
 } from './defaults';
 import { removeUndefinedValuesFromObject } from './util';
@@ -243,12 +245,12 @@ export {
   SearchStrategy,
   Transform,
   TransformSync,
+  defaultGlobalConfigSearchPlaces,
+  defaultGlobalConfigSearchPlacesSync,
   defaultLoaders,
   defaultLoadersSync,
   getDefaultSearchPlaces,
   getDefaultSearchPlacesSync,
-  defaultGlobalConfigSearchPlaces,
-  defaultGlobalConfigSearchPlacesSync,
   defaultGlobalConfigSearchPlaces as globalConfigSearchPlaces,
   defaultGlobalConfigSearchPlacesSync as globalConfigSearchPlacesSync,
 };

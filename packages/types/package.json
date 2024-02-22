@@ -1,9 +1,15 @@
 {
-  "name": "cosmiconfig",
+  "name": "@cosmiconfig/types",
   "version": "9.0.0",
-  "description": "Find and load configuration from a package.json property, rc file, TypeScript module, and more!",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
     "!dist/**/*.map"
@@ -16,9 +22,8 @@
     "dev": "npm run build:tsc -- --watch",
     "lint": "eslint --ext .js,.ts .",
     "lint:fix": "eslint --ext .js,.ts . --fix",
-    "lint:md": "remark-preset-davidtheclark",
-    "test": "vitest run --coverage",
-    "test:watch": "vitest"
+    "test": "",
+    "test:watch": ""
   },
   "repository": {
     "type": "git",
@@ -42,25 +47,6 @@
     "url": "https://github.com/cosmiconfig/cosmiconfig/issues"
   },
   "homepage": "https://github.com/cosmiconfig/cosmiconfig#readme",
-  "peerDependencies": {
-    "typescript": ">=4.9.5"
-  },
-  "peerDependenciesMeta": {
-    "typescript": {
-      "optional": true
-    }
-  },
-  "dependencies": {
-    "@cosmiconfig/base": "9.0.0",
-    "@cosmiconfig/types": "9.0.0",
-    "@cosmiconfig/yaml": "9.0.0",
-    "import-fresh": "^3.3.0",
-    "parse-json": "^5.2.0"
-  },
-  "devDependencies": {
-    "@types/parse-json": "^4.0.0",
-    "env-paths": "^2.2.1"
-  },
   "engines": {
     "node": ">=14"
   }

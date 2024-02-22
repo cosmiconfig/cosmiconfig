@@ -1,11 +1,10 @@
+import { Config, CosmiconfigResult } from '@cosmiconfig/types';
 import envPaths from 'env-paths';
 import os from 'os';
 import path from 'path';
 import {
   AsyncCache,
   Cache,
-  Config,
-  CosmiconfigResult,
   DirToSearch,
   InternalOptions,
   InternalOptionsSync,

@@ -4,27 +4,27 @@ import {
   ExplorerSync,
   InternalOptions,
   InternalOptionsSync,
-  Options,
 } from '@cosmiconfig/base';
 import path from 'path';
 import {
+  Mock,
+  MockInstance,
+  SpyInstance,
   afterAll,
   afterEach,
   beforeEach,
   describe,
   expect,
-  Mock,
-  MockInstance,
-  SpyInstance,
   test,
   vi,
 } from 'vitest';
 import {
-  defaultLoaders,
   Loader,
-  Loaders,
   LoaderSync,
+  Loaders,
+  Options,
   OptionsSync,
+  defaultLoaders,
 } from '../src';
 import { TempDir } from './util';
 

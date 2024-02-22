@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
+import { Loader, LoaderSync } from '@cosmiconfig/types';
 import { pathToFileURL } from 'url';
-import { Loader, LoaderSync } from './types';
 
 let importFresh: typeof import('import-fresh');
 export const loadJsSync: LoaderSync = function loadJsSync(filepath) {

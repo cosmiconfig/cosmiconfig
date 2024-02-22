@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
-import { LoaderSync } from '@cosmiconfig/base';
+import { LoaderSync } from '@cosmiconfig/types';
 
 let yaml: typeof import('js-yaml');
 export const loadYaml: LoaderSync = (filepath, content) => {

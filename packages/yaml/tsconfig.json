@@ -5,5 +5,5 @@
     "rootDir": "."
   },
   "include": ["src", "test"],
-  "references": [{ "path": "../base/tsconfig.build.json" }]
+  "references": [{ "path": "../types/tsconfig.build.json" }]
 }

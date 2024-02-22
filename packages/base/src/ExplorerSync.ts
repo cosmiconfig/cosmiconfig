@@ -1,13 +1,9 @@
+import { Config, CosmiconfigResult } from '@cosmiconfig/types';
 import fs from 'fs';
 import path from 'path';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase';
 import { hasOwn, mergeAll } from './merge';
-import {
-  Config,
-  CosmiconfigResult,
-  DirToSearch,
-  InternalOptionsSync,
-} from './types';
+import { DirToSearch, InternalOptionsSync } from './types';
 import { emplace, getPropertyByPath, isDirectorySync } from './util';
 
 /**

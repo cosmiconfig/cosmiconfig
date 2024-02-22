@@ -9,6 +9,7 @@
   "include": ["src"],
   "references": [
     { "path": "../base/tsconfig.build.json" },
+    { "path": "../types/tsconfig.build.json" },
     { "path": "../yaml/tsconfig.build.json" }
   ]
 }

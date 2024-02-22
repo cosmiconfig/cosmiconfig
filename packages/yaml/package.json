@@ -48,7 +48,7 @@
   },
   "homepage": "https://github.com/cosmiconfig/cosmiconfig#readme",
   "dependencies": {
-    "@cosmiconfig/base": "^9.0.0",
+    "@cosmiconfig/types": "9.0.0",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
