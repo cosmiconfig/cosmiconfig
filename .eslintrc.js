@@ -8,7 +8,8 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     sourceType: 'module',
-    project: './tsconfig.base.json',
+    project: 'packages/*/tsconfig.json',
+    tsconfigRootDir: __dirname,
   },
   extends: [
     'eslint-config-davidtheclark-node',

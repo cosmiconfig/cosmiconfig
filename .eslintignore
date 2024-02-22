@@ -4,3 +4,7 @@ coverage
 dist
 package-lock.json
 tsconfig.tsbuildinfo
+packages/**/coverage
+packages/**/dist
+packages/**/tsconfig.tsbuildinfo
+packages/**/vite.config.ts
