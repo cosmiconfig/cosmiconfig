@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "build": "npm run build:tsc",
-    "build:tsc": "cross-env NODE_ENV=production tsc -b",
+    "build:tsc": "cross-env NODE_ENV=production tsc -b tsconfig.build.json",
     "dev": "npm run build:tsc -- --watch",
     "lint": "eslint --ext .js,.ts .",
     "lint:fix": "eslint --ext .js,.ts . --fix",

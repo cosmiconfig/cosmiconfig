@@ -7,4 +7,4 @@ tsconfig.tsbuildinfo
 packages/**/coverage
 packages/**/dist
 packages/**/tsconfig.tsbuildinfo
-packages/**/vite.config.ts
+packages/**/vitest.config.ts
