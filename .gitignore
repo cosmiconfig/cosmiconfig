@@ -4,5 +4,4 @@ dist
 packages/**/coverage
 packages/**/dist
 package-lock.json
-tsconfig.tsbuildinfo
-tsconfig.build.tsbuildinfo
+*.tsbuildinfo
