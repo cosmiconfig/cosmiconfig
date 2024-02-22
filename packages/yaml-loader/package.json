@@ -1,5 +1,5 @@
 {
-  "name": "@cosmiconfig/yaml",
+  "name": "@cosmiconfig/yaml-loader",
   "version": "9.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

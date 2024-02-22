@@ -53,7 +53,7 @@
   "dependencies": {
     "@cosmiconfig/base": "9.0.0",
     "@cosmiconfig/types": "9.0.0",
-    "@cosmiconfig/yaml": "9.0.0",
+    "@cosmiconfig/yaml-loader": "9.0.0",
     "import-fresh": "^3.3.0",
     "parse-json": "^5.2.0"
   },
