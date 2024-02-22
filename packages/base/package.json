@@ -3,6 +3,21 @@
   "version": "9.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./defaults": {
+      "types": "./dist/defaults.d.ts",
+      "default": "./dist/defaults.js"
+    },
+    "./loaders": {
+      "types": "./dist/loaders.d.ts",
+      "default": "./dist/loaders.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
     "!dist/**/*.map"
@@ -11,6 +26,7 @@
     "build": "npm run build:tsc",
     "build:tsc": "cross-env NODE_ENV=production tsc -b tsconfig.build.json",
     "clean": "tsc -b tsconfig.build.json --clean",
+    "postclean": "rimraf dist && rimraf coverage",
     "dev": "npm run build:tsc -- --watch",
     "lint": "eslint --ext .js,.ts .",
     "lint:fix": "eslint --ext .js,.ts . --fix",
@@ -40,7 +56,8 @@
   },
   "homepage": "https://github.com/cosmiconfig/cosmiconfig#readme",
   "dependencies": {
-    "env-paths": "^2.2.1"
+    "env-paths": "^2.2.1",
+    "import-fresh": "^3.3.0"
   },
   "engines": {
     "node": ">=14"

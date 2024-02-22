@@ -12,6 +12,7 @@
     "build": "npm run build:tsc",
     "build:tsc": "cross-env NODE_ENV=production tsc -b tsconfig.build.json",
     "clean": "tsc -b tsconfig.build.json --clean",
+    "postclean": "rimraf dist && rimraf coverage",
     "dev": "npm run build:tsc -- --watch",
     "lint": "eslint --ext .js,.ts .",
     "lint:fix": "eslint --ext .js,.ts . --fix",

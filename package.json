@@ -59,6 +59,7 @@
     "parent-module": "^3.0.0",
     "prettier": "^3.0.3",
     "remark-preset-davidtheclark": "^0.12.0",
+    "rimraf": "^5.0.5",
     "typescript": "^5.2.2",
     "vitest": "^0.34.3"
   }
