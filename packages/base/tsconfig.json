@@ -4,6 +4,5 @@
     "composite": false,
     "rootDir": "."
   },
-  "include": ["src", "test"],
-  "references": [{ "path": "../base/tsconfig.build.json" }]
+  "include": ["src", "test"]
 }

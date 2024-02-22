@@ -6,11 +6,11 @@ import {
   Cache,
   Config,
   CosmiconfigResult,
+  DirToSearch,
   InternalOptions,
   InternalOptionsSync,
-  DirToSearch,
-} from './types.js';
-import { getPropertyByPath } from './util.js';
+} from './types';
+import { getPropertyByPath } from './util';
 
 /**
  * @internal

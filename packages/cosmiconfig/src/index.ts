@@ -1,25 +1,16 @@
 import {
-  defaultLoaders,
-  defaultLoadersSync,
-  getDefaultSearchPlaces,
-  getDefaultSearchPlacesSync,
-  metaSearchPlaces,
-  globalConfigSearchPlaces,
-  globalConfigSearchPlacesSync,
-} from './defaults';
-import { Explorer } from './Explorer.js';
-import { ExplorerSync } from './ExplorerSync.js';
-import {
   CommonOptions,
   Config,
   CosmiconfigResult,
+  Explorer,
+  ExplorerSync,
   InternalOptions,
   InternalOptionsSync,
   Loader,
   LoaderResult,
+  LoaderSync,
   Loaders,
   LoadersSync,
-  LoaderSync,
   Options,
   OptionsSync,
   PublicExplorer,
@@ -28,7 +19,16 @@ import {
   SearchStrategy,
   Transform,
   TransformSync,
-} from './types.js';
+} from '@cosmiconfig/base';
+import {
+  defaultLoaders,
+  defaultLoadersSync,
+  getDefaultSearchPlaces,
+  getDefaultSearchPlacesSync,
+  globalConfigSearchPlaces,
+  globalConfigSearchPlacesSync,
+  metaSearchPlaces,
+} from './defaults';
 import { removeUndefinedValuesFromObject } from './util';
 
 const identity: TransformSync = function identity(x) {
@@ -224,26 +224,26 @@ export function cosmiconfigSync(
 }
 
 export {
+  CommonOptions,
   Config,
   CosmiconfigResult,
-  LoaderResult,
   Loader,
-  Loaders,
+  LoaderResult,
   LoaderSync,
+  Loaders,
   LoadersSync,
-  Transform,
-  TransformSync,
-  SearchStrategy,
-  CommonOptions,
   Options,
   OptionsSync,
-  PublicExplorerBase,
   PublicExplorer,
+  PublicExplorerBase,
   PublicExplorerSync,
+  SearchStrategy,
+  Transform,
+  TransformSync,
+  defaultLoaders,
+  defaultLoadersSync,
   getDefaultSearchPlaces,
   getDefaultSearchPlacesSync,
   globalConfigSearchPlaces,
   globalConfigSearchPlacesSync,
-  defaultLoaders,
-  defaultLoadersSync,
 };

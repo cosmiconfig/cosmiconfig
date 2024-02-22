@@ -1,4 +1,11 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function*/
+import {
+  Explorer,
+  ExplorerSync,
+  InternalOptions,
+  InternalOptionsSync,
+  Options,
+} from '@cosmiconfig/base';
 import path from 'path';
 import {
   afterAll,
@@ -13,42 +20,25 @@ import {
   vi,
 } from 'vitest';
 import {
+  defaultLoaders,
   Loader,
   Loaders,
   LoaderSync,
   OptionsSync,
-  defaultLoaders,
 } from '../src';
-import { Explorer } from '../src/Explorer';
-import { ExplorerSync } from '../src/ExplorerSync';
-import { InternalOptions, InternalOptionsSync, Options } from '../src/types';
 import { TempDir } from './util';
 
-vi.mock('../src/ExplorerSync', async () => {
-  const { ExplorerSync } = await vi.importActual<
-    typeof import('../src/ExplorerSync')
-  >('../src/ExplorerSync');
+vi.mock('@cosmiconfig/base', async () => {
+  const { ExplorerSync, Explorer, ...rest } =
+    await vi.importActual<typeof import('@cosmiconfig/base')>(
+      '@cosmiconfig/base',
+    );
 
   const mock = vi.fn();
+  const mockSync = vi.fn();
 
   return {
-    ExplorerSync: class FakeExplorerSync extends ExplorerSync {
-      static mock = mock;
-      constructor(options: InternalOptionsSync) {
-        mock(options);
-        super(options);
-      }
-    },
-  };
-});
-
-vi.mock('../src/Explorer', async () => {
-  const { Explorer } =
-    await vi.importActual<typeof import('../src/Explorer')>('../src/Explorer');
-
-  const mock = vi.fn();
-
-  return {
+    ...rest,
     Explorer: class FakeExplorer extends Explorer {
       static mock = mock;
       constructor(options: InternalOptions) {
@@ -56,7 +46,16 @@ vi.mock('../src/Explorer', async () => {
         super(options);
       }
     },
+    ExplorerSync: class FakeExplorerSync extends ExplorerSync {
+      static mock = mockSync;
+      constructor(options: InternalOptionsSync) {
+        mockSync(options);
+        super(options);
+      }
+    },
   };
+
+  return {};
 });
 
 const { cosmiconfig, cosmiconfigSync } = await import('../src/index.js');

@@ -3,9 +3,8 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "./src",
-    "outDir": "./dist",
-    "stripInternal": true
+    "outDir": "./dist"
   },
   "include": ["src"],
-  "references": [{ "path": "../base/tsconfig.build.json" }]
+  "references": []
 }

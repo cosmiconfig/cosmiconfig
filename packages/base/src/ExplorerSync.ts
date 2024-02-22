@@ -1,38 +1,36 @@
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
-import { globalConfigSearchPlaces } from './defaults';
-import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
+import { ExplorerBase, getExtensionDescription } from './ExplorerBase';
+import { globalConfigSearchPlacesSync } from './defaults';
 import { hasOwn, mergeAll } from './merge';
 import {
   Config,
   CosmiconfigResult,
-  InternalOptions,
   DirToSearch,
-} from './types.js';
-import { emplace, getPropertyByPath, isDirectory } from './util.js';
+  InternalOptionsSync,
+} from './types';
+import { emplace, getPropertyByPath, isDirectorySync } from './util';
 
 /**
  * @internal
  */
-export class Explorer extends ExplorerBase<InternalOptions> {
-  public async load(filepath: string): Promise<CosmiconfigResult> {
+export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
+  public load(filepath: string): CosmiconfigResult {
     filepath = path.resolve(filepath);
 
-    const load = async (): Promise<CosmiconfigResult> => {
-      return await this.config.transform(
-        await this.#readConfiguration(filepath),
-      );
+    const load = (): CosmiconfigResult => {
+      return this.config.transform(this.#readConfiguration(filepath));
     };
     if (this.loadCache) {
-      return await emplace(this.loadCache, filepath, load);
+      return emplace(this.loadCache, filepath, load);
     }
-    return await load();
+    return load();
   }
 
-  public async search(from = ''): Promise<CosmiconfigResult> {
+  public search(from = ''): CosmiconfigResult {
     if (this.config.metaConfigFilePath) {
       this.loadingMetaConfig = true;
-      const config = await this.load(this.config.metaConfigFilePath);
+      const config = this.load(this.config.metaConfigFilePath);
       this.loadingMetaConfig = false;
       if (config && !config.isEmpty) {
         return config;
@@ -41,7 +39,7 @@ export class Explorer extends ExplorerBase<InternalOptions> {
 
     from = path.resolve(from);
     const dirs = this.#getDirs(from);
-    const firstDirIter = await dirs.next();
+    const firstDirIter = dirs.next();
     /* istanbul ignore if -- @preserve */
     if (firstDirIter.done) {
       // this should never happen
@@ -50,20 +48,20 @@ export class Explorer extends ExplorerBase<InternalOptions> {
       );
     }
     let currentDir = firstDirIter.value;
-    const search = async (): Promise<CosmiconfigResult> => {
+    const search = (): CosmiconfigResult => {
       /* istanbul ignore if -- @preserve */
-      if (await isDirectory(currentDir.path)) {
+      if (isDirectorySync(currentDir.path)) {
         for (const filepath of this.getSearchPlacesForDir(
           currentDir,
-          globalConfigSearchPlaces,
+          globalConfigSearchPlacesSync,
         )) {
           try {
-            const result = await this.#readConfiguration(filepath);
+            const result = this.#readConfiguration(filepath);
             if (
               result !== null &&
               !(result.isEmpty && this.config.ignoreEmptySearchPlaces)
             ) {
-              return await this.config.transform(result);
+              return this.config.transform(result);
             }
           } catch (error) {
             if (
@@ -78,40 +76,40 @@ export class Explorer extends ExplorerBase<InternalOptions> {
           }
         }
       }
-      const nextDirIter = await dirs.next();
+      const nextDirIter = dirs.next();
       if (!nextDirIter.done) {
         currentDir = nextDirIter.value;
         if (this.searchCache) {
-          return await emplace(this.searchCache, currentDir.path, search);
+          return emplace(this.searchCache, currentDir.path, search);
         }
-        return await search();
+        return search();
       }
-      return await this.config.transform(null);
+      return this.config.transform(null);
     };
 
     if (this.searchCache) {
-      return await emplace(this.searchCache, from, search);
+      return emplace(this.searchCache, from, search);
     }
-    return await search();
+    return search();
   }
 
-  async #readConfiguration(
+  #readConfiguration(
     filepath: string,
     importStack: Array<string> = [],
-  ): Promise<CosmiconfigResult> {
-    const contents = await fs.readFile(filepath, { encoding: 'utf-8' });
+  ): CosmiconfigResult {
+    const contents = fs.readFileSync(filepath, 'utf8');
     return this.toCosmiconfigResult(
       filepath,
-      await this.#loadConfigFileWithImports(filepath, contents, importStack),
+      this.#loadConfigFileWithImports(filepath, contents, importStack),
     );
   }
 
-  async #loadConfigFileWithImports(
+  #loadConfigFileWithImports(
     filepath: string,
     contents: string,
     importStack: Array<string>,
-  ): Promise<Config | null | undefined> {
-    const loadedContent = await this.#loadConfiguration(filepath, contents);
+  ): Config | null | undefined {
+    const loadedContent = this.#loadConfiguration(filepath, contents);
 
     if (!loadedContent || !hasOwn(loadedContent, '$import')) {
       return loadedContent;
@@ -123,24 +121,18 @@ export class Explorer extends ExplorerBase<InternalOptions> {
     const newImportStack = [...importStack, filepath];
     this.validateImports(filepath, importPaths, newImportStack);
 
-    const importedConfigs = await Promise.all(
-      importPaths.map(async (importPath) => {
-        const fullPath = path.resolve(fileDirectory, importPath);
-        const result = await this.#readConfiguration(fullPath, newImportStack);
+    const importedConfigs = importPaths.map((importPath) => {
+      const fullPath = path.resolve(fileDirectory, importPath);
+      const result = this.#readConfiguration(fullPath, newImportStack);
 
-        return result?.config;
-      }),
-    );
-
+      return result?.config;
+    });
     return mergeAll([...importedConfigs, ownContent], {
       mergeArrays: this.config.mergeImportArrays,
     });
   }
 
-  async #loadConfiguration(
-    filepath: string,
-    contents: string,
-  ): Promise<Config> {
+  #loadConfiguration(filepath: string, contents: string): Config {
     if (contents.trim() === '') {
       return;
     }
@@ -157,7 +149,7 @@ export class Explorer extends ExplorerBase<InternalOptions> {
     }
 
     try {
-      const loadedContents = await loader(filepath, contents);
+      const loadedContents = loader(filepath, contents);
 
       if (path.basename(filepath, extension) !== 'package') {
         return loadedContents;
@@ -175,19 +167,19 @@ export class Explorer extends ExplorerBase<InternalOptions> {
     }
   }
 
-  async #fileExists(path: string): Promise<boolean> {
+  #fileExists(path: string): boolean {
     try {
-      await fs.stat(path);
+      fs.statSync(path);
       return true;
     } catch (e) {
       return false;
     }
   }
 
-  async *#getDirs(startDir: string): AsyncIterableIterator<DirToSearch> {
+  *#getDirs(startDir: string): Iterator<DirToSearch> {
     switch (this.config.searchStrategy) {
       case 'none': {
-        // only check in the passed directory (defaults to working directory)
+        // there is no next dir
         yield { path: startDir, isGlobalConfig: false };
         return;
       }
@@ -197,7 +189,7 @@ export class Explorer extends ExplorerBase<InternalOptions> {
           yield { path: currentDir, isGlobalConfig: false };
           for (const ext of ['json', 'yaml']) {
             const packageFile = path.join(currentDir, `package.${ext}`);
-            if (await this.#fileExists(packageFile)) {
+            if (this.#fileExists(packageFile)) {
               break;
             }
           }
@@ -215,5 +207,21 @@ export class Explorer extends ExplorerBase<InternalOptions> {
         yield* this.getGlobalDirs(startDir);
       }
     }
+  }
+
+  /**
+   * @deprecated Use {@link ExplorerSync.prototype.load}.
+   */
+  /* istanbul ignore next */
+  public loadSync(filepath: string): CosmiconfigResult {
+    return this.load(filepath);
+  }
+
+  /**
+   * @deprecated Use {@link ExplorerSync.prototype.search}.
+   */
+  /* istanbul ignore next */
+  public searchSync(from = ''): CosmiconfigResult {
+    return this.search(from);
   }
 }
