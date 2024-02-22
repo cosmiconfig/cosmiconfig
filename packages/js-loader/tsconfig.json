@@ -5,8 +5,5 @@
     "rootDir": "."
   },
   "include": ["src", "test"],
-  "references": [
-    { "path": "../types/tsconfig.build.json" },
-    { "path": "../js-loader/tsconfig.build.json" }
-  ]
+  "references": [{ "path": "../types/tsconfig.build.json" }]
 }

@@ -53,6 +53,7 @@
   "dependencies": {
     "@cosmiconfig/base": "9.0.0",
     "@cosmiconfig/types": "9.0.0",
+    "@cosmiconfig/js-loader": "9.0.0",
     "@cosmiconfig/typescript-loader": "9.0.0",
     "@cosmiconfig/yaml-loader": "9.0.0",
     "import-fresh": "^3.3.0",

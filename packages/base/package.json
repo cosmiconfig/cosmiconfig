@@ -57,8 +57,7 @@
   "homepage": "https://github.com/cosmiconfig/cosmiconfig#readme",
   "dependencies": {
     "@cosmiconfig/types": "9.0.0",
-    "env-paths": "^2.2.1",
-    "import-fresh": "^3.3.0"
+    "env-paths": "^2.2.1"
   },
   "engines": {
     "node": ">=14"

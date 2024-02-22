@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
-import { loadJs, loadJsSync } from '@cosmiconfig/base/loaders';
+import { loadJs, loadJsSync } from '@cosmiconfig/js-loader';
 import { Loader, LoaderSync } from '@cosmiconfig/types';
 import { existsSync, rmSync, writeFileSync } from 'fs';
 import { rm, writeFile } from 'fs/promises';

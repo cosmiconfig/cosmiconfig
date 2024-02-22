@@ -1,5 +1,5 @@
 {
-  "name": "@cosmiconfig/typescript-loader",
+  "name": "@cosmiconfig/js-loader",
   "version": "9.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -48,16 +48,8 @@
   },
   "homepage": "https://github.com/cosmiconfig/cosmiconfig#readme",
   "dependencies": {
-    "@cosmiconfig/js-loader": "9.0.0",
-    "@cosmiconfig/types": "9.0.0"
-  },
-  "peerDependencies": {
-    "typescript": ">=4.9.5"
-  },
-  "peerDependenciesMeta": {
-    "typescript": {
-      "optional": true
-    }
+    "@cosmiconfig/types": "9.0.0",
+    "import-fresh": "^3.3.0"
   },
   "engines": {
     "node": ">=14"
