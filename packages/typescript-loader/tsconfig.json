@@ -6,9 +6,7 @@
   },
   "include": ["src", "test"],
   "references": [
-    { "path": "../base/tsconfig.build.json" },
     { "path": "../types/tsconfig.build.json" },
-    { "path": "../typescript-loader/tsconfig.build.json" },
-    { "path": "../yaml-loader/tsconfig.build.json" }
+    { "path": "../base/tsconfig.build.json" }
   ]
 }
