@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
+import { Loader, LoaderSync, loadJs } from '@cosmiconfig/core';
 import { existsSync, rmSync, writeFileSync } from 'fs';
 import { rm, writeFile } from 'fs/promises';
 import path from 'path';
-import { pathToFileURL } from 'url';
-import { Loader, LoaderSync } from './types.js';
 
 let importFresh: typeof import('import-fresh');
 export const loadJsSync: LoaderSync = function loadJsSync(filepath) {
@@ -13,29 +12,6 @@ export const loadJsSync: LoaderSync = function loadJsSync(filepath) {
   }
 
   return importFresh(filepath);
-};
-
-export const loadJs: Loader = async function loadJs(filepath) {
-  try {
-    const { href } = pathToFileURL(filepath);
-    return (await import(href)).default;
-  } catch (error) {
-    try {
-      return loadJsSync(filepath, '');
-    } catch (requireError) {
-      if (
-        requireError.code === 'ERR_REQUIRE_ESM' ||
-        (requireError instanceof SyntaxError &&
-          requireError
-            .toString()
-            .includes('Cannot use import statement outside a module'))
-      ) {
-        throw error;
-      }
-
-      throw requireError;
-    }
-  }
 };
 
 let parseJson: typeof import('parse-json');

@@ -1,0 +1,51 @@
+{
+  "name": "@cosmiconfig/core",
+  "version": "9.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.map"
+  ],
+  "scripts": {
+    "build": "cross-env NODE_ENV=production tsc -b tsconfig.build.json",
+    "clean": "tsc -b tsconfig.build.json --clean",
+    "postclean": "rimraf dist && rimraf coverage",
+    "dev": "npm run build:tsc -- --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cosmiconfig/cosmiconfig.git"
+  },
+  "keywords": [
+    "load",
+    "configuration",
+    "config"
+  ],
+  "author": "Daniel Fischer <daniel@d-fischer.dev>",
+  "contributors": [
+    "Randolf J <jrandolf@google.com>",
+    "David Clark <david.dave.clark@gmail.com>",
+    "Bogdan Chadkin <trysound@yandex.ru>",
+    "Suhas Karanth <sudo.suhas@gmail.com>"
+  ],
+  "funding": "https://github.com/sponsors/d-fischer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cosmiconfig/cosmiconfig/issues"
+  },
+  "homepage": "https://github.com/cosmiconfig/cosmiconfig#readme",
+  "dependencies": {
+    "env-paths": "^2.2.1"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}

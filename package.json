@@ -1,18 +1,15 @@
 {
-  "name": "cosmiconfig",
+  "name": "@cosmiconfig/source",
   "version": "9.0.0",
   "description": "Find and load configuration from a package.json property, rc file, TypeScript module, and more!",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist",
-    "!dist/**/*.map"
+  "private": true,
+  "workspaces": [
+    "packages/*"
   ],
   "scripts": {
-    "clean": "git clean -Xdf -e '!node_modules' .",
-    "build": "npm run build:tsc",
-    "build:tsc": "cross-env NODE_ENV=production tsc -b",
-    "dev": "npm run build:tsc -- --watch",
+    "clean": "npm run clean --workspaces",
+    "build": "npm run build --workspaces",
+    "dev": "npm run dev --workspaces",
     "lint": "eslint --ext .js,.ts .",
     "lint:fix": "eslint --ext .js,.ts . --fix",
     "lint:md": "remark-preset-davidtheclark",
@@ -60,28 +57,13 @@
     "url": "https://github.com/cosmiconfig/cosmiconfig/issues"
   },
   "homepage": "https://github.com/cosmiconfig/cosmiconfig#readme",
-  "peerDependencies": {
-    "typescript": ">=4.9.5"
-  },
-  "peerDependenciesMeta": {
-    "typescript": {
-      "optional": true
-    }
-  },
-  "dependencies": {
-    "env-paths": "^2.2.1",
-    "import-fresh": "^3.3.0",
-    "js-yaml": "^4.1.0",
-    "parse-json": "^5.2.0"
-  },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.5",
     "@types/node": "^14",
-    "@types/parse-json": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
     "@typescript-eslint/parser": "^6.5.0",
     "@vitest/coverage-istanbul": "^0.34.3",
     "cross-env": "^7.0.3",
+    "env-paths": "^2.2.1",
     "eslint": "^8.48.0",
     "eslint-config-davidtheclark-node": "^0.2.2",
     "eslint-config-prettier": "^9.0.0",
@@ -91,9 +73,10 @@
     "eslint-plugin-vitest": "^0.2.8",
     "husky": "^8.0.3",
     "lint-staged": "^14.0.1",
-    "parent-module": "^3.0.0",
+    "parent-module": "^2.0.0",
     "prettier": "^3.0.3",
     "remark-preset-davidtheclark": "^0.12.0",
+    "rimraf": "^5.0.5",
     "typescript": "^5.2.2",
     "vitest": "^0.34.3"
   },

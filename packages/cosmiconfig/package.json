@@ -1,0 +1,60 @@
+{
+  "name": "cosmiconfig",
+  "version": "9.0.0",
+  "description": "Find and load configuration from a package.json property, rc file, TypeScript module, and more!",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "!dist/**/*.map"
+  ],
+  "scripts": {
+    "build": "cross-env NODE_ENV=production tsc -b tsconfig.build.json",
+    "clean": "tsc -b tsconfig.build.json --clean",
+    "postclean": "rimraf dist && rimraf coverage",
+    "dev": "npm run build:tsc -- --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cosmiconfig/cosmiconfig.git"
+  },
+  "keywords": [
+    "load",
+    "configuration",
+    "config"
+  ],
+  "author": "Daniel Fischer <daniel@d-fischer.dev>",
+  "contributors": [
+    "Randolf J <jrandolf@google.com>",
+    "David Clark <david.dave.clark@gmail.com>",
+    "Bogdan Chadkin <trysound@yandex.ru>",
+    "Suhas Karanth <sudo.suhas@gmail.com>"
+  ],
+  "funding": "https://github.com/sponsors/d-fischer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cosmiconfig/cosmiconfig/issues"
+  },
+  "homepage": "https://github.com/cosmiconfig/cosmiconfig#readme",
+  "peerDependencies": {
+    "typescript": ">=4.9.5"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@cosmiconfig/core": "9.0.0",
+    "import-fresh": "^3.3.0",
+    "js-yaml": "^4.1.0",
+    "parse-json": "^5.2.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.5",
+    "@types/parse-json": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}

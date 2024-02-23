@@ -1,36 +1,37 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
-import { globalConfigSearchPlacesSync } from './defaults';
 import { ExplorerBase, getExtensionDescription } from './ExplorerBase.js';
 import { hasOwn, mergeAll } from './merge';
 import {
   Config,
   CosmiconfigResult,
-  InternalOptionsSync,
+  InternalOptions,
   DirToSearch,
 } from './types.js';
-import { emplace, getPropertyByPath, isDirectorySync } from './util.js';
+import { emplace, getPropertyByPath, isDirectory } from './util.js';
 
 /**
  * @internal
  */
-export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
-  public load(filepath: string): CosmiconfigResult {
+export class Explorer extends ExplorerBase<InternalOptions> {
+  public async load(filepath: string): Promise<CosmiconfigResult> {
     filepath = path.resolve(filepath);
 
-    const load = (): CosmiconfigResult => {
-      return this.config.transform(this.#readConfiguration(filepath));
+    const load = async (): Promise<CosmiconfigResult> => {
+      return await this.config.transform(
+        await this.#readConfiguration(filepath),
+      );
     };
     if (this.loadCache) {
-      return emplace(this.loadCache, filepath, load);
+      return await emplace(this.loadCache, filepath, load);
     }
-    return load();
+    return await load();
   }
 
-  public search(from = ''): CosmiconfigResult {
+  public async search(from = ''): Promise<CosmiconfigResult> {
     if (this.config.metaConfigFilePath) {
       this.loadingMetaConfig = true;
-      const config = this.load(this.config.metaConfigFilePath);
+      const config = await this.load(this.config.metaConfigFilePath);
       this.loadingMetaConfig = false;
       if (config && !config.isEmpty) {
         return config;
@@ -39,7 +40,7 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
 
     from = path.resolve(from);
     const dirs = this.#getDirs(from);
-    const firstDirIter = dirs.next();
+    const firstDirIter = await dirs.next();
     /* istanbul ignore if -- @preserve */
     if (firstDirIter.done) {
       // this should never happen
@@ -48,20 +49,20 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
       );
     }
     let currentDir = firstDirIter.value;
-    const search = (): CosmiconfigResult => {
+    const search = async (): Promise<CosmiconfigResult> => {
       /* istanbul ignore if -- @preserve */
-      if (isDirectorySync(currentDir.path)) {
+      if (await isDirectory(currentDir.path)) {
         for (const filepath of this.getSearchPlacesForDir(
           currentDir,
-          globalConfigSearchPlacesSync,
+          this.config.globalConfigSearchPlaces,
         )) {
           try {
-            const result = this.#readConfiguration(filepath);
+            const result = await this.#readConfiguration(filepath);
             if (
               result !== null &&
               !(result.isEmpty && this.config.ignoreEmptySearchPlaces)
             ) {
-              return this.config.transform(result);
+              return await this.config.transform(result);
             }
           } catch (error) {
             if (
@@ -76,40 +77,40 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
           }
         }
       }
-      const nextDirIter = dirs.next();
+      const nextDirIter = await dirs.next();
       if (!nextDirIter.done) {
         currentDir = nextDirIter.value;
         if (this.searchCache) {
-          return emplace(this.searchCache, currentDir.path, search);
+          return await emplace(this.searchCache, currentDir.path, search);
         }
-        return search();
+        return await search();
       }
-      return this.config.transform(null);
+      return await this.config.transform(null);
     };
 
     if (this.searchCache) {
-      return emplace(this.searchCache, from, search);
+      return await emplace(this.searchCache, from, search);
     }
-    return search();
+    return await search();
   }
 
-  #readConfiguration(
+  async #readConfiguration(
     filepath: string,
     importStack: Array<string> = [],
-  ): CosmiconfigResult {
-    const contents = fs.readFileSync(filepath, 'utf8');
+  ): Promise<CosmiconfigResult> {
+    const contents = await fs.readFile(filepath, { encoding: 'utf-8' });
     return this.toCosmiconfigResult(
       filepath,
-      this.#loadConfigFileWithImports(filepath, contents, importStack),
+      await this.#loadConfigFileWithImports(filepath, contents, importStack),
     );
   }
 
-  #loadConfigFileWithImports(
+  async #loadConfigFileWithImports(
     filepath: string,
     contents: string,
     importStack: Array<string>,
-  ): Config | null | undefined {
-    const loadedContent = this.#loadConfiguration(filepath, contents);
+  ): Promise<Config | null | undefined> {
+    const loadedContent = await this.#loadConfiguration(filepath, contents);
 
     if (!loadedContent || !hasOwn(loadedContent, '$import')) {
       return loadedContent;
@@ -121,18 +122,24 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
     const newImportStack = [...importStack, filepath];
     this.validateImports(filepath, importPaths, newImportStack);
 
-    const importedConfigs = importPaths.map((importPath) => {
-      const fullPath = path.resolve(fileDirectory, importPath);
-      const result = this.#readConfiguration(fullPath, newImportStack);
+    const importedConfigs = await Promise.all(
+      importPaths.map(async (importPath) => {
+        const fullPath = path.resolve(fileDirectory, importPath);
+        const result = await this.#readConfiguration(fullPath, newImportStack);
 
-      return result?.config;
-    });
+        return result?.config;
+      }),
+    );
+
     return mergeAll([...importedConfigs, ownContent], {
       mergeArrays: this.config.mergeImportArrays,
     });
   }
 
-  #loadConfiguration(filepath: string, contents: string): Config {
+  async #loadConfiguration(
+    filepath: string,
+    contents: string,
+  ): Promise<Config> {
     if (contents.trim() === '') {
       return;
     }
@@ -149,7 +156,7 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
     }
 
     try {
-      const loadedContents = loader(filepath, contents);
+      const loadedContents = await loader(filepath, contents);
 
       if (path.basename(filepath, extension) !== 'package') {
         return loadedContents;
@@ -167,19 +174,19 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
     }
   }
 
-  #fileExists(path: string): boolean {
+  async #fileExists(path: string): Promise<boolean> {
     try {
-      fs.statSync(path);
+      await fs.stat(path);
       return true;
     } catch (e) {
       return false;
     }
   }
 
-  *#getDirs(startDir: string): Iterator<DirToSearch> {
+  async *#getDirs(startDir: string): AsyncIterableIterator<DirToSearch> {
     switch (this.config.searchStrategy) {
       case 'none': {
-        // there is no next dir
+        // only check in the passed directory (defaults to working directory)
         yield { path: startDir, isGlobalConfig: false };
         return;
       }
@@ -189,7 +196,7 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
           yield { path: currentDir, isGlobalConfig: false };
           for (const ext of ['json', 'yaml']) {
             const packageFile = path.join(currentDir, `package.${ext}`);
-            if (this.#fileExists(packageFile)) {
+            if (await this.#fileExists(packageFile)) {
               break;
             }
           }
@@ -207,21 +214,5 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
         yield* this.getGlobalDirs(startDir);
       }
     }
-  }
-
-  /**
-   * @deprecated Use {@link ExplorerSync.prototype.load}.
-   */
-  /* istanbul ignore next */
-  public loadSync(filepath: string): CosmiconfigResult {
-    return this.load(filepath);
-  }
-
-  /**
-   * @deprecated Use {@link ExplorerSync.prototype.search}.
-   */
-  /* istanbul ignore next */
-  public searchSync(from = ''): CosmiconfigResult {
-    return this.search(from);
   }
 }

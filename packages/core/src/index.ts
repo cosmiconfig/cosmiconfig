@@ -4,6 +4,7 @@ import {
   getDefaultSearchPlaces,
   getDefaultSearchPlacesSync,
   metaSearchPlaces,
+  metaSearchPlacesSync,
   globalConfigSearchPlaces,
   globalConfigSearchPlacesSync,
 } from './defaults';
@@ -13,6 +14,8 @@ import {
   CommonOptions,
   Config,
   CosmiconfigResult,
+  DefaultOptions,
+  DefaultOptionsSync,
   InternalOptions,
   InternalOptionsSync,
   Loader,
@@ -35,14 +38,17 @@ const identity: TransformSync = function identity(x) {
   return x;
 };
 
-function getUserDefinedOptionsFromMetaConfig(): CosmiconfigResult {
+function getUserDefinedOptionsFromMetaConfig(
+  defaultOptions: Readonly<DefaultOptions>,
+): CosmiconfigResult {
   const metaExplorer = new ExplorerSync({
     moduleName: 'cosmiconfig',
     stopDir: process.cwd(),
-    searchPlaces: metaSearchPlaces,
+    globalConfigSearchPlaces: defaultOptions.globalConfigSearchPlaces,
+    searchPlaces: defaultOptions.metaSearchPlaces,
     ignoreEmptySearchPlaces: false,
     applyPackagePropertyPathToConfiguration: true,
-    loaders: defaultLoaders,
+    loaders: defaultOptions.loaders,
     transform: identity,
     cache: true,
     metaConfigFilePath: null,
@@ -102,8 +108,9 @@ function mergeOptionsBase<
   moduleName: string,
   defaults: IntOpts,
   options: Readonly<Partial<Opts>>,
+  defaultOptions: Readonly<DefaultOptions> | Readonly<DefaultOptionsSync>,
 ): IntOpts {
-  const userDefinedConfig = getUserDefinedOptionsFromMetaConfig();
+  const userDefinedConfig = getUserDefinedOptionsFromMetaConfig(defaultOptions);
 
   if (!userDefinedConfig) {
     return {
@@ -154,50 +161,55 @@ function validateOptions(
 function mergeOptions(
   moduleName: string,
   options: Readonly<Partial<Options>>,
+  defaultOptions: Readonly<DefaultOptions>,
 ): InternalOptions {
   validateOptions(options);
   const defaults = {
     moduleName,
-    searchPlaces: getDefaultSearchPlaces(moduleName),
+    globalConfigSearchPlaces: defaultOptions.globalConfigSearchPlaces,
+    searchPlaces: defaultOptions.searchPlaces,
     ignoreEmptySearchPlaces: true,
     cache: true,
     transform: identity,
-    loaders: defaultLoaders,
+    loaders: defaultOptions.loaders,
     metaConfigFilePath: null,
     mergeImportArrays: true,
     mergeSearchPlaces: true,
     searchStrategy: options.stopDir ? 'global' : 'none',
   } satisfies InternalOptions;
 
-  return mergeOptionsBase(moduleName, defaults, options);
+  return mergeOptionsBase(moduleName, defaults, options, defaultOptions);
 }
 
 function mergeOptionsSync(
   moduleName: string,
   options: Readonly<Partial<OptionsSync>>,
+  defaultOptions: Readonly<DefaultOptionsSync>,
 ): InternalOptionsSync {
   validateOptions(options);
   const defaults = {
     moduleName,
-    searchPlaces: getDefaultSearchPlacesSync(moduleName),
+    globalConfigSearchPlaces: defaultOptions.globalConfigSearchPlaces,
+    searchPlaces: defaultOptions.searchPlaces,
     ignoreEmptySearchPlaces: true,
     cache: true,
     transform: identity,
-    loaders: defaultLoadersSync,
+    loaders: defaultOptions.loaders,
     metaConfigFilePath: null,
     mergeImportArrays: true,
     mergeSearchPlaces: true,
     searchStrategy: options.stopDir ? 'global' : 'none',
   } satisfies InternalOptionsSync;
 
-  return mergeOptionsBase(moduleName, defaults, options);
+  return mergeOptionsBase(moduleName, defaults, options, defaultOptions);
 }
 
-export function cosmiconfig(
+export function createPublicExplorer(
   moduleName: string,
-  options: Readonly<Partial<Options>> = {},
+  options: Readonly<Partial<Options>>,
+  defaults: Readonly<DefaultOptions>,
 ): PublicExplorer {
-  const normalizedOptions = mergeOptions(moduleName, options);
+  const normalizedOptions = mergeOptions(moduleName, options, defaults);
   const explorer = new Explorer(normalizedOptions);
   return {
     search: explorer.search.bind(explorer),
@@ -208,11 +220,16 @@ export function cosmiconfig(
   };
 }
 
-export function cosmiconfigSync(
+export function createPublicExplorerSync(
   moduleName: string,
-  options: Readonly<Partial<OptionsSync>> = {},
+  options: Readonly<Partial<OptionsSync>>,
+  defaultOptions: Readonly<DefaultOptionsSync>,
 ): PublicExplorerSync {
-  const normalizedOptions = mergeOptionsSync(moduleName, options);
+  const normalizedOptions = mergeOptionsSync(
+    moduleName,
+    options,
+    defaultOptions,
+  );
   const explorerSync = new ExplorerSync(normalizedOptions);
   return {
     search: explorerSync.search.bind(explorerSync),
@@ -223,7 +240,33 @@ export function cosmiconfigSync(
   };
 }
 
+export function cosmiconfig(
+  moduleName: string,
+  options: Readonly<Partial<Options>> = {},
+): PublicExplorer {
+  return createPublicExplorer(moduleName, options, {
+    globalConfigSearchPlaces,
+    metaSearchPlaces,
+    loaders: defaultLoaders,
+    searchPlaces: getDefaultSearchPlaces(moduleName),
+  });
+}
+
+export function cosmiconfigSync(
+  moduleName: string,
+  options: Readonly<Partial<OptionsSync>> = {},
+): PublicExplorerSync {
+  return createPublicExplorerSync(moduleName, options, {
+    globalConfigSearchPlaces: globalConfigSearchPlacesSync,
+    metaSearchPlaces: metaSearchPlacesSync,
+    loaders: defaultLoadersSync,
+    searchPlaces: getDefaultSearchPlacesSync(moduleName),
+  });
+}
+
 export {
+  DefaultOptions,
+  DefaultOptionsSync,
   Config,
   CosmiconfigResult,
   LoaderResult,
@@ -247,3 +290,5 @@ export {
   defaultLoaders,
   defaultLoadersSync,
 };
+
+export { loadJs, loadJson, loadJsSync } from './loaders';
