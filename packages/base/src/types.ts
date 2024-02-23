@@ -1,4 +1,34 @@
-import { Options, OptionsSync, CosmiconfigResult } from '@cosmiconfig/types';
+import {
+  CosmiconfigResult,
+  LoadersSync,
+  Options,
+  OptionsSync,
+} from '@cosmiconfig/types';
+
+/**
+ * public
+ */
+export interface MetaConfigOptions {
+  globalConfigSearchPlaces: Array<string>;
+  metaSearchPlaces: Array<string>;
+  loaders: LoadersSync;
+}
+
+/**
+ * @public
+ */
+export type DefaultOptions = Pick<
+  Options,
+  'globalConfigSearchPlaces' | 'searchPlaces' | 'loaders'
+> & { metaSearchPlaces: Array<string> };
+
+/**
+ * @public
+ */
+export type DefaultOptionsSync = Pick<
+  OptionsSync,
+  'globalConfigSearchPlaces' | 'searchPlaces' | 'loaders'
+> & { metaSearchPlaces: Array<string> };
 
 /**
  * @internal

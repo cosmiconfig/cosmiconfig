@@ -59,7 +59,8 @@
     "@cosmiconfig/yaml-loader": "9.0.0"
   },
   "devDependencies": {
-    "env-paths": "^2.2.1"
+    "env-paths": "^2.2.1",
+    "parent-module": "^2.0.0"
   },
   "engines": {
     "node": ">=14"

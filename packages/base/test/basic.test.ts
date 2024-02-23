@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class,@typescript-eslint/explicit-member-accessibility,@typescript-eslint/no-empty-function*/
 import {
-  Explorer,
-  ExplorerSync,
-  InternalOptions,
-  InternalOptionsSync,
-} from '@cosmiconfig/base';
+  Loader,
+  LoaderSync,
+  Loaders,
+  Options,
+  OptionsSync,
+} from '@cosmiconfig/types';
 import path from 'path';
 import {
   Mock,
@@ -18,27 +19,23 @@ import {
   test,
   vi,
 } from 'vitest';
+import { Explorer } from '../src/Explorer';
+import { ExplorerSync } from '../src/ExplorerSync';
 import {
-  Loader,
-  LoaderSync,
-  Loaders,
-  Options,
-  OptionsSync,
+  cosmiconfigBasic,
+  cosmiconfigBasicSync,
   defaultLoaders,
-} from '../src';
+} from '../src/basic';
+import { InternalOptions, InternalOptionsSync } from '../src/types';
 import { TempDir } from './util';
 
-vi.mock('@cosmiconfig/base', async () => {
-  const { ExplorerSync, Explorer, ...rest } =
-    await vi.importActual<typeof import('@cosmiconfig/base')>(
-      '@cosmiconfig/base',
-    );
+vi.mock('../src/Explorer', async () => {
+  const { Explorer } =
+    await vi.importActual<typeof import('../src/Explorer')>('../src/Explorer');
 
   const mock = vi.fn();
-  const mockSync = vi.fn();
 
   return {
-    ...rest,
     Explorer: class FakeExplorer extends Explorer {
       static mock = mock;
       constructor(options: InternalOptions) {
@@ -46,19 +43,27 @@ vi.mock('@cosmiconfig/base', async () => {
         super(options);
       }
     },
+  };
+});
+
+vi.mock('../src/ExplorerSync', async () => {
+  const { ExplorerSync } = await vi.importActual<
+    typeof import('../src/ExplorerSync')
+  >('../src/ExplorerSync');
+
+  const mock = vi.fn();
+
+  return {
     ExplorerSync: class FakeExplorerSync extends ExplorerSync {
-      static mock = mockSync;
+      static mock = mock;
       constructor(options: InternalOptionsSync) {
-        mockSync(options);
+        mock(options);
         super(options);
       }
     },
   };
-
-  return {};
 });
 
-const { cosmiconfig, cosmiconfigSync } = await import('../src/index.js');
 const createExplorerSyncMock = (ExplorerSync as any).mock;
 const createExplorerMock = (Explorer as any).mock;
 
@@ -101,7 +106,7 @@ const checkConfigResult = (
   expect(explorerOptions).toStrictEqual(expectedExplorerOptions);
 };
 
-describe('cosmiconfig', () => {
+describe('cosmiconfigBasic', () => {
   const moduleName = 'foo';
 
   beforeEach(() => {
@@ -151,100 +156,42 @@ describe('cosmiconfig', () => {
     };
 
     test('async', () => {
-      cosmiconfig(moduleName);
+      cosmiconfigBasic(moduleName);
       checkResult(
         createExplorerMock,
         1,
         {
-          '.cjs': 'loadJs',
-          '.mjs': 'loadJs',
-          '.js': 'loadJs',
-          '.ts': 'loadTs',
           '.json': 'loadJson',
-          '.yaml': 'loadYaml',
-          '.yml': 'loadYaml',
-          noExt: 'loadYaml',
+          noExt: 'loadJson',
         },
         [
           'package.json',
           `.${moduleName}rc`,
           `.${moduleName}rc.json`,
-          `.${moduleName}rc.yaml`,
-          `.${moduleName}rc.yml`,
-          `.${moduleName}rc.js`,
-          `.${moduleName}rc.ts`,
-          `.${moduleName}rc.cjs`,
-          `.${moduleName}rc.mjs`,
           `.config/${moduleName}rc`,
           `.config/${moduleName}rc.json`,
-          `.config/${moduleName}rc.yaml`,
-          `.config/${moduleName}rc.yml`,
-          `.config/${moduleName}rc.js`,
-          `.config/${moduleName}rc.ts`,
-          `.config/${moduleName}rc.cjs`,
-          `.config/${moduleName}rc.mjs`,
-          `${moduleName}.config.js`,
-          `${moduleName}.config.ts`,
-          `${moduleName}.config.cjs`,
-          `${moduleName}.config.mjs`,
         ],
-        [
-          'config',
-          'config.json',
-          'config.yaml',
-          'config.yml',
-          'config.js',
-          'config.ts',
-          'config.cjs',
-          'config.mjs',
-        ],
+        ['config', 'config.json'],
       );
     });
 
     test('sync', () => {
-      cosmiconfigSync(moduleName);
+      cosmiconfigBasicSync(moduleName);
       checkResult(
         createExplorerSyncMock,
         2, // ExplorerSync is called twice (once in getExplorerOptions)
         {
-          '.mjs': 'loadJsSync',
-          '.cjs': 'loadJsSync',
-          '.js': 'loadJsSync',
-          '.ts': 'loadTsSync',
           '.json': 'loadJson',
-          '.yaml': 'loadYaml',
-          '.yml': 'loadYaml',
-          noExt: 'loadYaml',
+          noExt: 'loadJson',
         },
         [
           'package.json',
           `.${moduleName}rc`,
           `.${moduleName}rc.json`,
-          `.${moduleName}rc.yaml`,
-          `.${moduleName}rc.yml`,
-          `.${moduleName}rc.js`,
-          `.${moduleName}rc.ts`,
-          `.${moduleName}rc.cjs`,
           `.config/${moduleName}rc`,
           `.config/${moduleName}rc.json`,
-          `.config/${moduleName}rc.yaml`,
-          `.config/${moduleName}rc.yml`,
-          `.config/${moduleName}rc.js`,
-          `.config/${moduleName}rc.ts`,
-          `.config/${moduleName}rc.cjs`,
-          `${moduleName}.config.js`,
-          `${moduleName}.config.ts`,
-          `${moduleName}.config.cjs`,
         ],
-        [
-          'config',
-          'config.json',
-          'config.yaml',
-          'config.yml',
-          'config.js',
-          'config.ts',
-          'config.cjs',
-        ],
+        ['config', 'config.json'],
       );
     });
   });
@@ -257,24 +204,19 @@ describe('cosmiconfig', () => {
     };
 
     test('async', () => {
-      cosmiconfig(moduleName);
+      cosmiconfigBasic(moduleName);
       checkResult(createExplorerMock);
     });
 
     test('sync', () => {
-      cosmiconfigSync(moduleName);
+      cosmiconfigBasicSync(moduleName);
       checkResult(createExplorerSyncMock);
     });
   });
 
   describe('creates explorer with preference for given options over defaults', () => {
     const noExtLoader: Loader = () => {};
-    const jsLoader: Loader = () => {};
-    const tsLoader: Loader = () => {};
     const jsonLoader: Loader = () => {};
-    const yamlLoader: Loader = () => {};
-
-    const mjsLoader: Loader = () => {};
 
     const options = {
       stopDir: __dirname,
@@ -286,24 +228,12 @@ describe('cosmiconfig', () => {
       mergeSearchPlaces: true,
       loaders: {
         noExt: noExtLoader,
-        '.mjs': mjsLoader,
-        '.cjs': jsLoader,
-        '.js': jsLoader,
-        '.ts': tsLoader,
         '.json': jsonLoader,
-        '.yaml': yamlLoader,
-        '.yml': yamlLoader,
       },
     };
 
     const expectedLoaderNames = {
-      '.mjs': 'mjsLoader',
-      '.cjs': 'jsLoader',
-      '.js': 'jsLoader',
-      '.ts': 'tsLoader',
       '.json': 'jsonLoader',
-      '.yaml': 'yamlLoader',
-      '.yml': 'yamlLoader',
       noExt: 'noExtLoader',
     };
 
@@ -324,39 +254,22 @@ describe('cosmiconfig', () => {
       }) satisfies Partial<InternalOptions | InternalOptionsSync>;
 
     test('async', () => {
-      cosmiconfig(moduleName, options);
+      cosmiconfigBasic(moduleName, options);
       checkConfigResult(
         createExplorerMock,
         1,
         expectedLoaderNames,
-        expectedExplorerOptions([
-          'config',
-          'config.json',
-          'config.yaml',
-          'config.yml',
-          'config.js',
-          'config.ts',
-          'config.cjs',
-          'config.mjs',
-        ]),
+        expectedExplorerOptions(['config', 'config.json']),
       );
     });
 
     test('sync', () => {
-      cosmiconfigSync(moduleName, options);
+      cosmiconfigBasicSync(moduleName, options);
       checkConfigResult(
         createExplorerSyncMock,
         2,
         expectedLoaderNames,
-        expectedExplorerOptions([
-          'config',
-          'config.json',
-          'config.yaml',
-          'config.yml',
-          'config.js',
-          'config.ts',
-          'config.cjs',
-        ]),
+        expectedExplorerOptions(['config', 'config.json']),
       );
     });
   });
@@ -370,26 +283,18 @@ describe('cosmiconfig', () => {
     afterEach(() => process.chdir(currentDir));
 
     const noExtLoader: LoaderSync = () => {};
-    const jsLoader: LoaderSync = () => {};
-    const tsLoader: LoaderSync = () => {};
     const jsonLoader: LoaderSync = () => {};
-    const yamlLoader: LoaderSync = () => {};
 
     const options = {
       stopDir: __dirname,
       cache: false,
-      searchPlaces: ['.foorc.json', 'wildandfree.js', '.config/foo.json'],
+      searchPlaces: ['.foorc.json', '.config/foo.json'],
       moduleName: 'wildandfree',
       ignoreEmptySearchPlaces: false,
       metaConfigFilePath: `${temp.dir}/.config/config.json`,
       loaders: {
         noExt: noExtLoader,
-        '.mjs': jsLoader,
-        '.cjs': jsLoader,
-        '.js': jsLoader,
-        '.ts': tsLoader,
         '.json': jsonLoader,
-        '.yaml': yamlLoader,
       },
     };
 
@@ -439,12 +344,7 @@ describe('cosmiconfig', () => {
         expect(explorerOptions).toEqual({
           moduleName: 'wildandfree',
           globalConfigSearchPlaces: expectedGlobalConfigSearchPlaces,
-          searchPlaces: [
-            '.config/foo.json',
-            '.foorc.json',
-            'wildandfree.js',
-            '.config/foo.json',
-          ],
+          searchPlaces: ['.config/foo.json', '.foorc.json', '.config/foo.json'],
           ignoreEmptySearchPlaces: false,
           mergeImportArrays: true,
           mergeSearchPlaces: true,
@@ -456,57 +356,28 @@ describe('cosmiconfig', () => {
       };
 
       test('async', () => {
-        cosmiconfig(moduleName, options);
+        cosmiconfigBasic(moduleName, options);
         checkResult(
           createExplorerMock,
           1,
           {
-            '.mjs': 'jsLoader',
-            '.cjs': 'jsLoader',
-            '.js': 'jsLoader',
-            '.ts': 'tsLoader',
             '.json': 'jsonLoader',
-            '.yaml': 'yamlLoader',
-            '.yml': 'loadYaml',
             noExt: 'noExtLoader',
           },
-          [
-            'config',
-            'config.json',
-            'config.yaml',
-            'config.yml',
-            'config.js',
-            'config.ts',
-            'config.cjs',
-            'config.mjs',
-          ],
+          ['config', 'config.json'],
         );
       });
 
       test('sync', () => {
-        cosmiconfigSync(moduleName, options);
+        cosmiconfigBasicSync(moduleName, options);
         checkResult(
           createExplorerSyncMock,
           2, // ExplorerSync is called twice (once in getExplorerOptions)
           {
-            '.cjs': 'jsLoader',
-            '.mjs': 'jsLoader',
-            '.js': 'jsLoader',
-            '.ts': 'tsLoader',
             '.json': 'jsonLoader',
-            '.yaml': 'yamlLoader',
-            '.yml': 'loadYaml',
             noExt: 'noExtLoader',
           },
-          [
-            'config',
-            'config.json',
-            'config.yaml',
-            'config.yml',
-            'config.js',
-            'config.ts',
-            'config.cjs',
-          ],
+          ['config', 'config.json'],
         );
       });
     });
@@ -546,57 +417,28 @@ describe('cosmiconfig', () => {
       };
 
       test('async', () => {
-        cosmiconfig(moduleName, options);
+        cosmiconfigBasic(moduleName, options);
         checkResult(
           createExplorerMock,
           1,
           {
-            '.mjs': 'jsLoader',
-            '.cjs': 'jsLoader',
-            '.js': 'jsLoader',
-            '.ts': 'tsLoader',
             '.json': 'jsonLoader',
-            '.yaml': 'yamlLoader',
-            '.yml': 'loadYaml',
             noExt: 'noExtLoader',
           },
-          [
-            'config',
-            'config.json',
-            'config.yaml',
-            'config.yml',
-            'config.js',
-            'config.ts',
-            'config.cjs',
-            'config.mjs',
-          ],
+          ['config', 'config.json'],
         );
       });
 
       test('sync', () => {
-        cosmiconfigSync(moduleName, options);
+        cosmiconfigBasicSync(moduleName, options);
         checkResult(
           createExplorerSyncMock,
           2, // ExplorerSync is called twice (once in getExplorerOptions)
           {
-            '.cjs': 'jsLoader',
-            '.mjs': 'jsLoader',
-            '.js': 'jsLoader',
-            '.ts': 'tsLoader',
             '.json': 'jsonLoader',
-            '.yaml': 'yamlLoader',
-            '.yml': 'loadYaml',
             noExt: 'noExtLoader',
           },
-          [
-            'config',
-            'config.json',
-            'config.yaml',
-            'config.yml',
-            'config.js',
-            'config.ts',
-            'config.cjs',
-          ],
+          ['config', 'config.json'],
         );
       });
     });
@@ -623,13 +465,13 @@ describe('cosmiconfig', () => {
 
     test('async', () => {
       expect(() =>
-        cosmiconfig('foo', explorerOptions as unknown as Partial<Options>),
+        cosmiconfigBasic('foo', explorerOptions as unknown as Partial<Options>),
       ).toThrow(expectedError);
     });
 
     test('sync', () => {
       expect(() =>
-        cosmiconfigSync(
+        cosmiconfigBasicSync(
           'foo',
           explorerOptions as unknown as Partial<OptionsSync>,
         ),
@@ -639,7 +481,7 @@ describe('cosmiconfig', () => {
 
   test('errors with invalid combination of searchStrategy and stopDir', () => {
     expect(() =>
-      cosmiconfig('foo', {
+      cosmiconfigBasic('foo', {
         searchStrategy: 'none',
         stopDir: 'a',
       }),
@@ -649,8 +491,8 @@ describe('cosmiconfig', () => {
   });
 
   test('cannot mutate default loaders', () => {
-    const expectedError = "Cannot delete property '.js' of #<Object>";
+    const expectedError = "Cannot delete property '.json' of #<Object>";
     // @ts-ignore
-    expect(() => delete defaultLoaders['.js']).toThrow(expectedError);
+    expect(() => delete defaultLoaders['.json']).toThrow(expectedError);
   });
 });

@@ -8,13 +8,9 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./defaults": {
-      "types": "./dist/defaults.d.ts",
-      "default": "./dist/defaults.js"
-    },
-    "./loaders": {
-      "types": "./dist/loaders.d.ts",
-      "default": "./dist/loaders.js"
+    "./basic": {
+      "types": "./dist/basic.d.ts",
+      "default": "./dist/basic.js"
     },
     "./package.json": "./package.json"
   },
@@ -58,6 +54,9 @@
   "dependencies": {
     "@cosmiconfig/types": "9.0.0",
     "env-paths": "^2.2.1"
+  },
+  "devDependencies": {
+    "parent-module": "^2.0.0"
   },
   "engines": {
     "node": ">=14"
