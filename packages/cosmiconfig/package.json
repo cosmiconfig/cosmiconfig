@@ -51,7 +51,7 @@
     }
   },
   "dependencies": {
-    "@cosmiconfig/base": "9.0.0",
+    "@cosmiconfig/core": "9.0.0",
     "@cosmiconfig/types": "9.0.0",
     "@cosmiconfig/better-json-loader": "9.0.0",
     "@cosmiconfig/js-loader": "9.0.0",

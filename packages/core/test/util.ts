@@ -25,7 +25,7 @@ export class TempDir {
      * Get the pathname of the file that imported util.js.
      * Used to create a unique directory name for each test suite.
      */
-    const parent = parentModule() || '@cosmiconfig/base';
+    const parent = parentModule() || '@cosmiconfig/core';
     const relativeParent = path.relative(process.cwd(), parent);
 
     /**
@@ -34,7 +34,7 @@ export class TempDir {
      */
     this.dir = path.resolve(
       tempDir,
-      '@cosmiconfig/base',
+      '@cosmiconfig/core',
       `${relativeParent}-dir`,
     );
 
@@ -92,7 +92,7 @@ export class TempDir {
          * Filter out `fs` calls that are made within cosmiconfig's dependency
          * tree.
          */
-        return !filePath.includes('/@cosmiconfig/base/node_modules/');
+        return !filePath.includes('/@cosmiconfig/core/node_modules/');
       });
 
     return result;

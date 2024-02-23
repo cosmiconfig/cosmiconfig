@@ -1,7 +1,7 @@
 import {
   createPublicExplorer,
   createPublicExplorerSync,
-} from '@cosmiconfig/base';
+} from '@cosmiconfig/core';
 import { loadJson } from '@cosmiconfig/better-json-loader';
 import { loadJs, loadJsSync } from '@cosmiconfig/js-loader';
 import {
