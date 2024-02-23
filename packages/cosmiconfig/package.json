@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "@cosmiconfig/core": "9.0.0",
+    "import-fresh": "^3.3.0",
     "js-yaml": "^4.1.0",
     "parse-json": "^5.2.0"
   },

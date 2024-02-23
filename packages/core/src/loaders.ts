@@ -2,13 +2,8 @@
 import { pathToFileURL } from 'url';
 import { Loader, LoaderSync } from './types';
 
-let importFresh: typeof import('import-fresh');
 export const loadJsSync: LoaderSync = function loadJsSync(filepath) {
-  if (importFresh === undefined) {
-    importFresh = require('import-fresh');
-  }
-
-  return importFresh(filepath);
+  return require(filepath);
 };
 
 export const loadJs: Loader = async function loadJs(filepath) {

@@ -1,9 +1,18 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
-import { Loader, LoaderSync, loadJs, loadJsSync } from '@cosmiconfig/core';
+import { Loader, LoaderSync, loadJs } from '@cosmiconfig/core';
 import { existsSync, rmSync, writeFileSync } from 'fs';
 import { rm, writeFile } from 'fs/promises';
 import path from 'path';
+
+let importFresh: typeof import('import-fresh');
+export const loadJsSync: LoaderSync = function loadJsSync(filepath) {
+  if (importFresh === undefined) {
+    importFresh = require('import-fresh');
+  }
+
+  return importFresh(filepath);
+};
 
 let parseJson: typeof import('parse-json');
 export const loadJson: LoaderSync = function loadJson(filepath, content) {
