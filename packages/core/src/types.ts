@@ -54,6 +54,7 @@ export type SearchStrategy = 'none' | 'project' | 'global';
  */
 export interface CommonOptions {
   packageProp?: string | Array<string>;
+  globalConfigSearchPlaces: Array<string>;
   searchPlaces: Array<string>;
   ignoreEmptySearchPlaces: boolean;
   stopDir?: string;
@@ -153,3 +154,28 @@ export interface DirToSearch {
   path: string;
   isGlobalConfig: boolean;
 }
+
+/**
+ * public
+ */
+export interface MetaConfigOptions {
+  globalConfigSearchPlaces: Array<string>;
+  metaSearchPlaces: Array<string>;
+  loaders: LoadersSync;
+}
+
+/**
+ * @public
+ */
+export type DefaultOptions = Pick<
+  Options,
+  'globalConfigSearchPlaces' | 'searchPlaces' | 'loaders'
+> & { metaSearchPlaces: Array<string> };
+
+/**
+ * @public
+ */
+export type DefaultOptionsSync = Pick<
+  OptionsSync,
+  'globalConfigSearchPlaces' | 'searchPlaces' | 'loaders'
+> & { metaSearchPlaces: Array<string> };

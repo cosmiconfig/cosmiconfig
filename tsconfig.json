@@ -1,9 +1,9 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "stripInternal": true
+    "types": ["@types/node"],
+    "noEmit": true,
+    "allowJs": true
   },
-  "include": ["src"]
+  "include": [".eslintrc.js", ".prettierrc.cjs", "vite.config.ts"]
 }
