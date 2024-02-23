@@ -4,6 +4,7 @@ import {
   getDefaultSearchPlaces,
   getDefaultSearchPlacesSync,
   metaSearchPlaces,
+  metaSearchPlacesSync,
   globalConfigSearchPlaces,
   globalConfigSearchPlacesSync,
 } from './defaults';
@@ -257,7 +258,7 @@ export function cosmiconfigSync(
 ): PublicExplorerSync {
   return createPublicExplorerSync(moduleName, options, {
     globalConfigSearchPlaces: globalConfigSearchPlacesSync,
-    metaSearchPlaces,
+    metaSearchPlaces: metaSearchPlacesSync,
     loaders: defaultLoadersSync,
     searchPlaces: getDefaultSearchPlacesSync(moduleName),
   });

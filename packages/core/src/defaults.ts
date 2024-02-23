@@ -58,6 +58,13 @@ export const metaSearchPlaces = [
   '.config/config.mjs',
 ];
 
+export const metaSearchPlacesSync = [
+  'package.json',
+  '.config/config.json',
+  '.config/config.js',
+  '.config/config.cjs',
+];
+
 // do not allow mutation of default loaders. Make sure it is set inside options
 export const defaultLoaders = Object.freeze({
   '.mjs': loadJs,
