@@ -7,8 +7,8 @@ export type Config = any;
 /**
  * @public
  */
-export type CosmiconfigResult = {
-  config: Config;
+export type CosmiconfigResult<T = Config> = {
+  config: T;
   filepath: string;
   isEmpty?: boolean;
 } | null;
