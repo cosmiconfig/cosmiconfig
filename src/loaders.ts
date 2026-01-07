@@ -5,6 +5,7 @@ import { rm, writeFile } from 'fs/promises';
 import path from 'path';
 import { pathToFileURL } from 'url';
 import { Loader, LoaderSync } from './types.js';
+import { randomUUID } from 'crypto';
 
 let importFresh: typeof import('import-fresh');
 export const loadJsSync: LoaderSync = function loadJsSync(filepath) {
@@ -72,7 +73,7 @@ export const loadTsSync: LoaderSync = function loadTsSync(filepath, content) {
   if (typescript === undefined) {
     typescript = require('typescript');
   }
-  const compiledFilepath = `${filepath.slice(0, -2)}cjs`;
+  const compiledFilepath = `${filepath}.${randomUUID()}.cjs`;
   try {
     const config = resolveTsConfig(path.dirname(filepath)) ?? {};
     config.compilerOptions = {
@@ -99,7 +100,7 @@ export const loadTs: Loader = async function loadTs(filepath, content) {
   if (typescript === undefined) {
     typescript = (await import('typescript')).default;
   }
-  const compiledFilepath = `${filepath.slice(0, -2)}mjs`;
+  const compiledFilepath = `${filepath}.${randomUUID()}.mjs`;
   let transpiledContent;
   try {
     try {
