@@ -38,14 +38,9 @@ export const loadJs: Loader = async function loadJs(filepath) {
   }
 };
 
-let parseJson: typeof import('parse-json');
 export const loadJson: LoaderSync = function loadJson(filepath, content) {
-  if (parseJson === undefined) {
-    parseJson = require('parse-json');
-  }
-
   try {
-    return parseJson(content);
+    return JSON.parse(content);
   } catch (error) {
     error.message = `JSON Error in ${filepath}:\n${error.message}`;
     throw error;
