@@ -1,5 +1,10 @@
 # Changelog
 
+## 9.0.1
+
+- Fixed a race condition where multiple instances existing simultaneously could cause cosmiconfig to fail to load TypeScript config files.
+- Fixed an issue on Windows where CWD being a short path (e.g. `C:\Users\USERNA~1`) would cause cosmiconfig to fail to load ESM config files.
+
 ## 9.0.0
 
 - Added `searchStrategy` option:
