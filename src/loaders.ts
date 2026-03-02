@@ -17,7 +17,7 @@ export const loadJsSync: LoaderSync = function loadJsSync(filepath) {
 
 export const loadJs: Loader = async function loadJs(filepath) {
   try {
-    const { href } = pathToFileURL(filepath);
+    const { href } = pathToFileURL(path.resolve(filepath));
     return (await import(href)).default;
   } catch (error) {
     console.error(error);
