@@ -5,7 +5,7 @@ import { Mock, SpyInstance, vi } from 'vitest';
 
 const fs = await vi.importActual<typeof import('fs')>('fs');
 
-function normalizeDirectorySlash(pathname: string): string {
+export function normalizeDirectorySlash(pathname: string): string {
   const normalizeCrossPlatform = pathname.replace(/\\/g, '/');
 
   return normalizeCrossPlatform;
