@@ -23,6 +23,7 @@ export const loadJs: Loader = async function loadJs(filepath) {
     try {
       return loadJsSync(filepath, '');
     } catch (requireError) {
+      /* istanbul ignore next -- @preserve */
       if (
         requireError.code === 'ERR_REQUIRE_ESM' ||
         (requireError instanceof SyntaxError &&
