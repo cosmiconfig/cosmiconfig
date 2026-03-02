@@ -20,7 +20,6 @@ export const loadJs: Loader = async function loadJs(filepath) {
     const { href } = pathToFileURL(await realpath(filepath));
     return (await import(href)).default;
   } catch (error) {
-    console.error(error);
     try {
       return loadJsSync(filepath, '');
     } catch (requireError) {
