@@ -9,7 +9,7 @@ import {
   OptionsSync,
   defaultLoaders,
 } from '../src';
-import { isNotMjs, TempDir } from './util';
+import { isNotMjs, normalizeDirectorySlash, TempDir } from './util';
 
 const temp = new TempDir();
 
@@ -105,7 +105,9 @@ describe('gives up if it cannot find the file', () => {
       'config.ts',
       'config.cjs',
       'config.mjs',
-    ].map((place) => path.join(relativeGlobalConfigPath, place)),
+    ].map((place) =>
+      normalizeDirectorySlash(path.join(relativeGlobalConfigPath, place)),
+    ),
   ];
 
   const checkResult = (
@@ -115,7 +117,12 @@ describe('gives up if it cannot find the file', () => {
     files: any,
   ) => {
     const statPath = temp.getSpyPathCalls(statSpy);
-    expect(statPath).toEqual(['a/b', 'a', '', relativeGlobalConfigPath]);
+    expect(statPath).toEqual([
+      'a/b',
+      'a',
+      '',
+      normalizeDirectorySlash(relativeGlobalConfigPath),
+    ]);
 
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(files);
@@ -210,7 +217,9 @@ describe('stops at stopDir and gives up', () => {
       'config.ts',
       'config.cjs',
       'config.mjs',
-    ].map((place) => path.join(relativeGlobalConfigPath, place)),
+    ].map((place) =>
+      normalizeDirectorySlash(path.join(relativeGlobalConfigPath, place)),
+    ),
   ];
 
   const checkResult = (readFileSpy: any, result: any, files: any) => {

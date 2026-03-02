@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
 import { existsSync, rmSync, writeFileSync } from 'fs';
-import { rm, writeFile } from 'fs/promises';
+import { rm, writeFile, realpath } from 'fs/promises';
 import path from 'path';
 import { pathToFileURL } from 'url';
 import { Loader, LoaderSync } from './types.js';
@@ -18,7 +18,7 @@ export const loadJsSync: LoaderSync = function loadJsSync(filepath) {
 
 export const loadJs: Loader = async function loadJs(filepath) {
   try {
-    const { href } = pathToFileURL(filepath);
+    const { href } = pathToFileURL(await realpath(filepath));
     return (await import(href)).default;
   } catch (error) {
     try {

@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [14, 16, 18, 20, 22, 24, 25]
+        node: [20, 22, 24, 25]
         os: [ubuntu-latest, windows-latest, macos-26]
 
     steps:
