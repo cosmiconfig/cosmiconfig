@@ -23,7 +23,7 @@ jobs:
       fail-fast: true
       matrix:
         node: [14, 16, 18, 20, 22, 24, 25]
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-26]
 
     steps:
       - uses: actions/checkout@v3
@@ -32,6 +32,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
+          architecture: 'x64'
 
       - name: Install dependencies
         run: npm i
