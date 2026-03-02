@@ -105,7 +105,9 @@ describe('gives up if it cannot find the file', () => {
       'config.ts',
       'config.cjs',
       'config.mjs',
-    ].map((place) => path.join(relativeGlobalConfigPath, place)),
+    ].map((place) =>
+      normalizeDirectorySlash(path.join(relativeGlobalConfigPath, place)),
+    ),
   ];
 
   const checkResult = (
@@ -115,7 +117,12 @@ describe('gives up if it cannot find the file', () => {
     files: any,
   ) => {
     const statPath = temp.getSpyPathCalls(statSpy);
-    expect(statPath).toEqual(['a/b', 'a', '', relativeGlobalConfigPath]);
+    expect(statPath).toEqual([
+      'a/b',
+      'a',
+      '',
+      normalizeDirectorySlash(relativeGlobalConfigPath),
+    ]);
 
     const filesChecked = temp.getSpyPathCalls(readFileSpy);
     expect(filesChecked).toEqual(files);
