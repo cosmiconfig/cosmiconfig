@@ -156,7 +156,10 @@ describe('stops at stopDir and gives up', () => {
   const globalConfigPath = envPaths('foo', { suffix: '' }).config;
   // sorry, we have to create this folder even on a testing system, so we can spy on the reads properly
   fs.mkdirSync(globalConfigPath, { recursive: true });
-  const relativeGlobalConfigPath = path.relative(temp.dir, globalConfigPath);
+  const relativeGlobalConfigPath = path.posix.relative(
+    temp.dir,
+    globalConfigPath,
+  );
 
   const expectedFilesChecked = [
     'a/b/package.json',
@@ -210,7 +213,7 @@ describe('stops at stopDir and gives up', () => {
       'config.ts',
       'config.cjs',
       'config.mjs',
-    ].map((place) => path.join(relativeGlobalConfigPath, place)),
+    ].map((place) => path.posix.join(relativeGlobalConfigPath, place)),
   ];
 
   const checkResult = (readFileSpy: any, result: any, files: any) => {
