@@ -195,11 +195,16 @@ export class Explorer extends ExplorerBase<InternalOptions> {
         let currentDir = startDir;
         while (true) {
           yield { path: currentDir, isGlobalConfig: false };
+          let foundPackageFile = false;
           for (const ext of ['json', 'yaml']) {
             const packageFile = path.join(currentDir, `package.${ext}`);
             if (await this.#fileExists(packageFile)) {
+              foundPackageFile = true;
               break;
             }
+          }
+          if (foundPackageFile) {
+            return;
           }
           const parentDir = path.dirname(currentDir);
           /* istanbul ignore if -- @preserve */
