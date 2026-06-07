@@ -120,6 +120,7 @@ describe('search strategies', () => {
       temp.createDir('a/b');
       temp.createFile('a/package.json', '');
       temp.createFile('.bazrc.yml', 'result: 6');
+      temp.createFile('.foorc.yml', 'result: 7');
     });
 
     const startDir = temp.absolutePath('a/b');
@@ -135,6 +136,18 @@ describe('search strategies', () => {
 
     test('sync', () => {
       const explorer = cosmiconfigSync('bar', explorerOptions);
+      const result = explorer.search(startDir);
+      expect(result).toBeNull();
+    });
+
+    test('async stops at the first package file', async () => {
+      const explorer = cosmiconfig('foo', explorerOptions);
+      const result = await explorer.search(startDir);
+      expect(result).toBeNull();
+    });
+
+    test('sync stops at the first package file', () => {
+      const explorer = cosmiconfigSync('foo', explorerOptions);
       const result = explorer.search(startDir);
       expect(result).toBeNull();
     });
