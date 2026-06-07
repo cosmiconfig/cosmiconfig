@@ -210,11 +210,10 @@ export class Explorer extends ExplorerBase<InternalOptions> {
           /* istanbul ignore if -- @preserve */
           if (parentDir === currentDir) {
             // we're probably at the root of the directory structure
-            break;
+            return;
           }
           currentDir = parentDir;
         }
-        return;
       }
       case 'global': {
         yield* this.getGlobalDirs(startDir);
