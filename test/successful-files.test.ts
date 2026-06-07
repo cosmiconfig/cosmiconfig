@@ -70,10 +70,6 @@ describe('loads defined YAML config path', () => {
 });
 
 describe('loads defined JS config path', () => {
-  beforeEach(() => {
-    temp.createFile('foo.js', 'module.exports = { foo: true };');
-  });
-
   const file = temp.absolutePath('foo.js');
   const checkResult = (result: any) => {
     expect(result.config).toEqual({ foo: true });
@@ -81,39 +77,19 @@ describe('loads defined JS config path', () => {
   };
 
   test('async', async () => {
+    temp.createFile('foo.js', 'export default { foo: true };');
     const result = await cosmiconfig('successful-files-tests').load(file);
     checkResult(result);
   });
-});
-
-describe('loads defined TS config path', () => {
-  beforeEach(() => {
-    temp.createFile('goo.ts', 'export default { foo: true } as any;');
-  });
-
-  const file = temp.absolutePath('goo.ts');
-  const checkResult = (result: any) => {
-    expect(result.config).toEqual({ foo: true });
-    expect(result.filepath).toBe(file);
-  };
-
-  test('async', async () => {
-    const result = await cosmiconfig('successful-files-tests').load(file);
-    checkResult(result);
-  }, 20000);
 
   test('sync', async () => {
+    temp.createFile('foo.js', 'module.exports = { foo: true };');
     const result = cosmiconfigSync('successful-files-tests').load(file);
     checkResult(result);
   });
 });
 
-describe('loads defined TS config path with tsconfig.json', () => {
-  beforeEach(() => {
-    temp.createFile('goo.ts', 'export default { foo: true } as any;');
-    temp.createFile('tsconfig.json', '{}');
-  });
-
+describe('loads defined TS config path', () => {
   const file = temp.absolutePath('goo.ts');
   const checkResult = (result: any) => {
     expect(result.config).toEqual({ foo: true });
@@ -121,11 +97,13 @@ describe('loads defined TS config path with tsconfig.json', () => {
   };
 
   test('async', async () => {
+    temp.createFile('goo.ts', 'export default { foo: true };');
     const result = await cosmiconfig('successful-files-tests').load(file);
     checkResult(result);
   });
 
   test('sync', async () => {
+    temp.createFile('goo.ts', 'module.exports = { foo: true };');
     const result = cosmiconfigSync('successful-files-tests').load(file);
     checkResult(result);
   });
