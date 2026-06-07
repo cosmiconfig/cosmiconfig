@@ -68,11 +68,19 @@ export const loadYaml: LoaderSync = function loadYaml(filepath, content) {
   }
 };
 
+/**
+ * The `typescript` package name is referenced through this variable rather than
+ * as a string literal so that bundlers (e.g. Vite/Rollup) cannot statically
+ * trace the `require`/`import` below. This keeps the ~5MB `typescript` package
+ * out of consumer bundles when the TypeScript loader is not used, while the
+ * module is still resolved lazily at runtime when the loader runs.
+ */
+const typescriptPackageName = 'typescript';
 let typescript: typeof import('typescript');
 export const loadTsSync: LoaderSync = function loadTsSync(filepath, content) {
   /* istanbul ignore next -- @preserve */
   if (typescript === undefined) {
-    typescript = require('typescript');
+    typescript = require(typescriptPackageName);
   }
   const compiledFilepath = `${filepath}.${randomUUID()}.cjs`;
   try {
@@ -99,7 +107,7 @@ export const loadTsSync: LoaderSync = function loadTsSync(filepath, content) {
 
 export const loadTs: Loader = async function loadTs(filepath, content) {
   if (typescript === undefined) {
-    typescript = (await import('typescript')).default;
+    typescript = (await import(typescriptPackageName)).default;
   }
   const compiledFilepath = `${filepath}.${randomUUID()}.mjs`;
   let transpiledContent;
