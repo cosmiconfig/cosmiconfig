@@ -15,9 +15,7 @@
     "dev": "npm run build:tsc -- --watch",
     "lint": "eslint --ext .js,.ts .",
     "lint:fix": "eslint --ext .js,.ts . --fix",
-    "lint:md": "remark-preset-davidtheclark",
     "format": "prettier \"**/*.{js,ts,json,yml,yaml}\" --write",
-    "format:md": "remark-preset-davidtheclark --format",
     "format:check": "prettier \"**/*.{js,ts,json,yml,yaml}\" --check",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
@@ -32,10 +30,6 @@
     ],
     "*.{json,yml,yaml}": [
       "prettier --write"
-    ],
-    "*.md": [
-      "remark-preset-davidtheclark",
-      "remark-preset-davidtheclark --format"
     ]
   },
   "repository": {
@@ -93,7 +87,6 @@
     "lint-staged": "^14.0.1",
     "parent-module": "^3.0.0",
     "prettier": "^3.0.3",
-    "remark-preset-davidtheclark": "^0.12.0",
     "typescript": "^5.2.2",
     "vitest": "^0.34.3"
   },
