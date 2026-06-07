@@ -54,23 +54,13 @@
     "url": "https://github.com/cosmiconfig/cosmiconfig/issues"
   },
   "homepage": "https://github.com/cosmiconfig/cosmiconfig#readme",
-  "peerDependencies": {
-    "typescript": ">=4.9.5"
-  },
-  "peerDependenciesMeta": {
-    "typescript": {
-      "optional": true
-    }
-  },
   "dependencies": {
     "env-paths": "^2.2.1",
-    "js-yaml": "^4.1.0",
-    "parse-json": "^5.2.0"
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^14",
-    "@types/parse-json": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
     "@typescript-eslint/parser": "^6.5.0",
     "@vitest/coverage-istanbul": "^0.34.3",
@@ -90,6 +80,6 @@
     "vitest": "^0.34.3"
   },
   "engines": {
-    "node": ">=14"
+    "node": "^22.18 || >= 24"
   }
 }

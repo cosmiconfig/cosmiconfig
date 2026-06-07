@@ -158,7 +158,9 @@ describe('cosmiconfig', () => {
           '.cjs': 'loadJs',
           '.mjs': 'loadJs',
           '.js': 'loadJs',
-          '.ts': 'loadTs',
+          '.cts': 'loadJs',
+          '.mts': 'loadJs',
+          '.ts': 'loadJs',
           '.json': 'loadJson',
           '.yaml': 'loadYaml',
           '.yml': 'loadYaml',
@@ -199,7 +201,8 @@ describe('cosmiconfig', () => {
           '.mjs': 'loadJsSync',
           '.cjs': 'loadJsSync',
           '.js': 'loadJsSync',
-          '.ts': 'loadTsSync',
+          '.cts': 'loadJsSync',
+          '.ts': 'loadJsSync',
           '.json': 'loadJson',
           '.yaml': 'loadYaml',
           '.yml': 'loadYaml',
@@ -250,7 +253,6 @@ describe('cosmiconfig', () => {
   describe('creates explorer with preference for given options over defaults', () => {
     const noExtLoader: Loader = () => {};
     const jsLoader: Loader = () => {};
-    const tsLoader: Loader = () => {};
     const jsonLoader: Loader = () => {};
     const yamlLoader: Loader = () => {};
 
@@ -269,7 +271,9 @@ describe('cosmiconfig', () => {
         '.mjs': mjsLoader,
         '.cjs': jsLoader,
         '.js': jsLoader,
-        '.ts': tsLoader,
+        '.mts': mjsLoader,
+        '.cts': jsLoader,
+        '.ts': jsLoader,
         '.json': jsonLoader,
         '.yaml': yamlLoader,
         '.yml': yamlLoader,
@@ -280,7 +284,9 @@ describe('cosmiconfig', () => {
       '.mjs': 'mjsLoader',
       '.cjs': 'jsLoader',
       '.js': 'jsLoader',
-      '.ts': 'tsLoader',
+      '.mts': 'mjsLoader',
+      '.cts': 'jsLoader',
+      '.ts': 'jsLoader',
       '.json': 'jsonLoader',
       '.yaml': 'yamlLoader',
       '.yml': 'yamlLoader',
@@ -330,7 +336,6 @@ describe('cosmiconfig', () => {
 
     const noExtLoader: LoaderSync = () => {};
     const jsLoader: LoaderSync = () => {};
-    const tsLoader: LoaderSync = () => {};
     const jsonLoader: LoaderSync = () => {};
     const yamlLoader: LoaderSync = () => {};
 
@@ -346,7 +351,9 @@ describe('cosmiconfig', () => {
         '.mjs': jsLoader,
         '.cjs': jsLoader,
         '.js': jsLoader,
-        '.ts': tsLoader,
+        '.mts': jsLoader,
+        '.cts': jsLoader,
+        '.ts': jsLoader,
         '.json': jsonLoader,
         '.yaml': yamlLoader,
       },
@@ -418,7 +425,9 @@ describe('cosmiconfig', () => {
           '.mjs': 'jsLoader',
           '.cjs': 'jsLoader',
           '.js': 'jsLoader',
-          '.ts': 'tsLoader',
+          '.mts': 'jsLoader',
+          '.cts': 'jsLoader',
+          '.ts': 'jsLoader',
           '.json': 'jsonLoader',
           '.yaml': 'yamlLoader',
           '.yml': 'loadYaml',
@@ -435,7 +444,9 @@ describe('cosmiconfig', () => {
             '.cjs': 'jsLoader',
             '.mjs': 'jsLoader',
             '.js': 'jsLoader',
-            '.ts': 'tsLoader',
+            '.cts': 'jsLoader',
+            '.mts': 'jsLoader',
+            '.ts': 'jsLoader',
             '.json': 'jsonLoader',
             '.yaml': 'yamlLoader',
             '.yml': 'loadYaml',
@@ -483,7 +494,9 @@ describe('cosmiconfig', () => {
           '.mjs': 'jsLoader',
           '.cjs': 'jsLoader',
           '.js': 'jsLoader',
-          '.ts': 'tsLoader',
+          '.mts': 'jsLoader',
+          '.cts': 'jsLoader',
+          '.ts': 'jsLoader',
           '.json': 'jsonLoader',
           '.yaml': 'yamlLoader',
           '.yml': 'loadYaml',
@@ -500,7 +513,9 @@ describe('cosmiconfig', () => {
             '.cjs': 'jsLoader',
             '.mjs': 'jsLoader',
             '.js': 'jsLoader',
-            '.ts': 'tsLoader',
+            '.cts': 'jsLoader',
+            '.mts': 'jsLoader',
+            '.ts': 'jsLoader',
             '.json': 'jsonLoader',
             '.yaml': 'yamlLoader',
             '.yml': 'loadYaml',

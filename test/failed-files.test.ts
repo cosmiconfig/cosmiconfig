@@ -111,27 +111,6 @@ describe('throws error if defined TS file has syntax error', () => {
   });
 });
 
-describe('throws error if defined tsconfig.json file has syntax error', () => {
-  beforeEach(() => {
-    temp.createFile('foo.ts', 'export default {}');
-    temp.createFile('tsconfig.json', 'fdsfko');
-  });
-
-  const file = temp.absolutePath('foo.ts');
-
-  test('async', async () => {
-    await expect(cosmiconfig('failed-files-tests').load(file)).rejects.toThrow(
-      "tsconfig.json: '{' expected.",
-    );
-  });
-
-  test('sync', () => {
-    expect(() => cosmiconfigSync('failed-files-tests').load(file)).toThrow(
-      "tsconfig.json: '{' expected.",
-    );
-  });
-});
-
 describe('returns an empty config result for empty file, format JS', () => {
   beforeEach(() => {
     temp.createFile('foo-empty.js', '');

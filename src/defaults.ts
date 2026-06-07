@@ -1,11 +1,4 @@
-import {
-  loadJs,
-  loadJson,
-  loadJsSync,
-  loadTs,
-  loadTsSync,
-  loadYaml,
-} from './loaders';
+import { loadJs, loadJson, loadJsSync, loadYaml } from './loaders';
 
 export function getDefaultSearchPlaces(moduleName: string): Array<string> {
   return [
@@ -94,7 +87,9 @@ export const defaultLoaders = Object.freeze({
   '.mjs': loadJs,
   '.cjs': loadJs,
   '.js': loadJs,
-  '.ts': loadTs,
+  '.ts': loadJs,
+  '.cts': loadJs,
+  '.mts': loadJs,
   '.json': loadJson,
   '.yaml': loadYaml,
   '.yml': loadYaml,
@@ -104,7 +99,8 @@ export const defaultLoaders = Object.freeze({
 export const defaultLoadersSync = Object.freeze({
   '.cjs': loadJsSync,
   '.js': loadJsSync,
-  '.ts': loadTsSync,
+  '.cts': loadJsSync,
+  '.ts': loadJsSync,
   '.json': loadJson,
   '.yaml': loadYaml,
   '.yml': loadYaml,
