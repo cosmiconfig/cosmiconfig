@@ -1,5 +1,10 @@
 # Changelog
 
+## 9.0.2
+
+- Fixed a prototype chain issue that may happen when merging different config objects.
+- Fixed the `project` search strategy not correctly stopping at the package boundary.
+
 ## 9.0.1
 
 - Fixed a race condition where multiple instances existing simultaneously could cause cosmiconfig to fail to load TypeScript config files.

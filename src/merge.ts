@@ -17,6 +17,11 @@ export interface MergeOptions {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function merge(target: any, source: any, options: MergeOptions): any {
   for (const key of Object.keys(source)) {
+    /* istanbul ignore next -- @preserve */
+    if (key === '__proto__' || key === 'constructor') {
+      continue;
+    }
+
     const newValue = source[key];
     if (hasOwn(target, key)) {
       if (Array.isArray(target[key]) && Array.isArray(newValue)) {
