@@ -1,5 +1,12 @@
 # Changelog
 
+## 10.0.0-pre.0
+
+- **Breaking change**: Only works on LTS versions `^22.18 || >=24`.
+- **Breaking change**: Remove `typescript` in favor of Node's own type stripping. This means that only erasable type syntax is supported.
+- **Breaking change**: JSON parsing uses the `JSON.parse` function directly. `parse-json` is no longer used for better error messages, since Node has improved theirs.
+- Remove `import-fresh` dependency in favor of directly clearing the cache.
+
 ## 9.0.2
 
 - Fixed a prototype chain issue that may happen when merging different config objects.
