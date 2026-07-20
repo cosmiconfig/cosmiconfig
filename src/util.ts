@@ -42,6 +42,21 @@ export function getPropertyByPath(
   }, source);
 }
 
+// UTF-16LE and UTF-16BE byte-order marks. A config file saved with one of
+// these encodings (e.g. via PowerShell's default `Out-File` redirection on
+// Windows) is not valid UTF-8, so it must be decoded accordingly instead of
+// being passed through the UTF-8 path, which would otherwise produce garbage.
+/** @internal */
+export function decodeFileContent(buffer: Buffer): string {
+  if (buffer[0] === 0xff && buffer[1] === 0xfe) {
+    return new TextDecoder('utf-16le').decode(buffer);
+  }
+  if (buffer[0] === 0xfe && buffer[1] === 0xff) {
+    return new TextDecoder('utf-16be').decode(buffer);
+  }
+  return buffer.toString('utf-8');
+}
+
 /** @internal */
 export function removeUndefinedValuesFromObject(
   options: Record<string, unknown>,

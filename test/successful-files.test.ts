@@ -1,3 +1,4 @@
+import fs from 'fs';
 import {
   afterAll,
   afterEach,
@@ -16,6 +17,18 @@ function randomString(): string {
   return Math.random().toString(36).substring(7);
 }
 
+// UTF-16BE has no built-in Node Buffer encoding, so derive it by
+// byte-swapping the UTF-16LE encoding of the same string.
+function utf16beBuffer(contents: string): Buffer {
+  const le = Buffer.from(contents, 'utf16le');
+  const be = Buffer.alloc(le.length);
+  for (let i = 0; i < le.length; i += 2) {
+    be[i] = le[i + 1];
+    be[i + 1] = le[i];
+  }
+  return be;
+}
+
 beforeEach(() => {
   temp.clean();
 });
@@ -31,6 +44,54 @@ describe('loads defined JSON config path', () => {
   });
 
   const file = temp.absolutePath('foo.json');
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', async () => {
+    const result = await cosmiconfig('successful-files-tests').load(file);
+    checkResult(result);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('successful-files-tests').load(file);
+    checkResult(result);
+  });
+});
+
+describe('loads UTF-16LE encoded JSON config path (with BOM)', () => {
+  const file = temp.absolutePath('foo-utf16le.json');
+  beforeEach(() => {
+    const bom = Buffer.from([0xff, 0xfe]);
+    const content = Buffer.from('{ "foo": true }\n', 'utf16le');
+    fs.writeFileSync(file, Buffer.concat([bom, content]));
+  });
+
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', async () => {
+    const result = await cosmiconfig('successful-files-tests').load(file);
+    checkResult(result);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('successful-files-tests').load(file);
+    checkResult(result);
+  });
+});
+
+describe('loads UTF-16BE encoded JSON config path (with BOM)', () => {
+  const file = temp.absolutePath('foo-utf16be.json');
+  beforeEach(() => {
+    const bom = Buffer.from([0xfe, 0xff]);
+    const content = utf16beBuffer('{ "foo": true }\n');
+    fs.writeFileSync(file, Buffer.concat([bom, content]));
+  });
+
   const checkResult = (result: any) => {
     expect(result.config).toEqual({ foo: true });
     expect(result.filepath).toBe(file);

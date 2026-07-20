@@ -9,7 +9,12 @@ import {
   InternalOptions,
   DirToSearch,
 } from './types.js';
-import { emplace, getPropertyByPath, isDirectory } from './util.js';
+import {
+  decodeFileContent,
+  emplace,
+  getPropertyByPath,
+  isDirectory,
+} from './util.js';
 
 /**
  * @internal
@@ -99,7 +104,7 @@ export class Explorer extends ExplorerBase<InternalOptions> {
     filepath: string,
     importStack: Array<string> = [],
   ): Promise<CosmiconfigResult> {
-    const contents = await fs.readFile(filepath, { encoding: 'utf-8' });
+    const contents = decodeFileContent(await fs.readFile(filepath));
     return this.toCosmiconfigResult(
       filepath,
       await this.#loadConfigFileWithImports(filepath, contents, importStack),

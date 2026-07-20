@@ -9,7 +9,12 @@ import {
   InternalOptionsSync,
   DirToSearch,
 } from './types.js';
-import { emplace, getPropertyByPath, isDirectorySync } from './util.js';
+import {
+  decodeFileContent,
+  emplace,
+  getPropertyByPath,
+  isDirectorySync,
+} from './util.js';
 
 /**
  * @internal
@@ -97,7 +102,7 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
     filepath: string,
     importStack: Array<string> = [],
   ): CosmiconfigResult {
-    const contents = fs.readFileSync(filepath, 'utf8');
+    const contents = decodeFileContent(fs.readFileSync(filepath));
     return this.toCosmiconfigResult(
       filepath,
       this.#loadConfigFileWithImports(filepath, contents, importStack),
