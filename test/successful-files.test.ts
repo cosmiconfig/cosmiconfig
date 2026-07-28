@@ -9,24 +9,12 @@ import {
   vi,
 } from 'vitest';
 import { cosmiconfig, cosmiconfigSync } from '../src';
-import { TempDir } from './util';
+import { TempDir, utf16beBuffer } from './util';
 
 const temp = new TempDir();
 
 function randomString(): string {
   return Math.random().toString(36).substring(7);
-}
-
-// UTF-16BE has no built-in Node Buffer encoding, so derive it by
-// byte-swapping the UTF-16LE encoding of the same string.
-function utf16beBuffer(contents: string): Buffer {
-  const le = Buffer.from(contents, 'utf16le');
-  const be = Buffer.alloc(le.length);
-  for (let i = 0; i < le.length; i += 2) {
-    be[i] = le[i + 1];
-    be[i + 1] = le[i];
-  }
-  return be;
 }
 
 beforeEach(() => {

@@ -110,3 +110,15 @@ export class TempDir {
 export function isNotMjs(filePath: string): boolean {
   return path.extname(filePath) !== '.mjs';
 }
+
+// UTF-16BE has no built-in Node Buffer encoding, so derive it by
+// byte-swapping the UTF-16LE encoding of the same string.
+export function utf16beBuffer(contents: string): Buffer {
+  const le = Buffer.from(contents, 'utf16le');
+  const be = Buffer.alloc(le.length);
+  for (let i = 0; i < le.length; i += 2) {
+    be[i] = le[i + 1];
+    be[i + 1] = le[i];
+  }
+  return be;
+}
