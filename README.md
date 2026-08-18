@@ -11,17 +11,17 @@ By default, Cosmiconfig will check the current directory for the following:
 
 - a `package.json` property
 - a JSON or YAML, extensionless "rc file"
-- an "rc file" with the extensions `.json`, `.yaml`, `.yml`, `.js`, `.ts`, `.mjs`, or `.cjs`
+- an "rc file" with the extensions `.json`, `.yaml`, `.yml`, `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, or `.cts`
 - any of the above two inside a `.config` subdirectory
-- a `.config.js`, `.config.ts`, `.config.mjs`, or `.config.cjs` file
+- a `.config.js`, `.config.ts`, `.config.mjs`, `.config.cjs`, `.config.mts`, or `.config.cts` file
 
 For example, if your module's name is "myapp", cosmiconfig will search up the directory tree for configuration in the following places:
 
 - a `myapp` property in `package.json`
 - a `.myapprc` file in JSON or YAML format
-- a `.myapprc.json`, `.myapprc.yaml`, `.myapprc.yml`, `.myapprc.js`, `.myapprc.ts`, `.myapprc.mjs`, or `.myapprc.cjs` file
-- a `myapprc`, `myapprc.json`, `myapprc.yaml`, `myapprc.yml`, `myapprc.js`, `myapprc.ts`, `myapprc.mjs`, or `myapprc.cjs` file inside a `.config` subdirectory
-- a `myapp.config.js`, `myapp.config.ts`, `myapp.config.mjs`, or `myapp.config.cjs` file
+- a `.myapprc.json`, `.myapprc.yaml`, `.myapprc.yml`, `.myapprc.js`, `.myapprc.ts`, `.myapprc.mjs`, `.myapprc.cjs`, `.myapprc.mts`, or `.myapprc.cts` file
+- a `myapprc`, `myapprc.json`, `myapprc.yaml`, `myapprc.yml`, `myapprc.js`, `myapprc.ts`, `myapprc.mjs`, `myapprc.cjs`, `myapprc.mts`, or `myapprc.cts` file inside a `.config` subdirectory
+- a `myapp.config.js`, `myapp.config.ts`, `myapp.config.mjs`, `myapp.config.cjs`, `myapp.config.mts`, or `myapp.config.cts` file
 
 Optionally, you can tell it to search up the directory tree using [search strategies],
 checking each of these places in each directory, until it finds some acceptable configuration (or hits the home directory).
@@ -151,15 +151,15 @@ Here's how your default [`search()`] will work:
 - Starting from `process.cwd()` (or some other directory defined by the `searchFrom` argument to [`search()`]), look for configuration objects in the following places:
   1. A `goldengrahams` property in a `package.json` file.
   2. A `.goldengrahamsrc` file with JSON or YAML syntax.
-  3. A `.goldengrahamsrc.json`, `.goldengrahamsrc.yaml`, `.goldengrahamsrc.yml`, `.goldengrahamsrc.js`, `.goldengrahamsrc.ts`, `.goldengrahamsrc.mjs`, or `.goldengrahamsrc.cjs` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
-  4. A `goldengrahamsrc`, `goldengrahamsrc.json`, `goldengrahamsrc.yaml`, `goldengrahamsrc.yml`, `goldengrahamsrc.js`, `goldengrahamsrc.ts`, `goldengrahamsrc.mjs`, or `goldengrahamsrc.cjs` file in the `.config` subdirectory.
-  5. A `goldengrahams.config.js`, `goldengrahams.config.ts`, `goldengrahams.config.mjs`, or `goldengrahams.config.cjs` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
+  3. A `.goldengrahamsrc.json`, `.goldengrahamsrc.yaml`, `.goldengrahamsrc.yml`, `.goldengrahamsrc.js`, `.goldengrahamsrc.ts`, `.goldengrahamsrc.mjs`, `.goldengrahamsrc.cjs`, `.goldengrahamsrc.mts`, or `.goldengrahamsrc.cts` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
+  4. A `goldengrahamsrc`, `goldengrahamsrc.json`, `goldengrahamsrc.yaml`, `goldengrahamsrc.yml`, `goldengrahamsrc.js`, `goldengrahamsrc.ts`, `goldengrahamsrc.mjs`, `goldengrahamsrc.cjs`, `goldengrahamsrc.mts`, or `goldengrahamsrc.cts` file in the `.config` subdirectory.
+  5. A `goldengrahams.config.js`, `goldengrahams.config.ts`, `goldengrahams.config.mjs`, `goldengrahams.config.cjs`, `goldengrahams.config.mts`, or `goldengrahams.config.cts` file. (To learn more about how JS files are loaded, see ["Loading JS modules"].)
 - If none of those searches reveal a configuration object, continue depending on the current search strategy:
   - If it's `none` (which is the default if you don't specify a [`stopDir`] option), stop here and return/resolve with `null`.
   - If it's `global` (which is the default if you specify a [`stopDir`] option), move up one directory level and try again,
     recursing until arriving at the configured [`stopDir`] option, which defaults to the user's home directory.
     - After arriving at the [`stopDir`], the global configuration directory (as defined by [`env-paths`] without prefix) is also checked,
-      looking at the files `config`, `config.json`, `config.yaml`, `config.yml`, `config.js`, `config.ts`, `config.cjs`, and `config.mjs`
+      looking at the files `config`, `config.json`, `config.yaml`, `config.yml`, `config.js`, `config.ts`, `config.cjs`, `config.mjs`, `config.cts`, and `config.mts`
       in the directory `~/.config/goldengrahams/` (on Linux; see [`env-paths`] documentation for other OSs).
   - If it's `project`, check whether a `package.json` file is present in the current directory, and if not,
     move up one directory level and try again, recursing until there is one.
@@ -288,7 +288,9 @@ The strategy that should be used to determine which directories to check for con
   `config.js`,
   `config.ts`,
   `config.cjs`,
-  `config.mjs`
+  `config.mjs`,
+  `config.cts`,
+  `config.mts`
 ]
 ```
 
@@ -313,24 +315,30 @@ For the [asynchronous API](#asynchronous-api), these are the default `searchPlac
   `.${moduleName}rc.yml`,
   `.${moduleName}rc.js`,
   `.${moduleName}rc.ts`,
-  `.${moduleName}rc.mjs`,
   `.${moduleName}rc.cjs`,
+  `.${moduleName}rc.mjs`,
+  `.${moduleName}rc.cts`,
+  `.${moduleName}rc.mts`,
   `.config/${moduleName}rc`,
   `.config/${moduleName}rc.json`,
   `.config/${moduleName}rc.yaml`,
   `.config/${moduleName}rc.yml`,
   `.config/${moduleName}rc.js`,
   `.config/${moduleName}rc.ts`,
-  `.config/${moduleName}rc.mjs`,
   `.config/${moduleName}rc.cjs`,
+  `.config/${moduleName}rc.mjs`,
+  `.config/${moduleName}rc.cts`,
+  `.config/${moduleName}rc.mts`,
   `${moduleName}.config.js`,
   `${moduleName}.config.ts`,
-  `${moduleName}.config.mjs`,
   `${moduleName}.config.cjs`,
+  `${moduleName}.config.mjs`,
+  `${moduleName}.config.cts`,
+  `${moduleName}.config.mts`,
 ];
 ```
 
-For the [synchronous API](#synchronous-api), the only difference is that `.mjs` files are not included. See ["Loading JS modules"] for more information.
+For the [synchronous API](#synchronous-api), the only difference is that `.mjs` and `.mts` files are not included. See ["Loading JS modules"] for more information.
 
 Create your own array to search more, fewer, or altogether different places.
 
@@ -397,7 +405,9 @@ console.log(Object.entries(defaultLoaders));
 //   [ '.mjs', [Function: loadJs] ],
 //   [ '.cjs', [Function: loadJs] ],
 //   [ '.js', [Function: loadJs] ],
-//   [ '.ts', [Function: loadTs] ],
+//   [ '.ts', [Function: loadJs] ],
+//   [ '.cts', [Function: loadJs] ],
+//   [ '.mts', [Function: loadJs] ],
 //   [ '.json', [Function: loadJson] ],
 //   [ '.yaml', [Function: loadYaml] ],
 //   [ '.yml', [Function: loadYaml] ],
@@ -408,7 +418,8 @@ console.log(Object.entries(defaultLoadersSync));
 // [
 //   [ '.cjs', [Function: loadJsSync] ],
 //   [ '.js', [Function: loadJsSync] ],
-//   [ '.ts', [Function: loadTsSync] ],
+//   [ '.cts', [Function: loadJsSync] ],
+//   [ '.ts', [Function: loadJsSync] ],
 //   [ '.json', [Function: loadJson] ],
 //   [ '.yaml', [Function: loadYaml] ],
 //   [ '.yml', [Function: loadYaml] ],
@@ -580,9 +591,9 @@ Your end users can provide JS configuration files as ECMAScript modules (ESM) un
 - Your end user runs a version of Node that supports ESM ([>=12.17.0](https://nodejs.org/en/blog/release/v12.17.0/), or earlier with the `--experimental-modules` flag).
 - Your end user provides an `.mjs` configuration file, or a `.js` file whose nearest parent `package.json` file contains `"type": "module"`. (See [Node's method for determining a file's module system](https://nodejs.org/api/packages.html#packages_determining_module_system).)
 
-With cosmiconfig's [asynchronous API](#asynchronous-api), the default [`searchPlaces`] include `.js`, `.ts`, `.mjs`, and `.cjs` files. Cosmiconfig loads all these file types with the [dynamic `import` function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#dynamic_imports).
+With cosmiconfig's [asynchronous API](#asynchronous-api), the default [`searchPlaces`] include `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, and `.cts` files. Cosmiconfig loads all these file types with the [dynamic `import` function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#dynamic_imports).
 
-With the [synchronous API](#synchronous-api), JS configuration files are always treated as CommonJS, and `.mjs` files are ignored, because there is no synchronous API for the dynamic `import` function.
+With the [synchronous API](#synchronous-api), JS configuration files are always treated as CommonJS, and `.mjs` and `.mts` files are ignored, because there is no synchronous API for the dynamic `import` function.
 
 ## Caching
 
@@ -620,18 +631,25 @@ package.json
 .{NAME}rc.js
 .{NAME}rc.ts
 .{NAME}rc.cjs
+.{NAME}rc.mjs
+.{NAME}rc.cts
+.{NAME}rc.mts
 .config/{NAME}rc
 .config/{NAME}rc.json
 .config/{NAME}rc.yaml
 .config/{NAME}rc.yml
 .config/{NAME}rc.js
 .config/{NAME}rc.ts
-.config/{NAME}rc.mjs
 .config/{NAME}rc.cjs
+.config/{NAME}rc.mjs
+.config/{NAME}rc.cts
+.config/{NAME}rc.mts
 {NAME}.config.js
 {NAME}.config.ts
-{NAME}.config.mjs
 {NAME}.config.cjs
+{NAME}.config.mjs
+{NAME}.config.cts
+{NAME}.config.mts
 ```
 
 The contents of these files are defined by the tool.
@@ -668,6 +686,9 @@ to configure `cosmiconfig` itself:
 .config/config.js
 .config/config.ts
 .config/config.cjs
+.config/config.mjs
+.config/config.cts
+.config/config.mts
 ```
 
 The following properties are currently actively supported in these places:

@@ -9,7 +9,7 @@ import {
   OptionsSync,
   defaultLoaders,
 } from '../src';
-import { isNotMjs, normalizeDirectorySlash, TempDir } from './util';
+import { isNotEsmExt, normalizeDirectorySlash, TempDir } from './util';
 
 const temp = new TempDir();
 
@@ -42,6 +42,8 @@ describe('gives up if it cannot find the file', () => {
     'a/b/.foorc.ts',
     'a/b/.foorc.cjs',
     'a/b/.foorc.mjs',
+    'a/b/.foorc.cts',
+    'a/b/.foorc.mts',
     'a/b/.config/foorc',
     'a/b/.config/foorc.json',
     'a/b/.config/foorc.yaml',
@@ -50,10 +52,14 @@ describe('gives up if it cannot find the file', () => {
     'a/b/.config/foorc.ts',
     'a/b/.config/foorc.cjs',
     'a/b/.config/foorc.mjs',
+    'a/b/.config/foorc.cts',
+    'a/b/.config/foorc.mts',
     'a/b/foo.config.js',
     'a/b/foo.config.ts',
     'a/b/foo.config.cjs',
     'a/b/foo.config.mjs',
+    'a/b/foo.config.cts',
+    'a/b/foo.config.mts',
     'a/package.json',
     'a/.foorc',
     'a/.foorc.json',
@@ -63,6 +69,8 @@ describe('gives up if it cannot find the file', () => {
     'a/.foorc.ts',
     'a/.foorc.cjs',
     'a/.foorc.mjs',
+    'a/.foorc.cts',
+    'a/.foorc.mts',
     'a/.config/foorc',
     'a/.config/foorc.json',
     'a/.config/foorc.yaml',
@@ -71,10 +79,14 @@ describe('gives up if it cannot find the file', () => {
     'a/.config/foorc.ts',
     'a/.config/foorc.cjs',
     'a/.config/foorc.mjs',
+    'a/.config/foorc.cts',
+    'a/.config/foorc.mts',
     'a/foo.config.js',
     'a/foo.config.ts',
     'a/foo.config.cjs',
     'a/foo.config.mjs',
+    'a/foo.config.cts',
+    'a/foo.config.mts',
     'package.json',
     '.foorc',
     '.foorc.json',
@@ -84,6 +96,8 @@ describe('gives up if it cannot find the file', () => {
     '.foorc.ts',
     '.foorc.cjs',
     '.foorc.mjs',
+    '.foorc.cts',
+    '.foorc.mts',
     '.config/foorc',
     '.config/foorc.json',
     '.config/foorc.yaml',
@@ -92,10 +106,14 @@ describe('gives up if it cannot find the file', () => {
     '.config/foorc.ts',
     '.config/foorc.cjs',
     '.config/foorc.mjs',
+    '.config/foorc.cts',
+    '.config/foorc.mts',
     'foo.config.js',
     'foo.config.ts',
     'foo.config.cjs',
     'foo.config.mjs',
+    'foo.config.cts',
+    'foo.config.mts',
     ...[
       'config',
       'config.json',
@@ -105,6 +123,8 @@ describe('gives up if it cannot find the file', () => {
       'config.ts',
       'config.cjs',
       'config.mjs',
+      'config.cts',
+      'config.mts',
     ].map((place) =>
       normalizeDirectorySlash(path.join(relativeGlobalConfigPath, place)),
     ),
@@ -151,7 +171,7 @@ describe('gives up if it cannot find the file', () => {
       statSpy,
       readFileSpy,
       result,
-      expectedFilesChecked.filter(isNotMjs),
+      expectedFilesChecked.filter(isNotEsmExt),
     );
   });
 });
@@ -175,6 +195,8 @@ describe('stops at stopDir and gives up', () => {
     'a/b/.foorc.ts',
     'a/b/.foorc.cjs',
     'a/b/.foorc.mjs',
+    'a/b/.foorc.cts',
+    'a/b/.foorc.mts',
     'a/b/.config/foorc',
     'a/b/.config/foorc.json',
     'a/b/.config/foorc.yaml',
@@ -183,10 +205,14 @@ describe('stops at stopDir and gives up', () => {
     'a/b/.config/foorc.ts',
     'a/b/.config/foorc.cjs',
     'a/b/.config/foorc.mjs',
+    'a/b/.config/foorc.cts',
+    'a/b/.config/foorc.mts',
     'a/b/foo.config.js',
     'a/b/foo.config.ts',
     'a/b/foo.config.cjs',
     'a/b/foo.config.mjs',
+    'a/b/foo.config.cts',
+    'a/b/foo.config.mts',
     'a/package.json',
     'a/.foorc',
     'a/.foorc.json',
@@ -196,6 +222,8 @@ describe('stops at stopDir and gives up', () => {
     'a/.foorc.ts',
     'a/.foorc.cjs',
     'a/.foorc.mjs',
+    'a/.foorc.cts',
+    'a/.foorc.mts',
     'a/.config/foorc',
     'a/.config/foorc.json',
     'a/.config/foorc.yaml',
@@ -204,10 +232,14 @@ describe('stops at stopDir and gives up', () => {
     'a/.config/foorc.ts',
     'a/.config/foorc.cjs',
     'a/.config/foorc.mjs',
+    'a/.config/foorc.cts',
+    'a/.config/foorc.mts',
     'a/foo.config.js',
     'a/foo.config.ts',
     'a/foo.config.cjs',
     'a/foo.config.mjs',
+    'a/foo.config.cts',
+    'a/foo.config.mts',
     ...[
       'config',
       'config.json',
@@ -217,6 +249,8 @@ describe('stops at stopDir and gives up', () => {
       'config.ts',
       'config.cjs',
       'config.mjs',
+      'config.cts',
+      'config.mts',
     ].map((place) =>
       normalizeDirectorySlash(path.join(relativeGlobalConfigPath, place)),
     ),
@@ -242,7 +276,7 @@ describe('stops at stopDir and gives up', () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
