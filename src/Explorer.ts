@@ -13,6 +13,7 @@ import {
   decodeFileContent,
   emplace,
   getPropertyByPath,
+  getSearchCacheKey,
   isDirectory,
 } from './util.js';
 
@@ -87,7 +88,11 @@ export class Explorer extends ExplorerBase<InternalOptions> {
       if (!nextDirIter.done) {
         currentDir = nextDirIter.value;
         if (this.searchCache) {
-          return await emplace(this.searchCache, currentDir.path, search);
+          return await emplace(
+            this.searchCache,
+            getSearchCacheKey(currentDir),
+            search,
+          );
         }
         return await search();
       }
@@ -95,7 +100,7 @@ export class Explorer extends ExplorerBase<InternalOptions> {
     };
 
     if (this.searchCache) {
-      return await emplace(this.searchCache, from, search);
+      return await emplace(this.searchCache, getSearchCacheKey(from), search);
     }
     return await search();
   }

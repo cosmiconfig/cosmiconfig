@@ -1,6 +1,6 @@
 {
   "name": "cosmiconfig",
-  "version": "10.0.0",
+  "version": "10.0.1",
   "description": "Find and load configuration from a package.json property, rc file, TypeScript module, and more!",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -56,7 +56,7 @@
   "homepage": "https://github.com/cosmiconfig/cosmiconfig#readme",
   "dependencies": {
     "env-paths": "^2.2.1",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^5.4.1"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",

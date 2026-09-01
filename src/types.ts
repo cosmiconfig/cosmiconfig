@@ -22,8 +22,7 @@ export type LoaderResult = Config | null;
  * @public
  */
 export type Loader =
-  | ((filepath: string, content: string) => Promise<LoaderResult>)
-  | LoaderSync;
+  ((filepath: string, content: string) => Promise<LoaderResult>) | LoaderSync;
 
 /**
  * @public

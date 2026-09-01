@@ -1,4 +1,5 @@
 import fs, { promises as fsp } from 'fs';
+import { DirToSearch } from './types.js';
 
 /**
  * @internal
@@ -11,6 +12,19 @@ export function emplace<K, V>(map: Map<K, V>, key: K, fn: () => V): V {
   const result = fn();
   map.set(key, result);
   return result;
+}
+
+// Computes the key under which a directory's search result is cached. The
+// global config dir can coincide with a plain directory visited earlier in
+// the same search (e.g. when the search starts inside it), so add a prefix
+// to the key to prevent collisions.
+/**
+ * @internal
+ */
+export function getSearchCacheKey(dir: string | DirToSearch): string {
+  const { path, isGlobalConfig } =
+    typeof dir === 'string' ? { path: dir, isGlobalConfig: false } : dir;
+  return `${isGlobalConfig ? 'global' : 'nonglobal'}:${path}`;
 }
 
 // Resolves property names or property paths defined with period-delimited

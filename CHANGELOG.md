@@ -1,5 +1,8 @@
 # Changelog
 
+## 10.0.1
+Dependency security update.
+
 ## 10.0.0
 
 - **Breaking change**: The required version range is now `^22.18 || >=24`.
