@@ -111,6 +111,58 @@ describe('search strategies', () => {
           checkResult(result);
         });
       });
+
+      describe('does not deadlock when cwd is the global config dir or a descendant of it', () => {
+        const origConfigFolder = process.env.XDG_CONFIG_HOME;
+        beforeEach(() => {
+          temp.clean();
+          temp.createFile('config/foo/config.yml', 'result: 6');
+          process.env.XDG_CONFIG_HOME = temp.absolutePath('config');
+        });
+        afterEach(() => {
+          process.env.XDG_CONFIG_HOME = origConfigFolder;
+        });
+
+        const explorerOptions = {
+          searchStrategy: 'global',
+          stopDir: temp.absolutePath('.'),
+        } satisfies Partial<Options | OptionsSync>;
+
+        const checkResult = (result: any) => {
+          expect(result).toEqual({
+            config: { result: 6 },
+            filepath: temp.absolutePath('config/foo/config.yml'),
+          });
+        };
+
+        test('async, start dir = global config dir', async () => {
+          const explorer = cosmiconfig('foo', explorerOptions);
+          const result = await explorer.search(temp.absolutePath('config/foo'));
+          checkResult(result);
+        }, 2000);
+
+        test('async, start dir = descendant of global config dir', async () => {
+          temp.createDir('config/foo/sub');
+          const explorer = cosmiconfig('foo', explorerOptions);
+          const result = await explorer.search(
+            temp.absolutePath('config/foo/sub'),
+          );
+          checkResult(result);
+        }, 2000);
+
+        test('sync, start dir = global config dir', () => {
+          const explorer = cosmiconfigSync('foo', explorerOptions);
+          const result = explorer.search(temp.absolutePath('config/foo'));
+          checkResult(result);
+        });
+
+        test('sync, start dir = descendant of global config dir', () => {
+          temp.createDir('config/foo/sub');
+          const explorer = cosmiconfigSync('foo', explorerOptions);
+          const result = explorer.search(temp.absolutePath('config/foo/sub'));
+          checkResult(result);
+        });
+      });
     }
   });
 
