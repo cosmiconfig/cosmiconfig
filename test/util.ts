@@ -107,8 +107,9 @@ export class TempDir {
   }
 }
 
-export function isNotMjs(filePath: string): boolean {
-  return path.extname(filePath) !== '.mjs';
+export function isNotEsmExt(filePath: string): boolean {
+  const ext = path.extname(filePath);
+  return ext !== '.mjs' && ext !== '.mts';
 }
 
 // UTF-16BE has no built-in Node Buffer encoding, so derive it by

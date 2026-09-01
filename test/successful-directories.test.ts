@@ -17,7 +17,7 @@ import {
   OptionsSync,
   defaultLoaders,
 } from '../src';
-import { TempDir, isNotMjs } from './util';
+import { TempDir, isNotEsmExt } from './util';
 
 const temp = new TempDir();
 
@@ -59,6 +59,8 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
     'a/b/c/d/e/f/.config/foorc.yaml',
@@ -67,10 +69,14 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
     'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
+    'a/b/c/d/e/f/.config/foorc.cts',
+    'a/b/c/d/e/f/.config/foorc.mts',
     'a/b/c/d/e/f/foo.config.js',
     'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/foo.config.cjs',
     'a/b/c/d/e/f/foo.config.mjs',
+    'a/b/c/d/e/f/foo.config.cts',
+    'a/b/c/d/e/f/foo.config.mts',
     'a/b/c/d/e/package.json',
     'a/b/c/d/e/.foorc',
     'a/b/c/d/e/.foorc.json',
@@ -80,6 +86,8 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
     'a/b/c/d/e/.foorc.ts',
     'a/b/c/d/e/.foorc.cjs',
     'a/b/c/d/e/.foorc.mjs',
+    'a/b/c/d/e/.foorc.cts',
+    'a/b/c/d/e/.foorc.mts',
     'a/b/c/d/e/.config/foorc',
     'a/b/c/d/e/.config/foorc.json',
     'a/b/c/d/e/.config/foorc.yaml',
@@ -88,10 +96,14 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
     'a/b/c/d/e/.config/foorc.ts',
     'a/b/c/d/e/.config/foorc.cjs',
     'a/b/c/d/e/.config/foorc.mjs',
+    'a/b/c/d/e/.config/foorc.cts',
+    'a/b/c/d/e/.config/foorc.mts',
     'a/b/c/d/e/foo.config.js',
     'a/b/c/d/e/foo.config.ts',
     'a/b/c/d/e/foo.config.cjs',
     'a/b/c/d/e/foo.config.mjs',
+    'a/b/c/d/e/foo.config.cts',
+    'a/b/c/d/e/foo.config.mts',
     'a/b/c/d/package.json',
     'a/b/c/d/.foorc',
   ];
@@ -119,7 +131,7 @@ describe('finds rc file in third searched dir, with a package.json lacking prop'
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -144,6 +156,8 @@ describe('finds package.json prop in second searched dir', () => {
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
     'a/b/c/d/e/f/.config/foorc.yaml',
@@ -152,10 +166,14 @@ describe('finds package.json prop in second searched dir', () => {
     'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
+    'a/b/c/d/e/f/.config/foorc.cts',
+    'a/b/c/d/e/f/.config/foorc.mts',
     'a/b/c/d/e/f/foo.config.js',
     'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/foo.config.cjs',
     'a/b/c/d/e/f/foo.config.mjs',
+    'a/b/c/d/e/f/foo.config.cts',
+    'a/b/c/d/e/f/foo.config.mts',
     'a/b/c/d/e/package.json',
   ];
 
@@ -182,7 +200,7 @@ describe('finds package.json prop in second searched dir', () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -215,6 +233,8 @@ describe('finds package.json with nested packageProp in second searched dir', ()
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
     'a/b/c/d/e/f/.config/foorc.yaml',
@@ -223,10 +243,14 @@ describe('finds package.json with nested packageProp in second searched dir', ()
     'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
+    'a/b/c/d/e/f/.config/foorc.cts',
+    'a/b/c/d/e/f/.config/foorc.mts',
     'a/b/c/d/e/f/foo.config.js',
     'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/foo.config.cjs',
     'a/b/c/d/e/f/foo.config.mjs',
+    'a/b/c/d/e/f/foo.config.cts',
+    'a/b/c/d/e/f/foo.config.mts',
     'a/b/c/d/e/package.json',
   ];
 
@@ -251,7 +275,7 @@ describe('finds package.json with nested packageProp in second searched dir', ()
     const explorer = cosmiconfigSync('foo', explorerOptions);
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -276,6 +300,8 @@ describe('finds JS file in first searched dir', () => {
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
     'a/b/c/d/e/f/.config/foorc.yaml',
@@ -284,6 +310,8 @@ describe('finds JS file in first searched dir', () => {
     'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
+    'a/b/c/d/e/f/.config/foorc.cts',
+    'a/b/c/d/e/f/.config/foorc.mts',
     'a/b/c/d/e/f/foo.config.js',
   ];
 
@@ -313,7 +341,7 @@ describe('finds JS file in first searched dir', () => {
     const result = explorer.search(startDir);
     // Last call is from `require`.
     readFileSpy.mock.calls.pop();
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -338,6 +366,8 @@ describe('finds CJS file in first searched dir', () => {
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
     'a/b/c/d/e/f/.config/foorc.yaml',
@@ -346,6 +376,8 @@ describe('finds CJS file in first searched dir', () => {
     'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
+    'a/b/c/d/e/f/.config/foorc.cts',
+    'a/b/c/d/e/f/.config/foorc.mts',
     'a/b/c/d/e/f/foo.config.js',
     'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/foo.config.cjs',
@@ -377,7 +409,7 @@ describe('finds CJS file in first searched dir', () => {
     const result = explorer.search(startDir);
     // Last call is from `require`.
     readFileSpy.mock.calls.pop();
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -397,6 +429,8 @@ describe('finds ESM foo.config.mjs file in first searched dir', () => {
     `${dirPrefix}/a/b/c/d/e/f/.foorc.ts`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.cjs`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.mjs`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.cts`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.mts`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.json`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.yaml`,
@@ -405,6 +439,8 @@ describe('finds ESM foo.config.mjs file in first searched dir', () => {
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.ts`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.cjs`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.mjs`,
+    `${dirPrefix}/a/b/c/d/e/f/.config/foorc.cts`,
+    `${dirPrefix}/a/b/c/d/e/f/.config/foorc.mts`,
     `${dirPrefix}/a/b/c/d/e/f/foo.config.js`,
     `${dirPrefix}/a/b/c/d/e/f/foo.config.ts`,
     `${dirPrefix}/a/b/c/d/e/f/foo.config.cjs`,
@@ -452,6 +488,8 @@ describe('finds ESM foo.config.js file in first searched dir', () => {
     `${dirPrefix}/a/b/c/d/e/f/.foorc.ts`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.cjs`,
     `${dirPrefix}/a/b/c/d/e/f/.foorc.mjs`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.cts`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.mts`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.json`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.yaml`,
@@ -460,6 +498,8 @@ describe('finds ESM foo.config.js file in first searched dir', () => {
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.ts`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.cjs`,
     `${dirPrefix}/a/b/c/d/e/f/.config/foorc.mjs`,
+    `${dirPrefix}/a/b/c/d/e/f/.config/foorc.cts`,
+    `${dirPrefix}/a/b/c/d/e/f/.config/foorc.mts`,
     `${dirPrefix}/a/b/c/d/e/f/foo.config.js`,
   ];
 
@@ -539,7 +579,7 @@ describe('finds .foorc.js file in first searched dir', () => {
     const result = explorer.search(startDir);
     // Last call is from `require`.
     readFileSpy.mock.calls.pop();
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -682,8 +722,111 @@ describe('finds .foorc.cjs file in first searched dir', () => {
     const result = explorer.search(startDir);
     // Last call is from `require`.
     readFileSpy.mock.calls.pop();
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
+});
+
+describe('finds .foorc.cts file in first searched dir', () => {
+  beforeEach(() => {
+    temp.createFile(
+      'a/b/c/d/e/f/.foorc.cts',
+      'module.exports = { found: true };',
+    );
+  });
+
+  const startDir = temp.absolutePath('a/b/c/d/e/f');
+  const explorerOptions = { stopDir: temp.absolutePath('.') };
+
+  const expectedFilesChecked = [
+    'a/b/c/d/e/f/package.json',
+    'a/b/c/d/e/f/.foorc',
+    'a/b/c/d/e/f/.foorc.json',
+    'a/b/c/d/e/f/.foorc.yaml',
+    'a/b/c/d/e/f/.foorc.yml',
+    'a/b/c/d/e/f/.foorc.js',
+    'a/b/c/d/e/f/.foorc.ts',
+    'a/b/c/d/e/f/.foorc.cjs',
+    'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+  ];
+
+  const checkResult = (
+    readFileSpy: any,
+    result: any,
+    expectedResult: Array<string>,
+  ) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+
+    expect(filesChecked).toEqual(expectedResult);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath('a/b/c/d/e/f/.foorc.cts'),
+    });
+  };
+
+  test('async', async () => {
+    const explorer = cosmiconfig('foo', explorerOptions);
+
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
+    const result = await explorer.search(startDir);
+    checkResult(readFileSpy, result, expectedFilesChecked);
+  });
+
+  test('sync', () => {
+    const explorer = cosmiconfigSync('foo', explorerOptions);
+
+    const readFileSpy = vi.spyOn(fs, 'readFileSync');
+    const result = explorer.search(startDir);
+    // Last call is from `require`.
+    readFileSpy.mock.calls.pop();
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
+  });
+});
+
+describe('finds ESM .foorc.mts file in first searched dir', () => {
+  // This prefix works around our inability to clear the ESM loader cache.
+  const dirPrefix = randomString();
+  const startDir = temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f`);
+  const explorerOptions = { stopDir: temp.absolutePath('.') };
+
+  const expectedFilesChecked = [
+    `${dirPrefix}/a/b/c/d/e/f/package.json`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.json`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.yaml`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.yml`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.js`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.ts`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.cjs`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.mjs`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.cts`,
+    `${dirPrefix}/a/b/c/d/e/f/.foorc.mts`,
+  ];
+
+  const checkResult = (readFileSpy: any, result: any, files: any) => {
+    const filesChecked = temp.getSpyPathCalls(readFileSpy);
+
+    expect(filesChecked).toEqual(files);
+
+    expect(result).toEqual({
+      config: { found: true },
+      filepath: temp.absolutePath(`${dirPrefix}/a/b/c/d/e/f/.foorc.mts`),
+    });
+  };
+
+  test('.foorc.mts: async', async () => {
+    temp.createDir(`${dirPrefix}/a/b/c/d/e/f`);
+    temp.createFile(
+      `${dirPrefix}/a/b/c/d/e/f/.foorc.mts`,
+      'export default { found: true } as any;',
+    );
+
+    const readFileSpy = vi.spyOn(fsPromises, 'readFile');
+
+    const result = await cosmiconfig('foo', explorerOptions).search(startDir);
+    checkResult(readFileSpy, result, expectedFilesChecked);
+  }, 20000);
 });
 
 describe("finds foorc file in first searched dir's .config subdir", () => {
@@ -704,6 +847,8 @@ describe("finds foorc file in first searched dir's .config subdir", () => {
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
   ];
 
@@ -735,7 +880,7 @@ describe("finds foorc file in first searched dir's .config subdir", () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -757,6 +902,8 @@ describe("finds foorc.json file in first searched dir's .config subdir", () => {
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
   ];
@@ -789,7 +936,7 @@ describe("finds foorc.json file in first searched dir's .config subdir", () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -811,6 +958,8 @@ describe("finds foorc.yaml file in first searched dir's .config subdir", () => {
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
     'a/b/c/d/e/f/.config/foorc.yaml',
@@ -844,7 +993,7 @@ describe("finds foorc.yaml file in first searched dir's .config subdir", () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -866,6 +1015,8 @@ describe("finds foorc.yml file in first searched dir's .config subdir", () => {
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
     'a/b/c/d/e/f/.config/foorc.yaml',
@@ -900,7 +1051,7 @@ describe("finds foorc.yml file in first searched dir's .config subdir", () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -925,6 +1076,8 @@ describe("finds foorc.js file in first searched dir's .config subdir", () => {
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
     'a/b/c/d/e/f/.config/foorc.yaml',
@@ -962,7 +1115,7 @@ describe("finds foorc.js file in first searched dir's .config subdir", () => {
     const result = explorer.search(startDir);
     // Last call is from `require`.
     readFileSpy.mock.calls.pop();
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -987,6 +1140,8 @@ describe("finds foorc.cjs file in first searched dir's .config subdir", () => {
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
     'a/b/c/d/e/f/.config/foorc.yaml',
@@ -1026,7 +1181,7 @@ describe("finds foorc.cjs file in first searched dir's .config subdir", () => {
     const result = explorer.search(startDir);
     // Last call is from `require`.
     readFileSpy.mock.calls.pop();
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -1052,6 +1207,8 @@ describe('skips over empty file to find JS file in first searched dir', () => {
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
     'a/b/c/d/e/f/.config/foorc.yaml',
@@ -1060,6 +1217,8 @@ describe('skips over empty file to find JS file in first searched dir', () => {
     'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
+    'a/b/c/d/e/f/.config/foorc.cts',
+    'a/b/c/d/e/f/.config/foorc.mts',
     'a/b/c/d/e/f/foo.config.js',
   ];
 
@@ -1089,7 +1248,7 @@ describe('skips over empty file to find JS file in first searched dir', () => {
     const result = explorer.search(startDir);
     // Last call is from `require`.
     readFileSpy.mock.calls.pop();
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -1135,7 +1294,7 @@ describe('finds package.json in second dir searched, with alternate names', () =
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -1182,7 +1341,7 @@ describe('finds rc file in third searched dir, skipping packageProp, parsing ext
     const explorer = cosmiconfigSync('foo', explorerOptions);
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -1228,7 +1387,7 @@ describe('finds package.json file in second searched dir, skipping JS and RC fil
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -1252,6 +1411,8 @@ describe('finds .foorc.json in second searched dir', () => {
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
     'a/b/c/d/e/f/.config/foorc.yaml',
@@ -1260,10 +1421,14 @@ describe('finds .foorc.json in second searched dir', () => {
     'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
+    'a/b/c/d/e/f/.config/foorc.cts',
+    'a/b/c/d/e/f/.config/foorc.mts',
     'a/b/c/d/e/f/foo.config.js',
     'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/foo.config.cjs',
     'a/b/c/d/e/f/foo.config.mjs',
+    'a/b/c/d/e/f/foo.config.cts',
+    'a/b/c/d/e/f/foo.config.mts',
     'a/b/c/d/e/package.json',
     'a/b/c/d/e/.foorc',
     'a/b/c/d/e/.foorc.json',
@@ -1292,7 +1457,7 @@ describe('finds .foorc.json in second searched dir', () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -1336,7 +1501,7 @@ describe('finds .foorc.yaml in first searched dir', () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -1381,7 +1546,7 @@ describe('finds .foorc.yml in first searched dir', () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -1446,7 +1611,7 @@ describe('adding myfooconfig.js to searchPlaces, finds it in first searched dir'
     const result = explorer.search(startDir);
     // Last call is from `require`.
     readFileSpy.mock.calls.pop();
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -1479,6 +1644,8 @@ describe('finds JS file traversing from cwd', () => {
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
     'a/b/c/d/e/f/.config/foorc.yaml',
@@ -1487,10 +1654,14 @@ describe('finds JS file traversing from cwd', () => {
     'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
+    'a/b/c/d/e/f/.config/foorc.cts',
+    'a/b/c/d/e/f/.config/foorc.mts',
     'a/b/c/d/e/f/foo.config.js',
     'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/foo.config.cjs',
     'a/b/c/d/e/f/foo.config.mjs',
+    'a/b/c/d/e/f/foo.config.cts',
+    'a/b/c/d/e/f/foo.config.mts',
     'a/b/c/d/e/package.json',
     'a/b/c/d/e/.foorc',
     'a/b/c/d/e/.foorc.json',
@@ -1500,6 +1671,8 @@ describe('finds JS file traversing from cwd', () => {
     'a/b/c/d/e/.foorc.ts',
     'a/b/c/d/e/.foorc.cjs',
     'a/b/c/d/e/.foorc.mjs',
+    'a/b/c/d/e/.foorc.cts',
+    'a/b/c/d/e/.foorc.mts',
     'a/b/c/d/e/.config/foorc',
     'a/b/c/d/e/.config/foorc.json',
     'a/b/c/d/e/.config/foorc.yaml',
@@ -1508,6 +1681,8 @@ describe('finds JS file traversing from cwd', () => {
     'a/b/c/d/e/.config/foorc.ts',
     'a/b/c/d/e/.config/foorc.cjs',
     'a/b/c/d/e/.config/foorc.mjs',
+    'a/b/c/d/e/.config/foorc.cts',
+    'a/b/c/d/e/.config/foorc.mts',
     'a/b/c/d/e/foo.config.js',
   ];
 
@@ -1536,7 +1711,7 @@ describe('finds JS file traversing from cwd', () => {
     const result = explorer.search();
     // Last call is from `require`.
     readFileSpy.mock.calls.pop();
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -1589,7 +1764,7 @@ describe('searchPlaces can include subdirectories', () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -1708,7 +1883,7 @@ describe('custom loaders allow non-default file types', () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -1779,7 +1954,7 @@ describe('adding custom loaders allows for default and non-default file types', 
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -1842,7 +2017,7 @@ describe('defaults loaders can be overridden', () => {
 
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(startDir);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 

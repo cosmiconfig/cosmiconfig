@@ -11,6 +11,8 @@ export function getDefaultSearchPlaces(moduleName: string): Array<string> {
     `.${moduleName}rc.ts`,
     `.${moduleName}rc.cjs`,
     `.${moduleName}rc.mjs`,
+    `.${moduleName}rc.cts`,
+    `.${moduleName}rc.mts`,
     `.config/${moduleName}rc`,
     `.config/${moduleName}rc.json`,
     `.config/${moduleName}rc.yaml`,
@@ -19,10 +21,14 @@ export function getDefaultSearchPlaces(moduleName: string): Array<string> {
     `.config/${moduleName}rc.ts`,
     `.config/${moduleName}rc.cjs`,
     `.config/${moduleName}rc.mjs`,
+    `.config/${moduleName}rc.cts`,
+    `.config/${moduleName}rc.mts`,
     `${moduleName}.config.js`,
     `${moduleName}.config.ts`,
     `${moduleName}.config.cjs`,
     `${moduleName}.config.mjs`,
+    `${moduleName}.config.cts`,
+    `${moduleName}.config.mts`,
   ];
 }
 
@@ -36,6 +42,7 @@ export function getDefaultSearchPlacesSync(moduleName: string): Array<string> {
     `.${moduleName}rc.js`,
     `.${moduleName}rc.ts`,
     `.${moduleName}rc.cjs`,
+    `.${moduleName}rc.cts`,
     `.config/${moduleName}rc`,
     `.config/${moduleName}rc.json`,
     `.config/${moduleName}rc.yaml`,
@@ -43,9 +50,11 @@ export function getDefaultSearchPlacesSync(moduleName: string): Array<string> {
     `.config/${moduleName}rc.js`,
     `.config/${moduleName}rc.ts`,
     `.config/${moduleName}rc.cjs`,
+    `.config/${moduleName}rc.cts`,
     `${moduleName}.config.js`,
     `${moduleName}.config.ts`,
     `${moduleName}.config.cjs`,
+    `${moduleName}.config.cts`,
   ];
 }
 
@@ -58,6 +67,8 @@ export const globalConfigSearchPlaces = [
   'config.ts',
   'config.cjs',
   'config.mjs',
+  'config.cts',
+  'config.mts',
 ];
 export const globalConfigSearchPlacesSync = [
   'config',
@@ -67,6 +78,7 @@ export const globalConfigSearchPlacesSync = [
   'config.js',
   'config.ts',
   'config.cjs',
+  'config.cts',
 ];
 
 // this needs to be hardcoded, as this is intended for end users, who can't supply options at this point
@@ -80,6 +92,8 @@ export const metaSearchPlaces = [
   '.config/config.ts',
   '.config/config.cjs',
   '.config/config.mjs',
+  '.config/config.cts',
+  '.config/config.mts',
 ];
 
 // do not allow mutation of default loaders. Make sure it is set inside options

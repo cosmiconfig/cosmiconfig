@@ -10,7 +10,7 @@ import {
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { cosmiconfig, cosmiconfigSync } from '../src';
-import { isNotMjs, TempDir } from './util';
+import { isNotEsmExt, TempDir } from './util';
 
 const temp = new TempDir();
 
@@ -44,6 +44,8 @@ describe('cache is not used initially', () => {
     'a/b/c/d/e/.foorc.ts',
     'a/b/c/d/e/.foorc.cjs',
     'a/b/c/d/e/.foorc.mjs',
+    'a/b/c/d/e/.foorc.cts',
+    'a/b/c/d/e/.foorc.mts',
     'a/b/c/d/e/.config/foorc',
     'a/b/c/d/e/.config/foorc.json',
     'a/b/c/d/e/.config/foorc.yaml',
@@ -52,10 +54,14 @@ describe('cache is not used initially', () => {
     'a/b/c/d/e/.config/foorc.ts',
     'a/b/c/d/e/.config/foorc.cjs',
     'a/b/c/d/e/.config/foorc.mjs',
+    'a/b/c/d/e/.config/foorc.cts',
+    'a/b/c/d/e/.config/foorc.mts',
     'a/b/c/d/e/foo.config.js',
     'a/b/c/d/e/foo.config.ts',
     'a/b/c/d/e/foo.config.cjs',
     'a/b/c/d/e/foo.config.mjs',
+    'a/b/c/d/e/foo.config.cts',
+    'a/b/c/d/e/foo.config.mts',
     'a/b/c/d/package.json',
     'a/b/c/d/.foorc',
   ];
@@ -83,7 +89,7 @@ describe('cache is not used initially', () => {
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const cachedSearchSync = explorer.search;
     const result = cachedSearchSync(searchPath);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -177,6 +183,8 @@ describe('cache is used when some directories in search are already visted', () 
     'a/b/c/d/e/f/.foorc.ts',
     'a/b/c/d/e/f/.foorc.cjs',
     'a/b/c/d/e/f/.foorc.mjs',
+    'a/b/c/d/e/f/.foorc.cts',
+    'a/b/c/d/e/f/.foorc.mts',
     'a/b/c/d/e/f/.config/foorc',
     'a/b/c/d/e/f/.config/foorc.json',
     'a/b/c/d/e/f/.config/foorc.yaml',
@@ -185,10 +193,14 @@ describe('cache is used when some directories in search are already visted', () 
     'a/b/c/d/e/f/.config/foorc.ts',
     'a/b/c/d/e/f/.config/foorc.cjs',
     'a/b/c/d/e/f/.config/foorc.mjs',
+    'a/b/c/d/e/f/.config/foorc.cts',
+    'a/b/c/d/e/f/.config/foorc.mts',
     'a/b/c/d/e/f/foo.config.js',
     'a/b/c/d/e/f/foo.config.ts',
     'a/b/c/d/e/f/foo.config.cjs',
     'a/b/c/d/e/f/foo.config.mjs',
+    'a/b/c/d/e/f/foo.config.cts',
+    'a/b/c/d/e/f/foo.config.mts',
   ];
 
   const checkResult = (readFileSpy: any, result: any, files: any) => {
@@ -226,7 +238,7 @@ describe('cache is used when some directories in search are already visted', () 
     readFileSpy.mockClear();
 
     const result = cachedSearchSync(secondSearchPath);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -281,6 +293,8 @@ describe('cache is not used in a new cosmiconfig instance', () => {
     'a/b/c/d/e/.foorc.ts',
     'a/b/c/d/e/.foorc.cjs',
     'a/b/c/d/e/.foorc.mjs',
+    'a/b/c/d/e/.foorc.cts',
+    'a/b/c/d/e/.foorc.mts',
     'a/b/c/d/e/.config/foorc',
     'a/b/c/d/e/.config/foorc.json',
     'a/b/c/d/e/.config/foorc.yaml',
@@ -289,10 +303,14 @@ describe('cache is not used in a new cosmiconfig instance', () => {
     'a/b/c/d/e/.config/foorc.ts',
     'a/b/c/d/e/.config/foorc.cjs',
     'a/b/c/d/e/.config/foorc.mjs',
+    'a/b/c/d/e/.config/foorc.cts',
+    'a/b/c/d/e/.config/foorc.mts',
     'a/b/c/d/e/foo.config.js',
     'a/b/c/d/e/foo.config.ts',
     'a/b/c/d/e/foo.config.cjs',
     'a/b/c/d/e/foo.config.mjs',
+    'a/b/c/d/e/foo.config.cts',
+    'a/b/c/d/e/foo.config.mts',
     'a/b/c/d/package.json',
     'a/b/c/d/.foorc',
   ];
@@ -324,7 +342,7 @@ describe('cache is not used in a new cosmiconfig instance', () => {
     const explorer = cosmiconfigSync('foo', { searchStrategy: 'global' });
     const readFileSpy = vi.spyOn(fs, 'readFileSync');
     const result = explorer.search(searchPath);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -414,6 +432,8 @@ describe('clears directory cache on calling clearSearchCache', () => {
     'a/b/c/d/e/.foorc.ts',
     'a/b/c/d/e/.foorc.cjs',
     'a/b/c/d/e/.foorc.mjs',
+    'a/b/c/d/e/.foorc.cts',
+    'a/b/c/d/e/.foorc.mts',
     'a/b/c/d/e/.config/foorc',
     'a/b/c/d/e/.config/foorc.json',
     'a/b/c/d/e/.config/foorc.yaml',
@@ -422,10 +442,14 @@ describe('clears directory cache on calling clearSearchCache', () => {
     'a/b/c/d/e/.config/foorc.ts',
     'a/b/c/d/e/.config/foorc.cjs',
     'a/b/c/d/e/.config/foorc.mjs',
+    'a/b/c/d/e/.config/foorc.cts',
+    'a/b/c/d/e/.config/foorc.mts',
     'a/b/c/d/e/foo.config.js',
     'a/b/c/d/e/foo.config.ts',
     'a/b/c/d/e/foo.config.cjs',
     'a/b/c/d/e/foo.config.mjs',
+    'a/b/c/d/e/foo.config.cts',
+    'a/b/c/d/e/foo.config.mts',
     'a/b/c/d/package.json',
     'a/b/c/d/.foorc',
   ];
@@ -460,7 +484,7 @@ describe('clears directory cache on calling clearSearchCache', () => {
     explorer.clearSearchCache();
 
     const result = explorer.search(searchPath);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -477,6 +501,8 @@ describe('clears directory cache on calling clearCaches', () => {
     'a/b/c/d/e/.foorc.ts',
     'a/b/c/d/e/.foorc.cjs',
     'a/b/c/d/e/.foorc.mjs',
+    'a/b/c/d/e/.foorc.cts',
+    'a/b/c/d/e/.foorc.mts',
     'a/b/c/d/e/.config/foorc',
     'a/b/c/d/e/.config/foorc.json',
     'a/b/c/d/e/.config/foorc.yaml',
@@ -485,10 +511,14 @@ describe('clears directory cache on calling clearCaches', () => {
     'a/b/c/d/e/.config/foorc.ts',
     'a/b/c/d/e/.config/foorc.cjs',
     'a/b/c/d/e/.config/foorc.mjs',
+    'a/b/c/d/e/.config/foorc.cts',
+    'a/b/c/d/e/.config/foorc.mts',
     'a/b/c/d/e/foo.config.js',
     'a/b/c/d/e/foo.config.ts',
     'a/b/c/d/e/foo.config.cjs',
     'a/b/c/d/e/foo.config.mjs',
+    'a/b/c/d/e/foo.config.cts',
+    'a/b/c/d/e/foo.config.mts',
     'a/b/c/d/package.json',
     'a/b/c/d/.foorc',
   ];
@@ -523,7 +553,7 @@ describe('clears directory cache on calling clearCaches', () => {
     explorer.clearCaches();
 
     const result = explorer.search(searchPath);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 
@@ -556,6 +586,8 @@ describe('with cache disabled, does not cache directory results', () => {
     'a/b/c/d/e/.foorc.ts',
     'a/b/c/d/e/.foorc.cjs',
     'a/b/c/d/e/.foorc.mjs',
+    'a/b/c/d/e/.foorc.cts',
+    'a/b/c/d/e/.foorc.mts',
     'a/b/c/d/e/.config/foorc',
     'a/b/c/d/e/.config/foorc.json',
     'a/b/c/d/e/.config/foorc.yaml',
@@ -564,10 +596,14 @@ describe('with cache disabled, does not cache directory results', () => {
     'a/b/c/d/e/.config/foorc.ts',
     'a/b/c/d/e/.config/foorc.cjs',
     'a/b/c/d/e/.config/foorc.mjs',
+    'a/b/c/d/e/.config/foorc.cts',
+    'a/b/c/d/e/.config/foorc.mts',
     'a/b/c/d/e/foo.config.js',
     'a/b/c/d/e/foo.config.ts',
     'a/b/c/d/e/foo.config.cjs',
     'a/b/c/d/e/foo.config.mjs',
+    'a/b/c/d/e/foo.config.cts',
+    'a/b/c/d/e/foo.config.mts',
     'a/b/c/d/package.json',
     'a/b/c/d/.foorc',
   ];
@@ -605,7 +641,7 @@ describe('with cache disabled, does not cache directory results', () => {
     readFileSpy.mockClear();
 
     const result = explorer.search(searchPath);
-    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotMjs));
+    checkResult(readFileSpy, result, expectedFilesChecked.filter(isNotEsmExt));
   });
 });
 

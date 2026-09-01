@@ -176,6 +176,8 @@ describe('cosmiconfig', () => {
           `.${moduleName}rc.ts`,
           `.${moduleName}rc.cjs`,
           `.${moduleName}rc.mjs`,
+          `.${moduleName}rc.cts`,
+          `.${moduleName}rc.mts`,
           `.config/${moduleName}rc`,
           `.config/${moduleName}rc.json`,
           `.config/${moduleName}rc.yaml`,
@@ -184,10 +186,14 @@ describe('cosmiconfig', () => {
           `.config/${moduleName}rc.ts`,
           `.config/${moduleName}rc.cjs`,
           `.config/${moduleName}rc.mjs`,
+          `.config/${moduleName}rc.cts`,
+          `.config/${moduleName}rc.mts`,
           `${moduleName}.config.js`,
           `${moduleName}.config.ts`,
           `${moduleName}.config.cjs`,
           `${moduleName}.config.mjs`,
+          `${moduleName}.config.cts`,
+          `${moduleName}.config.mts`,
         ],
       );
     });
@@ -217,6 +223,7 @@ describe('cosmiconfig', () => {
           `.${moduleName}rc.js`,
           `.${moduleName}rc.ts`,
           `.${moduleName}rc.cjs`,
+          `.${moduleName}rc.cts`,
           `.config/${moduleName}rc`,
           `.config/${moduleName}rc.json`,
           `.config/${moduleName}rc.yaml`,
@@ -224,9 +231,11 @@ describe('cosmiconfig', () => {
           `.config/${moduleName}rc.js`,
           `.config/${moduleName}rc.ts`,
           `.config/${moduleName}rc.cjs`,
+          `.config/${moduleName}rc.cts`,
           `${moduleName}.config.js`,
           `${moduleName}.config.ts`,
           `${moduleName}.config.cjs`,
+          `${moduleName}.config.cts`,
         ],
       );
     });
