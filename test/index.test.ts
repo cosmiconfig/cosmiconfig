@@ -155,10 +155,10 @@ describe('cosmiconfig', () => {
         createExplorerMock,
         1,
         {
-          '.cjs': 'loadJs',
+          '.cjs': 'loadJsSync',
           '.mjs': 'loadJs',
           '.js': 'loadJs',
-          '.cts': 'loadJs',
+          '.cts': 'loadJsSync',
           '.mts': 'loadJs',
           '.ts': 'loadJs',
           '.json': 'loadJson',

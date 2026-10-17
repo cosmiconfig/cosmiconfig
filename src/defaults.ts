@@ -99,10 +99,10 @@ export const metaSearchPlaces = [
 // do not allow mutation of default loaders. Make sure it is set inside options
 export const defaultLoaders = Object.freeze({
   '.mjs': loadJs,
-  '.cjs': loadJs,
+  '.cjs': loadJsSync,
   '.js': loadJs,
   '.ts': loadJs,
-  '.cts': loadJs,
+  '.cts': loadJsSync,
   '.mts': loadJs,
   '.json': loadJson,
   '.yaml': loadYaml,
