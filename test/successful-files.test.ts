@@ -439,6 +439,48 @@ describe('loads package prop when configPath is package.json', () => {
   });
 });
 
+for (const [apiName, createExplorer] of [
+  ['async', cosmiconfig],
+  ['sync', cosmiconfigSync],
+] as const) {
+  describe(`${apiName} nested packageProp with null intermediates`, () => {
+    const packageProps: Array<string | Array<string>> = [
+      'foo.bar.baz',
+      ['foo', 'bar', 'baz'],
+    ];
+    const configurations = [{ foo: null }, { foo: { bar: null } }];
+
+    test('load returns null instead of throwing for the missing nested property', async () => {
+      for (const config of configurations) {
+        temp.createFile('package.json', JSON.stringify(config));
+        for (const packageProp of packageProps) {
+          const result = await createExplorer('foo', { packageProp }).load(
+            temp.absolutePath('package.json'),
+          );
+          expect(result).toBeNull();
+        }
+      }
+    });
+
+    test('search continues to the next search place', async () => {
+      temp.createFile('fallback.json', '{ "selected": true }');
+      for (const config of configurations) {
+        temp.createFile('package.json', JSON.stringify(config));
+        for (const packageProp of packageProps) {
+          const result = await createExplorer('foo', {
+            packageProp,
+            searchPlaces: ['package.json', 'fallback.json'],
+          }).search(temp.dir);
+          expect(result).toEqual({
+            config: { selected: true },
+            filepath: temp.absolutePath('fallback.json'),
+          });
+        }
+      }
+    });
+  });
+}
+
 describe('runs transform', () => {
   beforeEach(() => {
     temp.createFile('foo.json', '{ "foo": true }');
