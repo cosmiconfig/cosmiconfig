@@ -35,7 +35,11 @@ export const loadJs: Loader = async function loadJs(filepath) {
 
 export const loadJson: LoaderSync = function loadJson(filepath, content) {
   try {
-    return JSON.parse(content);
+    // Like Node's require() for .json files, ignore a leading UTF-8 BOM,
+    // which JSON.parse rejects.
+    return JSON.parse(
+      content.charCodeAt(0) === 0xfeff ? content.slice(1) : content,
+    );
   } catch (error) {
     error.message = `JSON Error in ${filepath}:\n${error.message}`;
     throw error;
