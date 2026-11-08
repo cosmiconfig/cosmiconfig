@@ -260,4 +260,54 @@ describe('imports', () => {
       );
     });
   });
+
+  describe('does not mutate imported JS module when merging', () => {
+    beforeEach(() => {
+      temp.createFile(
+        'base.js',
+        'module.exports = { rules: { base: true }, arr: [1] };',
+      );
+      temp.createFile(
+        'a.json',
+        '{"$import": "./base.js", "rules": {"a": true}, "arr": [2]}',
+      );
+      temp.createFile(
+        'b.json',
+        '{"$import": "./base.js", "rules": {"b": true}, "arr": [3]}',
+      );
+    });
+
+    const fileA = temp.absolutePath('a.json');
+    const fileB = temp.absolutePath('b.json');
+
+    test('async', async () => {
+      const explorer = cosmiconfig('import-tests');
+      const resA = await explorer.load(fileA);
+      const resB = await explorer.load(fileB);
+
+      expect(resA.config).toEqual({
+        rules: { base: true, a: true },
+        arr: [1, 2],
+      });
+      expect(resB.config).toEqual({
+        rules: { base: true, b: true },
+        arr: [1, 3],
+      });
+    });
+
+    test('sync', () => {
+      const explorer = cosmiconfigSync('import-tests');
+      const resA = explorer.load(fileA);
+      const resB = explorer.load(fileB);
+
+      expect(resA.config).toEqual({
+        rules: { base: true, a: true },
+        arr: [1, 2],
+      });
+      expect(resB.config).toEqual({
+        rules: { base: true, b: true },
+        arr: [1, 3],
+      });
+    });
+  });
 });
