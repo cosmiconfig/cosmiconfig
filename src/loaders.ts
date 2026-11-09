@@ -49,6 +49,12 @@ export const loadYaml: LoaderSync = function loadYaml(filepath, content) {
   }
 
   try {
+    // js-yaml v5 `load()` throws on a source without any document (such as a
+    // file that only contains comments), so treat that as an empty file
+    const documents = yaml.loadAll(content);
+    if (documents.length === 0) {
+      return undefined;
+    }
     return yaml.load(content);
   } catch (error) {
     error.message = `YAML Error in ${filepath}:\n${error.message}`;

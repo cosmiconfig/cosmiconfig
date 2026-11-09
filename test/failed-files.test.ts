@@ -186,6 +186,31 @@ describe('returns an empty config result for empty file, format YAML', () => {
   });
 });
 
+describe('returns an empty config result for a YAML file with only comments', () => {
+  beforeEach(() => {
+    temp.createFile('foo-comments.yaml', '# semi: true\n# printWidth: 80\n');
+  });
+
+  const file = temp.absolutePath('foo-comments.yaml');
+  const checkResult = (result: any) => {
+    expect(result).toEqual({
+      config: undefined,
+      filepath: file,
+      isEmpty: true,
+    });
+  };
+
+  test('async', async () => {
+    const result = await cosmiconfig('failed-files-tests').load(file);
+    checkResult(result);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('failed-files-tests').load(file);
+    checkResult(result);
+  });
+});
+
 describe('[#325] transforms & returns null when no config file is found', () => {
   beforeEach(() => {
     // temp.createFile('package.json', '{"name": "failed-files-tests"}');
