@@ -61,14 +61,12 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
           currentDir,
           globalConfigSearchPlacesSync,
         )) {
+          // Only errors from reading the search place itself mean that there
+          // is no config file there; errors from loading it (including
+          // reading the files it imports) have to reach the caller
+          let contents: string;
           try {
-            const result = this.#readConfiguration(filepath);
-            if (
-              result !== null &&
-              !(result.isEmpty && this.config.ignoreEmptySearchPlaces)
-            ) {
-              return this.config.transform(result);
-            }
+            contents = decodeFileContent(fs.readFileSync(filepath));
           } catch (error) {
             if (
               error.code === 'ENOENT' ||
@@ -79,6 +77,16 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
               continue;
             }
             throw error;
+          }
+          const result = this.toCosmiconfigResult(
+            filepath,
+            this.#loadConfigFileWithImports(filepath, contents, []),
+          );
+          if (
+            result !== null &&
+            !(result.isEmpty && this.config.ignoreEmptySearchPlaces)
+          ) {
+            return this.config.transform(result);
           }
         }
       }
