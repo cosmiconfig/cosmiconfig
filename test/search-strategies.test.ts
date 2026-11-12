@@ -36,6 +36,68 @@ describe('search strategies', () => {
       const result = explorer.search(startDir);
       checkResult(result);
     });
+
+    describe.each([undefined, 'none'] as const)(
+      'file input with searchStrategy=%s',
+      (searchStrategy) => {
+        beforeEach(() => {
+          temp.createFile('a/b/index.js', '');
+          temp.createFile('a/b/other.js', '');
+        });
+
+        test('async shares the directory cache', async () => {
+          const explorer = cosmiconfig('foo', { searchStrategy });
+          const result = await explorer.search(
+            temp.absolutePath('a/b/index.js'),
+          );
+          checkResult(result);
+          expect(await explorer.search(temp.absolutePath('a/b/other.js'))).toBe(
+            result,
+          );
+          expect(await explorer.search(startDir)).toBe(result);
+          explorer.clearSearchCache();
+          expect(await explorer.search(startDir)).not.toBe(result);
+        });
+
+        test('sync shares the directory cache', () => {
+          const explorer = cosmiconfigSync('foo', { searchStrategy });
+          const result = explorer.search(temp.absolutePath('a/b/index.js'));
+          checkResult(result);
+          expect(explorer.search(temp.absolutePath('a/b/other.js'))).toBe(
+            result,
+          );
+          expect(explorer.search(startDir)).toBe(result);
+          explorer.clearSearchCache();
+          expect(explorer.search(startDir)).not.toBe(result);
+        });
+      },
+    );
+
+    test("async does not search above a file's directory", async () => {
+      temp.createFile('a/b/c/index.js', '');
+      const explorer = cosmiconfig('foo', explorerOptions);
+      expect(
+        await explorer.search(temp.absolutePath('a/b/c/index.js')),
+      ).toBeNull();
+    });
+
+    test("sync does not search above a file's directory", () => {
+      temp.createFile('a/b/c/index.js', '');
+      const explorer = cosmiconfigSync('foo', explorerOptions);
+      expect(explorer.search(temp.absolutePath('a/b/c/index.js'))).toBeNull();
+    });
+
+    test('async does not search the parent of a missing path', async () => {
+      const explorer = cosmiconfig('foo', explorerOptions);
+      expect(
+        await explorer.search(temp.absolutePath('a/b/missing')),
+      ).toBeNull();
+    });
+
+    test('sync does not search the parent of a missing path', () => {
+      const explorer = cosmiconfigSync('foo', explorerOptions);
+      expect(explorer.search(temp.absolutePath('a/b/missing'))).toBeNull();
+    });
   });
 
   describe('global', () => {
