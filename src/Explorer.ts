@@ -100,7 +100,11 @@ export class Explorer extends ExplorerBase<InternalOptions> {
     };
 
     if (this.searchCache) {
-      return await emplace(this.searchCache, getSearchCacheKey(from), search);
+      return await emplace(
+        this.searchCache,
+        getSearchCacheKey(firstDirIter.value.path),
+        search,
+      );
     }
     return await search();
   }
@@ -194,11 +198,24 @@ export class Explorer extends ExplorerBase<InternalOptions> {
     }
   }
 
+  async #isFile(path: string): Promise<boolean> {
+    try {
+      return (await fs.stat(path)).isFile();
+    } catch (e) {
+      return false;
+    }
+  }
+
   async *#getDirs(startDir: string): AsyncIterableIterator<DirToSearch> {
     switch (this.config.searchStrategy) {
       case 'none': {
         // only check in the passed directory (defaults to working directory)
-        yield { path: startDir, isGlobalConfig: false };
+        yield {
+          path: (await this.#isFile(startDir))
+            ? path.dirname(startDir)
+            : startDir,
+          isGlobalConfig: false,
+        };
         return;
       }
       case 'project': {

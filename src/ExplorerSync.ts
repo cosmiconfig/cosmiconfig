@@ -98,7 +98,11 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
     };
 
     if (this.searchCache) {
-      return emplace(this.searchCache, getSearchCacheKey(from), search);
+      return emplace(
+        this.searchCache,
+        getSearchCacheKey(firstDirIter.value.path),
+        search,
+      );
     }
     return search();
   }
@@ -186,11 +190,22 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
     }
   }
 
+  #isFile(path: string): boolean {
+    try {
+      return fs.statSync(path).isFile();
+    } catch (e) {
+      return false;
+    }
+  }
+
   *#getDirs(startDir: string): Iterator<DirToSearch> {
     switch (this.config.searchStrategy) {
       case 'none': {
         // there is no next dir
-        yield { path: startDir, isGlobalConfig: false };
+        yield {
+          path: this.#isFile(startDir) ? path.dirname(startDir) : startDir,
+          isGlobalConfig: false,
+        };
         return;
       }
       case 'project': {
