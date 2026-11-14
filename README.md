@@ -548,10 +548,10 @@ If a string includes period but corresponds to a top-level property name, it wil
 
 ### stopDir
 
-Type: `string`.
+Type: `string | ((dir: string) => boolean)`.
 Default: Absolute path to your home directory.
 
-Directory where the search will stop.
+Directory where the search will stop, or a predicate function that receives the absolute path of each searched directory and returns `true` when upward directory traversal should stop after checking that directory.
 
 ### cache
 
