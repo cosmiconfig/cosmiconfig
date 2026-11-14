@@ -145,11 +145,20 @@ ${[...importStack, fullPath]
     return envPaths(this.config.moduleName, { suffix: '' }).config;
   }
 
+  #getIsStopDir(): (dir: string) => boolean {
+    const { stopDir } = this.config;
+    if (typeof stopDir === 'function') {
+      return stopDir;
+    }
+    const resolvedStopDir = path.resolve(stopDir ?? os.homedir());
+    return (dir: string): boolean => dir === resolvedStopDir;
+  }
+
   protected *getGlobalDirs(startDir: string): IterableIterator<DirToSearch> {
-    const stopDir = path.resolve(this.config.stopDir ?? os.homedir());
+    const isStopDir = this.#getIsStopDir();
     yield { path: startDir, isGlobalConfig: false };
     let currentDir = startDir;
-    while (currentDir !== stopDir) {
+    while (!isStopDir(currentDir)) {
       const parentDir = path.dirname(currentDir);
       /* istanbul ignore if -- @preserve */
       if (parentDir === currentDir) {
