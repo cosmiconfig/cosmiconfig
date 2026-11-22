@@ -403,10 +403,10 @@ const { defaultLoaders, defaultLoadersSync } = require('cosmiconfig');
 console.log(Object.entries(defaultLoaders));
 // [
 //   [ '.mjs', [Function: loadJs] ],
-//   [ '.cjs', [Function: loadJs] ],
+//   [ '.cjs', [Function: loadJsSync] ],
 //   [ '.js', [Function: loadJs] ],
 //   [ '.ts', [Function: loadJs] ],
-//   [ '.cts', [Function: loadJs] ],
+//   [ '.cts', [Function: loadJsSync] ],
 //   [ '.mts', [Function: loadJs] ],
 //   [ '.json', [Function: loadJson] ],
 //   [ '.yaml', [Function: loadYaml] ],
@@ -591,7 +591,7 @@ Your end users can provide JS configuration files as ECMAScript modules (ESM) un
 - Your end user runs a version of Node that supports ESM ([>=12.17.0](https://nodejs.org/en/blog/release/v12.17.0/), or earlier with the `--experimental-modules` flag).
 - Your end user provides an `.mjs` configuration file, or a `.js` file whose nearest parent `package.json` file contains `"type": "module"`. (See [Node's method for determining a file's module system](https://nodejs.org/api/packages.html#packages_determining_module_system).)
 
-With cosmiconfig's [asynchronous API](#asynchronous-api), the default [`searchPlaces`] include `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, and `.cts` files. Cosmiconfig loads all these file types with the [dynamic `import` function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#dynamic_imports).
+With cosmiconfig's [asynchronous API](#asynchronous-api), the default [`searchPlaces`] include `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, and `.cts` files. CommonJS `.cjs` and `.cts` files are loaded with `require`, clearing the require cache before loading. The other file types use the [dynamic `import` function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#dynamic_imports).
 
 With the [synchronous API](#synchronous-api), JS configuration files are always treated as CommonJS, and `.mjs` and `.mts` files are ignored, because there is no synchronous API for the dynamic `import` function.
 
