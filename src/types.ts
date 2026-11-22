@@ -55,7 +55,7 @@ export interface CommonOptions {
   packageProp?: string | Array<string>;
   searchPlaces: Array<string>;
   ignoreEmptySearchPlaces: boolean;
-  stopDir?: string;
+  stopDir?: string | ((dir: string) => boolean);
   cache: boolean;
   mergeImportArrays: boolean;
   mergeSearchPlaces: boolean;
