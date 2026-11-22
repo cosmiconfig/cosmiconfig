@@ -15,6 +15,17 @@ export interface MergeOptions {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+function cloneValue(value: any): any {
+  if (Array.isArray(value)) {
+    return value.map(cloneValue);
+  }
+  if (isPlainObject(value)) {
+    return merge({}, value, { mergeArrays: false });
+  }
+  return value;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function merge(target: any, source: any, options: MergeOptions): any {
   for (const key of Object.keys(source)) {
     /* istanbul ignore next -- @preserve */
@@ -26,7 +37,7 @@ function merge(target: any, source: any, options: MergeOptions): any {
     if (hasOwn(target, key)) {
       if (Array.isArray(target[key]) && Array.isArray(newValue)) {
         if (options.mergeArrays) {
-          target[key].push(...newValue);
+          target[key].push(...cloneValue(newValue));
           continue;
         }
       } else if (isPlainObject(target[key]) && isPlainObject(newValue)) {
@@ -34,14 +45,14 @@ function merge(target: any, source: any, options: MergeOptions): any {
         continue;
       }
     }
-    target[key] = newValue;
+    target[key] = cloneValue(newValue);
   }
 
   return target;
 }
 
 /**
- * Merges multiple objects. Doesn't care about cloning non-primitives, as we load all these objects fresh from a file.
+ * Merges multiple objects. Clones plain objects and arrays so imported modules are not mutated.
  */
 export function mergeAll(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
