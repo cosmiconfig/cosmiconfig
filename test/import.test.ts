@@ -219,6 +219,25 @@ describe('imports', () => {
     });
   });
 
+  describe('errors when a searched file imports a file that does not exist', () => {
+    beforeEach(() => {
+      temp.createFile('package.json', '{}');
+      temp.createFile('.import-testsrc.yml', '$import: foo.base.yml\nfoo: 1');
+    });
+
+    test('async', async () => {
+      await expect(
+        async () => await cosmiconfig('import-tests').search(temp.dir),
+      ).rejects.toThrow('no such file or directory');
+    });
+
+    test('sync', () => {
+      expect(() => cosmiconfigSync('import-tests').search(temp.dir)).toThrow(
+        'no such file or directory',
+      );
+    });
+  });
+
   describe('errors when trying to import itself', () => {
     beforeEach(() => {
       temp.createFile('foo.yml', '$import: foo.yml\nfoo: 1\nbar: 2');
