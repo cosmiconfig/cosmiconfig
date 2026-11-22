@@ -90,3 +90,19 @@ describe('with array path', () => {
     expect(getPropertyByPath(source, ['ant', 'fancy.namez'])).toBeUndefined();
   });
 });
+
+describe('null intermediates', () => {
+  test('returns undefined when a nested property cannot be reached through null', () => {
+    for (const source of [{ foo: null }, { foo: { bar: null } }]) {
+      expect(getPropertyByPath(source, 'foo.bar.baz')).toBeUndefined();
+      expect(getPropertyByPath(source, ['foo', 'bar', 'baz'])).toBeUndefined();
+    }
+  });
+
+  test('preserves null leaves and properties of falsy values', () => {
+    expect(getPropertyByPath({ foo: null }, ['foo'])).toBeNull();
+    expect(getPropertyByPath({ foo: { bar: null } }, 'foo.bar')).toBeNull();
+    expect(getPropertyByPath({ foo: '' }, 'foo.length')).toBe(0);
+    expect(getPropertyByPath({ foo: '' }, ['foo', 'length'])).toBe(0);
+  });
+});

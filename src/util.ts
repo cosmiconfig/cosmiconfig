@@ -49,8 +49,8 @@ export function getPropertyByPath(
   const parsedPath = typeof path === 'string' ? path.split('.') : path;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return parsedPath.reduce((previous: any, key): unknown => {
-    if (previous === undefined) {
-      return previous;
+    if (previous === undefined || previous === null) {
+      return undefined;
     }
     return previous[key];
   }, source);

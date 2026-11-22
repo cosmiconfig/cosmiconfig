@@ -439,6 +439,79 @@ describe('loads package prop when configPath is package.json', () => {
   });
 });
 
+describe('nested packageProp with null intermediates', () => {
+  const packageProps: Array<string | Array<string>> = [
+    'foo.bar.baz',
+    ['foo', 'bar', 'baz'],
+  ];
+  const configurations = [{ foo: null }, { foo: { bar: null } }];
+
+  describe('load returns null instead of throwing for the missing nested property', () => {
+    test('async', async () => {
+      for (const config of configurations) {
+        temp.createFile('package.json', JSON.stringify(config));
+        for (const packageProp of packageProps) {
+          const result = await cosmiconfig('foo', { packageProp }).load(
+            temp.absolutePath('package.json'),
+          );
+          expect(result).toBeNull();
+        }
+      }
+    });
+
+    test('sync', () => {
+      for (const config of configurations) {
+        temp.createFile('package.json', JSON.stringify(config));
+        for (const packageProp of packageProps) {
+          const result = cosmiconfigSync('foo', { packageProp }).load(
+            temp.absolutePath('package.json'),
+          );
+          expect(result).toBeNull();
+        }
+      }
+    });
+  });
+
+  describe('search continues to the next search place', () => {
+    beforeEach(() => {
+      temp.createFile('fallback.json', '{ "selected": true }');
+    });
+
+    const checkResult = (result: any) => {
+      expect(result).toEqual({
+        config: { selected: true },
+        filepath: temp.absolutePath('fallback.json'),
+      });
+    };
+
+    test('async', async () => {
+      for (const config of configurations) {
+        temp.createFile('package.json', JSON.stringify(config));
+        for (const packageProp of packageProps) {
+          const result = await cosmiconfig('foo', {
+            packageProp,
+            searchPlaces: ['package.json', 'fallback.json'],
+          }).search(temp.dir);
+          checkResult(result);
+        }
+      }
+    });
+
+    test('sync', () => {
+      for (const config of configurations) {
+        temp.createFile('package.json', JSON.stringify(config));
+        for (const packageProp of packageProps) {
+          const result = cosmiconfigSync('foo', {
+            packageProp,
+            searchPlaces: ['package.json', 'fallback.json'],
+          }).search(temp.dir);
+          checkResult(result);
+        }
+      }
+    });
+  });
+});
+
 describe('runs transform', () => {
   beforeEach(() => {
     temp.createFile('foo.json', '{ "foo": true }');
