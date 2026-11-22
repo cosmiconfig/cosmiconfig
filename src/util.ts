@@ -60,6 +60,9 @@ export function getPropertyByPath(
 // these encodings (e.g. via PowerShell's default `Out-File` redirection on
 // Windows) is not valid UTF-8, so it must be decoded accordingly instead of
 // being passed through the UTF-8 path, which would otherwise produce garbage.
+// A UTF-8 byte-order mark (e.g. from `Out-File -Encoding utf8` or Notepad) is
+// dropped as well, like Node's require() does for .json files, since parsers
+// such as JSON.parse reject it.
 /** @internal */
 export function decodeFileContent(buffer: Buffer): string {
   if (buffer[0] === 0xff && buffer[1] === 0xfe) {
@@ -67,6 +70,9 @@ export function decodeFileContent(buffer: Buffer): string {
   }
   if (buffer[0] === 0xfe && buffer[1] === 0xff) {
     return new TextDecoder('utf-16be').decode(buffer);
+  }
+  if (buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf) {
+    return buffer.toString('utf-8', 3);
   }
   return buffer.toString('utf-8');
 }
