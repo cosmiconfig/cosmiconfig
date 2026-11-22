@@ -28,13 +28,12 @@ describe('with no UTF-16 byte-order mark', () => {
     expect(decodeFileContent(content)).toBe(content.toString('utf-8'));
   });
 
-  test('leaves a UTF-8 byte-order mark untouched, matching prior behavior', () => {
+  test('drops a UTF-8 byte-order mark', () => {
     const bom = Buffer.from([0xef, 0xbb, 0xbf]);
     const content = Buffer.concat([
       bom,
       Buffer.from('{ "foo": true }', 'utf8'),
     ]);
-    expect(decodeFileContent(content)).toBe(content.toString('utf-8'));
-    expect(decodeFileContent(content).charCodeAt(0)).toBe(0xfeff);
+    expect(decodeFileContent(content)).toBe('{ "foo": true }');
   });
 });

@@ -96,6 +96,54 @@ describe('loads UTF-16BE encoded JSON config path (with BOM)', () => {
   });
 });
 
+describe('loads UTF-8 encoded JSON config path (with BOM)', () => {
+  const file = temp.absolutePath('foo-utf8bom.json');
+  beforeEach(() => {
+    const bom = Buffer.from([0xef, 0xbb, 0xbf]);
+    const content = Buffer.from('{ "foo": true }\n', 'utf8');
+    fs.writeFileSync(file, Buffer.concat([bom, content]));
+  });
+
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', async () => {
+    const result = await cosmiconfig('successful-files-tests').load(file);
+    checkResult(result);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('successful-files-tests').load(file);
+    checkResult(result);
+  });
+});
+
+describe('loads package prop from UTF-8 encoded package.json (with BOM)', () => {
+  const file = temp.absolutePath('package.json');
+  beforeEach(() => {
+    const bom = Buffer.from([0xef, 0xbb, 0xbf]);
+    const content = Buffer.from('{ "foo": { "bar": "baz" } }\n', 'utf8');
+    fs.writeFileSync(file, Buffer.concat([bom, content]));
+  });
+
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ bar: 'baz' });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', async () => {
+    const result = await cosmiconfig('foo').load(file);
+    checkResult(result);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('foo').load(file);
+    checkResult(result);
+  });
+});
+
 describe('loads defined YAML config path', () => {
   beforeEach(() => {
     temp.createFile('foo.yaml', 'foo: true');
