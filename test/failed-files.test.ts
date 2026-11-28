@@ -72,6 +72,27 @@ describe('throws error if defined YAML file has syntax error', () => {
   });
 });
 
+describe('throws error if defined YAML file has multiple documents', () => {
+  beforeEach(() => {
+    temp.createFile('foo-multi.yaml', 'foo: true\n---\nbar: false\n');
+  });
+
+  const file = temp.absolutePath('foo-multi.yaml');
+  const expectedError = `YAML Error in ${file}:\nexpected a single document in the stream, but found more`;
+
+  test('async', async () => {
+    await expect(cosmiconfig('failed-files-tests').load(file)).rejects.toThrow(
+      expectedError,
+    );
+  });
+
+  test('sync', () => {
+    expect(() => cosmiconfigSync('failed-files-tests').load(file)).toThrow(
+      expectedError,
+    );
+  });
+});
+
 describe('throws error if defined JS file has syntax error', () => {
   beforeEach(() => {
     temp.createFile('foo-invalid.js', 'module.exports = { foo }');
@@ -167,6 +188,31 @@ describe('returns an empty config result for empty file, format YAML', () => {
   });
 
   const file = temp.absolutePath('foo-empty.yaml');
+  const checkResult = (result: any) => {
+    expect(result).toEqual({
+      config: undefined,
+      filepath: file,
+      isEmpty: true,
+    });
+  };
+
+  test('async', async () => {
+    const result = await cosmiconfig('failed-files-tests').load(file);
+    checkResult(result);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('failed-files-tests').load(file);
+    checkResult(result);
+  });
+});
+
+describe('returns an empty config result for a YAML file with only comments', () => {
+  beforeEach(() => {
+    temp.createFile('foo-comments.yaml', '# semi: true\n# printWidth: 80\n');
+  });
+
+  const file = temp.absolutePath('foo-comments.yaml');
   const checkResult = (result: any) => {
     expect(result).toEqual({
       config: undefined,
