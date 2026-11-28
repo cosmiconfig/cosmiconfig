@@ -72,6 +72,27 @@ describe('throws error if defined YAML file has syntax error', () => {
   });
 });
 
+describe('throws error if defined YAML file has multiple documents', () => {
+  beforeEach(() => {
+    temp.createFile('foo-multi.yaml', 'foo: true\n---\nbar: false\n');
+  });
+
+  const file = temp.absolutePath('foo-multi.yaml');
+  const expectedError = `YAML Error in ${file}:\nexpected a single document in the stream, but found more`;
+
+  test('async', async () => {
+    await expect(cosmiconfig('failed-files-tests').load(file)).rejects.toThrow(
+      expectedError,
+    );
+  });
+
+  test('sync', () => {
+    expect(() => cosmiconfigSync('failed-files-tests').load(file)).toThrow(
+      expectedError,
+    );
+  });
+});
+
 describe('throws error if defined JS file has syntax error', () => {
   beforeEach(() => {
     temp.createFile('foo-invalid.js', 'module.exports = { foo }');
